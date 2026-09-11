@@ -36,3 +36,19 @@ export class InvalidAmountError extends DomainError {
     super(`Invalid amount: ${raw}`);
   }
 }
+export type TransferErrorReason = 'negative_fee' | 'non_positive_amount' | 'same_account';
+export class TransferError extends DomainError {
+  readonly code = 'TRANSFER_INVALID';
+  constructor(readonly reason: TransferErrorReason) {
+    super(`Transfer invalid: ${reason}`);
+  }
+}
+export class InsufficientFundsError extends DomainError {
+  readonly code = 'INSUFFICIENT_FUNDS';
+  constructor(
+    readonly account: string,
+    readonly shortBy: string,
+  ) {
+    super(`Insufficient funds on ${account}: short by ${shortBy}`);
+  }
+}

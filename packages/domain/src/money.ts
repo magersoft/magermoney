@@ -16,6 +16,10 @@ export class Money {
     return new Money(new D(amount), currency);
   }
 
+  static zero(currency: Currency): Money {
+    return new Money(new D(0), currency);
+  }
+
   static parse(raw: string, currency: Currency): Result<Money, InvalidAmountError> {
     if (!/^-?\d+(\.\d+)?$/.test(raw.trim())) return err(new InvalidAmountError(raw));
     return ok(new Money(new D(raw.trim()), currency));
