@@ -9,6 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
+        with: { version: 2.117.0 }
       - run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector
       - run: supabase db lint --level warning
       # Applies every migration from scratch, then asks whether the result still
@@ -34,6 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
+        with: { version: 2.117.0 }
       - run: supabase link --project-ref ${{ secrets.SUPABASE_STAGING_REF }}
         env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}", SUPABASE_DB_PASSWORD: "${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}" }
       - run: supabase db push
@@ -46,6 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
+        with: { version: 2.117.0 }
       - run: supabase link --project-ref ${{ secrets.SUPABASE_PROD_REF }}
         env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}", SUPABASE_DB_PASSWORD: "${{ secrets.SUPABASE_PROD_DB_PASSWORD }}" }
       - run: supabase db push
