@@ -31,4 +31,16 @@ describe('RateTable', () => {
     const empty = new RateTable('2026-09-11', [], reg);
     expect(empty.rateOf('EUR').isErr()).toBe(true);
   });
+
+  it('treats a stored zero rate as missing', () => {
+    const t = new RateTable('2026-09-11', [rate('EUR', '0')], reg);
+    expect(t.rateOf('EUR')._unsafeUnwrapErr()).toBeInstanceOf(RateMissingError);
+    expect(t.convert(Money.of('1', c('EUR')), 'USD')._unsafeUnwrapErr()).toBeInstanceOf(RateMissingError);
+  });
+
+  it('treats a stored infinite rate as missing', () => {
+    const t = new RateTable('2026-09-11', [{ base: 'EUR', quote: 'USD', value: new Decimal(Infinity), date: '2026-09-11', source: 'api' }], reg);
+    expect(t.rateOf('EUR')._unsafeUnwrapErr()).toBeInstanceOf(RateMissingError);
+    expect(t.convert(Money.of('1', c('EUR')), 'USD')._unsafeUnwrapErr()).toBeInstanceOf(RateMissingError);
+  });
 });
