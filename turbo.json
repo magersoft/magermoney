@@ -5,6 +5,14 @@
     "dev": { "cache": false, "persistent": true },
     "lint": {},
     "typecheck": { "dependsOn": ["^build"] },
-    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] }
+    "test": { "dependsOn": ["^build", "//#lint:boundaries-check"], "outputs": ["coverage/**"] },
+    "//#lint:boundaries-check": {
+      "inputs": [
+        "eslint.config.js",
+        "tsconfig.eslint.json",
+        "scripts/check-boundaries.ts",
+        "tools/lint-fixtures/**"
+      ]
+    }
   }
 }
