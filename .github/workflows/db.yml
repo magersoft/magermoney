@@ -11,6 +11,22 @@ jobs:
       - uses: supabase/setup-cli@v1
       - run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector
       - run: supabase db lint --level warning
+      # Applies every migration from scratch, then asks whether the result still
+      # matches what the migrations describe. A non-empty diff means the
+      # migrations are not reproducible — hand-edited history, or a change made
+      # in Studio and never written down. `--linked` is deliberately not used:
+      # the PR job has no project to link to, and the shadow database is the
+      # honest comparison anyway.
+      - name: migrations reproduce the schema
+        run: |
+          supabase db reset
+          supabase db diff -f ci_drift
+          drift=$(find supabase/migrations -name '*ci_drift.sql' -size +0c)
+          if [ -n "$drift" ]; then
+            echo "::error::Schema drift: applying the migrations does not reproduce the schema."
+            cat $drift
+            exit 1
+          fi
   staging:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest

@@ -14,9 +14,29 @@ import { createClient } from '@supabase/supabase-js';
  * real magic-link sign-in through Inbucket at http://127.0.0.1:54324, the
  * app itself wrote its session under `sb-127-auth-token` in localStorage.
  */
+/**
+ * A freshly deployed staging has no rates until the daily cron first runs, and
+ * the home screen has nothing to convert without them. Seeding is the same job
+ * the cron triggers, so this exercises the real path rather than inserting rows.
+ */
+async function seedRates(): Promise<void> {
+  const secret = process.env.E2E_CRON_SECRET;
+  const api = process.env.E2E_API_URL;
+  if (!secret || !api) {
+    console.log('E2E_CRON_SECRET or E2E_API_URL is unset; running against whatever rates exist.');
+    return;
+  }
+  const res = await fetch(`${api}/jobs/rates?kind=fiat`, {
+    headers: { authorization: `Bearer ${secret}` },
+  });
+  if (!res.ok) throw new Error(`Seeding rates failed: ${res.status} ${res.statusText}`);
+}
+
 const EMAIL_PREFIX = 'e2e-';
 const EMAIL_DOMAIN = '@magermoney.test';
 const STALE_AFTER_MS = 60 * 60 * 1000;
+
+test.beforeAll(seedRates);
 
 test('sign in, see home, switch currency', async ({ page }) => {
   const admin = createClient(
