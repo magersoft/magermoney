@@ -4,6 +4,7 @@ import { createApp } from '../src/app.js';
 import { loadEnv } from '../src/shared/env.js';
 import { createDb } from '../src/shared/db/client.js';
 import { PgProfileRepository } from '../src/modules/profiles/infrastructure/pg-profile-repository.js';
+import { PgRateRepository } from '../src/modules/rates/infrastructure/pg-rate-repository.js';
 
 const env = loadEnv();
 const sql = createDb(env.DATABASE_URL);
@@ -14,6 +15,7 @@ const app = createApp({
   exposeDocs: env.NODE_ENV !== 'production',
   profiles: new PgProfileRepository(sql),
   registry: CurrencyRegistry.default(),
+  rates: new PgRateRepository(sql),
 });
 
 export default handle(app);

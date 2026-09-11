@@ -6,6 +6,8 @@ import { mountOpenApi } from './shared/openapi.js';
 import { logger } from './shared/logger.js';
 import { profileRoutes } from './modules/profiles/http/routes.js';
 import type { ProfileRepository } from './modules/profiles/application/profile-repository.js';
+import { ratesRoutes } from './modules/rates/http/routes.js';
+import type { RateRepository } from './modules/rates/application/rate-repository.js';
 
 export type AppEnv = { Variables: { userId: string; requestId: string } };
 
@@ -16,6 +18,7 @@ export interface AppDeps {
   exposeDocs?: boolean;
   profiles: ProfileRepository;
   registry: CurrencyRegistry;
+  rates: RateRepository;
 }
 
 export function createApp(deps: AppDeps) {
@@ -51,6 +54,7 @@ export function createApp(deps: AppDeps) {
   );
 
   app.route('/me', profileRoutes(deps));
+  app.route('/', ratesRoutes(deps));
 
   mountOpenApi(app, deps.exposeDocs ?? true);
   return app;
