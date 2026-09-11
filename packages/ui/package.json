@@ -11,16 +11,13 @@
     "./styles": "./src/styles/index.css"
   },
   "scripts": {
+    "icons:build": "bun run scripts/build-icon-subset.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint src test"
   },
   "dependencies": {
-    "@iconify-json/circle-flags": "^1.2.11",
-    "@iconify-json/cryptocurrency-color": "^1.2.4",
-    "@iconify/types": "^2.0.0",
-    "@iconify/utils": "^3.1.7",
     "@iconify/vue": "^5.0.0",
     "@lucide/vue": "^1.44.0",
     "@vueuse/core": "^14.4.0",
@@ -35,7 +32,11 @@
     "vue-sonner": "^2.0.9"
   },
   "devDependencies": {
+    "@iconify-json/circle-flags": "^1.2.11",
+    "@iconify-json/cryptocurrency-color": "^1.2.4",
     "@iconify-json/lucide": "^1.2.131",
+    "@iconify/types": "^2.0.0",
+    "@iconify/utils": "^3.1.7",
     "@magermoney/config": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-vue": "^6.0.0",

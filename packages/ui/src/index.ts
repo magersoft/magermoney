@@ -8,28 +8,21 @@
 
 import type { IconifyJSON } from '@iconify/types';
 import { addCollection } from '@iconify/vue';
-import { getIcons } from '@iconify/utils';
-import { icons as circleFlags } from '@iconify-json/circle-flags';
-import { icons as cryptocurrencyColor } from '@iconify-json/cryptocurrency-color';
 import { toast } from 'vue-sonner';
-import { CRYPTO_KNOWN, FIAT_FLAG } from './components/currency-icon/resolve-icon';
+import subset from './icons/subset.json';
 
 /*
  * Registering up front is what makes every currency mark render offline, with no
  * request to the Iconify API — a requirement for the PWA, and the reason
  * CurrencyIcon works inside a service-worker-served shell.
  *
- * Only the icons the resolver can actually name are registered. The two sets are
- * ~1.1MB of JSON between them; the subsets are a few KB, and they are built from
- * the resolver's own tables, so an icon can never be resolvable but unregistered.
+ * The subset is built at development time by `bun run icons:build` from the
+ * resolver's own tables, so an icon can never be resolvable but unregistered,
+ * and the two ~1.1MB collections never reach a consumer's bundle.
  */
-function subset(collection: IconifyJSON, names: readonly string[]): void {
-  const icons = getIcons(collection, [...names]);
-  if (icons) addCollection(icons);
+for (const collection of Object.values(subset)) {
+  addCollection(collection as unknown as IconifyJSON);
 }
-
-subset(circleFlags, Object.values(FIAT_FLAG));
-subset(cryptocurrencyColor, [...CRYPTO_KNOWN]);
 
 export { cn } from './lib/utils';
 
