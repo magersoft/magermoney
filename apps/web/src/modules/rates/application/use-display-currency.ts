@@ -19,20 +19,36 @@ export function createDisplayCurrency(
   storage: Storage,
 ): DisplayCurrency {
   const options = computed(() => profile.value?.reportingCurrencies ?? []);
+
+  /** A choice made this session outranks storage: it is the most recent thing the person did. */
+  let chosen: string | null = null;
+
   const pick = () => {
-    const saved = storage.get();
+    const saved = chosen ?? storage.get();
     return saved && options.value.includes(saved) ? saved : (profile.value?.defaultCurrency ?? 'USD');
   };
+
   const current = ref(pick());
-  watch(options, () => {
-    if (!options.value.includes(current.value)) current.value = pick();
+
+  /*
+   * The first pick happens while the profile is still loading, so it can only
+   * be a guess. Re-picking when the profile arrives — and whenever the list
+   * changes — is what makes the remembered choice and the account's default
+   * survive a cold start.
+   */
+  watch([options, profile], () => {
+    const next = pick();
+    if (next !== current.value) current.value = next;
   });
+
   const set = (code: string) => {
-    if (options.value.includes(code)) {
-      current.value = code;
-      storage.set(code);
-    }
+    // An empty list means the profile has not arrived, not that nothing is allowed.
+    if (options.value.length > 0 && !options.value.includes(code)) return;
+    chosen = code;
+    current.value = code;
+    storage.set(code);
   };
+
   return { current, options, set };
 }
 

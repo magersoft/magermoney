@@ -2,16 +2,25 @@ import { err, ok, type Result } from 'neverthrow';
 import { storeToRefs } from 'pinia';
 import type { Ref } from 'vue';
 import type { SessionUser } from '../domain/session';
+import { safeRedirect } from '../domain/redirect';
 import { supabase } from '../infrastructure/supabase';
 import { useSessionStore } from '../infrastructure/session-store';
 
-const callbackUrl = (): string => `${location.origin}/auth/callback`;
+/**
+ * The callback carries the destination, because the round trip goes through an
+ * e-mail client or Google and nothing else survives it.
+ */
+const callbackUrl = (redirect?: string): string => {
+  const safe = safeRedirect(redirect);
+  const base = `${location.origin}/auth/callback`;
+  return safe ? `${base}?redirect=${encodeURIComponent(safe)}` : base;
+};
 
 export interface Session {
   user: Ref<SessionUser | null>;
   ready: Ref<boolean>;
-  signInWithGoogle(): Promise<void>;
-  signInWithMagicLink(email: string): Promise<Result<void, Error>>;
+  signInWithGoogle(redirect?: string): Promise<void>;
+  signInWithMagicLink(email: string, redirect?: string): Promise<Result<void, Error>>;
   signOut(): Promise<void>;
   getAccessToken(): Promise<string | null>;
 }
@@ -27,17 +36,17 @@ export function useSession(): Session {
   return {
     user,
     ready,
-    signInWithGoogle: async () => {
+    signInWithGoogle: async (redirect?: string) => {
       const { error } = await supabase().auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: callbackUrl() },
+        options: { redirectTo: callbackUrl(redirect) },
       });
       if (error) throw error;
     },
-    signInWithMagicLink: async (email: string) => {
+    signInWithMagicLink: async (email: string, redirect?: string) => {
       const { error } = await supabase().auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: callbackUrl() },
+        options: { emailRedirectTo: callbackUrl(redirect) },
       });
       return error ? err(error) : ok(undefined);
     },

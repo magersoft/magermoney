@@ -11,7 +11,7 @@ import { useI18n } from 'vue-i18n';
 import { CurrencyIcon, EASE_OUT_QUART } from '@magermoney/ui';
 import { Motion } from 'motion-v';
 import { computed } from 'vue';
-import { useCurrencies } from '../application/use-currencies';
+import { useCurrencies } from '@/modules/currencies';
 import { useDisplayCurrency } from '../application/use-display-currency';
 
 const { t } = useI18n();
@@ -37,6 +37,7 @@ const kindOf = computed(
       type="button"
       :aria-pressed="code === current"
       :title="t('a11y.showIn', { code })"
+      data-slot="button"
       class="relative flex min-h-9 items-center gap-1.5 rounded-lg px-2 py-1 text-xs outline-offset-2 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring"
       :class="code === current ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'"
       @click="set(code)"

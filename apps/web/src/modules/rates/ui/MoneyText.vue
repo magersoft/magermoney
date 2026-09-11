@@ -10,11 +10,9 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Money, type Currency } from '@magermoney/domain';
+import { toCurrency, useCurrencies } from '@/modules/currencies';
 import { formatMoney, type MoneyLocale } from '@/shared/money/format';
-import { toCurrency } from '../domain';
-import { useCurrencies } from '../application/use-currencies';
-import { useDisplayCurrency } from '../application/use-display-currency';
-import { useRates } from '../application/use-rates';
+import { useConvertToDisplay } from '../application/convert-to-display';
 
 const props = defineProps<{
   /** A decimal string. Never a number: amounts are exact end to end (ADR 0001). */
@@ -24,8 +22,7 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 const currencies = useCurrencies();
-const { table, date } = useRates();
-const { current } = useDisplayCurrency();
+const { convertToDisplay, current, date } = useConvertToDisplay();
 
 const fallbackCurrency = (code: string): Currency => ({ code, kind: 'fiat', scale: 2 });
 
@@ -39,12 +36,10 @@ const target = computed(() => {
   return dto ? toCurrency(dto) : fallbackCurrency(current.value);
 });
 
-const converted = computed(() => table.value?.convert(Money.of(props.amount, known.value), current.value));
+const converted = computed(() => convertToDisplay(Money.of(props.amount, known.value)));
 
-const shown = computed(() => {
-  const result = converted.value;
-  if (!result) return { text: '—', title: undefined as string | undefined };
-  return result.match(
+const shown = computed(() =>
+  converted.value.match(
     (money) => ({
       text: formatMoney(money.round().toString(), target.value.code, locale.value as MoneyLocale, {
         scale: target.value.scale,
@@ -53,8 +48,8 @@ const shown = computed(() => {
       title: undefined as string | undefined,
     }),
     () => ({ text: '—', title: t('money.noRate', { code: current.value, date: date.value }) }),
-  );
-});
+  ),
+);
 </script>
 
 <template>

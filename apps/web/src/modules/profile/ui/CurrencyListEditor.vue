@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@magermoney/ui';
-import { useCurrencies } from '@/modules/rates';
+import { useCurrencies } from '@/modules/currencies';
 import { withoutCurrency } from '../domain/profile';
 
 const props = defineProps<{

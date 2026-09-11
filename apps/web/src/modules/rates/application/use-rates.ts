@@ -1,10 +1,10 @@
 import { computed, type ComputedRef } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import { CurrencyRegistry, RateTable } from '@magermoney/domain';
+import { RateTable } from '@magermoney/domain';
+import { toRate, useCurrencyRegistry } from '@/modules/currencies';
 import { useApi } from '@/shared/api/use-api';
 import { ratesApi } from '../infrastructure/rates-api';
-import { toCurrency, toRate, todayIso } from '../domain';
-import { useCurrencies } from './use-currencies';
+import { todayIso } from '../domain';
 
 /**
  * The rates for a day, as the domain's `RateTable`. The registry comes from the
@@ -17,14 +17,12 @@ export function useRates(date?: string): {
   date: ComputedRef<string>;
 } {
   const api = ratesApi(useApi());
-  const currencies = useCurrencies();
+  const registry = useCurrencyRegistry();
   const query = useQuery({ queryKey: ['rates', date ?? null], queryFn: () => api.list(date) });
-
-  const registry = computed(() => new CurrencyRegistry(currencies.value.map(toCurrency)));
 
   const table = computed(() => {
     const rates = query.data.value;
-    if (!rates || currencies.value.length === 0) return undefined;
+    if (!rates || registry.value.all().length === 0) return undefined;
     return new RateTable(date ?? rates[0]?.date ?? todayIso(), rates.map(toRate), registry.value);
   });
 

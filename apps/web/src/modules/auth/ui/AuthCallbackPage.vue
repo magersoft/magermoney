@@ -8,6 +8,7 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { Button } from '@magermoney/ui';
+import { safeRedirect } from '../domain/redirect';
 import { supabase } from '../infrastructure/supabase';
 
 const { t } = useI18n();
@@ -22,8 +23,7 @@ onMounted(async () => {
     error.value = exchangeError.message;
     return;
   }
-  const redirect = route.query.redirect;
-  await router.replace(typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/');
+  await router.replace(safeRedirect(route.query.redirect) ?? '/');
 });
 </script>
 

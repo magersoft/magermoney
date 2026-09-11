@@ -9,11 +9,17 @@
  */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import { Button, Input } from '@magermoney/ui';
 import { useSession } from '../application/use-session';
+import { safeRedirect } from '../domain/redirect';
 
 const { t } = useI18n();
+const route = useRoute();
 const session = useSession();
+
+/** Where the guard wanted to go. It rides along so the round trip ends there. */
+const redirect = computed(() => safeRedirect(route.query.redirect));
 
 const email = ref('');
 const pending = ref(false);
@@ -26,7 +32,7 @@ async function sendLink(): Promise<void> {
   if (!canSend.value) return;
   pending.value = true;
   error.value = null;
-  const result = await session.signInWithMagicLink(email.value.trim());
+  const result = await session.signInWithMagicLink(email.value.trim(), redirect.value);
   pending.value = false;
   result.match(
     () => {
@@ -41,7 +47,7 @@ async function sendLink(): Promise<void> {
 async function google(): Promise<void> {
   error.value = null;
   try {
-    await session.signInWithGoogle();
+    await session.signInWithGoogle(redirect.value);
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
   }

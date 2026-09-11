@@ -3,6 +3,7 @@
  * who is signed in passes through here.
  */
 export type { SessionUser } from './domain/session';
+export { safeRedirect } from './domain/redirect';
 export { authGuard } from './application/auth-guard';
 export { useSession, type Session } from './application/use-session';
 export { useSessionStore } from './infrastructure/session-store';
