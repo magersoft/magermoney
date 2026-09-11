@@ -1,0 +1,137 @@
+/**
+ * Magermoney design tokens — see docs/design/direction.md.
+ *
+ * Raw tokens are namespaced `--mm-*` so they never collide with the shadcn
+ * contract (`--background`, `--primary`, `--accent`, …). `src/styles/index.css`
+ * maps the shadcn names onto these, so changing a value here retints every
+ * generated component.
+ *
+ * Neutrals sit on hue 80 (warm paper) at chroma <= 0.012; the brand accent is
+ * hue 272 — fountain-pen ink, the mark of a hand-kept ledger.
+ *
+ * Every foreground token clears 4.5:1 against its own theme's `--mm-bg`, and
+ * `--mm-line-strong` clears 3:1 for the boundaries of form controls (WCAG 1.4.11).
+ * `--mm-line` is the row hairline and is deliberately quiet; never use it to
+ * outline something the user has to find.
+ */
+
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Two tiers: soft containers, sharp data rows. */
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+
+  /* Everything that enters uses this curve. Nothing overshoots. */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+:root {
+  /*
+   * Both palettes are declared once, here, and the theme rules below only
+   * re-point `--mm-*` at one of them. A value therefore cannot drift between
+   * the `prefers-color-scheme` branch and the `data-theme` branch.
+   */
+  --mm-light-bg: oklch(0.981 0.005 85);
+  --mm-light-surface: oklch(0.995 0.002 85);
+  --mm-light-surface-raised: oklch(1 0 0);
+  --mm-light-ink: oklch(0.23 0.012 80);
+  --mm-light-muted: oklch(0.52 0.012 80);
+  --mm-light-line: oklch(0.9 0.008 80);
+  --mm-light-line-strong: oklch(0.65 0.01 80);
+  --mm-light-accent: oklch(0.52 0.19 272);
+  --mm-light-accent-fg: oklch(0.99 0 0);
+  --mm-light-positive: oklch(0.52 0.13 155);
+  --mm-light-negative: oklch(0.53 0.19 25);
+  --mm-light-warning: oklch(0.555 0.14 75);
+
+  --mm-dark-bg: oklch(0.18 0.008 80);
+  --mm-dark-surface: oklch(0.22 0.008 80);
+  --mm-dark-surface-raised: oklch(0.26 0.009 80);
+  --mm-dark-ink: oklch(0.96 0.004 85);
+  --mm-dark-muted: oklch(0.68 0.01 80);
+  --mm-dark-line: oklch(0.31 0.008 80);
+  --mm-dark-line-strong: oklch(0.49 0.01 80);
+  --mm-dark-accent: oklch(0.68 0.16 272);
+  --mm-dark-accent-fg: oklch(0.17 0.02 272);
+  --mm-dark-positive: oklch(0.72 0.14 155);
+  --mm-dark-negative: oklch(0.7 0.17 25);
+  --mm-dark-warning: oklch(0.8 0.13 75);
+
+  /* Light is the default. */
+  --mm-bg: var(--mm-light-bg);
+  --mm-surface: var(--mm-light-surface);
+  --mm-surface-raised: var(--mm-light-surface-raised);
+  --mm-ink: var(--mm-light-ink);
+  --mm-muted: var(--mm-light-muted);
+  --mm-line: var(--mm-light-line);
+  --mm-line-strong: var(--mm-light-line-strong);
+  --mm-accent: var(--mm-light-accent);
+  --mm-accent-fg: var(--mm-light-accent-fg);
+  --mm-positive: var(--mm-light-positive);
+  --mm-negative: var(--mm-light-negative);
+  --mm-warning: var(--mm-light-warning);
+
+  --mm-duration-fast: 150ms;
+  --mm-duration-base: 240ms;
+  --mm-duration-slow: 400ms;
+}
+
+/* System preference, unless the user pinned the light theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --mm-bg: var(--mm-dark-bg);
+    --mm-surface: var(--mm-dark-surface);
+    --mm-surface-raised: var(--mm-dark-surface-raised);
+    --mm-ink: var(--mm-dark-ink);
+    --mm-muted: var(--mm-dark-muted);
+    --mm-line: var(--mm-dark-line);
+    --mm-line-strong: var(--mm-dark-line-strong);
+    --mm-accent: var(--mm-dark-accent);
+    --mm-accent-fg: var(--mm-dark-accent-fg);
+    --mm-positive: var(--mm-dark-positive);
+    --mm-negative: var(--mm-dark-negative);
+    --mm-warning: var(--mm-dark-warning);
+  }
+}
+
+/* An explicit choice wins in both directions. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --mm-bg: var(--mm-dark-bg);
+  --mm-surface: var(--mm-dark-surface);
+  --mm-surface-raised: var(--mm-dark-surface-raised);
+  --mm-ink: var(--mm-dark-ink);
+  --mm-muted: var(--mm-dark-muted);
+  --mm-line: var(--mm-dark-line);
+  --mm-line-strong: var(--mm-dark-line-strong);
+  --mm-accent: var(--mm-dark-accent);
+  --mm-accent-fg: var(--mm-dark-accent-fg);
+  --mm-positive: var(--mm-dark-positive);
+  --mm-negative: var(--mm-dark-negative);
+  --mm-warning: var(--mm-dark-warning);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+/*
+ * Reduced motion collapses the durations rather than removing the animations,
+ * so state still changes and nothing that waits on an animation callback is
+ * left invisible. Opacity and colour transitions survive at `--mm-duration-fast`
+ * where they carry meaning — see the motion presets.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mm-duration-fast: 0ms;
+    --mm-duration-base: 0ms;
+    --mm-duration-slow: 0ms;
+  }
+}
