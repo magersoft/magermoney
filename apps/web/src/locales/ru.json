@@ -51,7 +51,7 @@
       "google": "Войти через Google",
       "or": "или",
       "emailLabel": "Почта",
-      "emailPlaceholder": "you@example.com",
+      "emailPlaceholder": "you{'@'}example.com",
       "send": "Прислать ссылку",
       "sending": "Отправляем",
       "sentTitle": "Проверьте почту",
