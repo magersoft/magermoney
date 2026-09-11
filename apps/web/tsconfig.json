@@ -1,0 +1,20 @@
+{
+  "extends": "@magermoney/config/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    /*
+     * `@magermoney/ui` is consumed as source, and its shadcn components import
+     * `@/lib/utils` — their own alias. The second candidate resolves those; the
+     * app's own `@/` always wins because it is tried first.
+     */
+    "paths": { "@/*": ["./src/*", "../../packages/ui/src/*"] },
+    // Same reason as packages/ui: reka-ui and vue-sonner declare optional props
+    // without `| undefined`, and the components generated on top of them are
+    // type-checked here too. Every other strict flag stays on.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src", "test", "e2e", "vite.alias.ts", "vite.config.ts", "vitest.config.ts", "vercel.ts"]
+}

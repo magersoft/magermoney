@@ -1,0 +1,14 @@
+{
+  "app": { "name": "Magermoney" },
+  "nav": { "home": "Home", "settings": "Settings" },
+  "theme": {
+    "label": "Switch theme (now {theme})",
+    "system": "system",
+    "light": "light",
+    "dark": "dark"
+  },
+  "home": { "greeting": "Hi, {name}", "sample": "Sample amount" },
+  "settings": { "title": "Settings" },
+  "auth": { "signIn": { "title": "Sign in" } },
+  "a11y": { "primaryNav": "Main navigation", "skipToContent": "Skip to content" }
+}

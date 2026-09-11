@@ -1,0 +1,14 @@
+{
+  "app": { "name": "Magermoney" },
+  "nav": { "home": "Главная", "settings": "Настройки" },
+  "theme": {
+    "label": "Сменить тему (сейчас {theme})",
+    "system": "как в системе",
+    "light": "светлая",
+    "dark": "тёмная"
+  },
+  "home": { "greeting": "Привет, {name}", "sample": "Пример суммы" },
+  "settings": { "title": "Настройки" },
+  "auth": { "signIn": { "title": "Вход" } },
+  "a11y": { "primaryNav": "Основная навигация", "skipToContent": "Перейти к содержимому" }
+}
