@@ -45,6 +45,14 @@ describe('account contracts', () => {
       true,
     );
   });
+  it('a partial update omitting isSpending should not inject a default', () => {
+    expect(UpdateAccountInputSchema.parse({ name: 'New' })).toEqual({ name: 'New' });
+  });
+  it('a creation omitting isSpending should default to false', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { isSpending, ...baseWithoutSpending } = base;
+    expect(CreateAccountInputSchema.parse(baseWithoutSpending).isSpending).toBe(false);
+  });
   it('coerces the list limit and caps it', () => {
     expect(CursorQuerySchema.parse({}).limit).toBe(50);
     expect(CursorQuerySchema.parse({ limit: '20' }).limit).toBe(20);

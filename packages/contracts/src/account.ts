@@ -42,7 +42,7 @@ const accountFields = {
   currency: CurrencyCodeSchema,
   kind: AccountKindSchema,
   cardType: CardTypeSchema.nullable().optional(),
-  isSpending: z.boolean().default(false),
+  isSpending: z.boolean(),
   cardLast4: z
     .string()
     .regex(/^\d{4}$/)
@@ -61,7 +61,11 @@ export const OpeningBalanceSchema = z.object({
 });
 
 export const CreateAccountInputSchema = z
-  .object({ ...accountFields, openingBalance: OpeningBalanceSchema.optional() })
+  .object({
+    ...accountFields,
+    isSpending: z.boolean().default(false),
+    openingBalance: OpeningBalanceSchema.optional(),
+  })
   .refine(cardFieldsOnlyOnCards, CARD_MESSAGE)
   .openapi('CreateAccountInput');
 export type CreateAccountInput = z.infer<typeof CreateAccountInputSchema>;
