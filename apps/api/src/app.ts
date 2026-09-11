@@ -1,6 +1,7 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { requestId } from 'hono/request-id';
+import type { JWTVerifyGetKey } from 'jose';
 import type { Clock, CurrencyRegistry } from '@magermoney/domain';
 import { mountOpenApi } from './shared/openapi.js';
 import { logger } from './shared/logger.js';
@@ -16,6 +17,7 @@ export type AppEnv = { Variables: { userId: string; requestId: string } };
 export interface AppDeps {
   clock: Clock;
   jwtSecret: string;
+  jwks?: JWTVerifyGetKey;
   cronSecret: string;
   exposeDocs?: boolean;
   profiles: ProfileRepository;

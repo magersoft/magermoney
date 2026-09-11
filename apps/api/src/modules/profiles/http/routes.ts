@@ -10,7 +10,7 @@ const errors = { 400: { description: 'Bad request', content: { 'application/json
 
 export function profileRoutes(deps: AppDeps) {
   const r = new OpenAPIHono<AppEnv>();
-  r.use('*', requireUser(deps.jwtSecret));
+  r.use('*', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
   r.openapi(createRoute({ method: 'get', path: '/', security: [{ bearer: [] }], responses: { 200: { description: 'Profile', content: { 'application/json': { schema: ProfileDtoSchema } } }, ...errors } }),
     async (c) => { const res = await getProfile(deps.profiles)(c.var.userId); return res.match((p) => c.json(p, 200), (e) => { const h = toHttpError(e); return c.json(h.body, h.status as 404); }); });
   r.openapi(createRoute({ method: 'patch', path: '/', security: [{ bearer: [] }], request: { body: { content: { 'application/json': { schema: UpdateProfileInputSchema } } } }, responses: { 200: { description: 'Updated', content: { 'application/json': { schema: ProfileDtoSchema } } }, ...errors } }),

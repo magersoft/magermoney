@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 const schema = z.object({
   DATABASE_URL: z.string().url(),
+  SUPABASE_URL: z.string().url(),
   SUPABASE_JWT_SECRET: z.string().min(32),
   CRON_SECRET: z.string().min(8),
   FIAT_RATES_URL: z.string().url().default('https://open.er-api.com/v6/latest/USD'),

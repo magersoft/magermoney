@@ -12,9 +12,9 @@ const errorsWith400 = { 400: { description: 'Bad request', content: { 'applicati
 
 export function ratesRoutes(deps: AppDeps) {
   const r = new OpenAPIHono<AppEnv>();
-  r.use('/currencies', requireUser(deps.jwtSecret));
-  r.use('/rates', requireUser(deps.jwtSecret));
-  r.use('/rates/manual', requireUser(deps.jwtSecret));
+  r.use('/currencies', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
+  r.use('/rates', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
+  r.use('/rates/manual', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
 
   r.openapi(
     createRoute({ method: 'get', path: '/currencies', security: [{ bearer: [] }], responses: { 200: { description: 'Currencies', content: { 'application/json': { schema: z.array(CurrencyDtoSchema) } } }, ...errors } }),

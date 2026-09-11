@@ -4,7 +4,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 
 ## Layout
 - `apps/web` Vue 3 PWA. Modules in `src/modules/<name>/{domain,application,infrastructure,ui}` with a single public `index.ts`. Follow the `/vue-ddd-architecture` skill.
-- `apps/api` Hono API on Vercel Functions. Modules in `src/modules/<name>/{application,infrastructure,http}`; `src/shared` for auth, db, errors, openapi.
+- `apps/api` Hono API on Vercel Functions. Modules in `src/modules/<name>/{application,infrastructure,http}`; `src/shared` for auth, db, errors, openapi. JWT verified via Supabase JWKS (ES256) with HS256 secret fallback.
 - `packages/domain` pure model (Money, Currency, Rate…). No framework imports. 100 % test coverage.
 - `packages/contracts` zod schemas for DTOs and routes → OpenAPI + client types.
 - `packages/ui` the design system (shadcn-vue + Tailwind v4 + motion-v). Add components only via the shadcn-vue MCP / CLI. Components it generates import `@/…`; rewrite those to relative paths, or every consumer has to reproduce the alias. After changing `FIAT_FLAG` / `CRYPTO_KNOWN`, run `bun run icons:build` in `packages/ui` and commit `src/icons/subset.json`.
