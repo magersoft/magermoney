@@ -4,12 +4,13 @@
  * Zero-config `api/*` functions are discovered before the build command runs,
  * so a bundle written by the build command was never picked up. Writing the
  * output tree directly makes the deployment deterministic: one Node function
- * (the esbuild bundle of `src/vercel-entry.ts`), one rewrite, two crons.
+ * (the esbuild bundle of `src/vercel-entry.ts`) and one rewrite. Crons stay in
+ * `vercel.ts`: declaring them here as well makes Vercel reject the deployment
+ * as a duplicated cron job.
  */
 import { build } from 'esbuild';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { config } from '../vercel.js';
 
 const out = join(process.cwd(), '.vercel', 'output');
 const fn = join(out, 'functions', 'api.func');
@@ -50,7 +51,6 @@ await writeFile(
     {
       version: 3,
       routes: [{ src: '/(.*)', dest: '/api' }],
-      crons: config.crons ?? [],
     },
     null,
     2,
