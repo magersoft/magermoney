@@ -19,7 +19,8 @@ export function deriveTransfer(input: {
   amountReceived: Money;
 }): Result<TransferDerivation, TransferError | CurrencyMismatchError> {
   const { amountSent, amountReceived } = input;
-  if (!amountSent.amount.gt(0)) return err(new TransferError('non_positive_amount'));
+  if (!amountSent.amount.gt(0) || !amountReceived.amount.gt(0))
+    return err(new TransferError('non_positive_amount'));
   if (amountSent.currency.code === amountReceived.currency.code) {
     return amountSent
       .subtract(amountReceived)
