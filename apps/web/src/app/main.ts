@@ -6,13 +6,28 @@ import App from '@/app/App.vue';
 import { i18n } from '@/app/i18n';
 import { clientPersister, queryClient } from '@/app/query';
 import { router } from '@/app/router';
+import { authGuard, useSession, useSessionStore } from '@/modules/auth';
+import { createApiClient } from '@/shared/api/client';
+import { API_KEY } from '@/shared/api/use-api';
 import '@/app/styles/index.css';
 
 registerSW({ immediate: true });
 
-createApp(App)
-  .use(createPinia())
-  .use(router)
-  .use(i18n)
-  .use(VueQueryPlugin, { queryClient, clientPersister })
-  .mount('#app');
+const app = createApp(App).use(createPinia()).use(router).use(i18n);
+
+const session = useSession();
+
+app.provide(API_KEY, createApiClient(import.meta.env.VITE_API_URL, session.getAccessToken));
+app.use(VueQueryPlugin, { queryClient, clientPersister });
+
+/**
+ * The stored session is read before the first navigation, so a signed-in person
+ * is never bounced to sign-in on a cold start, and the app is mounted only once
+ * the guard can answer.
+ */
+void useSessionStore()
+  .init()
+  .then(() => {
+    router.beforeEach(authGuard(session));
+    app.mount('#app');
+  });

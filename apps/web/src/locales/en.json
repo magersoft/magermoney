@@ -1,14 +1,47 @@
 {
-  "app": { "name": "Magermoney" },
-  "nav": { "home": "Home", "settings": "Settings" },
+  "app": {
+    "name": "Magermoney"
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings"
+  },
   "theme": {
     "label": "Switch theme (now {theme})",
     "system": "system",
     "light": "light",
     "dark": "dark"
   },
-  "home": { "greeting": "Hi, {name}", "sample": "Sample amount" },
-  "settings": { "title": "Settings" },
-  "auth": { "signIn": { "title": "Sign in" } },
-  "a11y": { "primaryNav": "Main navigation", "skipToContent": "Skip to content" }
+  "home": {
+    "greeting": "Hi, {name}",
+    "sample": "Sample amount"
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "subtitle": "No password. We email you a link, or use Google.",
+      "google": "Continue with Google",
+      "or": "or",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "send": "Email me a link",
+      "sending": "Sending",
+      "sentTitle": "Check your inbox",
+      "sentBody": "We sent a link to {email}. It works for an hour.",
+      "useAnother": "Use a different address"
+    },
+    "callback": {
+      "working": "Signing you in",
+      "failedTitle": "That link did not work",
+      "failedBody": "A link lasts an hour and works once. Ask for a new one.",
+      "retry": "Back to sign in"
+    }
+  },
+  "a11y": {
+    "primaryNav": "Main navigation",
+    "skipToContent": "Skip to content"
+  }
 }
