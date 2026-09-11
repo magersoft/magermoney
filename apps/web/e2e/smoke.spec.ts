@@ -14,34 +14,66 @@ import { createClient } from '@supabase/supabase-js';
  * real magic-link sign-in through Inbucket at http://127.0.0.1:54324, the
  * app itself wrote its session under `sb-127-auth-token` in localStorage.
  */
+const EMAIL_PREFIX = 'e2e-';
+const EMAIL_DOMAIN = '@magermoney.test';
+const STALE_AFTER_MS = 60 * 60 * 1000;
+
 test('sign in, see home, switch currency', async ({ page }) => {
   const admin = createClient(
     process.env.E2E_SUPABASE_URL!,
     process.env.E2E_SUPABASE_SERVICE_ROLE_KEY!,
   );
-  const email = `e2e-${Date.now()}@magermoney.test`;
-  await admin.auth.admin.createUser({ email, email_confirm: true });
-  const { data } = await admin.auth.admin.generateLink({ type: 'magiclink', email });
-  // The installed @supabase/auth-js names this field `hashed_token`, not the
-  // `token_hash` the brief assumed — confirmed against `GoTrueAdminApi`'s own
-  // JSDoc example. `verifyOtp`'s parameter is still called `token_hash`; it is
-  // only the response field that differs.
-  const token_hash = data.properties!.hashed_token;
-  const anon = createClient(process.env.E2E_SUPABASE_URL!, process.env.E2E_SUPABASE_ANON_KEY!);
-  const { data: s } = await anon.auth.verifyOtp({ token_hash, type: 'magiclink' });
 
-  const storageKey = `sb-${new URL(process.env.E2E_SUPABASE_URL!).hostname.split('.')[0]}-auth-token`;
+  // Deletes any `e2e-*@magermoney.test` user older than an hour. Guards
+  // against a run that crashed between `createUser` and its own cleanup —
+  // against staging, this test runs on every PR, so a leaked user per crash
+  // would otherwise grow `auth.users` without bound.
+  const cutoff = Date.now() - STALE_AFTER_MS;
+  for (let page2 = 1; ; page2++) {
+    const { data: listed, error } = await admin.auth.admin.listUsers({
+      page: page2,
+      perPage: 200,
+    });
+    if (error) throw error;
+    const stale = listed.users.filter(
+      (u) =>
+        u.email?.startsWith(EMAIL_PREFIX) &&
+        u.email.endsWith(EMAIL_DOMAIN) &&
+        new Date(u.created_at).getTime() < cutoff,
+    );
+    await Promise.all(stale.map((u) => admin.auth.admin.deleteUser(u.id)));
+    if (listed.users.length < 200) break;
+  }
 
-  await page.goto('/sign-in');
-  await page.evaluate(([k, v]: [string, string]) => localStorage.setItem(k, v), [
-    storageKey,
-    JSON.stringify(s.session),
-  ] as [string, string]);
-  await page.goto('/');
+  const email = `${EMAIL_PREFIX}${Date.now()}${EMAIL_DOMAIN}`;
+  const { data: created } = await admin.auth.admin.createUser({ email, email_confirm: true });
+  const userId = created.user!.id;
 
-  await expect(page.getByTestId('home-greeting')).toBeVisible();
-  const before = await page.getByTestId('sample-amount').innerText();
-  await page.getByTestId('currency-switch').getByRole('button', { name: 'USD' }).click();
-  await expect(page.getByTestId('sample-amount')).not.toHaveText(before);
-  await expect(page.getByTestId('sample-amount')).toContainText('$');
+  try {
+    const { data } = await admin.auth.admin.generateLink({ type: 'magiclink', email });
+    // The installed @supabase/auth-js names this field `hashed_token`, not the
+    // `token_hash` the brief assumed — confirmed against `GoTrueAdminApi`'s own
+    // JSDoc example. `verifyOtp`'s parameter is still called `token_hash`; it is
+    // only the response field that differs.
+    const token_hash = data.properties!.hashed_token;
+    const anon = createClient(process.env.E2E_SUPABASE_URL!, process.env.E2E_SUPABASE_ANON_KEY!);
+    const { data: s } = await anon.auth.verifyOtp({ token_hash, type: 'magiclink' });
+
+    const storageKey = `sb-${new URL(process.env.E2E_SUPABASE_URL!).hostname.split('.')[0]}-auth-token`;
+
+    await page.goto('/sign-in');
+    await page.evaluate(([k, v]: [string, string]) => localStorage.setItem(k, v), [
+      storageKey,
+      JSON.stringify(s.session),
+    ] as [string, string]);
+    await page.goto('/');
+
+    await expect(page.getByTestId('home-greeting')).toBeVisible();
+    const before = await page.getByTestId('sample-amount').innerText();
+    await page.getByTestId('currency-switch').getByRole('button', { name: 'USD' }).click();
+    await expect(page.getByTestId('sample-amount')).not.toHaveText(before);
+    await expect(page.getByTestId('sample-amount')).toContainText('$');
+  } finally {
+    await admin.auth.admin.deleteUser(userId);
+  }
 });
