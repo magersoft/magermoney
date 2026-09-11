@@ -37,3 +37,19 @@ Chronological, one line each. Rationale lives in the ADRs where it matters.
 ## Open
 
 - none; interview closed 2026-09-11, awaiting final confirmation of the summary.
+
+## Phase 1 deployed (2026-09-11)
+
+- Web: https://magermoney-web.vercel.app (Vercel project `magermoney-web`, root `apps/web`)
+- API: https://magermoney-api.vercel.app (Vercel project `magermoney-api`, root `apps/api`, Build Output API via `scripts/build-vercel.ts`)
+- Supabase production: ref `rwvtqlwnqhjkvexifmdv`, eu-central-1; migrations 0001–0003 applied; 19 currencies; rates fetched by the two daily crons (18 rows per day, USD has no row).
+- GitHub: `main` protected (checks + integration required), environment `production` with the owner as reviewer; repo variables `E2E_ENABLED=false`, `STAGING_ENABLED` unset.
+- Verified: `/health` 200, `/openapi.json` 404 in production, cron routes 401 without secret, `{"stored":8}` fiat and `{"stored":10}` crypto, CORS echoes only the web origin.
+
+### Still to do by the owner
+
+- Supabase dashboard → Authentication → URL configuration: Site URL `https://magermoney-web.vercel.app`, additional redirect URLs `https://magermoney-web.vercel.app/auth/callback` and `https://*.vercel.app/auth/callback`.
+- Google provider: create an OAuth client in Google Cloud Console with redirect `https://rwvtqlwnqhjkvexifmdv.supabase.co/auth/v1/callback`, paste client id/secret into Supabase → Providers → Google.
+- Sign in from the iPhone (Add to Home Screen), switch the display currency on the home screen.
+- Staging Supabase project: pause/delete the unused `magersoft's Project` or upgrade the org, then create `magermoney-staging`, set `STAGING_*` secrets, `STAGING_ENABLED=true` and `E2E_ENABLED=true`.
+- Phase 2 on Vercel Pro: crypto cron back to hourly.
