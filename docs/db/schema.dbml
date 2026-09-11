@@ -35,6 +35,7 @@ Table currencies [note: 'phase 1. Shared reference data, service-role writes onl
   symbol text [note: 'null = derive from Intl.NumberFormat; set only for crypto or overrides (₿, Ξ, ₮)']
   name_ru text [note: 'null = Intl.DisplayNames']
   name_en text [note: 'null = Intl.DisplayNames']
+  icon text [note: 'Iconify id override, e.g. "cryptocurrency-color:btc"; null = auto: circle-flags for fiat, cryptocurrency-color by ticker for crypto, initials fallback']
 }
 
 Table rates [note: 'phase 1. Append-only. quote is always USD. user_id null = shared api rate; set = user manual override.'] {

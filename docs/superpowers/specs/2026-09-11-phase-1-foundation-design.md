@@ -58,7 +58,7 @@ Errors are typed classes; use-case boundaries return `Result<T, E>` (neverthrow)
 Conventions for every future table: `uuid` PK via `gen_random_uuid()`, `user_id uuid not null references profiles(id)` with an index, `created_at`/`updated_at timestamptz`, money and rates as unconstrained `numeric`, no soft delete (active periods where the domain needs them), RLS on every user table.
 
 - **profiles** — `id` (= `auth.users.id`), `display_name`, `locale ('ru'|'en')`, `default_currency`, `reporting_currencies text[]`, `onboarding_completed_at`, timestamps. Trigger on `auth.users` insert creates the row. RLS: owner only.
-- **currencies** — `code` PK, `kind`, `scale`, and nullable overrides `symbol`, `name_ru`, `name_en`. Null means the web app derives symbol and name from `Intl.NumberFormat` / `Intl.DisplayNames` by code; overrides exist only for crypto (BTC, ETH, USDT and the like), which Intl does not know. Seeded by migration with the owner's 18 currencies. Readable by all authenticated users; written by the service role only.
+- **currencies** — `code` PK, `kind`, `scale`, and nullable overrides `symbol`, `name_ru`, `name_en`, `icon`. Null means the web app derives symbol and name from `Intl.NumberFormat` / `Intl.DisplayNames` by code; overrides exist only for crypto (BTC, ETH, USDT and the like), which Intl does not know. `icon` is an Iconify id used only when auto-selection misses. Seeded by migration with the owner's 18 currencies. Readable by all authenticated users; written by the service role only.
 - **rates** — `id`, `base`, `quote` (always `USD`), `value numeric`, `date`, `source ('api'|'manual')`, `user_id null` (null = shared, set = a user's manual override), timestamps. Unique `(base, quote, date, source, coalesce(user_id, ''))`. RLS: shared rows readable by all; manual rows owner only.
 
 Access from the API through `postgres.js` with hand-written SQL; no ORM. The full schema for all phases is documented in `docs/db/schema.dbml` for review and kept current as phases land.
@@ -77,7 +77,7 @@ Structure follows the `vue-ddd-architecture` skill: `app/` (bootstrap, router, i
 
 Infrastructure layer wraps a `hono/client` typed by `contracts` inside TanStack Query with IndexedDB persistence; UI and application layers never see the query library. Pinia holds UI state only.
 
-Phase 1 screens: sign-in, a placeholder home with a greeting and the Display currency switch converting a sample amount, profile settings (display name, locale, reporting currencies, default currency). PWA via `vite-plugin-pwa` (precache shell, network-first API). System theme with manual toggle. `packages/ui` starts with Button, Input, Select, Card, Sheet, Toast, Skeleton installed through the shadcn-vue MCP, theme tokens, and one motion preset.
+Phase 1 screens: sign-in, a placeholder home with a greeting and the Display currency switch converting a sample amount, profile settings (display name, locale, reporting currencies, default currency). PWA via `vite-plugin-pwa` (precache shell, network-first API). System theme with manual toggle. `packages/ui` starts with Button, Input, Select, Card, Sheet, Toast, Skeleton installed through the shadcn-vue MCP, theme tokens, one motion preset, and a `CurrencyIcon` component: `circle-flags` for fiat (by the currency's country), `cryptocurrency-color` by ticker for crypto, initials in a circle as fallback, all via `unplugin-icons` so icons are inlined and work offline.
 
 ## 7. Environments and CI/CD
 

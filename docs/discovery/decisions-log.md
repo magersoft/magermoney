@@ -32,6 +32,7 @@ Chronological, one line each. Rationale lives in the ADRs where it matters.
 26. Delivery phases: 1 foundation → 2 accounts+rates+transfers+import → 3 income/expenses/budgets/dashboard → 4 goals+assets → 5 snapshots/spend/analytics/history import → 6 onboarding, EN, motion, passkey lock, e2e. Each phase ends deployed.
 27. Charts: shadcn-vue chart components on Unovis (`@unovis/vue`), copied into `packages/ui`; same CSS-variable theming as the rest. ECharts not used.
 28. Currency presentation: code is the identifier; symbol and names come from Intl on the client for fiat, stored only as nullable overrides for crypto.
+29. Currency icons: Iconify sets via unplugin-icons (`circle-flags` for fiat, `cryptocurrency-color` for crypto), `CurrencyIcon` in packages/ui with initials fallback; `currencies.icon` nullable override for misses (e.g. PEPE from @web3icons/core as local SVG).
 
 ## Open
 
