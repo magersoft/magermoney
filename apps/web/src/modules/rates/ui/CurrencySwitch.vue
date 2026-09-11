@@ -6,6 +6,11 @@
  *
  * The indicator is a single element that moves between segments, so the change
  * reads as the same thing relocating rather than two things blinking.
+ *
+ * The segment is 36px under a mouse, where the header would otherwise grow for
+ * no one, and 44px under a finger. `pointer-coarse:` rather than the design
+ * system's base-layer rule for touch targets: a `min-h-*` utility sits in the
+ * `utilities` layer and would win against `base` on the same property.
  */
 import { useI18n } from 'vue-i18n';
 import { CurrencyIcon, EASE_OUT_QUART } from '@magermoney/ui';
@@ -38,7 +43,7 @@ const kindOf = computed(
       :aria-pressed="code === current"
       :title="t('a11y.showIn', { code })"
       data-slot="button"
-      class="relative flex min-h-9 items-center gap-1.5 rounded-lg px-2 py-1 text-xs outline-offset-2 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring"
+      class="relative flex min-h-9 items-center gap-1.5 pointer-coarse:min-h-11 rounded-lg px-2 py-1 text-xs outline-offset-2 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring"
       :class="code === current ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'"
       @click="set(code)"
     >
