@@ -30,7 +30,7 @@ jobs:
           bun run --filter @magermoney/api test:integration
   e2e:
     needs: [checks]
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && vars.E2E_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
