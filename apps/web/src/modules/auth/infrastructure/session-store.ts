@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { SessionUser } from '../domain/session';
+import { clearClientCaches } from '@/shared/cache/client-caches';
 import { supabase } from './supabase';
 
 /**
@@ -26,7 +27,12 @@ export const useSessionStore = defineStore('session', () => {
     started ??= (async () => {
       const { data } = await supabase().auth.getSession();
       adopt(data.session?.user);
-      supabase().auth.onAuthStateChange((_event, session) => adopt(session?.user));
+      supabase().auth.onAuthStateChange((event, session) => {
+        adopt(session?.user);
+        // Covers the sign-outs `signOut()` never sees: an expired session, or
+        // another tab signing out.
+        if (event === 'SIGNED_OUT') void clearClientCaches();
+      });
       ready.value = true;
     })();
     return started;

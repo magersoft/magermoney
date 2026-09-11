@@ -6,6 +6,12 @@
 export type MoneyLocale = 'ru' | 'en';
 
 export interface FormatMoneyOptions {
+  /**
+   * What the code denominates. Three letters are not enough to tell: XRP, SOL
+   * and TRX look exactly like ISO-4217 fiat codes and must not be rounded to
+   * two decimals. Absent, an ISO-shaped code without a symbol is read as fiat.
+   */
+  kind?: 'fiat' | 'crypto';
   /** Fraction digits for currencies `Intl` does not know (crypto). */
   scale?: number;
   /** Symbol for a non-ISO currency; `null` keeps the code itself. */
@@ -33,7 +39,7 @@ export function formatMoney(
   opts: FormatMoneyOptions = {},
 ): string {
   const n = Number(amount);
-  const isIso = /^[A-Z]{3}$/.test(code) && opts.symbol == null;
+  const isIso = opts.kind !== 'crypto' && /^[A-Z]{3}$/.test(code) && opts.symbol == null;
 
   if (isIso) {
     const f = new Intl.NumberFormat(intlLocale(locale), {

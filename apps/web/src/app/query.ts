@@ -5,6 +5,7 @@ import {
 } from '@tanstack/query-persist-client-core';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { del, get, set } from 'idb-keyval';
+import { onClearClientCaches } from '@/shared/cache/client-caches';
 
 const WEEK_MS = 7 * 24 * 3_600_000;
 
@@ -46,3 +47,14 @@ export function persistOptions(client: QueryClient): PersistQueryClientOptions {
 export function clientPersister(client: QueryClient): [() => void, Promise<void>] {
   return persistQueryClient(persistOptions(client));
 }
+
+/**
+ * Both halves of the cache go at sign-out: the in-memory one, and the copy in
+ * IndexedDB that would otherwise hydrate the next account from the previous
+ * one. Registered here rather than in `main.ts` so that owning the cache and
+ * clearing it cannot drift apart.
+ */
+onClearClientCaches(async () => {
+  queryClient.clear();
+  await persister.removeClient();
+});

@@ -33,6 +33,10 @@ describe('AppShell', () => {
     expect(text).toContain('Settings');
   });
 
+  it('makes the skip link target focusable, so the skip actually moves focus', () => {
+    expect(mountShell().get('main#main').attributes('tabindex')).toBe('-1');
+  });
+
   it('asks for the next theme in the cycle rather than setting it itself', async () => {
     const shell = mountShell();
 

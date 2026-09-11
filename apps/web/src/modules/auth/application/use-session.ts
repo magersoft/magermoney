@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import type { Ref } from 'vue';
 import type { SessionUser } from '../domain/session';
 import { safeRedirect } from '../domain/redirect';
+import { clearClientCaches } from '@/shared/cache/client-caches';
 import { supabase } from '../infrastructure/supabase';
 import { useSessionStore } from '../infrastructure/session-store';
 
@@ -52,6 +53,10 @@ export function useSession(): Session {
     },
     signOut: async () => {
       await supabase().auth.signOut();
+      // Nothing the previous account fetched may survive into the next one on
+      // this device. Also runs from `SIGNED_OUT`, for a session that expired or
+      // was ended in another tab.
+      await clearClientCaches();
     },
     getAccessToken: async () =>
       (await supabase().auth.getSession()).data.session?.access_token ?? null,

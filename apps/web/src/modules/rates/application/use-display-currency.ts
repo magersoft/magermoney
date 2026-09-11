@@ -1,5 +1,6 @@
 import { computed, ref, watch, type Ref } from 'vue';
 import { useProfile } from '@/modules/profile';
+import { onClearClientCaches } from '@/shared/cache/client-caches';
 
 type Storage = { get(): string | null; set(v: string): void };
 
@@ -86,3 +87,20 @@ export function useDisplayCurrency(): DisplayCurrency {
   instance ??= createDisplayCurrency(useProfile().profile, localStorageBacked);
   return instance;
 }
+
+/**
+ * The switch is per device, but it is still a fact about the account that was
+ * signed in, so it goes with the rest of the caches. The singleton is dropped
+ * too: the next sign-in rebuilds it against its own profile.
+ */
+export function resetDisplayCurrency(): void {
+  instance = undefined;
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* Nothing is remembered anyway if storage refuses. */
+  }
+}
+
+onClearClientCaches(resetDisplayCurrency);

@@ -112,7 +112,7 @@ function cycleTheme(): void {
       </div>
     </header>
 
-    <main id="main" class="mx-auto w-full max-w-3xl px-4 pb-24 pt-6 md:px-6 md:pb-12">
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-3xl px-4 pb-24 pt-6 md:px-6 md:pb-12">
       <slot />
     </main>
 

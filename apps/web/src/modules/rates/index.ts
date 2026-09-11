@@ -13,6 +13,7 @@ export {
 } from './application/convert-to-display';
 export {
   createDisplayCurrency,
+  resetDisplayCurrency,
   useDisplayCurrency,
   type DisplayCurrency,
 } from './application/use-display-currency';

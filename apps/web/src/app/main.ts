@@ -27,7 +27,13 @@ app.use(VueQueryPlugin, { queryClient, clientPersister });
  */
 void useSessionStore()
   .init()
-  .then(() => {
+  .catch((error: unknown) => {
+    // Reading the stored session can fail on its own — blocked storage, a
+    // private window, a corrupt entry. Mount anyway: the guard then treats the
+    // person as signed out, which is recoverable. A blank page is not.
+    console.error('Could not restore the session; starting signed out', error);
+  })
+  .finally(() => {
     router.beforeEach(authGuard(session));
     app.mount('#app');
   });

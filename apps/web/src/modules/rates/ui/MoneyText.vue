@@ -42,6 +42,7 @@ const shown = computed(() =>
   converted.value.match(
     (money) => ({
       text: formatMoney(money.round().toString(), target.value.code, locale.value as MoneyLocale, {
+        kind: target.value.kind,
         scale: target.value.scale,
         symbol: target.value.symbol ?? null,
       }),
