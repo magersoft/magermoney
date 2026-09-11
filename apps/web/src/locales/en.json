@@ -14,7 +14,10 @@
   },
   "home": {
     "greeting": "Hi, {name}",
-    "sample": "Sample amount"
+    "greetingPlain": "Hi",
+    "sample": "Sample amount",
+    "rateDate": "Rates for {date}",
+    "soon": "Accounts and transactions come in the next version. For now there is one amount here, to check the conversion."
   },
   "settings": {
     "title": "Settings",
@@ -64,6 +67,11 @@
   },
   "a11y": {
     "primaryNav": "Main navigation",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "displayCurrency": "Display currency",
+    "showIn": "Show amounts in {code}"
+  },
+  "money": {
+    "noRate": "No rate for {code} on {date}"
   }
 }

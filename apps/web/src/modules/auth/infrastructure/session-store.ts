@@ -24,9 +24,9 @@ export const useSessionStore = defineStore('session', () => {
    */
   const init = (): Promise<void> => {
     started ??= (async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await supabase().auth.getSession();
       adopt(data.session?.user);
-      supabase.auth.onAuthStateChange((_event, session) => adopt(session?.user));
+      supabase().auth.onAuthStateChange((_event, session) => adopt(session?.user));
       ready.value = true;
     })();
     return started;

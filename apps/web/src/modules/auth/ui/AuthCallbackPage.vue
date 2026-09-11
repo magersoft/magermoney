@@ -17,7 +17,7 @@ const router = useRouter();
 const error = ref<string | null>(null);
 
 onMounted(async () => {
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(location.href);
+  const { error: exchangeError } = await supabase().auth.exchangeCodeForSession(location.href);
   if (exchangeError) {
     error.value = exchangeError.message;
     return;

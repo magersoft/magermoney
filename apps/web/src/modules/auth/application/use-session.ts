@@ -28,22 +28,22 @@ export function useSession(): Session {
     user,
     ready,
     signInWithGoogle: async () => {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase().auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: callbackUrl() },
       });
       if (error) throw error;
     },
     signInWithMagicLink: async (email: string) => {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase().auth.signInWithOtp({
         email,
         options: { emailRedirectTo: callbackUrl() },
       });
       return error ? err(error) : ok(undefined);
     },
     signOut: async () => {
-      await supabase.auth.signOut();
+      await supabase().auth.signOut();
     },
-    getAccessToken: async () => (await supabase.auth.getSession()).data.session?.access_token ?? null,
+    getAccessToken: async () => (await supabase().auth.getSession()).data.session?.access_token ?? null,
   };
 }
