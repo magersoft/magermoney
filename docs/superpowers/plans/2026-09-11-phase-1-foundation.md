@@ -3785,7 +3785,7 @@ curl -s -X POST -H "authorization: Bearer $CRON_SECRET" "https://magermoney-api.
 curl -s -X POST -H "authorization: Bearer $CRON_SECRET" "https://magermoney-api.vercel.app/jobs/rates?kind=crypto"  # {"stored":10}
 ```
 
-Then in the Supabase prod SQL editor: `select base, value, date from rates order by base;` → 18 rows for today. Open the production web URL on the iPhone: Add to Home Screen, sign in with Google, see the greeting, switch currency, values change. Sign in with magic link in a private window works too. Vercel Cron shows both jobs scheduled.
+Then in the Supabase prod SQL editor: `select base, value, date from rates order by base;` → 19 rows for today. Open the production web URL on the iPhone: Add to Home Screen, sign in with Google, see the greeting, switch currency, values change. Sign in with magic link in a private window works too. Vercel Cron shows both jobs scheduled.
 
 - [ ] **Step 6: Record**
 
