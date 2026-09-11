@@ -17,15 +17,27 @@
 
 @import 'tailwindcss';
 
+/*
+ * Consumers import this file from `node_modules`, where Tailwind's automatic
+ * source detection does not reach. These paths are what make the utility
+ * classes used by the components exist in the consumer's build.
+ */
+@source '../components';
+@source '../index.ts';
+
 @theme {
   --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Two tiers: soft containers, sharp data rows. */
-  --radius-xs: 0.375rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.25rem;
+  /*
+   * Two tiers: soft containers, sharp data rows. Tailwind's own scale already
+   * puts controls where we want them — `rounded-lg` (what every shadcn control
+   * uses) is 0.5rem / 8px — so only the container tier is redefined, keeping
+   * the scale monotonic. Cards are `rounded-xl` (14px), sheets and toasts
+   * `rounded-2xl` (20px). Data rows stay square.
+   */
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.25rem;
 
   /* Everything that enters uses this curve. Nothing overshoots. */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
@@ -123,10 +135,9 @@
 }
 
 /*
- * Reduced motion collapses the durations rather than removing the animations,
- * so state still changes and nothing that waits on an animation callback is
- * left invisible. Opacity and colour transitions survive at `--mm-duration-fast`
- * where they carry meaning — see the motion presets.
+ * Reduced motion collapses these durations to zero. They only cover motion that
+ * reads them; the generated components hardcode their own timings, so the
+ * catch-all that actually holds the promise lives in `index.css`.
  */
 @media (prefers-reduced-motion: reduce) {
   :root {

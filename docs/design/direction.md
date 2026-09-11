@@ -21,7 +21,7 @@ by cards-inside-cards. Both keep a many-currency screen calm when fifteen number
 | Temperature | Warm neutrals, cool accent | Paper and ink. Also keeps us off the slate-blue default. |
 | Contrast | High on amounts, low on chrome | Amounts are the content; labels, rules and chrome recede. |
 | Density | Dense data, comfortable controls | 52px data rows; 44px minimum tap target on iPhone. |
-| Radius | Two tiers: soft containers, sharp data | Cards 14–20px, controls 8px, rows 0. Not "rounded-lg on everything". |
+| Radius | Two tiers: soft containers, sharp data | Containers 14–20px, controls 8px, rows 0. Not one radius on everything. |
 | Colour count | 1 accent + 3 semantics | Accent never means positive/negative; those are their own hues. |
 | Motion | Settle, never bounce | Short distances, ease-out, no springs, no count-ups. |
 
@@ -72,7 +72,10 @@ Every foreground token clears WCAG AA on its own theme's background. `--mm-line`
 and is deliberately quiet; anything the user has to find — a field boundary, a focus ring — uses
 `--mm-line-strong` or the accent, which clear the 3:1 non-text minimum.
 
-Radius: `--radius-xs 0.375rem`, `--radius-sm 0.5rem`, `--radius-md 0.875rem`, `--radius-lg 1.25rem`.
+Radius is two-tier on top of Tailwind's own scale, which already lands controls where we want them:
+controls keep `--radius-lg` at 0.5rem / 8px (every shadcn control is `rounded-lg`), containers are
+redefined — `--radius-xl 0.875rem` / 14px for cards, `--radius-2xl 1.25rem` / 20px for sheets and
+toasts. Data rows stay square. The scale stays monotonic; nothing below `xl` is overridden.
 Spacing: 4px base step, gutters 16px on iPhone / 24px on web. Coarse pointers get a 44px minimum on
 every control, whatever size variant the screen chose.
 

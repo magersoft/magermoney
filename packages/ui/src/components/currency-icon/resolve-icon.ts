@@ -1,8 +1,9 @@
 /**
- * ISO 4217 code -> circle-flags name. Codes absent here fall back to initials,
+ * ISO 4217 code -> circle-flags name. Exported because `src/index.ts` builds the
+ * registered icon subset from it — the two must not drift apart. Codes absent here fall back to initials,
  * which is the honest answer for a currency we have no flag for.
  */
-const FIAT_FLAG: Record<string, string> = {
+export const FIAT_FLAG: Record<string, string> = {
   USD: 'us',
   EUR: 'european-union',
   RUB: 'ru',
@@ -28,7 +29,7 @@ const FIAT_FLAG: Record<string, string> = {
 };
 
 /** Tickers present in `@iconify-json/cryptocurrency-color`. */
-const CRYPTO_KNOWN = new Set([
+export const CRYPTO_KNOWN: ReadonlySet<string> = new Set([
   'btc',
   'eth',
   'usdt',

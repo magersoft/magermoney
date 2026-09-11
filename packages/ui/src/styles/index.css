@@ -82,7 +82,8 @@
  * theme; these mappings never need to.
  */
 :root {
-  --radius: var(--radius-md);
+  /* shadcn's one radius knob is the control radius; containers use the scale. */
+  --radius: var(--radius-lg);
 
   --background: var(--mm-bg);
   --foreground: var(--mm-ink);
@@ -119,6 +120,23 @@
   --sidebar-accent-foreground: var(--mm-accent);
   --sidebar-border: var(--mm-line);
   --sidebar-ring: var(--mm-accent);
+}
+
+/*
+ * The catch-all for reduced motion. The token durations only reach motion that
+ * reads them, and the generated components hardcode `duration-200` and
+ * tw-animate's `animate-in`/`animate-out`. 0.01ms rather than 0 so animation
+ * and transition end events still fire and nothing waits forever on one.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer base {

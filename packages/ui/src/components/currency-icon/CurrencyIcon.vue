@@ -38,6 +38,7 @@ const initialsStyle = computed(() => ({
     :height="size"
     role="img"
     :aria-label="code"
+    aria-hidden="false"
     class="shrink-0 rounded-full"
   />
   <span
