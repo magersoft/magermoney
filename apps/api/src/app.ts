@@ -1,9 +1,11 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { requestId } from 'hono/request-id';
-import type { Clock } from '@magermoney/domain';
+import type { Clock, CurrencyRegistry } from '@magermoney/domain';
 import { mountOpenApi } from './shared/openapi.js';
 import { logger } from './shared/logger.js';
+import { profileRoutes } from './modules/profiles/http/routes.js';
+import type { ProfileRepository } from './modules/profiles/application/profile-repository.js';
 
 export type AppEnv = { Variables: { userId: string; requestId: string } };
 
@@ -12,6 +14,8 @@ export interface AppDeps {
   jwtSecret: string;
   cronSecret: string;
   exposeDocs?: boolean;
+  profiles: ProfileRepository;
+  registry: CurrencyRegistry;
 }
 
 export function createApp(deps: AppDeps) {
@@ -45,6 +49,8 @@ export function createApp(deps: AppDeps) {
     }),
     (c) => c.json({ ok: true, date: deps.clock.today() }, 200),
   );
+
+  app.route('/me', profileRoutes(deps));
 
   mountOpenApi(app, deps.exposeDocs ?? true);
   return app;
