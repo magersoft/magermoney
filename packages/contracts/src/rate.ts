@@ -15,3 +15,8 @@ export const ManualRateInputSchema = z
   .object({ base: CurrencyCodeSchema, date: IsoDateSchema, value: DecimalString })
   .openapi('ManualRateInput');
 export type ManualRateInput = z.infer<typeof ManualRateInputSchema>;
+export const DeleteManualRateQuerySchema = z.object({
+  base: CurrencyCodeSchema,
+  date: IsoDateSchema,
+});
+export type DeleteManualRateQuery = z.infer<typeof DeleteManualRateQuerySchema>;
