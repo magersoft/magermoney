@@ -12,3 +12,4 @@ supabase/.temp/
 playwright-report/
 test-results/
 dev-dist/
+apps/api/api/index.js

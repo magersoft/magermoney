@@ -1,5 +1,5 @@
 {
   "extends": "@magermoney/config/tsconfig.base.json",
   "compilerOptions": { "rootDir": ".", "noEmit": false, "outDir": "dist", "types": ["node"] },
-  "include": ["src", "api"]
+  "include": ["src"]
 }

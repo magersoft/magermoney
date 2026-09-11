@@ -8,7 +8,7 @@ import { PgRateRepository } from './modules/rates/infrastructure/pg-rate-reposit
 import { OpenErApiProvider } from './modules/rates/infrastructure/open-er-api-provider.js';
 import { CoinGeckoProvider } from './modules/rates/infrastructure/coingecko-provider.js';
 
-/** Shared by the node server (`src/index.ts`) and the Vercel function (`api/index.ts`). */
+/** Shared by the node server (`src/index.ts`) and the Vercel function (`src/vercel-entry.ts`, bundled to `api/index.js`). */
 export function depsFromEnv(env: Env): AppDeps {
   assertJwtConfigured(env);
   const sql = createDb(env.DATABASE_URL);
