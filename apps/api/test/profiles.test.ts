@@ -40,5 +40,6 @@ describe('/me', () => {
     const { app } = setup();
     const res = await app.request('/me', { method: 'PATCH', headers: await auth(), body: JSON.stringify({ reportingCurrencies: ['USD'], defaultCurrency: 'EUR' }) });
     expect(res.status).toBe(400);
+    expect((await res.json()).code).toBe('VALIDATION');
   });
 });
