@@ -9,7 +9,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { Button } from '@magermoney/ui';
 import { safeRedirect } from '../domain/redirect';
-import { supabase } from '../infrastructure/supabase';
+import { exchangeCallback } from '../application/exchange-callback';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -17,10 +17,13 @@ const router = useRouter();
 
 const error = ref<string | null>(null);
 
+const detail = ref<string | null>(null);
+
 onMounted(async () => {
-  const { error: exchangeError } = await supabase().auth.exchangeCodeForSession(location.href);
-  if (exchangeError) {
-    error.value = exchangeError.message;
+  const result = await exchangeCallback(new URL(location.href));
+  if (result.isErr()) {
+    error.value = result.error;
+    detail.value = result.error;
     return;
   }
   await router.replace(safeRedirect(route.query.redirect) ?? '/');
@@ -35,6 +38,13 @@ onMounted(async () => {
       </h1>
       <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
         {{ t('auth.callback.failedBody') }}
+      </p>
+      <p
+        v-if="detail"
+        class="mt-3 font-mono text-xs text-muted-foreground"
+        data-testid="callback-error"
+      >
+        {{ detail }}
       </p>
       <Button type="button" class="mt-6 h-11 w-full" @click="router.replace({ name: 'sign-in' })">
         {{ t('auth.callback.retry') }}
