@@ -3762,7 +3762,7 @@ cd apps/api && vercel link --yes --project magermoney-api
 cd ../web && vercel link --yes --project magermoney-web
 ```
 
-In the Vercel dashboard for each project: Git → connect `magersoft/magermoney`, Root Directory `apps/api` / `apps/web`, Ignored Build Step `npx turbo-ignore`, Node.js version 24. For `magermoney-api` set env vars for Production (prod Supabase) and Preview (staging Supabase): `DATABASE_URL` (use the pooler URL, port 6543, `?sslmode=require`), `SUPABASE_URL`, `SUPABASE_JWT_SECRET` (Project Settings → API → JWT secret), `CRON_SECRET` (random), `NODE_ENV=production`. For `magermoney-web`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` (`https://magermoney-api.vercel.app` for prod; for previews point at the api preview URL pattern or the staging api production URL).
+In the Vercel dashboard for each project: Git → connect `magersoft/magermoney`, Root Directory `apps/api` / `apps/web`, Ignored Build Step `npx turbo-ignore`, Node.js version 24. For `magermoney-api` set env vars for Production (prod Supabase) and Preview (staging Supabase): `DATABASE_URL` (use the pooler URL, port 6543, `?sslmode=require`), `SUPABASE_URL`, `SUPABASE_JWT_SECRET` (Project Settings → API → JWT secret), `CRON_SECRET` (random), `CORS_ORIGINS` (the production web origin, comma-separated), `ALLOW_VERCEL_PREVIEWS=true` (Preview, and Production while previews share the production API), `NODE_ENV=production`. For `magermoney-web`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` (`https://magermoney-api.vercel.app` for prod; for previews point at the api preview URL pattern or the staging api production URL).
 
 GitHub secrets: `STAGING_API_URL`, `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_ANON_KEY`, `STAGING_SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_STAGING_REF`, `SUPABASE_STAGING_DB_PASSWORD`, `SUPABASE_PROD_REF`, `SUPABASE_PROD_DB_PASSWORD`. GitHub Environments: `staging` (no rules), `production` (required reviewer: the owner).
 
@@ -3785,7 +3785,7 @@ curl -s -X POST -H "authorization: Bearer $CRON_SECRET" "https://magermoney-api.
 curl -s -X POST -H "authorization: Bearer $CRON_SECRET" "https://magermoney-api.vercel.app/jobs/rates?kind=crypto"  # {"stored":10}
 ```
 
-Then in the Supabase prod SQL editor: `select base, value, date from rates order by base;` → 19 rows for today. Open the production web URL on the iPhone: Add to Home Screen, sign in with Google, see the greeting, switch currency, values change. Sign in with magic link in a private window works too. Vercel Cron shows both jobs scheduled.
+Then in the Supabase prod SQL editor: `select base, value, date from rates order by base;` → 18 rows for today (USD is the quote and has no row of its own). Open the production web URL on the iPhone: Add to Home Screen, sign in with Google, see the greeting, switch currency, values change. Sign in with magic link in a private window works too. Vercel Cron shows both jobs scheduled.
 
 - [ ] **Step 6: Record**
 
