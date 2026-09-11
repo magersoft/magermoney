@@ -54,16 +54,14 @@ const shown = computed(() =>
 
 <template>
   <span class="money inline-flex items-baseline gap-1.5">
-    <Transition
-      mode="out-in"
-      name="money"
-    >
+    <Transition mode="out-in" name="money">
       <span
         :key="shown.text"
         data-amount
         :title="shown.title"
         class="text-[inherit] font-semibold leading-[1.1]"
-      >{{ shown.text }}</span>
+        >{{ shown.text }}</span
+      >
     </Transition>
     <span class="font-mono text-[0.6em] uppercase tracking-[0.08em] text-muted-foreground">
       {{ current }}

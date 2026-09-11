@@ -1,9 +1,10 @@
 ---
 status: accepted
 ---
+
 # Balances are declared, not derived from transactions
 
-The user records "account X now holds Y" (a Balance entry), never individual purchases. The current balance is the latest entry; earlier entries are kept as history. Transfers and Inflows are first-class operations that *produce* Balance entries, but no balance is ever computed as a sum of transactions. This matches how the spreadsheet was used for years (rewrite the number) while keeping history, and deliberately rejects the YNAB-style ledger, which the owner would not maintain.
+The user records "account X now holds Y" (a Balance entry), never individual purchases. The current balance is the latest entry; earlier entries are kept as history. Transfers and Inflows are first-class operations that _produce_ Balance entries, but no balance is ever computed as a sum of transactions. This matches how the spreadsheet was used for years (rewrite the number) while keeping history, and deliberately rejects the YNAB-style ledger, which the owner would not maintain.
 
 ## Consequences
 

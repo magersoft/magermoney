@@ -7,7 +7,10 @@ import type { AppEnv } from '../src/app.js';
 
 const secret = 'test-secret-test-secret-test-secret-1234';
 
-function buildApp(opts: { jwks?: ReturnType<typeof createLocalJWKSet> | undefined; secret?: string | undefined }) {
+function buildApp(opts: {
+  jwks?: ReturnType<typeof createLocalJWKSet> | undefined;
+  secret?: string | undefined;
+}) {
   const app = new OpenAPIHono<AppEnv>();
   app.use('/me', requireUser(opts));
   app.get('/me', (c) => c.json({ userId: c.var.userId }));
@@ -33,11 +36,15 @@ describe('requireUser (HS256 secret)', () => {
   });
   it('rejects a token signed with another secret', async () => {
     const t = await signTestToken('u1', 'x'.repeat(40));
-    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(401);
+    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(
+      401,
+    );
   });
   it('rejects an expired token', async () => {
     const t = await signTestToken('u1', secret, '-1s');
-    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(401);
+    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(
+      401,
+    );
   });
   it('accepts a valid token and exposes userId', async () => {
     const t = await signTestToken('11111111-1111-1111-1111-111111111111', secret);

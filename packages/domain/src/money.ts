@@ -7,7 +7,10 @@ const D = Decimal.clone({ precision: 40, rounding: Decimal.ROUND_HALF_UP });
 export type DecimalInput = string | number | Decimal;
 
 export class Money {
-  private constructor(readonly amount: Decimal, readonly currency: Currency) {}
+  private constructor(
+    readonly amount: Decimal,
+    readonly currency: Currency,
+  ) {}
 
   static of(amount: DecimalInput, currency: Currency): Money {
     return new Money(new D(amount), currency);
@@ -37,10 +40,21 @@ export class Money {
     return this.same(other).map(() => this.amount.comparedTo(other.amount) as -1 | 0 | 1);
   }
   round(): Money {
-    return new Money(this.amount.toDecimalPlaces(this.currency.scale, Decimal.ROUND_HALF_UP), this.currency);
+    return new Money(
+      this.amount.toDecimalPlaces(this.currency.scale, Decimal.ROUND_HALF_UP),
+      this.currency,
+    );
   }
-  isZero(): boolean { return this.amount.isZero(); }
-  isNegative(): boolean { return this.amount.isNegative(); }
-  toString(): string { return this.amount.toFixed(); }
-  toJSON(): { amount: string; currency: string } { return { amount: this.toString(), currency: this.currency.code }; }
+  isZero(): boolean {
+    return this.amount.isZero();
+  }
+  isNegative(): boolean {
+    return this.amount.isNegative();
+  }
+  toString(): string {
+    return this.amount.toFixed();
+  }
+  toJSON(): { amount: string; currency: string } {
+    return { amount: this.toString(), currency: this.currency.code };
+  }
 }

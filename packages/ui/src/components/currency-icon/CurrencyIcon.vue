@@ -16,7 +16,9 @@ const props = withDefaults(
   { icon: null, size: 24 },
 );
 
-const resolved = computed(() => resolveCurrencyIcon({ code: props.code, kind: props.kind, icon: props.icon }));
+const resolved = computed(() =>
+  resolveCurrencyIcon({ code: props.code, kind: props.kind, icon: props.icon }),
+);
 
 /**
  * Two letters have to stay legible inside a small circle, so the type scales
@@ -47,5 +49,6 @@ const initialsStyle = computed(() => ({
     :aria-label="code"
     :style="initialsStyle"
     class="bg-line text-ink inline-flex shrink-0 items-center justify-center rounded-full overflow-hidden font-mono leading-none font-medium tracking-tight"
-  >{{ resolved.text }}</span>
+    >{{ resolved.text }}</span
+  >
 </template>

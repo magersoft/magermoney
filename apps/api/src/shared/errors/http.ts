@@ -1,4 +1,10 @@
-import { DomainError, RateMissingError, UnknownCurrencyError, CurrencyMismatchError, InvalidAmountError } from '@magermoney/domain';
+import {
+  DomainError,
+  RateMissingError,
+  UnknownCurrencyError,
+  CurrencyMismatchError,
+  InvalidAmountError,
+} from '@magermoney/domain';
 import type { ErrorDto } from '@magermoney/contracts';
 
 export class NotFoundError extends Error {
@@ -25,11 +31,19 @@ export class ValidationError extends Error {
 export type AppError = DomainError | NotFoundError | UnauthorizedError | ValidationError;
 
 export function toHttpError(e: AppError): { status: 400 | 401 | 404 | 422 | 500; body: ErrorDto } {
-  if (e instanceof NotFoundError) return { status: 404, body: { code: e.code, message: e.message } };
-  if (e instanceof UnauthorizedError) return { status: 401, body: { code: e.code, message: e.message } };
-  if (e instanceof ValidationError) return { status: 400, body: { code: e.code, message: e.message } };
-  if (e instanceof RateMissingError) return { status: 422, body: { code: e.code, message: e.message } };
-  if (e instanceof UnknownCurrencyError || e instanceof CurrencyMismatchError || e instanceof InvalidAmountError)
+  if (e instanceof NotFoundError)
+    return { status: 404, body: { code: e.code, message: e.message } };
+  if (e instanceof UnauthorizedError)
+    return { status: 401, body: { code: e.code, message: e.message } };
+  if (e instanceof ValidationError)
+    return { status: 400, body: { code: e.code, message: e.message } };
+  if (e instanceof RateMissingError)
+    return { status: 422, body: { code: e.code, message: e.message } };
+  if (
+    e instanceof UnknownCurrencyError ||
+    e instanceof CurrencyMismatchError ||
+    e instanceof InvalidAmountError
+  )
     return { status: 400, body: { code: e.code, message: e.message } };
   return { status: 500, body: { code: 'INTERNAL', message: 'Unexpected error' } };
 }

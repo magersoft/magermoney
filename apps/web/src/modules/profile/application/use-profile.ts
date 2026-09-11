@@ -29,6 +29,7 @@ export function useProfile() {
   return {
     profile: query.data,
     isLoading: query.isLoading,
-    update: (input: UpdateProfileInput): Promise<void> => mutation.mutateAsync(input).then(() => undefined),
+    update: (input: UpdateProfileInput): Promise<void> =>
+      mutation.mutateAsync(input).then(() => undefined),
   };
 }

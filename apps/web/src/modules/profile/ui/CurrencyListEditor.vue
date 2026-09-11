@@ -68,26 +68,14 @@ function makeDefault(code: string): void {
 </script>
 
 <template>
-  <fieldset
-    class="mt-4"
-    :disabled="busy"
-  >
+  <fieldset class="mt-4" :disabled="busy">
     <legend class="sr-only">
       {{ t('settings.currencies.title') }}
     </legend>
 
     <ul class="divide-y divide-border border-y border-border">
-      <li
-        v-for="row in rows"
-        :key="row.code"
-        class="flex min-h-[52px] items-center gap-3 py-2"
-      >
-        <CurrencyIcon
-          :code="row.code"
-          :kind="row.kind"
-          :icon="row.icon"
-          :size="24"
-        />
+      <li v-for="row in rows" :key="row.code" class="flex min-h-[52px] items-center gap-3 py-2">
+        <CurrencyIcon :code="row.code" :kind="row.kind" :icon="row.icon" :size="24" />
         <span class="font-mono text-xs uppercase tracking-[0.08em]">{{ row.code }}</span>
         <span class="truncate text-sm text-muted-foreground">{{ row.name }}</span>
 
@@ -102,7 +90,7 @@ function makeDefault(code: string): void {
             :value="row.code"
             :checked="row.code === defaultCurrency"
             @change="makeDefault(row.code)"
-          >
+          />
           <span :class="row.code === defaultCurrency ? 'text-foreground' : 'text-muted-foreground'">
             {{ t('settings.currencies.default') }}
           </span>
@@ -134,10 +122,7 @@ function makeDefault(code: string): void {
     </ul>
 
     <div class="mt-4 flex items-center gap-3">
-      <Select
-        :key="selected.join()"
-        @update:model-value="(v: unknown) => add(String(v))"
-      >
+      <Select :key="selected.join()" @update:model-value="(v: unknown) => add(String(v))">
         <SelectTrigger
           class="h-11"
           :aria-label="t('settings.currencies.add')"
@@ -146,11 +131,7 @@ function makeDefault(code: string): void {
           <SelectValue :placeholder="t('settings.currencies.add')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem
-            v-for="c in addable"
-            :key="c.code"
-            :value="c.code"
-          >
+          <SelectItem v-for="c in addable" :key="c.code" :value="c.code">
             {{ c.code }} · {{ (locale === 'ru' ? c.nameRu : c.nameEn) ?? '' }}
           </SelectItem>
         </SelectContent>

@@ -25,7 +25,9 @@ export function createDisplayCurrency(
 
   const pick = () => {
     const saved = chosen ?? storage.get();
-    return saved && options.value.includes(saved) ? saved : (profile.value?.defaultCurrency ?? 'USD');
+    return saved && options.value.includes(saved)
+      ? saved
+      : (profile.value?.defaultCurrency ?? 'USD');
   };
 
   const current = ref(pick());

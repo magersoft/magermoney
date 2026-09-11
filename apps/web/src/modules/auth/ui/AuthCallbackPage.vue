@@ -36,19 +36,11 @@ onMounted(async () => {
       <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
         {{ t('auth.callback.failedBody') }}
       </p>
-      <Button
-        type="button"
-        class="mt-6 h-11 w-full"
-        @click="router.replace({ name: 'sign-in' })"
-      >
+      <Button type="button" class="mt-6 h-11 w-full" @click="router.replace({ name: 'sign-in' })">
         {{ t('auth.callback.retry') }}
       </Button>
     </template>
-    <p
-      v-else
-      class="text-sm text-muted-foreground"
-      role="status"
-    >
+    <p v-else class="text-sm text-muted-foreground" role="status">
       {{ t('auth.callback.working') }}
     </p>
   </div>

@@ -53,6 +53,7 @@ export function useSession(): Session {
     signOut: async () => {
       await supabase().auth.signOut();
     },
-    getAccessToken: async () => (await supabase().auth.getSession()).data.session?.access_token ?? null,
+    getAccessToken: async () =>
+      (await supabase().auth.getSession()).data.session?.access_token ?? null,
   };
 }

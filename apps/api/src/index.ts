@@ -20,7 +20,10 @@ const app = createApp({
   profiles: new PgProfileRepository(sql),
   registry: CurrencyRegistry.default(),
   rates: new PgRateRepository(sql),
-  rateProviders: [new OpenErApiProvider(env.FIAT_RATES_URL), new CoinGeckoProvider(env.CRYPTO_RATES_URL)],
+  rateProviders: [
+    new OpenErApiProvider(env.FIAT_RATES_URL),
+    new CoinGeckoProvider(env.CRYPTO_RATES_URL),
+  ],
 });
 
 serve({ fetch: app.fetch, port: 3000 }, (i) => console.log(`api on http://localhost:${i.port}`));

@@ -8,5 +8,7 @@ export const createDb = (url: string) =>
     max: 5,
     idle_timeout: 20,
     prepare: false,
-    types: { numeric: { to: 1700, from: [1700], serialize: (v: string) => v, parse: (v: string) => v } },
+    types: {
+      numeric: { to: 1700, from: [1700], serialize: (v: string) => v, parse: (v: string) => v },
+    },
   });

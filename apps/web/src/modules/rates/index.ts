@@ -11,7 +11,11 @@ export {
   type ConversionError,
   type ConvertToDisplay,
 } from './application/convert-to-display';
-export { createDisplayCurrency, useDisplayCurrency, type DisplayCurrency } from './application/use-display-currency';
+export {
+  createDisplayCurrency,
+  useDisplayCurrency,
+  type DisplayCurrency,
+} from './application/use-display-currency';
 export { default as CurrencySwitch } from './ui/CurrencySwitch.vue';
 export { default as MoneyText } from './ui/MoneyText.vue';
 export { default as HomePage } from './ui/HomePage.vue';

@@ -31,7 +31,10 @@ export function createApp(deps: AppDeps) {
     defaultHook: (result, c) => {
       if (!result.success)
         return c.json(
-          { code: 'VALIDATION', message: result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') },
+          {
+            code: 'VALIDATION',
+            message: result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+          },
           400,
         );
     },
@@ -51,7 +54,9 @@ export function createApp(deps: AppDeps) {
       responses: {
         200: {
           description: 'ok',
-          content: { 'application/json': { schema: z.object({ ok: z.boolean(), date: z.string() }) } },
+          content: {
+            'application/json': { schema: z.object({ ok: z.boolean(), date: z.string() }) },
+          },
         },
       },
     }),

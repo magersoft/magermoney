@@ -9,12 +9,28 @@ describe('contracts', () => {
     expect(DecimalString.safeParse('1,5').success).toBe(false);
   });
   it('validates a manual rate', () => {
-    expect(ManualRateInputSchema.safeParse({ base: 'RUB', date: '2026-09-10', value: '0.011855' }).success).toBe(true);
-    expect(ManualRateInputSchema.safeParse({ base: 'RUB', date: '10.09.2026', value: '0.01' }).success).toBe(false);
+    expect(
+      ManualRateInputSchema.safeParse({ base: 'RUB', date: '2026-09-10', value: '0.011855' })
+        .success,
+    ).toBe(true);
+    expect(
+      ManualRateInputSchema.safeParse({ base: 'RUB', date: '10.09.2026', value: '0.01' }).success,
+    ).toBe(false);
   });
   it('validates profile updates', () => {
-    expect(UpdateProfileInputSchema.safeParse({ reportingCurrencies: ['USD', 'EUR'], defaultCurrency: 'EUR' }).success).toBe(true);
-    expect(UpdateProfileInputSchema.safeParse({ reportingCurrencies: [], defaultCurrency: 'EUR' }).success).toBe(false);
-    expect(UpdateProfileInputSchema.safeParse({ reportingCurrencies: ['USD'], defaultCurrency: 'EUR' }).success).toBe(false);
+    expect(
+      UpdateProfileInputSchema.safeParse({
+        reportingCurrencies: ['USD', 'EUR'],
+        defaultCurrency: 'EUR',
+      }).success,
+    ).toBe(true);
+    expect(
+      UpdateProfileInputSchema.safeParse({ reportingCurrencies: [], defaultCurrency: 'EUR' })
+        .success,
+    ).toBe(false);
+    expect(
+      UpdateProfileInputSchema.safeParse({ reportingCurrencies: ['USD'], defaultCurrency: 'EUR' })
+        .success,
+    ).toBe(false);
   });
 });

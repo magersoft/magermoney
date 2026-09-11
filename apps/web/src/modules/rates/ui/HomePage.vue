@@ -26,24 +26,20 @@ const name = computed(() => greetingName(profile.value, user.value?.email ?? nul
 
 <template>
   <section class="pb-8">
-    <h1
-      data-testid="home-greeting"
-      class="text-2xl font-semibold tracking-[-0.01em]"
-    >
+    <h1 data-testid="home-greeting" class="text-2xl font-semibold tracking-[-0.01em]">
       {{ name ? t('home.greeting', { name }) : t('home.greetingPlain') }}
     </h1>
 
     <Card class="mt-8">
       <CardHeader>
-        <CardTitle class="font-mono text-xs font-normal uppercase tracking-[0.08em] text-muted-foreground">
+        <CardTitle
+          class="font-mono text-xs font-normal uppercase tracking-[0.08em] text-muted-foreground"
+        >
           {{ t('home.sample') }}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Skeleton
-          v-if="!table"
-          class="h-10 w-40"
-        />
+        <Skeleton v-if="!table" class="h-10 w-40" />
         <MoneyText
           v-else
           data-testid="sample-amount"

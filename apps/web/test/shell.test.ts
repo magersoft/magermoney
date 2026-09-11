@@ -7,7 +7,12 @@ import en from '../src/locales/en.json';
 import ru from '../src/locales/ru.json';
 
 function mountShell() {
-  const i18n = createI18n({ legacy: false, locale: 'en', fallbackLocale: 'en', messages: { ru, en } });
+  const i18n = createI18n({
+    legacy: false,
+    locale: 'en',
+    fallbackLocale: 'en',
+    messages: { ru, en },
+  });
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -15,7 +20,10 @@ function mountShell() {
       { path: '/settings', component: { template: '<p>settings</p>' } },
     ],
   });
-  return mount(AppShell, { props: { theme: 'system' as const }, global: { plugins: [i18n, router] } });
+  return mount(AppShell, {
+    props: { theme: 'system' as const },
+    global: { plugins: [i18n, router] },
+  });
 }
 
 describe('AppShell', () => {

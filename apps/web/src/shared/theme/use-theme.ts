@@ -8,7 +8,9 @@ function readStored(): Theme {
   if (typeof localStorage === 'undefined') return 'system';
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored !== null && (THEMES as readonly string[]).includes(stored) ? (stored as Theme) : 'system';
+    return stored !== null && (THEMES as readonly string[]).includes(stored)
+      ? (stored as Theme)
+      : 'system';
   } catch {
     return 'system';
   }

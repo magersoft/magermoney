@@ -30,7 +30,10 @@ describe('convertToDisplay', () => {
   });
 
   it('fails while the rates are still on their way', () => {
-    const convert = createConvertToDisplay(shallowRef<RateTable | undefined>(undefined), ref('USD'));
+    const convert = createConvertToDisplay(
+      shallowRef<RateTable | undefined>(undefined),
+      ref('USD'),
+    );
 
     expect(convert(Money.of('100', fiat('EUR'))).isErr()).toBe(true);
   });

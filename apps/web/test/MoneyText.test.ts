@@ -28,7 +28,9 @@ const currency = (code: string, kind: CurrencyDto['kind'] = 'fiat'): CurrencyDto
   icon: null,
 });
 
-const rates: RateDto[] = [{ base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api' }];
+const rates: RateDto[] = [
+  { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api' },
+];
 
 /** The screen never fetches here: the cache is seeded, which is what an offline reload looks like. */
 function mountMoneyText() {

@@ -53,11 +53,7 @@ const kindOf = computed(
         class="absolute inset-0 -z-10 rounded-lg bg-surface-raised ring-1 ring-foreground/10"
         :transition="{ duration: 0.18, ease: EASE_OUT_QUART }"
       />
-      <CurrencyIcon
-        :code="code"
-        :kind="kindOf(code)"
-        :size="16"
-      />
+      <CurrencyIcon :code="code" :kind="kindOf(code)" :size="16" />
       <span class="font-mono uppercase tracking-[0.08em]">{{ code }}</span>
     </button>
   </div>

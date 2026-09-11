@@ -10,20 +10,20 @@ neutrals, one ink-coloured accent, amounts set as the largest thing on screen wi
 code tagged beside them in small mono caps.
 
 Two conventions come straight from double-entry bookkeeping and do real work here:
-**in the black, in the red** — a balance is ink, never green; only *changes* (deltas, goal progress,
+**in the black, in the red** — a balance is ink, never green; only _changes_ (deltas, goal progress,
 month-over-month) are allowed colour. And **the ledger rule** — rows are separated by hairlines, not
 by cards-inside-cards. Both keep a many-currency screen calm when fifteen numbers are visible at once.
 
 ## Dials
 
-| Dial | Setting | Why |
-|---|---|---|
-| Temperature | Warm neutrals, cool accent | Paper and ink. Also keeps us off the slate-blue default. |
-| Contrast | High on amounts, low on chrome | Amounts are the content; labels, rules and chrome recede. |
-| Density | Dense data, comfortable controls | 52px data rows; 44px minimum tap target on iPhone. |
-| Radius | Two tiers: soft containers, sharp data | Containers 14–20px, controls 8px, rows 0. Not one radius on everything. |
-| Colour count | 1 accent + 3 semantics | Accent never means positive/negative; those are their own hues. |
-| Motion | Settle, never bounce | Short distances, ease-out, no springs, no count-ups. |
+| Dial         | Setting                                | Why                                                                     |
+| ------------ | -------------------------------------- | ----------------------------------------------------------------------- |
+| Temperature  | Warm neutrals, cool accent             | Paper and ink. Also keeps us off the slate-blue default.                |
+| Contrast     | High on amounts, low on chrome         | Amounts are the content; labels, rules and chrome recede.               |
+| Density      | Dense data, comfortable controls       | 52px data rows; 44px minimum tap target on iPhone.                      |
+| Radius       | Two tiers: soft containers, sharp data | Containers 14–20px, controls 8px, rows 0. Not one radius on everything. |
+| Colour count | 1 accent + 3 semantics                 | Accent never means positive/negative; those are their own hues.         |
+| Motion       | Settle, never bounce                   | Short distances, ease-out, no springs, no count-ups.                    |
 
 ## Signature
 
@@ -33,10 +33,10 @@ app is recognised by, and it is the same lockup at every scale — dashboard her
 
 ## Type
 
-| Role | Family | Notes |
-|---|---|---|
-| Interface, amounts | **Instrument Sans** | Google Fonts. A contemporary grotesque with a slightly narrow set — legible at 13px, characterful at 32px. Amounts use `font-variant-numeric: tabular-nums lining-nums`. |
-| Codes, data labels, timestamps | **IBM Plex Mono** | Google Fonts. Humanist mono, warm; used only at small sizes, uppercase, tracked out. |
+| Role                           | Family              | Notes                                                                                                                                                                    |
+| ------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Interface, amounts             | **Instrument Sans** | Google Fonts. A contemporary grotesque with a slightly narrow set — legible at 13px, characterful at 32px. Amounts use `font-variant-numeric: tabular-nums lining-nums`. |
+| Codes, data labels, timestamps | **IBM Plex Mono**   | Google Fonts. Humanist mono, warm; used only at small sizes, uppercase, tracked out.                                                                                     |
 
 Fonts are loaded by the consuming app (`apps/web`), not by `packages/ui`; the tokens declare full
 fallback stacks so the package is usable without them.
@@ -53,20 +53,20 @@ Neutral axis is hue 80 (warm) at chroma <= 0.012; the accent is hue 272 (ink blu
 pen ink, the mark of a hand-kept ledger. Raw tokens are namespaced `--mm-*` so they never collide
 with the shadcn variable contract, which `src/styles/index.css` maps onto them.
 
-| Token | Light | Dark | Contrast on bg |
-|---|---|---|---|
-| `--mm-bg` | `oklch(0.981 0.005 85)` | `oklch(0.18 0.008 80)` | — |
-| `--mm-surface` | `oklch(0.995 0.002 85)` | `oklch(0.22 0.008 80)` | — |
-| `--mm-surface-raised` | `oklch(1 0 0)` | `oklch(0.26 0.009 80)` | — |
-| `--mm-ink` | `oklch(0.23 0.012 80)` | `oklch(0.96 0.004 85)` | 16.0 / 16.8 |
-| `--mm-muted` | `oklch(0.52 0.012 80)` | `oklch(0.68 0.01 80)` | 5.2 / 6.5 |
-| `--mm-line` | `oklch(0.9 0.008 80)` | `oklch(0.31 0.008 80)` | hairline, non-text |
-| `--mm-line-strong` | `oklch(0.65 0.01 80)` | `oklch(0.49 0.01 80)` | 3.0 / 3.0 |
-| `--mm-accent` | `oklch(0.52 0.19 272)` | `oklch(0.68 0.16 272)` | 5.5 / 6.3 |
-| `--mm-accent-fg` | `oklch(0.99 0 0)` | `oklch(0.17 0.02 272)` | 5.7 / 6.5 on accent |
-| `--mm-positive` | `oklch(0.52 0.13 155)` | `oklch(0.72 0.14 155)` | 4.9 / 8.0 |
-| `--mm-negative` | `oklch(0.53 0.19 25)` | `oklch(0.7 0.17 25)` | 5.5 / 6.5 |
-| `--mm-warning` | `oklch(0.555 0.14 75)` | `oklch(0.8 0.13 75)` | 4.6 / 9.9 |
+| Token                 | Light                   | Dark                   | Contrast on bg      |
+| --------------------- | ----------------------- | ---------------------- | ------------------- |
+| `--mm-bg`             | `oklch(0.981 0.005 85)` | `oklch(0.18 0.008 80)` | —                   |
+| `--mm-surface`        | `oklch(0.995 0.002 85)` | `oklch(0.22 0.008 80)` | —                   |
+| `--mm-surface-raised` | `oklch(1 0 0)`          | `oklch(0.26 0.009 80)` | —                   |
+| `--mm-ink`            | `oklch(0.23 0.012 80)`  | `oklch(0.96 0.004 85)` | 16.0 / 16.8         |
+| `--mm-muted`          | `oklch(0.52 0.012 80)`  | `oklch(0.68 0.01 80)`  | 5.2 / 6.5           |
+| `--mm-line`           | `oklch(0.9 0.008 80)`   | `oklch(0.31 0.008 80)` | hairline, non-text  |
+| `--mm-line-strong`    | `oklch(0.65 0.01 80)`   | `oklch(0.49 0.01 80)`  | 3.0 / 3.0           |
+| `--mm-accent`         | `oklch(0.52 0.19 272)`  | `oklch(0.68 0.16 272)` | 5.5 / 6.3           |
+| `--mm-accent-fg`      | `oklch(0.99 0 0)`       | `oklch(0.17 0.02 272)` | 5.7 / 6.5 on accent |
+| `--mm-positive`       | `oklch(0.52 0.13 155)`  | `oklch(0.72 0.14 155)` | 4.9 / 8.0           |
+| `--mm-negative`       | `oklch(0.53 0.19 25)`   | `oklch(0.7 0.17 25)`   | 5.5 / 6.5           |
+| `--mm-warning`        | `oklch(0.555 0.14 75)`  | `oklch(0.8 0.13 75)`   | 4.6 / 9.9           |
 
 Every foreground token clears WCAG AA on its own theme's background. `--mm-line` is the row hairline
 and is deliberately quiet; anything the user has to find — a field boundary, a focus ring — uses
@@ -81,7 +81,7 @@ every control, whatever size variant the screen chose.
 
 ## Motion
 
-Calm means *settle*, not spring. Entry moves 8px and fades; exits fade only, faster than entries,
+Calm means _settle_, not spring. Entry moves 8px and fades; exits fade only, faster than entries,
 because leaving should never hold the user up.
 
 - Durations: `--duration-fast 150ms` (state, hover, press), `--duration-base 240ms` (enter, sheets),

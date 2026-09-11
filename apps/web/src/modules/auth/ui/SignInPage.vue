@@ -74,29 +74,15 @@ async function google(): Promise<void> {
         <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
           {{ t('auth.signIn.sentBody', { email }) }}
         </p>
-        <Button
-          variant="link"
-          type="button"
-          class="mt-4 px-0"
-          @click="sent = false"
-        >
+        <Button variant="link" type="button" class="mt-4 px-0" @click="sent = false">
           {{ t('auth.signIn.useAnother') }}
         </Button>
       </div>
     </template>
 
     <template v-else>
-      <Button
-        variant="outline"
-        type="button"
-        class="mt-8 h-11 w-full gap-2"
-        @click="google"
-      >
-        <svg
-          viewBox="0 0 18 18"
-          class="size-4"
-          aria-hidden="true"
-        >
+      <Button variant="outline" type="button" class="mt-8 h-11 w-full gap-2" @click="google">
+        <svg viewBox="0 0 18 18" class="size-4" aria-hidden="true">
           <path
             fill="#4285F4"
             d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"
@@ -125,15 +111,8 @@ async function google(): Promise<void> {
         <span class="h-px flex-1 bg-border" />
       </div>
 
-      <form
-        class="flex flex-col gap-2"
-        novalidate
-        @submit.prevent="sendLink"
-      >
-        <label
-          for="email"
-          class="text-sm font-medium"
-        >
+      <form class="flex flex-col gap-2" novalidate @submit.prevent="sendLink">
+        <label for="email" class="text-sm font-medium">
           {{ t('auth.signIn.emailLabel') }}
         </label>
         <Input
@@ -148,19 +127,10 @@ async function google(): Promise<void> {
           :aria-invalid="error ? true : undefined"
           :aria-describedby="error ? 'email-error' : undefined"
         />
-        <p
-          v-if="error"
-          id="email-error"
-          role="alert"
-          class="text-sm text-destructive"
-        >
+        <p v-if="error" id="email-error" role="alert" class="text-sm text-destructive">
           {{ error }}
         </p>
-        <Button
-          type="submit"
-          class="mt-2 h-11 w-full"
-          :disabled="!canSend"
-        >
+        <Button type="submit" class="mt-2 h-11 w-full" :disabled="!canSend">
           {{ pending ? t('auth.signIn.sending') : t('auth.signIn.send') }}
         </Button>
       </form>

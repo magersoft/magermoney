@@ -18,9 +18,13 @@ describe('PgRateRepository', () => {
   });
 
   it('updates the value on conflict instead of duplicating', async () => {
-    await repo.upsertMany([{ base: 'EUR', value: '1.20', date: '2026-09-10', source: 'api', userId: null }]);
+    await repo.upsertMany([
+      { base: 'EUR', value: '1.20', date: '2026-09-10', source: 'api', userId: null },
+    ]);
     const rows = await repo.latestOnOrBefore('2026-09-10', anyUuid);
-    const eurRows = rows.filter((r) => r.base === 'EUR' && r.date === '2026-09-10' && r.source === 'api');
+    const eurRows = rows.filter(
+      (r) => r.base === 'EUR' && r.date === '2026-09-10' && r.source === 'api',
+    );
     expect(eurRows).toHaveLength(1);
     expect(eurRows[0]?.value).toBe('1.20');
   });

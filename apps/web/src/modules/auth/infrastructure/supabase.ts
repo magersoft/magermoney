@@ -17,13 +17,17 @@ let client: SupabaseClient | undefined;
  * auth module's public API should pay for neither.
  */
 export function supabase(): SupabaseClient {
-  client ??= createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
-    auth: {
-      flowType: 'pkce',
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: false,
+  client ??= createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY,
+    {
+      auth: {
+        flowType: 'pkce',
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+      },
     },
-  });
+  );
   return client;
 }

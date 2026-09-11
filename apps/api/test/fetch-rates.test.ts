@@ -8,26 +8,55 @@ import { createApp } from '../src/app.js';
 import { testDeps } from './helpers/deps.js';
 
 const clock = new FixedClock(new Date('2026-09-11T06:15:00Z'));
-const fiat = { kind: 'fiat' as const, fetch: async () => ok([{ base: 'EUR', value: '1.16' }, { base: 'RUB', value: '0.0119' }]) };
-const broken = { kind: 'crypto' as const, fetch: async () => err(new ProviderError('coingecko', 'boom')) };
+const fiat = {
+  kind: 'fiat' as const,
+  fetch: async () =>
+    ok([
+      { base: 'EUR', value: '1.16' },
+      { base: 'RUB', value: '0.0119' },
+    ]),
+};
+const broken = {
+  kind: 'crypto' as const,
+  fetch: async () => err(new ProviderError('coingecko', 'boom')),
+};
 
 describe('fetchRates', () => {
-  it('stores today\'s api rates for the requested kind only', async () => {
+  it("stores today's api rates for the requested kind only", async () => {
     const repo = new MemoryRateRepository();
     const res = await fetchRates(repo, [fiat, broken], CurrencyRegistry.default(), clock)('fiat');
     expect(res._unsafeUnwrap()).toEqual({ stored: 2 });
     expect(repo.rows).toEqual([
       { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api', userId: null },
-      { base: 'RUB', quote: 'USD', value: '0.0119', date: '2026-09-11', source: 'api', userId: null },
+      {
+        base: 'RUB',
+        quote: 'USD',
+        value: '0.0119',
+        date: '2026-09-11',
+        source: 'api',
+        userId: null,
+      },
     ]);
   });
   it('propagates provider failure', async () => {
-    expect((await fetchRates(new MemoryRateRepository(), [broken], CurrencyRegistry.default(), clock)('crypto')).isErr()).toBe(true);
+    expect(
+      (
+        await fetchRates(
+          new MemoryRateRepository(),
+          [broken],
+          CurrencyRegistry.default(),
+          clock,
+        )('crypto')
+      ).isErr(),
+    ).toBe(true);
   });
   it('POST /jobs/rates requires the cron secret', async () => {
     const app = createApp(testDeps({ rateProviders: [fiat], clock }));
     expect((await app.request('/jobs/rates?kind=fiat', { method: 'POST' })).status).toBe(401);
-    const ok2 = await app.request('/jobs/rates?kind=fiat', { method: 'POST', headers: { authorization: 'Bearer cron' } });
+    const ok2 = await app.request('/jobs/rates?kind=fiat', {
+      method: 'POST',
+      headers: { authorization: 'Bearer cron' },
+    });
     expect(ok2.status).toBe(200);
     expect(await ok2.json()).toEqual({ stored: 2 });
   });

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { CurrencyMismatchError, CurrencyRegistry, InvalidAmountError, Money } from '../src/index.js';
+import {
+  CurrencyMismatchError,
+  CurrencyRegistry,
+  InvalidAmountError,
+  Money,
+} from '../src/index.js';
 
 const reg = CurrencyRegistry.default();
 const USD = reg.get('USD')._unsafeUnwrap();
@@ -45,6 +50,9 @@ describe('Money', () => {
   });
 
   it('serialises to a JSON shape with a decimal string', () => {
-    expect(JSON.parse(JSON.stringify(Money.of('1.50', EUR)))).toEqual({ amount: '1.5', currency: 'EUR' });
+    expect(JSON.parse(JSON.stringify(Money.of('1.50', EUR)))).toEqual({
+      amount: '1.5',
+      currency: 'EUR',
+    });
   });
 });

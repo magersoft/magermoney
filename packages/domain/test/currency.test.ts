@@ -5,7 +5,12 @@ describe('CurrencyRegistry', () => {
   it('knows the default fiat and crypto currencies', () => {
     const r = CurrencyRegistry.default();
     expect(r.get('USD')._unsafeUnwrap()).toEqual({ code: 'USD', kind: 'fiat', scale: 2 });
-    expect(r.get('BTC')._unsafeUnwrap()).toEqual({ code: 'BTC', kind: 'crypto', scale: 8, symbol: '₿' });
+    expect(r.get('BTC')._unsafeUnwrap()).toEqual({
+      code: 'BTC',
+      kind: 'crypto',
+      scale: 8,
+      symbol: '₿',
+    });
     expect(r.has('USDT')).toBe(true);
   });
 
@@ -19,6 +24,12 @@ describe('CurrencyRegistry', () => {
   it('accepts a custom list and rejects duplicates', () => {
     const r = new CurrencyRegistry([{ code: 'ABC', kind: 'fiat', scale: 2 }]);
     expect(r.all()).toHaveLength(1);
-    expect(() => new CurrencyRegistry([{ code: 'A', kind: 'fiat', scale: 2 }, { code: 'A', kind: 'fiat', scale: 2 }])).toThrow(/duplicate/i);
+    expect(
+      () =>
+        new CurrencyRegistry([
+          { code: 'A', kind: 'fiat', scale: 2 },
+          { code: 'A', kind: 'fiat', scale: 2 },
+        ]),
+    ).toThrow(/duplicate/i);
   });
 });

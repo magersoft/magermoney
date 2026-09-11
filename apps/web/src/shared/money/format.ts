@@ -15,7 +15,12 @@ export interface FormatMoneyOptions {
 }
 
 const HIDDEN = '••••';
-const NUMERIC_PARTS = new Set<Intl.NumberFormatPartTypes>(['integer', 'group', 'decimal', 'fraction']);
+const NUMERIC_PARTS = new Set<Intl.NumberFormatPartTypes>([
+  'integer',
+  'group',
+  'decimal',
+  'fraction',
+]);
 
 function intlLocale(locale: MoneyLocale): string {
   return locale === 'ru' ? 'ru-RU' : 'en-US';

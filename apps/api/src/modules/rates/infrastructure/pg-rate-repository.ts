@@ -17,6 +17,8 @@ export class PgRateRepository implements RateRepository {
     return res.count;
   }
   async listCurrencies(): Promise<CurrencyDto[]> {
-    return this.sql<CurrencyDto[]>`select code, kind, scale, symbol, name_ru, name_en, icon from currencies order by kind, code`;
+    return this.sql<
+      CurrencyDto[]
+    >`select code, kind, scale, symbol, name_ru, name_en, icon from currencies order by kind, code`;
   }
 }

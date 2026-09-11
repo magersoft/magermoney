@@ -71,7 +71,8 @@ export function resolveCurrencyIcon(c: CurrencyIconInput): ResolvedIcon {
   }
   if (c.kind === 'crypto') {
     const ticker = c.code.toLowerCase();
-    if (CRYPTO_KNOWN.has(ticker)) return { kind: 'iconify', name: `cryptocurrency-color:${ticker}` };
+    if (CRYPTO_KNOWN.has(ticker))
+      return { kind: 'iconify', name: `cryptocurrency-color:${ticker}` };
   }
   return { kind: 'initials', text: c.code.slice(0, 2).toUpperCase() };
 }

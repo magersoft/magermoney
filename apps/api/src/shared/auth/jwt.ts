@@ -19,8 +19,13 @@ export async function verifySupabaseJwt(
     const { alg } = decodeProtectedHeader(token);
 
     if ((alg === 'ES256' || alg === 'RS256') && opts.jwks) {
-      const { payload } = await jwtVerify(token, opts.jwks, { algorithms: ['ES256', 'RS256'], audience: 'authenticated' });
-      return typeof payload.sub === 'string' ? ok({ userId: payload.sub }) : err(new UnauthorizedError());
+      const { payload } = await jwtVerify(token, opts.jwks, {
+        algorithms: ['ES256', 'RS256'],
+        audience: 'authenticated',
+      });
+      return typeof payload.sub === 'string'
+        ? ok({ userId: payload.sub })
+        : err(new UnauthorizedError());
     }
 
     if (alg === 'HS256' && opts.secret) {
@@ -28,7 +33,9 @@ export async function verifySupabaseJwt(
         algorithms: ['HS256'],
         audience: 'authenticated',
       });
-      return typeof payload.sub === 'string' ? ok({ userId: payload.sub }) : err(new UnauthorizedError());
+      return typeof payload.sub === 'string'
+        ? ok({ userId: payload.sub })
+        : err(new UnauthorizedError());
     }
 
     return err(new UnauthorizedError());

@@ -20,16 +20,31 @@ export default tseslint.config(
       ],
     },
     rules: {
-      'boundaries/element-types': ['error', {
-        default: 'disallow',
-        rules: [
-          { from: 'domain', allow: [] },
-          { from: 'contracts', allow: ['domain'] },
-          { from: 'ui', allow: [] },
-          { from: 'api', allow: ['domain', 'contracts'] },
-          { from: 'web', allow: ['domain', 'contracts', 'ui'] },
-        ],
-      }],
+      'boundaries/element-types': [
+        'error',
+        {
+          default: 'disallow',
+          rules: [
+            { from: 'domain', allow: [] },
+            { from: 'contracts', allow: ['domain'] },
+            { from: 'ui', allow: [] },
+            { from: 'api', allow: ['domain', 'contracts'] },
+            { from: 'web', allow: ['domain', 'contracts', 'ui'] },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Prettier owns formatting; these `eslint-plugin-vue` rules only judge
+    // layout (line breaks, indentation, attribute wrapping) and fight
+    // `prettier --write` on every `lint-staged` run since it runs after
+    // `eslint --fix`. Off everywhere, not just in generated components.
+    rules: {
+      'vue/max-attributes-per-line': 'off',
+      'vue/html-indent': 'off',
+      'vue/html-closing-bracket-newline': 'off',
+      'vue/html-self-closing': 'off',
     },
   },
   {
@@ -39,7 +54,6 @@ export default tseslint.config(
     rules: {
       'vue/multi-word-component-names': 'off',
       'vue/require-default-prop': 'off',
-      'vue/max-attributes-per-line': 'off',
     },
   },
 );

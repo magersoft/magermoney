@@ -37,7 +37,9 @@ function mountProfile(fetchImpl: (path: string, init?: RequestInit) => Promise<R
       return () => h('div');
     },
   });
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   const wrapper = mount(Probe, {
     global: {
       plugins: [[VueQueryPlugin, { queryClient }]],

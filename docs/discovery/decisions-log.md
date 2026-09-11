@@ -37,4 +37,3 @@ Chronological, one line each. Rationale lives in the ADRs where it matters.
 ## Open
 
 - none; interview closed 2026-09-11, awaiting final confirmation of the summary.
-

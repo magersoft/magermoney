@@ -15,14 +15,24 @@ export function jobRoutes(deps: AppDeps) {
       security: [{ bearer: [] }],
       request: { query: z.object({ kind: z.enum(['fiat', 'crypto']) }) },
       responses: {
-        200: { description: 'Fetched', content: { 'application/json': { schema: StoredDtoSchema } } },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: ErrorDtoSchema } } },
-        502: { description: 'Provider failed', content: { 'application/json': { schema: ErrorDtoSchema } } },
+        200: {
+          description: 'Fetched',
+          content: { 'application/json': { schema: StoredDtoSchema } },
+        },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: ErrorDtoSchema } },
+        },
+        502: {
+          description: 'Provider failed',
+          content: { 'application/json': { schema: ErrorDtoSchema } },
+        },
       },
     }),
     async (c) => {
       const header = c.req.header('authorization') ?? '';
-      if (header !== `Bearer ${deps.cronSecret}`) return c.json({ code: 'UNAUTHORIZED', message: 'Sign in required' }, 401);
+      if (header !== `Bearer ${deps.cronSecret}`)
+        return c.json({ code: 'UNAUTHORIZED', message: 'Sign in required' }, 401);
       const { kind } = c.req.valid('query');
       const res = await fetchRates(deps.rates, deps.rateProviders, deps.registry, deps.clock)(kind);
       return res.match(

@@ -3,6 +3,7 @@
 Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before naming anything, and `docs/adr/` before changing architecture.
 
 ## Layout
+
 - `apps/web` Vue 3 PWA. Modules in `src/modules/<name>/{domain,application,infrastructure,ui}` with a single public `index.ts`. Follow the `/vue-ddd-architecture` skill.
 - `apps/api` Hono API on Vercel Functions. Modules in `src/modules/<name>/{application,infrastructure,http}`; `src/shared` for auth, db, errors, openapi. JWT verified via Supabase JWKS (ES256) with HS256 secret fallback.
 - `packages/domain` pure model (Money, Currency, Rate…). No framework imports. 100 % test coverage.
@@ -11,6 +12,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 - `supabase/migrations` hand-written SQL. No ORM.
 
 ## Rules
+
 - Money is decimal end to end (ADR 0001). Never `number` for amounts.
 - Every user table has `user_id` + RLS; every use case filters by `userId`.
 - Use cases return `Result` (neverthrow); HTTP mapping lives in `apps/api/src/shared/errors`.
@@ -19,6 +21,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 - Never log amounts, emails or tokens. Never commit real data or `.env*`.
 
 ## Skills to use
+
 - `/vue-ddd-architecture` — any structural change in `apps/web`.
 - `/frontend-design` — BEFORE the first line of markup of any new screen or component.
 - `/impeccable` — audit and polish any UI you touched, before handing off.
@@ -29,6 +32,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 - shadcn-vue MCP (`.mcp.json`) — adding components to `packages/ui`.
 
 ## Commands
+
 - `bun install` · `bun run dev` · `bun run test` · `bun run lint` · `bun run typecheck` · `bun run build`
 - Local DB: `supabase start` / `supabase db reset` (applies migrations + seed).
 - Env: `vercel env pull .env.local` inside `apps/api` and `apps/web`.

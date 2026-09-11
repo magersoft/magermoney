@@ -35,10 +35,20 @@ export * from './components/ui/sonner';
 export * from './components/ui/skeleton';
 
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
-export { resolveCurrencyIcon, FIAT_FLAG, CRYPTO_KNOWN } from './components/currency-icon/resolve-icon';
+export {
+  resolveCurrencyIcon,
+  FIAT_FLAG,
+  CRYPTO_KNOWN,
+} from './components/currency-icon/resolve-icon';
 export type { CurrencyIconInput, ResolvedIcon } from './components/currency-icon/resolve-icon';
 
-export { fadeUp, scaleIn, listStagger, withMotionPreference, EASE_OUT_QUART } from './motion/presets';
+export {
+  fadeUp,
+  scaleIn,
+  listStagger,
+  withMotionPreference,
+  EASE_OUT_QUART,
+} from './motion/presets';
 export type { MotionPreset } from './motion/presets';
 
 /**

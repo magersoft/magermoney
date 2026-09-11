@@ -92,10 +92,7 @@ async function signOut(): Promise<void> {
     <template v-else>
       <div class="mt-8 flex flex-col gap-6 border-t border-border pt-6 md:gap-5">
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <label
-            for="display-name"
-            class="text-sm font-medium"
-          >
+          <label for="display-name" class="text-sm font-medium">
             {{ t('settings.displayName.label') }}
           </label>
           <Input
@@ -111,58 +108,42 @@ async function signOut(): Promise<void> {
           />
         </div>
 
-        <div class="flex flex-col gap-2 border-t border-border pt-6 md:flex-row md:items-center md:justify-between md:pt-5">
-          <span
-            id="language-label"
-            class="text-sm font-medium"
-          >
+        <div
+          class="flex flex-col gap-2 border-t border-border pt-6 md:flex-row md:items-center md:justify-between md:pt-5"
+        >
+          <span id="language-label" class="text-sm font-medium">
             {{ t('settings.language.label') }}
           </span>
           <Select
             :model-value="locale"
             @update:model-value="(v: unknown) => saveLocale(String(v) as Locale)"
           >
-            <SelectTrigger
-              class="h-11 w-full md:w-64"
-              aria-labelledby="language-label"
-            >
+            <SelectTrigger class="h-11 w-full md:w-64" aria-labelledby="language-label">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem
-                v-for="l in LOCALES"
-                :key="l"
-                :value="l"
-              >
+              <SelectItem v-for="l in LOCALES" :key="l" :value="l">
                 {{ t(`settings.language.${l}`) }}
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div class="flex flex-col gap-2 border-t border-border pt-6 md:flex-row md:items-center md:justify-between md:pt-5">
-          <span
-            id="theme-label"
-            class="text-sm font-medium"
-          >
+        <div
+          class="flex flex-col gap-2 border-t border-border pt-6 md:flex-row md:items-center md:justify-between md:pt-5"
+        >
+          <span id="theme-label" class="text-sm font-medium">
             {{ t('settings.theme.label') }}
           </span>
           <Select
             :model-value="theme"
             @update:model-value="(v: unknown) => setTheme(String(v) as Theme)"
           >
-            <SelectTrigger
-              class="h-11 w-full md:w-64"
-              aria-labelledby="theme-label"
-            >
+            <SelectTrigger class="h-11 w-full md:w-64" aria-labelledby="theme-label">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem
-                v-for="th in THEMES"
-                :key="th"
-                :value="th"
-              >
+              <SelectItem v-for="th in THEMES" :key="th" :value="th">
                 {{ t(`theme.${th}`) }}
               </SelectItem>
             </SelectContent>
@@ -186,12 +167,7 @@ async function signOut(): Promise<void> {
         </div>
 
         <div class="border-t border-border pt-6 md:pt-5">
-          <Button
-            variant="outline"
-            type="button"
-            class="h-11"
-            @click="signOut"
-          >
+          <Button variant="outline" type="button" class="h-11" @click="signOut">
             {{ t('settings.signOut') }}
           </Button>
         </div>

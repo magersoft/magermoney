@@ -29,11 +29,7 @@ const bare = computed(() => Boolean(route.meta.public));
     >
       <RouterView />
     </main>
-    <AppShell
-      v-else
-      :theme="theme"
-      @update:theme="set"
-    >
+    <AppShell v-else :theme="theme" @update:theme="set">
       <template #currency>
         <CurrencySwitch />
       </template>

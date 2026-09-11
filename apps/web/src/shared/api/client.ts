@@ -18,7 +18,8 @@ export function createApiClient(base: string, getToken: GetToken): ApiClient {
       const token = await getToken();
       const headers = new Headers(init.headers);
       if (token) headers.set('authorization', `Bearer ${token}`);
-      if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json');
+      if (init.body && !headers.has('content-type'))
+        headers.set('content-type', 'application/json');
       return fetch(`${base}${path}`, { ...init, headers });
     },
   };
@@ -76,7 +77,8 @@ export function listOf<T>(item: ResponseSchema<T>): ResponseSchema<T[]> {
       const out: T[] = [];
       for (const [i, raw] of input.entries()) {
         const parsed = item.safeParse(raw);
-        if (!parsed.success) return { success: false, error: new Error(`Item ${i}: ${parsed.error.message}`) };
+        if (!parsed.success)
+          return { success: false, error: new Error(`Item ${i}: ${parsed.error.message}`) };
         out.push(parsed.data);
       }
       return { success: true, data: out };

@@ -7,7 +7,13 @@ import { Decimal, type Currency, type Rate } from '@magermoney/domain';
  * number.
  */
 export function toRate(dto: RateDto): Rate {
-  return { base: dto.base, quote: dto.quote, value: new Decimal(dto.value), date: dto.date, source: dto.source };
+  return {
+    base: dto.base,
+    quote: dto.quote,
+    value: new Decimal(dto.value),
+    date: dto.date,
+    source: dto.source,
+  };
 }
 
 /**
