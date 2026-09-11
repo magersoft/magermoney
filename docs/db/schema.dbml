@@ -31,10 +31,10 @@ Table profiles [note: 'phase 1. One row per auth.users row, created by trigger.'
 Table currencies [note: 'phase 1. Shared reference data, service-role writes only.'] {
   code text [pk]
   kind currency_kind [not null]
-  scale int [not null, note: '2 fiat, up to 8 crypto']
-  symbol text [not null]
-  name_ru text [not null]
-  name_en text [not null]
+  scale int [not null, note: '2 fiat, up to 8 crypto; Intl does not know crypto']
+  symbol text [note: 'null = derive from Intl.NumberFormat; set only for crypto or overrides (₿, Ξ, ₮)']
+  name_ru text [note: 'null = Intl.DisplayNames']
+  name_en text [note: 'null = Intl.DisplayNames']
 }
 
 Table rates [note: 'phase 1. Append-only. quote is always USD. user_id null = shared api rate; set = user manual override.'] {

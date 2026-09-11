@@ -45,7 +45,7 @@ Toolchain: bun (package manager and script runner), Node 24 (`.nvmrc`, `engines`
 
 ## 3. Domain core (`packages/domain`)
 
-- **Currency** — `{ code, kind: 'fiat' | 'crypto', scale, symbol }`. A registry object, not an enum; unknown code → `UnknownCurrencyError`.
+- **Currency** — `{ code, kind: 'fiat' | 'crypto', scale, symbol? }`. A registry object, not an enum; unknown code → `UnknownCurrencyError`. Symbol and display name are presentation concerns: the domain only carries an optional override, formatting lives in `apps/web` via Intl.
 - **Money** — value object over `decimal.js`, `{ amount, currency }`. `add`, `subtract`, `multiply(n)`, `compare`, `round()` (to the currency scale), `isZero`, `toString()` / `Money.parse()`. Mixed currencies → `CurrencyMismatchError`. Immutable.
 - **Rate** — `{ base, quote: 'USD', value, date, source: 'api' | 'manual' }`.
 - **RateTable** — rates for one date; `convert(money, to)` goes through USD; a missing leg → `RateMissingError`. Never returns 0 or NaN.
@@ -58,7 +58,7 @@ Errors are typed classes; use-case boundaries return `Result<T, E>` (neverthrow)
 Conventions for every future table: `uuid` PK via `gen_random_uuid()`, `user_id uuid not null references profiles(id)` with an index, `created_at`/`updated_at timestamptz`, money and rates as unconstrained `numeric`, no soft delete (active periods where the domain needs them), RLS on every user table.
 
 - **profiles** — `id` (= `auth.users.id`), `display_name`, `locale ('ru'|'en')`, `default_currency`, `reporting_currencies text[]`, `onboarding_completed_at`, timestamps. Trigger on `auth.users` insert creates the row. RLS: owner only.
-- **currencies** — `code` PK, `kind`, `scale`, `symbol`, `name_ru`, `name_en`. Seeded by migration with the owner's 18 currencies. Readable by all authenticated users; written by the service role only.
+- **currencies** — `code` PK, `kind`, `scale`, and nullable overrides `symbol`, `name_ru`, `name_en`. Null means the web app derives symbol and name from `Intl.NumberFormat` / `Intl.DisplayNames` by code; overrides exist only for crypto (BTC, ETH, USDT and the like), which Intl does not know. Seeded by migration with the owner's 18 currencies. Readable by all authenticated users; written by the service role only.
 - **rates** — `id`, `base`, `quote` (always `USD`), `value numeric`, `date`, `source ('api'|'manual')`, `user_id null` (null = shared, set = a user's manual override), timestamps. Unique `(base, quote, date, source, coalesce(user_id, ''))`. RLS: shared rows readable by all; manual rows owner only.
 
 Access from the API through `postgres.js` with hand-written SQL; no ORM. The full schema for all phases is documented in `docs/db/schema.dbml` for review and kept current as phases land.

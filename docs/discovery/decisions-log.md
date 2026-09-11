@@ -31,6 +31,7 @@ Chronological, one line each. Rationale lives in the ADRs where it matters.
 25. Money: decimal end to end (Postgres numeric, string in API, Money value object). ADR 0001. ADRs 0002–0005 record balances-as-journal, client read models, Hono-over-Supabase, snapshot contents.
 26. Delivery phases: 1 foundation → 2 accounts+rates+transfers+import → 3 income/expenses/budgets/dashboard → 4 goals+assets → 5 snapshots/spend/analytics/history import → 6 onboarding, EN, motion, passkey lock, e2e. Each phase ends deployed.
 27. Charts: shadcn-vue chart components on Unovis (`@unovis/vue`), copied into `packages/ui`; same CSS-variable theming as the rest. ECharts not used.
+28. Currency presentation: code is the identifier; symbol and names come from Intl on the client for fiat, stored only as nullable overrides for crypto.
 
 ## Open
 
