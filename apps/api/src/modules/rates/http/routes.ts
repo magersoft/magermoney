@@ -1,16 +1,20 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { CurrencyDtoSchema, ErrorDtoSchema, RateDtoSchema, RatesQuerySchema } from '@magermoney/contracts';
+import { CurrencyDtoSchema, ErrorDtoSchema, ManualRateInputSchema, RateDtoSchema, RatesQuerySchema } from '@magermoney/contracts';
 import type { AppDeps, AppEnv } from '../../../app.js';
 import { requireUser } from '../../../shared/auth/middleware.js';
+import { toHttpError } from '../../../shared/errors/http.js';
 import { getRates } from '../application/get-rates.js';
 import { listCurrencies } from '../application/list-currencies.js';
+import { setManualRate } from '../application/set-manual-rate.js';
 
 const errors = { 401: { description: 'Unauthorized', content: { 'application/json': { schema: ErrorDtoSchema } } } };
+const errorsWith400 = { 400: { description: 'Bad request', content: { 'application/json': { schema: ErrorDtoSchema } } }, ...errors };
 
 export function ratesRoutes(deps: AppDeps) {
   const r = new OpenAPIHono<AppEnv>();
   r.use('/currencies', requireUser(deps.jwtSecret));
   r.use('/rates', requireUser(deps.jwtSecret));
+  r.use('/rates/manual', requireUser(deps.jwtSecret));
 
   r.openapi(
     createRoute({ method: 'get', path: '/currencies', security: [{ bearer: [] }], responses: { 200: { description: 'Currencies', content: { 'application/json': { schema: z.array(CurrencyDtoSchema) } } }, ...errors } }),
@@ -23,6 +27,17 @@ export function ratesRoutes(deps: AppDeps) {
       const { date } = c.req.valid('query');
       const rates = await getRates(deps.rates)(c.var.userId, date ?? deps.clock.today());
       return c.json(rates, 200);
+    },
+  );
+
+  r.openapi(
+    createRoute({ method: 'put', path: '/rates/manual', security: [{ bearer: [] }], request: { body: { content: { 'application/json': { schema: ManualRateInputSchema } } } }, responses: { 200: { description: 'Manual rate', content: { 'application/json': { schema: RateDtoSchema } } }, ...errorsWith400 } }),
+    async (c) => {
+      const res = await setManualRate(deps.rates, deps.registry)(c.var.userId, c.req.valid('json'));
+      return res.match(
+        (rate) => c.json(rate, 200),
+        (e) => { const h = toHttpError(e); return c.json(h.body, h.status as 400); },
+      );
     },
   );
 

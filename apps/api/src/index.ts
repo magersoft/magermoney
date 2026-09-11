@@ -5,6 +5,8 @@ import { loadEnv } from './shared/env.js';
 import { createDb } from './shared/db/client.js';
 import { PgProfileRepository } from './modules/profiles/infrastructure/pg-profile-repository.js';
 import { PgRateRepository } from './modules/rates/infrastructure/pg-rate-repository.js';
+import { OpenErApiProvider } from './modules/rates/infrastructure/open-er-api-provider.js';
+import { CoinGeckoProvider } from './modules/rates/infrastructure/coingecko-provider.js';
 
 const env = loadEnv();
 const sql = createDb(env.DATABASE_URL);
@@ -16,6 +18,7 @@ const app = createApp({
   profiles: new PgProfileRepository(sql),
   registry: CurrencyRegistry.default(),
   rates: new PgRateRepository(sql),
+  rateProviders: [new OpenErApiProvider(env.FIAT_RATES_URL), new CoinGeckoProvider(env.CRYPTO_RATES_URL)],
 });
 
 serve({ fetch: app.fetch, port: 3000 }, (i) => console.log(`api on http://localhost:${i.port}`));

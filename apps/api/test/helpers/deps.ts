@@ -11,6 +11,7 @@ export function testDeps(over: Partial<AppDeps> = {}): AppDeps {
     profiles: new MemoryProfileRepository([]),
     registry: CurrencyRegistry.default(),
     rates: new MemoryRateRepository(),
+    rateProviders: [],
     ...over,
   } as AppDeps;
 }

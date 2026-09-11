@@ -8,6 +8,8 @@ import { profileRoutes } from './modules/profiles/http/routes.js';
 import type { ProfileRepository } from './modules/profiles/application/profile-repository.js';
 import { ratesRoutes } from './modules/rates/http/routes.js';
 import type { RateRepository } from './modules/rates/application/rate-repository.js';
+import type { RateProvider } from './modules/rates/application/rate-provider.js';
+import { jobRoutes } from './jobs/fetch-rates.js';
 
 export type AppEnv = { Variables: { userId: string; requestId: string } };
 
@@ -19,6 +21,7 @@ export interface AppDeps {
   profiles: ProfileRepository;
   registry: CurrencyRegistry;
   rates: RateRepository;
+  rateProviders: RateProvider[];
 }
 
 export function createApp(deps: AppDeps) {
@@ -55,6 +58,7 @@ export function createApp(deps: AppDeps) {
 
   app.route('/me', profileRoutes(deps));
   app.route('/', ratesRoutes(deps));
+  app.route('/', jobRoutes(deps));
 
   mountOpenApi(app, deps.exposeDocs ?? true);
   return app;
