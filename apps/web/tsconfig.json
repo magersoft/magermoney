@@ -1,0 +1,15 @@
+{
+  "extends": "@magermoney/config/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
+    // Same reason as packages/ui: reka-ui and vue-sonner declare optional props
+    // without `| undefined`, and the components generated on top of them are
+    // type-checked here too. Every other strict flag stays on.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src", "test", "e2e", "vite.config.ts", "vitest.config.ts", "vercel.ts"]
+}

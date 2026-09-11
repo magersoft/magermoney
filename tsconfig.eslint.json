@@ -1,0 +1,16 @@
+{
+  // Resolution only — never compiled. It exists so eslint can resolve every
+  // workspace import from any file, including the ones a package does not
+  // depend on: those are exactly the boundary violations the lint rules have to
+  // see, and an unresolvable import is invisible to them.
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@magermoney/domain": ["packages/domain/src/index.ts"],
+      "@magermoney/contracts": ["packages/contracts/src/index.ts"],
+      "@magermoney/ui": ["packages/ui/src/index.ts"],
+      "@/*": ["apps/web/src/*"]
+    }
+  },
+  "include": []
+}

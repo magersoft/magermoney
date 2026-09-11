@@ -3,3 +3,12 @@
 node_modules/
 .env*
 !.env.example
+.superpowers/
+dist/
+coverage/
+.vercel/
+.turbo/
+supabase/.temp/
+playwright-report/
+test-results/
+dev-dist/

@@ -56,10 +56,12 @@ apps/web/e2e/smoke.spec.ts  apps/web/playwright.config.ts  apps/web/vercel.ts  a
 ### Task 1: Monorepo skeleton and agent docs
 
 **Files:**
+
 - Create: `.nvmrc`, `package.json`, `turbo.json`, `tsconfig.base.json`, `eslint.config.js`, `.env.example`, `AGENTS.md`, `CLAUDE.md`, `.mcp.json`, `packages/config/package.json`, `packages/config/tsconfig.base.json`
 - Modify: `.gitignore`
 
 **Interfaces:**
+
 - Produces: workspace names `@magermoney/domain`, `@magermoney/contracts`, `@magermoney/ui`, `@magermoney/config`, `@magermoney/api`, `@magermoney/web`; turbo tasks `build`, `dev`, `lint`, `typecheck`, `test`.
 
 - [ ] **Step 1: Pin Node and create the root package.json**
@@ -143,7 +145,13 @@ node --version   # v24.x
 `packages/config/package.json`:
 
 ```json
-{ "name": "@magermoney/config", "version": "0.0.0", "private": true, "type": "module", "exports": { "./tsconfig.base.json": "./tsconfig.base.json" } }
+{
+  "name": "@magermoney/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { "./tsconfig.base.json": "./tsconfig.base.json" }
+}
 ```
 
 Copy `tsconfig.base.json` to `packages/config/tsconfig.base.json` (packages extend `@magermoney/config/tsconfig.base.json`; the root one is for editor tooling).
@@ -171,16 +179,19 @@ export default tseslint.config(
       ],
     },
     rules: {
-      'boundaries/element-types': ['error', {
-        default: 'disallow',
-        rules: [
-          { from: 'domain', allow: [] },
-          { from: 'contracts', allow: ['domain'] },
-          { from: 'ui', allow: [] },
-          { from: 'api', allow: ['domain', 'contracts'] },
-          { from: 'web', allow: ['domain', 'contracts', 'ui'] },
-        ],
-      }],
+      'boundaries/element-types': [
+        'error',
+        {
+          default: 'disallow',
+          rules: [
+            { from: 'domain', allow: [] },
+            { from: 'contracts', allow: ['domain'] },
+            { from: 'ui', allow: [] },
+            { from: 'api', allow: ['domain', 'contracts'] },
+            { from: 'web', allow: ['domain', 'contracts', 'ui'] },
+          ],
+        },
+      ],
     },
   },
 );
@@ -226,6 +237,7 @@ VITE_API_URL=http://127.0.0.1:3000
 Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before naming anything, and `docs/adr/` before changing architecture.
 
 ## Layout
+
 - `apps/web` Vue 3 PWA. Modules in `src/modules/<name>/{domain,application,infrastructure,ui}` with a single public `index.ts`. Follow the `/vue-ddd-architecture` skill.
 - `apps/api` Hono API on Vercel Functions. Modules in `src/modules/<name>/{application,infrastructure,http}`; `src/shared` for auth, db, errors, openapi.
 - `packages/domain` pure model (Money, Currency, Rate…). No framework imports. 100 % test coverage.
@@ -234,6 +246,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 - `supabase/migrations` hand-written SQL. No ORM.
 
 ## Rules
+
 - Money is decimal end to end (ADR 0001). Never `number` for amounts.
 - Every user table has `user_id` + RLS; every use case filters by `userId`.
 - Use cases return `Result` (neverthrow); HTTP mapping lives in `apps/api/src/shared/errors`.
@@ -242,6 +255,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 - Never log amounts, emails or tokens. Never commit real data or `.env*`.
 
 ## Skills to use
+
 - `/vue-ddd-architecture` — any structural change in `apps/web`.
 - `/frontend-design` — BEFORE the first line of markup of any new screen or component.
 - `/impeccable` — audit and polish any UI you touched, before handing off.
@@ -252,6 +266,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 - shadcn-vue MCP (`.mcp.json`) — adding components to `packages/ui`.
 
 ## Commands
+
 - `bun install` · `bun run dev` · `bun run test` · `bun run lint` · `bun run typecheck` · `bun run build`
 - Local DB: `supabase start` / `supabase db reset` (applies migrations + seed).
 - Env: `vercel env pull .env.local` inside `apps/api` and `apps/web`.
@@ -291,10 +306,12 @@ Use `/git-commit`: `chore: scaffold bun + turborepo monorepo with agent docs`
 ### Task 2: `packages/domain` — Currency registry
 
 **Files:**
+
 - Create: `packages/domain/package.json`, `packages/domain/tsconfig.json`, `packages/domain/vitest.config.ts`, `packages/domain/src/errors.ts`, `packages/domain/src/currency.ts`, `packages/domain/src/index.ts`
 - Test: `packages/domain/test/currency.test.ts`
 
 **Interfaces:**
+
 - Produces: `type CurrencyCode = string`; `interface Currency { code: CurrencyCode; kind: 'fiat' | 'crypto'; scale: number; symbol?: string }`; `class CurrencyRegistry { static default(): CurrencyRegistry; constructor(list: Currency[]); get(code): Result<Currency, UnknownCurrencyError>; has(code): boolean; all(): Currency[] }`; `class DomainError extends Error { readonly code: string }`; `class UnknownCurrencyError extends DomainError`.
 
 - [ ] **Step 1: Package files**
@@ -315,14 +332,22 @@ Use `/git-commit`: `chore: scaffold bun + turborepo monorepo with agent docs`
     "lint": "eslint src test"
   },
   "dependencies": { "decimal.js": "^10.6.0", "neverthrow": "^8.2.0" },
-  "devDependencies": { "vitest": "^5.0.0", "@vitest/coverage-v8": "^5.0.0", "fast-check": "^4.10.0" }
+  "devDependencies": {
+    "vitest": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "fast-check": "^4.10.0"
+  }
 }
 ```
 
 `packages/domain/tsconfig.json`:
 
 ```json
-{ "extends": "@magermoney/config/tsconfig.base.json", "compilerOptions": { "rootDir": ".", "noEmit": true }, "include": ["src", "test"] }
+{
+  "extends": "@magermoney/config/tsconfig.base.json",
+  "compilerOptions": { "rootDir": ".", "noEmit": true },
+  "include": ["src", "test"]
+}
 ```
 
 `packages/domain/vitest.config.ts`:
@@ -332,7 +357,11 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     include: ['test/**/*.test.ts'],
-    coverage: { provider: 'v8', include: ['src/**'], thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 } },
+    coverage: {
+      provider: 'v8',
+      include: ['src/**'],
+      thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },
+    },
   },
 });
 ```
@@ -349,7 +378,12 @@ describe('CurrencyRegistry', () => {
   it('knows the default fiat and crypto currencies', () => {
     const r = CurrencyRegistry.default();
     expect(r.get('USD')._unsafeUnwrap()).toEqual({ code: 'USD', kind: 'fiat', scale: 2 });
-    expect(r.get('BTC')._unsafeUnwrap()).toEqual({ code: 'BTC', kind: 'crypto', scale: 8, symbol: '₿' });
+    expect(r.get('BTC')._unsafeUnwrap()).toEqual({
+      code: 'BTC',
+      kind: 'crypto',
+      scale: 8,
+      symbol: '₿',
+    });
     expect(r.has('USDT')).toBe(true);
   });
 
@@ -363,7 +397,13 @@ describe('CurrencyRegistry', () => {
   it('accepts a custom list and rejects duplicates', () => {
     const r = new CurrencyRegistry([{ code: 'ABC', kind: 'fiat', scale: 2 }]);
     expect(r.all()).toHaveLength(1);
-    expect(() => new CurrencyRegistry([{ code: 'A', kind: 'fiat', scale: 2 }, { code: 'A', kind: 'fiat', scale: 2 }])).toThrow(/duplicate/i);
+    expect(
+      () =>
+        new CurrencyRegistry([
+          { code: 'A', kind: 'fiat', scale: 2 },
+          { code: 'A', kind: 'fiat', scale: 2 },
+        ]),
+    ).toThrow(/duplicate/i);
   });
 });
 ```
@@ -390,21 +430,34 @@ export abstract class DomainError extends Error {
 }
 export class UnknownCurrencyError extends DomainError {
   readonly code = 'UNKNOWN_CURRENCY';
-  constructor(readonly currency: string) { super(`Unknown currency: ${currency}`); }
+  constructor(readonly currency: string) {
+    super(`Unknown currency: ${currency}`);
+  }
 }
 export class CurrencyMismatchError extends DomainError {
   readonly code = 'CURRENCY_MISMATCH';
-  constructor(readonly left: string, readonly right: string) { super(`Currency mismatch: ${left} vs ${right}`); }
+  constructor(
+    readonly left: string,
+    readonly right: string,
+  ) {
+    super(`Currency mismatch: ${left} vs ${right}`);
+  }
 }
 export class RateMissingError extends DomainError {
   readonly code = 'RATE_MISSING';
-  constructor(readonly base: string, readonly quote: string, readonly date: string) {
+  constructor(
+    readonly base: string,
+    readonly quote: string,
+    readonly date: string,
+  ) {
     super(`No rate for ${base}/${quote} on ${date}`);
   }
 }
 export class InvalidAmountError extends DomainError {
   readonly code = 'INVALID_AMOUNT';
-  constructor(readonly raw: string) { super(`Invalid amount: ${raw}`); }
+  constructor(readonly raw: string) {
+    super(`Invalid amount: ${raw}`);
+  }
 }
 ```
 
@@ -416,16 +469,37 @@ import { UnknownCurrencyError } from './errors.js';
 
 export type CurrencyCode = string;
 export type CurrencyKind = 'fiat' | 'crypto';
-export interface Currency { code: CurrencyCode; kind: CurrencyKind; scale: number; symbol?: string }
+export interface Currency {
+  code: CurrencyCode;
+  kind: CurrencyKind;
+  scale: number;
+  symbol?: string;
+}
 
 const fiat = (code: string, scale = 2): Currency => ({ code, kind: 'fiat', scale });
 const crypto = (code: string, scale: number, symbol?: string): Currency =>
   symbol === undefined ? { code, kind: 'crypto', scale } : { code, kind: 'crypto', scale, symbol };
 
 export const DEFAULT_CURRENCIES: readonly Currency[] = [
-  fiat('USD'), fiat('EUR'), fiat('RUB'), fiat('KZT'), fiat('UZS'), fiat('IDR'), fiat('EGP'), fiat('GEL'), fiat('KGS'),
-  crypto('BTC', 8, '₿'), crypto('ETH', 8, 'Ξ'), crypto('USDT', 2, '₮'), crypto('XRP', 6), crypto('SOL', 6),
-  crypto('DOGE', 4), crypto('PEPE', 8), crypto('AVAX', 6), crypto('ATOM', 6), crypto('TRX', 6),
+  fiat('USD'),
+  fiat('EUR'),
+  fiat('RUB'),
+  fiat('KZT'),
+  fiat('UZS'),
+  fiat('IDR'),
+  fiat('EGP'),
+  fiat('GEL'),
+  fiat('KGS'),
+  crypto('BTC', 8, '₿'),
+  crypto('ETH', 8, 'Ξ'),
+  crypto('USDT', 2, '₮'),
+  crypto('XRP', 6),
+  crypto('SOL', 6),
+  crypto('DOGE', 4),
+  crypto('PEPE', 8),
+  crypto('AVAX', 6),
+  crypto('ATOM', 6),
+  crypto('TRX', 6),
 ];
 
 export class CurrencyRegistry {
@@ -436,13 +510,19 @@ export class CurrencyRegistry {
       this.byCode.set(c.code, c);
     }
   }
-  static default(): CurrencyRegistry { return new CurrencyRegistry(DEFAULT_CURRENCIES); }
-  has(code: CurrencyCode): boolean { return this.byCode.has(code); }
+  static default(): CurrencyRegistry {
+    return new CurrencyRegistry(DEFAULT_CURRENCIES);
+  }
+  has(code: CurrencyCode): boolean {
+    return this.byCode.has(code);
+  }
   get(code: CurrencyCode): Result<Currency, UnknownCurrencyError> {
     const c = this.byCode.get(code);
     return c ? ok(c) : err(new UnknownCurrencyError(code));
   }
-  all(): Currency[] { return [...this.byCode.values()]; }
+  all(): Currency[] {
+    return [...this.byCode.values()];
+  }
 }
 ```
 
@@ -470,11 +550,13 @@ Expected: 3 passed; coverage 100 % for `src/currency.ts` and `src/errors.ts` (un
 ### Task 3: `packages/domain` — Money value object
 
 **Files:**
+
 - Create: `packages/domain/src/money.ts`
 - Modify: `packages/domain/src/index.ts`
 - Test: `packages/domain/test/money.test.ts`, `packages/domain/test/money.property.test.ts`
 
 **Interfaces:**
+
 - Produces: `class Money { static of(amount: string | number | Decimal, currency: Currency): Money; static parse(raw: string, currency: Currency): Result<Money, InvalidAmountError>; readonly amount: Decimal; readonly currency: Currency; add(o): Result<Money, CurrencyMismatchError>; subtract(o): Result<Money, CurrencyMismatchError>; multiply(factor: string | number | Decimal): Money; compare(o): Result<-1|0|1, CurrencyMismatchError>; round(): Money; isZero(): boolean; isNegative(): boolean; toString(): string; toJSON(): { amount: string; currency: string } }`.
 
 - [ ] **Step 1: Failing tests**
@@ -483,7 +565,12 @@ Expected: 3 passed; coverage 100 % for `src/currency.ts` and `src/errors.ts` (un
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { CurrencyMismatchError, CurrencyRegistry, InvalidAmountError, Money } from '../src/index.js';
+import {
+  CurrencyMismatchError,
+  CurrencyRegistry,
+  InvalidAmountError,
+  Money,
+} from '../src/index.js';
 
 const reg = CurrencyRegistry.default();
 const USD = reg.get('USD')._unsafeUnwrap();
@@ -529,7 +616,10 @@ describe('Money', () => {
   });
 
   it('serialises to a JSON shape with a decimal string', () => {
-    expect(JSON.parse(JSON.stringify(Money.of('1.50', EUR)))).toEqual({ amount: '1.5', currency: 'EUR' });
+    expect(JSON.parse(JSON.stringify(Money.of('1.50', EUR)))).toEqual({
+      amount: '1.5',
+      currency: 'EUR',
+    });
   });
 });
 ```
@@ -542,33 +632,40 @@ import fc from 'fast-check';
 import { CurrencyRegistry, Money } from '../src/index.js';
 
 const USD = CurrencyRegistry.default().get('USD')._unsafeUnwrap();
-const amount = fc.tuple(fc.integer({ min: -1_000_000_000, max: 1_000_000_000 }), fc.integer({ min: 0, max: 999 }))
+const amount = fc
+  .tuple(fc.integer({ min: -1_000_000_000, max: 1_000_000_000 }), fc.integer({ min: 0, max: 999 }))
   .map(([int, frac]) => `${int}.${String(frac).padStart(3, '0')}`);
 
 describe('Money properties', () => {
   it('addition is commutative and associative', () => {
-    fc.assert(fc.property(amount, amount, amount, (a, b, c) => {
-      const [x, y, z] = [Money.of(a, USD), Money.of(b, USD), Money.of(c, USD)];
-      expect(x.add(y)._unsafeUnwrap().toString()).toBe(y.add(x)._unsafeUnwrap().toString());
-      const l = x.add(y)._unsafeUnwrap().add(z)._unsafeUnwrap();
-      const r = x.add(y.add(z)._unsafeUnwrap())._unsafeUnwrap();
-      expect(l.toString()).toBe(r.toString());
-    }));
+    fc.assert(
+      fc.property(amount, amount, amount, (a, b, c) => {
+        const [x, y, z] = [Money.of(a, USD), Money.of(b, USD), Money.of(c, USD)];
+        expect(x.add(y)._unsafeUnwrap().toString()).toBe(y.add(x)._unsafeUnwrap().toString());
+        const l = x.add(y)._unsafeUnwrap().add(z)._unsafeUnwrap();
+        const r = x.add(y.add(z)._unsafeUnwrap())._unsafeUnwrap();
+        expect(l.toString()).toBe(r.toString());
+      }),
+    );
   });
 
   it('round is idempotent and never exceeds the scale', () => {
-    fc.assert(fc.property(amount, (a) => {
-      const once = Money.of(a, USD).round();
-      expect(once.round().toString()).toBe(once.toString());
-      expect(once.amount.decimalPlaces()).toBeLessThanOrEqual(USD.scale);
-    }));
+    fc.assert(
+      fc.property(amount, (a) => {
+        const once = Money.of(a, USD).round();
+        expect(once.round().toString()).toBe(once.toString());
+        expect(once.amount.decimalPlaces()).toBeLessThanOrEqual(USD.scale);
+      }),
+    );
   });
 
   it('parse(toString) round-trips', () => {
-    fc.assert(fc.property(amount, (a) => {
-      const m = Money.of(a, USD);
-      expect(Money.parse(m.toString(), USD)._unsafeUnwrap().toString()).toBe(m.toString());
-    }));
+    fc.assert(
+      fc.property(amount, (a) => {
+        const m = Money.of(a, USD);
+        expect(Money.parse(m.toString(), USD)._unsafeUnwrap().toString()).toBe(m.toString());
+      }),
+    );
   });
 });
 ```
@@ -595,7 +692,10 @@ const D = Decimal.clone({ precision: 40, rounding: Decimal.ROUND_HALF_UP });
 export type DecimalInput = string | number | Decimal;
 
 export class Money {
-  private constructor(readonly amount: Decimal, readonly currency: Currency) {}
+  private constructor(
+    readonly amount: Decimal,
+    readonly currency: Currency,
+  ) {}
 
   static of(amount: DecimalInput, currency: Currency): Money {
     return new Money(new D(amount), currency);
@@ -625,12 +725,23 @@ export class Money {
     return this.same(other).map(() => this.amount.comparedTo(other.amount) as -1 | 0 | 1);
   }
   round(): Money {
-    return new Money(this.amount.toDecimalPlaces(this.currency.scale, Decimal.ROUND_HALF_UP), this.currency);
+    return new Money(
+      this.amount.toDecimalPlaces(this.currency.scale, Decimal.ROUND_HALF_UP),
+      this.currency,
+    );
   }
-  isZero(): boolean { return this.amount.isZero(); }
-  isNegative(): boolean { return this.amount.isNegative(); }
-  toString(): string { return this.amount.toFixed(); }
-  toJSON(): { amount: string; currency: string } { return { amount: this.toString(), currency: this.currency.code }; }
+  isZero(): boolean {
+    return this.amount.isZero();
+  }
+  isNegative(): boolean {
+    return this.amount.isNegative();
+  }
+  toString(): string {
+    return this.amount.toFixed();
+  }
+  toJSON(): { amount: string; currency: string } {
+    return { amount: this.toString(), currency: this.currency.code };
+  }
 }
 ```
 
@@ -653,11 +764,13 @@ Expected: all money tests pass. If `toFixed()` prints `1.50` for `Money.of('1.50
 ### Task 4: `packages/domain` — Rate, RateTable, Clock
 
 **Files:**
+
 - Create: `packages/domain/src/rate.ts`, `packages/domain/src/rate-table.ts`, `packages/domain/src/clock.ts`
 - Modify: `packages/domain/src/index.ts`
 - Test: `packages/domain/test/rate-table.test.ts`, `packages/domain/test/clock.test.ts`
 
 **Interfaces:**
+
 - Produces: `type IsoDate = string` (`YYYY-MM-DD`); `interface Rate { base: CurrencyCode; quote: 'USD'; value: Decimal; date: IsoDate; source: 'api' | 'manual' }`; `class RateTable { constructor(date: IsoDate, rates: Rate[], registry: CurrencyRegistry); readonly date; convert(money: Money, to: CurrencyCode): Result<Money, RateMissingError | UnknownCurrencyError>; rateOf(code): Result<Decimal, RateMissingError> }`; `interface Clock { now(): Date; today(): IsoDate }`; `SystemClock`, `FixedClock`.
 
 - [ ] **Step 1: Failing tests**
@@ -666,22 +779,62 @@ Expected: all money tests pass. If `toFixed()` prints `1.50` for `Money.of('1.50
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { CurrencyRegistry, Money, RateMissingError, RateTable, UnknownCurrencyError, type Rate, Decimal } from '../src/index.js';
+import {
+  CurrencyRegistry,
+  Money,
+  RateMissingError,
+  RateTable,
+  UnknownCurrencyError,
+  type Rate,
+  Decimal,
+} from '../src/index.js';
 
 const reg = CurrencyRegistry.default();
 const c = (code: string) => reg.get(code)._unsafeUnwrap();
-const rate = (base: string, value: string): Rate => ({ base, quote: 'USD', value: new Decimal(value), date: '2026-09-11', source: 'api' });
-const table = new RateTable('2026-09-11', [rate('EUR', '1.16'), rate('RUB', '0.011911'), rate('BTC', '77389.36'), rate('USD', '1')], reg);
+const rate = (base: string, value: string): Rate => ({
+  base,
+  quote: 'USD',
+  value: new Decimal(value),
+  date: '2026-09-11',
+  source: 'api',
+});
+const table = new RateTable(
+  '2026-09-11',
+  [rate('EUR', '1.16'), rate('RUB', '0.011911'), rate('BTC', '77389.36'), rate('USD', '1')],
+  reg,
+);
 
 describe('RateTable', () => {
   it('converts through USD as the cross currency', () => {
-    expect(table.convert(Money.of('100', c('EUR')), 'USD')._unsafeUnwrap().toString()).toBe('116');
-    expect(table.convert(Money.of('116', c('USD')), 'EUR')._unsafeUnwrap().round().toString()).toBe('100');
-    expect(table.convert(Money.of('1', c('BTC')), 'RUB')._unsafeUnwrap().round().toString()).toBe('6497303.33');
+    expect(
+      table
+        .convert(Money.of('100', c('EUR')), 'USD')
+        ._unsafeUnwrap()
+        .toString(),
+    ).toBe('116');
+    expect(
+      table
+        .convert(Money.of('116', c('USD')), 'EUR')
+        ._unsafeUnwrap()
+        .round()
+        .toString(),
+    ).toBe('100');
+    expect(
+      table
+        .convert(Money.of('1', c('BTC')), 'RUB')
+        ._unsafeUnwrap()
+        .round()
+        .toString(),
+    ).toBe('6497303.33');
   });
 
   it('is identity for the same currency', () => {
-    expect(table.convert(Money.of('5', c('EUR')), 'EUR')._unsafeUnwrap().toString()).toBe('5');
+    expect(
+      table
+        .convert(Money.of('5', c('EUR')), 'EUR')
+        ._unsafeUnwrap()
+        .toString(),
+    ).toBe('5');
   });
 
   it('fails with RateMissingError when a leg is missing', () => {
@@ -691,7 +844,9 @@ describe('RateTable', () => {
   });
 
   it('fails with UnknownCurrencyError for an unknown target', () => {
-    expect(table.convert(Money.of('1', c('EUR')), 'XYZ')._unsafeUnwrapErr()).toBeInstanceOf(UnknownCurrencyError);
+    expect(table.convert(Money.of('1', c('EUR')), 'XYZ')._unsafeUnwrapErr()).toBeInstanceOf(
+      UnknownCurrencyError,
+    );
   });
 
   it('never returns NaN or zero for a missing rate', () => {
@@ -731,7 +886,13 @@ import type Decimal from 'decimal.js';
 import type { CurrencyCode } from './currency.js';
 export type IsoDate = string; // YYYY-MM-DD
 export type RateSource = 'api' | 'manual';
-export interface Rate { base: CurrencyCode; quote: 'USD'; value: Decimal; date: IsoDate; source: RateSource }
+export interface Rate {
+  base: CurrencyCode;
+  quote: 'USD';
+  value: Decimal;
+  date: IsoDate;
+  source: RateSource;
+}
 ```
 
 `packages/domain/src/rate-table.ts`:
@@ -746,21 +907,29 @@ import type { IsoDate, Rate } from './rate.js';
 
 export class RateTable {
   private readonly byBase = new Map<CurrencyCode, Decimal>();
-  constructor(readonly date: IsoDate, rates: readonly Rate[], private readonly registry: CurrencyRegistry) {
+  constructor(
+    readonly date: IsoDate,
+    rates: readonly Rate[],
+    private readonly registry: CurrencyRegistry,
+  ) {
     for (const r of rates) this.byBase.set(r.base, r.value);
     if (!this.byBase.has('USD')) this.byBase.set('USD', new Decimal(1));
   }
 
   rateOf(code: CurrencyCode): Result<Decimal, RateMissingError> {
     const v = this.byBase.get(code);
-    return v && v.isFinite() && !v.isZero() ? ok(v) : err(new RateMissingError(code, 'USD', this.date));
+    return v && v.isFinite() && !v.isZero()
+      ? ok(v)
+      : err(new RateMissingError(code, 'USD', this.date));
   }
 
   convert(money: Money, to: CurrencyCode): Result<Money, RateMissingError | UnknownCurrencyError> {
     return this.registry.get(to).andThen((target) => {
       if (target.code === money.currency.code) return ok(money);
       return this.rateOf(money.currency.code).andThen((fromRate) =>
-        this.rateOf(target.code).map((toRate) => Money.of(money.amount.times(fromRate).div(toRate), target)),
+        this.rateOf(target.code).map((toRate) =>
+          Money.of(money.amount.times(fromRate).div(toRate), target),
+        ),
       );
     });
   }
@@ -771,13 +940,27 @@ export class RateTable {
 
 ```ts
 import type { IsoDate } from './rate.js';
-export interface Clock { now(): Date; today(): IsoDate }
+export interface Clock {
+  now(): Date;
+  today(): IsoDate;
+}
 const iso = (d: Date): IsoDate => d.toISOString().slice(0, 10);
-export class SystemClock implements Clock { now() { return new Date(); } today() { return iso(this.now()); } }
+export class SystemClock implements Clock {
+  now() {
+    return new Date();
+  }
+  today() {
+    return iso(this.now());
+  }
+}
 export class FixedClock implements Clock {
   constructor(private readonly at: Date) {}
-  now() { return new Date(this.at); }
-  today() { return iso(this.at); }
+  now() {
+    return new Date(this.at);
+  }
+  today() {
+    return iso(this.at);
+  }
 }
 ```
 
@@ -800,10 +983,12 @@ Expected: all pass, coverage thresholds met. If a branch in `errors.ts` is uncov
 ### Task 5: `packages/contracts` — zod schemas and OpenAPI-ready routes
 
 **Files:**
+
 - Create: `packages/contracts/package.json`, `packages/contracts/tsconfig.json`, `packages/contracts/vitest.config.ts`, `packages/contracts/src/common.ts`, `packages/contracts/src/currency.ts`, `packages/contracts/src/rate.ts`, `packages/contracts/src/profile.ts`, `packages/contracts/src/index.ts`
 - Test: `packages/contracts/test/schemas.test.ts`
 
 **Interfaces:**
+
 - Produces: `DecimalString` (zod string matching `^-?\d+(\.\d+)?$`), `IsoDateSchema`, `CurrencyCodeSchema`, `CurrencyDto`, `RateDto`, `ManualRateInput`, `ProfileDto`, `UpdateProfileInput`, `ErrorDto = { code: string; message: string }`; all as zod schemas (`*Schema`) plus inferred types.
 
 - [ ] **Step 1: Package files**
@@ -818,7 +1003,11 @@ Expected: all pass, coverage thresholds met. If a branch in `errors.ts` is uncov
   "type": "module",
   "exports": { ".": { "types": "./src/index.ts", "default": "./src/index.ts" } },
   "scripts": { "test": "vitest run", "typecheck": "tsc --noEmit", "lint": "eslint src test" },
-  "dependencies": { "zod": "^4.6.2", "@hono/zod-openapi": "^1.6.3", "@magermoney/domain": "workspace:*" },
+  "dependencies": {
+    "zod": "^4.6.2",
+    "@hono/zod-openapi": "^1.6.3",
+    "@magermoney/domain": "workspace:*"
+  },
   "devDependencies": { "vitest": "^5.0.0" }
 }
 ```
@@ -841,13 +1030,29 @@ describe('contracts', () => {
     expect(DecimalString.safeParse('1,5').success).toBe(false);
   });
   it('validates a manual rate', () => {
-    expect(ManualRateInputSchema.safeParse({ base: 'RUB', date: '2026-09-10', value: '0.011855' }).success).toBe(true);
-    expect(ManualRateInputSchema.safeParse({ base: 'RUB', date: '10.09.2026', value: '0.01' }).success).toBe(false);
+    expect(
+      ManualRateInputSchema.safeParse({ base: 'RUB', date: '2026-09-10', value: '0.011855' })
+        .success,
+    ).toBe(true);
+    expect(
+      ManualRateInputSchema.safeParse({ base: 'RUB', date: '10.09.2026', value: '0.01' }).success,
+    ).toBe(false);
   });
   it('validates profile updates', () => {
-    expect(UpdateProfileInputSchema.safeParse({ reportingCurrencies: ['USD', 'EUR'], defaultCurrency: 'EUR' }).success).toBe(true);
-    expect(UpdateProfileInputSchema.safeParse({ reportingCurrencies: [], defaultCurrency: 'EUR' }).success).toBe(false);
-    expect(UpdateProfileInputSchema.safeParse({ reportingCurrencies: ['USD'], defaultCurrency: 'EUR' }).success).toBe(false);
+    expect(
+      UpdateProfileInputSchema.safeParse({
+        reportingCurrencies: ['USD', 'EUR'],
+        defaultCurrency: 'EUR',
+      }).success,
+    ).toBe(true);
+    expect(
+      UpdateProfileInputSchema.safeParse({ reportingCurrencies: [], defaultCurrency: 'EUR' })
+        .success,
+    ).toBe(false);
+    expect(
+      UpdateProfileInputSchema.safeParse({ reportingCurrencies: ['USD'], defaultCurrency: 'EUR' })
+        .success,
+    ).toBe(false);
   });
 });
 ```
@@ -860,9 +1065,20 @@ describe('contracts', () => {
 
 ```ts
 import { z } from '@hono/zod-openapi';
-export const DecimalString = z.string().regex(/^-?\d+(\.\d+)?$/).openapi({ example: '24715.00', description: 'Exact decimal as a string' });
-export const IsoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).openapi({ example: '2026-09-11' });
-export const CurrencyCodeSchema = z.string().min(2).max(10).regex(/^[A-Z0-9]+$/).openapi({ example: 'EUR' });
+export const DecimalString = z
+  .string()
+  .regex(/^-?\d+(\.\d+)?$/)
+  .openapi({ example: '24715.00', description: 'Exact decimal as a string' });
+export const IsoDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .openapi({ example: '2026-09-11' });
+export const CurrencyCodeSchema = z
+  .string()
+  .min(2)
+  .max(10)
+  .regex(/^[A-Z0-9]+$/)
+  .openapi({ example: 'EUR' });
 export const ErrorDtoSchema = z.object({ code: z.string(), message: z.string() }).openapi('Error');
 export type ErrorDto = z.infer<typeof ErrorDtoSchema>;
 ```
@@ -872,10 +1088,17 @@ export type ErrorDto = z.infer<typeof ErrorDtoSchema>;
 ```ts
 import { z } from '@hono/zod-openapi';
 import { CurrencyCodeSchema } from './common.js';
-export const CurrencyDtoSchema = z.object({
-  code: CurrencyCodeSchema, kind: z.enum(['fiat', 'crypto']), scale: z.number().int().min(0).max(18),
-  symbol: z.string().nullable(), nameRu: z.string().nullable(), nameEn: z.string().nullable(), icon: z.string().nullable(),
-}).openapi('Currency');
+export const CurrencyDtoSchema = z
+  .object({
+    code: CurrencyCodeSchema,
+    kind: z.enum(['fiat', 'crypto']),
+    scale: z.number().int().min(0).max(18),
+    symbol: z.string().nullable(),
+    nameRu: z.string().nullable(),
+    nameEn: z.string().nullable(),
+    icon: z.string().nullable(),
+  })
+  .openapi('Currency');
 export type CurrencyDto = z.infer<typeof CurrencyDtoSchema>;
 ```
 
@@ -884,12 +1107,20 @@ export type CurrencyDto = z.infer<typeof CurrencyDtoSchema>;
 ```ts
 import { z } from '@hono/zod-openapi';
 import { CurrencyCodeSchema, DecimalString, IsoDateSchema } from './common.js';
-export const RateDtoSchema = z.object({
-  base: CurrencyCodeSchema, quote: z.literal('USD'), value: DecimalString, date: IsoDateSchema, source: z.enum(['api', 'manual']),
-}).openapi('Rate');
+export const RateDtoSchema = z
+  .object({
+    base: CurrencyCodeSchema,
+    quote: z.literal('USD'),
+    value: DecimalString,
+    date: IsoDateSchema,
+    source: z.enum(['api', 'manual']),
+  })
+  .openapi('Rate');
 export type RateDto = z.infer<typeof RateDtoSchema>;
 export const RatesQuerySchema = z.object({ date: IsoDateSchema.optional() });
-export const ManualRateInputSchema = z.object({ base: CurrencyCodeSchema, date: IsoDateSchema, value: DecimalString }).openapi('ManualRateInput');
+export const ManualRateInputSchema = z
+  .object({ base: CurrencyCodeSchema, date: IsoDateSchema, value: DecimalString })
+  .openapi('ManualRateInput');
 export type ManualRateInput = z.infer<typeof ManualRateInputSchema>;
 ```
 
@@ -898,18 +1129,35 @@ export type ManualRateInput = z.infer<typeof ManualRateInputSchema>;
 ```ts
 import { z } from '@hono/zod-openapi';
 import { CurrencyCodeSchema } from './common.js';
-export const ProfileDtoSchema = z.object({
-  id: z.string().uuid(), displayName: z.string().nullable(), locale: z.enum(['ru', 'en']),
-  defaultCurrency: CurrencyCodeSchema, reportingCurrencies: z.array(CurrencyCodeSchema).min(1),
-  onboardingCompletedAt: z.string().datetime().nullable(),
-}).openapi('Profile');
+export const ProfileDtoSchema = z
+  .object({
+    id: z.string().uuid(),
+    displayName: z.string().nullable(),
+    locale: z.enum(['ru', 'en']),
+    defaultCurrency: CurrencyCodeSchema,
+    reportingCurrencies: z.array(CurrencyCodeSchema).min(1),
+    onboardingCompletedAt: z.string().datetime().nullable(),
+  })
+  .openapi('Profile');
 export type ProfileDto = z.infer<typeof ProfileDtoSchema>;
-export const UpdateProfileInputSchema = z.object({
-  displayName: z.string().max(80).optional(), locale: z.enum(['ru', 'en']).optional(),
-  defaultCurrency: CurrencyCodeSchema.optional(), reportingCurrencies: z.array(CurrencyCodeSchema).min(1).max(12).optional(),
-}).refine((v) => !v.defaultCurrency || !v.reportingCurrencies || v.reportingCurrencies.includes(v.defaultCurrency), {
-  message: 'defaultCurrency must be one of reportingCurrencies', path: ['defaultCurrency'],
-}).openapi('UpdateProfileInput');
+export const UpdateProfileInputSchema = z
+  .object({
+    displayName: z.string().max(80).optional(),
+    locale: z.enum(['ru', 'en']).optional(),
+    defaultCurrency: CurrencyCodeSchema.optional(),
+    reportingCurrencies: z.array(CurrencyCodeSchema).min(1).max(12).optional(),
+  })
+  .refine(
+    (v) =>
+      !v.defaultCurrency ||
+      !v.reportingCurrencies ||
+      v.reportingCurrencies.includes(v.defaultCurrency),
+    {
+      message: 'defaultCurrency must be one of reportingCurrencies',
+      path: ['defaultCurrency'],
+    },
+  )
+  .openapi('UpdateProfileInput');
 export type UpdateProfileInput = z.infer<typeof UpdateProfileInputSchema>;
 ```
 
@@ -924,10 +1172,12 @@ export type UpdateProfileInput = z.infer<typeof UpdateProfileInputSchema>;
 ### Task 6: Supabase project, migrations, RLS, seed
 
 **Files:**
+
 - Create: `supabase/config.toml` (generated), `supabase/migrations/20260911000001_profiles.sql`, `supabase/migrations/20260911000002_currencies.sql`, `supabase/migrations/20260911000003_rates.sql`, `supabase/seed.sql`, `supabase/README.md`
 - Test: `supabase/test/rls.test.ts` (run from `apps/api` in Task 8's integration job; write it here)
 
 **Interfaces:**
+
 - Produces: tables `profiles`, `currencies`, `rates` exactly as in `docs/db/schema.dbml` phase 1; enum types `locale`, `currency_kind`, `rate_source`; trigger `handle_new_user`.
 
 - [ ] **Step 1: Initialise local Supabase**
@@ -1069,18 +1319,28 @@ Expected: `rates` shows the unique index and RLS enabled; `currencies` count = 1
 import { describe, expect, it, beforeAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 
-const url = process.env.SUPABASE_URL!; const anon = process.env.SUPABASE_ANON_KEY!; const service = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const url = process.env.SUPABASE_URL!;
+const anon = process.env.SUPABASE_ANON_KEY!;
+const service = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 async function userClient(email: string) {
   const admin = createClient(url, service);
-  const { data } = await admin.auth.admin.createUser({ email, password: 'pw-123456', email_confirm: true });
+  const { data } = await admin.auth.admin.createUser({
+    email,
+    password: 'pw-123456',
+    email_confirm: true,
+  });
   const c = createClient(url, anon);
   await c.auth.signInWithPassword({ email, password: 'pw-123456' });
   return { c, id: data.user!.id };
 }
 
 describe('RLS', () => {
-  let a: Awaited<ReturnType<typeof userClient>>; let b: typeof a;
-  beforeAll(async () => { a = await userClient(`a-${Date.now()}@test.local`); b = await userClient(`b-${Date.now()}@test.local`); });
+  let a: Awaited<ReturnType<typeof userClient>>;
+  let b: typeof a;
+  beforeAll(async () => {
+    a = await userClient(`a-${Date.now()}@test.local`);
+    b = await userClient(`b-${Date.now()}@test.local`);
+  });
 
   it('creates a profile on signup and hides it from others', async () => {
     expect((await a.c.from('profiles').select('id').eq('id', a.id)).data).toHaveLength(1);
@@ -1088,15 +1348,25 @@ describe('RLS', () => {
   });
 
   it('shares api rates but isolates manual rates', async () => {
-    await a.c.from('rates').insert({ base: 'RUB', value: '0.0123', date: '2026-01-01', source: 'manual', user_id: a.id });
+    await a.c.from('rates').insert({
+      base: 'RUB',
+      value: '0.0123',
+      date: '2026-01-01',
+      source: 'manual',
+      user_id: a.id,
+    });
     const seen = (await b.c.from('rates').select('source').eq('date', '2026-01-01')).data ?? [];
     expect(seen.every((r) => r.source === 'api')).toBe(true);
-    const mine = (await a.c.from('rates').select('source').eq('date', '2026-01-01').eq('source', 'manual')).data ?? [];
+    const mine =
+      (await a.c.from('rates').select('source').eq('date', '2026-01-01').eq('source', 'manual'))
+        .data ?? [];
     expect(mine).toHaveLength(1);
   });
 
   it('refuses a manual rate for another user', async () => {
-    const { error } = await a.c.from('rates').insert({ base: 'RUB', value: '1', date: '2026-01-02', source: 'manual', user_id: b.id });
+    const { error } = await a.c
+      .from('rates')
+      .insert({ base: 'RUB', value: '1', date: '2026-01-02', source: 'manual', user_id: b.id });
     expect(error).not.toBeNull();
   });
 });
@@ -1109,10 +1379,12 @@ describe('RLS', () => {
 ### Task 7: `apps/api` skeleton — Hono app, env, logger, errors, OpenAPI, health
 
 **Files:**
+
 - Create: `apps/api/package.json`, `apps/api/tsconfig.json`, `apps/api/vitest.config.ts`, `apps/api/src/shared/env.ts`, `apps/api/src/shared/logger.ts`, `apps/api/src/shared/errors/http.ts`, `apps/api/src/shared/openapi.ts`, `apps/api/src/app.ts`, `apps/api/src/index.ts`, `apps/api/api/index.ts`, `apps/api/vercel.ts`
 - Test: `apps/api/test/app.test.ts`, `apps/api/test/errors.test.ts`
 
 **Interfaces:**
+
 - Produces: `createApp(deps: AppDeps): OpenAPIHono<AppEnv>` where `AppEnv = { Variables: { userId: string; requestId: string } }`; `AppDeps = { profiles: ProfileRepository; rates: RateRepository; rateProviders: RateProvider[]; clock: Clock; jwtSecret: string; cronSecret: string }` (repository interfaces defined in Tasks 9–10; in this task `AppDeps` only needs `jwtSecret`, `cronSecret`, `clock`; extend later); `toHttpError(e: DomainError | NotFoundError | ForbiddenError): { status: number; body: ErrorDto }`.
 
 - [ ] **Step 1: Package files**
@@ -1134,11 +1406,25 @@ describe('RLS', () => {
     "lint": "eslint src test"
   },
   "dependencies": {
-    "hono": "^4.13.7", "@hono/zod-openapi": "^1.6.3", "@hono/swagger-ui": "^0.6.1", "@hono/node-server": "^2.1.1",
-    "zod": "^4.6.2", "postgres": "^3.4.9", "jose": "^6.2.12", "pino": "^10.3.1", "neverthrow": "^8.2.0", "decimal.js": "^10.6.0",
-    "@magermoney/domain": "workspace:*", "@magermoney/contracts": "workspace:*"
+    "hono": "^4.13.7",
+    "@hono/zod-openapi": "^1.6.3",
+    "@hono/swagger-ui": "^0.6.1",
+    "@hono/node-server": "^2.1.1",
+    "zod": "^4.6.2",
+    "postgres": "^3.4.9",
+    "jose": "^6.2.12",
+    "pino": "^10.3.1",
+    "neverthrow": "^8.2.0",
+    "decimal.js": "^10.6.0",
+    "@magermoney/domain": "workspace:*",
+    "@magermoney/contracts": "workspace:*"
   },
-  "devDependencies": { "vitest": "^5.0.0", "@supabase/supabase-js": "^2.116.0", "@types/node": "^24.0.0", "@vercel/config": "^0.7.0" }
+  "devDependencies": {
+    "vitest": "^5.0.0",
+    "@supabase/supabase-js": "^2.116.0",
+    "@types/node": "^24.0.0",
+    "@vercel/config": "^0.7.0"
+  }
 }
 ```
 
@@ -1185,7 +1471,12 @@ describe('app', () => {
 import { SystemClock, type Clock } from '@magermoney/domain';
 import type { AppDeps } from '../../src/app.js';
 export function testDeps(over: Partial<AppDeps> = {}): AppDeps {
-  return { clock: new SystemClock() as Clock, jwtSecret: 'test-secret-test-secret-test-secret-1234', cronSecret: 'cron', ...over } as AppDeps;
+  return {
+    clock: new SystemClock() as Clock,
+    jwtSecret: 'test-secret-test-secret-test-secret-1234',
+    cronSecret: 'cron',
+    ...over,
+  } as AppDeps;
 }
 ```
 
@@ -1200,7 +1491,10 @@ describe('toHttpError', () => {
   it('maps domain errors to statuses', () => {
     expect(toHttpError(new RateMissingError('KZT', 'USD', '2026-01-01')).status).toBe(422);
     expect(toHttpError(new UnknownCurrencyError('XYZ')).status).toBe(400);
-    expect(toHttpError(new NotFoundError('profile'))).toEqual({ status: 404, body: { code: 'NOT_FOUND', message: 'profile not found' } });
+    expect(toHttpError(new NotFoundError('profile'))).toEqual({
+      status: 404,
+      body: { code: 'NOT_FOUND', message: 'profile not found' },
+    });
   });
 });
 ```
@@ -1231,26 +1525,60 @@ export const loadEnv = (source: NodeJS.ProcessEnv = process.env): Env => schema.
 import pino from 'pino';
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? 'info',
-  redact: { paths: ['req.headers.authorization', 'email', '*.email', 'amount', '*.amount', 'value', '*.value'], censor: '[redacted]' },
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'email',
+      '*.email',
+      'amount',
+      '*.amount',
+      'value',
+      '*.value',
+    ],
+    censor: '[redacted]',
+  },
 });
 ```
 
 `src/shared/errors/http.ts`:
 
 ```ts
-import { DomainError, RateMissingError, UnknownCurrencyError, CurrencyMismatchError, InvalidAmountError } from '@magermoney/domain';
+import {
+  DomainError,
+  RateMissingError,
+  UnknownCurrencyError,
+  CurrencyMismatchError,
+  InvalidAmountError,
+} from '@magermoney/domain';
 import type { ErrorDto } from '@magermoney/contracts';
 
-export class NotFoundError extends Error { readonly code = 'NOT_FOUND'; constructor(readonly what: string) { super(`${what} not found`); } }
-export class UnauthorizedError extends Error { readonly code = 'UNAUTHORIZED'; constructor() { super('Sign in required'); } }
+export class NotFoundError extends Error {
+  readonly code = 'NOT_FOUND';
+  constructor(readonly what: string) {
+    super(`${what} not found`);
+  }
+}
+export class UnauthorizedError extends Error {
+  readonly code = 'UNAUTHORIZED';
+  constructor() {
+    super('Sign in required');
+  }
+}
 
 export type AppError = DomainError | NotFoundError | UnauthorizedError;
 
 export function toHttpError(e: AppError): { status: 400 | 401 | 404 | 422 | 500; body: ErrorDto } {
-  if (e instanceof NotFoundError) return { status: 404, body: { code: e.code, message: e.message } };
-  if (e instanceof UnauthorizedError) return { status: 401, body: { code: e.code, message: e.message } };
-  if (e instanceof RateMissingError) return { status: 422, body: { code: e.code, message: e.message } };
-  if (e instanceof UnknownCurrencyError || e instanceof CurrencyMismatchError || e instanceof InvalidAmountError)
+  if (e instanceof NotFoundError)
+    return { status: 404, body: { code: e.code, message: e.message } };
+  if (e instanceof UnauthorizedError)
+    return { status: 401, body: { code: e.code, message: e.message } };
+  if (e instanceof RateMissingError)
+    return { status: 422, body: { code: e.code, message: e.message } };
+  if (
+    e instanceof UnknownCurrencyError ||
+    e instanceof CurrencyMismatchError ||
+    e instanceof InvalidAmountError
+  )
     return { status: 400, body: { code: e.code, message: e.message } };
   return { status: 500, body: { code: 'INTERNAL', message: 'Unexpected error' } };
 }
@@ -1263,8 +1591,15 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import type { AppEnv } from '../app.js';
 export function mountOpenApi(app: OpenAPIHono<AppEnv>, exposeUi: boolean) {
-  app.doc('/openapi.json', { openapi: '3.1.0', info: { title: 'Magermoney API', version: '0.1.0' } });
-  app.openAPIRegistry.registerComponent('securitySchemes', 'bearer', { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' });
+  app.doc('/openapi.json', {
+    openapi: '3.1.0',
+    info: { title: 'Magermoney API', version: '0.1.0' },
+  });
+  app.openAPIRegistry.registerComponent('securitySchemes', 'bearer', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+  });
   if (exposeUi) app.get('/docs', swaggerUI({ url: '/openapi.json' }));
 }
 ```
@@ -1280,19 +1615,49 @@ import { mountOpenApi } from './shared/openapi.js';
 import { logger } from './shared/logger.js';
 
 export type AppEnv = { Variables: { userId: string; requestId: string } };
-export interface AppDeps { clock: Clock; jwtSecret: string; cronSecret: string; exposeDocs?: boolean }
+export interface AppDeps {
+  clock: Clock;
+  jwtSecret: string;
+  cronSecret: string;
+  exposeDocs?: boolean;
+}
 
 export function createApp(deps: AppDeps) {
-  const app = new OpenAPIHono<AppEnv>({ defaultHook: (result, c) => {
-    if (!result.success) return c.json({ code: 'VALIDATION', message: result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') }, 400);
-  } });
+  const app = new OpenAPIHono<AppEnv>({
+    defaultHook: (result, c) => {
+      if (!result.success)
+        return c.json(
+          {
+            code: 'VALIDATION',
+            message: result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+          },
+          400,
+        );
+    },
+  });
   app.use('*', requestId());
   app.use('*', cors({ origin: (o) => o, credentials: true }));
   app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404));
-  app.onError((e, c) => { logger.error({ err: e, requestId: c.get('requestId') }, 'unhandled'); return c.json({ code: 'INTERNAL', message: 'Unexpected error' }, 500); });
+  app.onError((e, c) => {
+    logger.error({ err: e, requestId: c.get('requestId') }, 'unhandled');
+    return c.json({ code: 'INTERNAL', message: 'Unexpected error' }, 500);
+  });
 
-  app.openapi(createRoute({ method: 'get', path: '/health', responses: { 200: { description: 'ok', content: { 'application/json': { schema: z.object({ ok: z.boolean(), date: z.string() }) } } } } }),
-    (c) => c.json({ ok: true, date: deps.clock.today() }, 200));
+  app.openapi(
+    createRoute({
+      method: 'get',
+      path: '/health',
+      responses: {
+        200: {
+          description: 'ok',
+          content: {
+            'application/json': { schema: z.object({ ok: z.boolean(), date: z.string() }) },
+          },
+        },
+      },
+    }),
+    (c) => c.json({ ok: true, date: deps.clock.today() }, 200),
+  );
 
   mountOpenApi(app, deps.exposeDocs ?? true);
   return app;
@@ -1307,7 +1672,12 @@ import { SystemClock } from '@magermoney/domain';
 import { createApp } from './app.js';
 import { loadEnv } from './shared/env.js';
 const env = loadEnv();
-const app = createApp({ clock: new SystemClock(), jwtSecret: env.SUPABASE_JWT_SECRET, cronSecret: env.CRON_SECRET, exposeDocs: env.NODE_ENV !== 'production' });
+const app = createApp({
+  clock: new SystemClock(),
+  jwtSecret: env.SUPABASE_JWT_SECRET,
+  cronSecret: env.CRON_SECRET,
+  exposeDocs: env.NODE_ENV !== 'production',
+});
 serve({ fetch: app.fetch, port: 3000 }, (i) => console.log(`api on http://localhost:${i.port}`));
 ```
 
@@ -1319,7 +1689,12 @@ import { SystemClock } from '@magermoney/domain';
 import { createApp } from '../src/app.js';
 import { loadEnv } from '../src/shared/env.js';
 const env = loadEnv();
-const app = createApp({ clock: new SystemClock(), jwtSecret: env.SUPABASE_JWT_SECRET, cronSecret: env.CRON_SECRET, exposeDocs: env.NODE_ENV !== 'production' });
+const app = createApp({
+  clock: new SystemClock(),
+  jwtSecret: env.SUPABASE_JWT_SECRET,
+  cronSecret: env.CRON_SECRET,
+  exposeDocs: env.NODE_ENV !== 'production',
+});
 export default handle(app);
 ```
 
@@ -1330,7 +1705,10 @@ import { routes, type VercelConfig } from '@vercel/config/v1';
 export const config: VercelConfig = {
   framework: null,
   rewrites: [routes.rewrite('/(.*)', '/api')],
-  crons: [{ path: '/jobs/rates?kind=fiat', schedule: '15 6 * * *' }, { path: '/jobs/rates?kind=crypto', schedule: '5 * * * *' }],
+  crons: [
+    { path: '/jobs/rates?kind=fiat', schedule: '15 6 * * *' },
+    { path: '/jobs/rates?kind=crypto', schedule: '5 * * * *' },
+  ],
 };
 ```
 
@@ -1343,11 +1721,13 @@ export const config: VercelConfig = {
 ### Task 8: `apps/api` — Supabase JWT auth middleware and DB client
 
 **Files:**
+
 - Create: `apps/api/src/shared/auth/jwt.ts`, `apps/api/src/shared/auth/middleware.ts`, `apps/api/src/shared/db/client.ts`
 - Modify: `apps/api/src/app.ts`
 - Test: `apps/api/test/auth.test.ts`, `apps/api/test/helpers/token.ts`
 
 **Interfaces:**
+
 - Produces: `verifySupabaseJwt(token, secret): Promise<Result<{ userId: string }, UnauthorizedError>>`; `requireUser(secret): MiddlewareHandler<AppEnv>` which sets `c.var.userId`; `createDb(url): Sql` (postgres.js instance with `transform: postgres.camel`, `types` mapping `numeric` → string); test helper `signTestToken(userId, secret)`.
 
 - [ ] **Step 1: Failing test**
@@ -1357,7 +1737,12 @@ export const config: VercelConfig = {
 ```ts
 import { SignJWT } from 'jose';
 export const signTestToken = (sub: string, secret: string, exp = '1h') =>
-  new SignJWT({ role: 'authenticated', aud: 'authenticated' }).setProtectedHeader({ alg: 'HS256' }).setSubject(sub).setIssuedAt().setExpirationTime(exp).sign(new TextEncoder().encode(secret));
+  new SignJWT({ role: 'authenticated', aud: 'authenticated' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(sub)
+    .setIssuedAt()
+    .setExpirationTime(exp)
+    .sign(new TextEncoder().encode(secret));
 ```
 
 `apps/api/test/auth.test.ts`:
@@ -1382,11 +1767,15 @@ describe('requireUser', () => {
   });
   it('rejects a token signed with another secret', async () => {
     const t = await signTestToken('u1', 'x'.repeat(40));
-    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(401);
+    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(
+      401,
+    );
   });
   it('rejects an expired token', async () => {
     const t = await signTestToken('u1', secret, '-1s');
-    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(401);
+    expect((await app.request('/me', { headers: { authorization: `Bearer ${t}` } })).status).toBe(
+      401,
+    );
   });
   it('accepts a valid token and exposes userId', async () => {
     const t = await signTestToken('11111111-1111-1111-1111-111111111111', secret);
@@ -1406,11 +1795,21 @@ describe('requireUser', () => {
 import { jwtVerify } from 'jose';
 import { err, ok, type Result } from 'neverthrow';
 import { UnauthorizedError } from '../errors/http.js';
-export async function verifySupabaseJwt(token: string, secret: string): Promise<Result<{ userId: string }, UnauthorizedError>> {
+export async function verifySupabaseJwt(
+  token: string,
+  secret: string,
+): Promise<Result<{ userId: string }, UnauthorizedError>> {
   try {
-    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), { algorithms: ['HS256'], audience: 'authenticated' });
-    return typeof payload.sub === 'string' ? ok({ userId: payload.sub }) : err(new UnauthorizedError());
-  } catch { return err(new UnauthorizedError()); }
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), {
+      algorithms: ['HS256'],
+      audience: 'authenticated',
+    });
+    return typeof payload.sub === 'string'
+      ? ok({ userId: payload.sub })
+      : err(new UnauthorizedError());
+  } catch {
+    return err(new UnauthorizedError());
+  }
 }
 ```
 
@@ -1421,14 +1820,19 @@ import type { MiddlewareHandler } from 'hono';
 import type { AppEnv } from '../../app.js';
 import { toHttpError, UnauthorizedError } from '../errors/http.js';
 import { verifySupabaseJwt } from './jwt.js';
-export const requireUser = (secret: string): MiddlewareHandler<AppEnv> => async (c, next) => {
-  const header = c.req.header('authorization') ?? '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  const verified = token ? await verifySupabaseJwt(token, secret) : undefined;
-  if (!verified || verified.isErr()) { const { status, body } = toHttpError(new UnauthorizedError()); return c.json(body, status); }
-  c.set('userId', verified.value.userId);
-  await next();
-};
+export const requireUser =
+  (secret: string): MiddlewareHandler<AppEnv> =>
+  async (c, next) => {
+    const header = c.req.header('authorization') ?? '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+    const verified = token ? await verifySupabaseJwt(token, secret) : undefined;
+    if (!verified || verified.isErr()) {
+      const { status, body } = toHttpError(new UnauthorizedError());
+      return c.json(body, status);
+    }
+    c.set('userId', verified.value.userId);
+    await next();
+  };
 ```
 
 `src/shared/db/client.ts`:
@@ -1436,10 +1840,16 @@ export const requireUser = (secret: string): MiddlewareHandler<AppEnv> => async 
 ```ts
 import postgres from 'postgres';
 export type Sql = ReturnType<typeof createDb>;
-export const createDb = (url: string) => postgres(url, {
-  transform: postgres.camel, max: 5, idle_timeout: 20, prepare: false,
-  types: { numeric: { to: 1700, from: [1700], serialize: (v: string) => v, parse: (v: string) => v } },
-});
+export const createDb = (url: string) =>
+  postgres(url, {
+    transform: postgres.camel,
+    max: 5,
+    idle_timeout: 20,
+    prepare: false,
+    types: {
+      numeric: { to: 1700, from: [1700], serialize: (v: string) => v, parse: (v: string) => v },
+    },
+  });
 ```
 
 (`prepare: false` because Supabase's pooler in transaction mode does not support prepared statements; `numeric` stays a string so `Money.parse` receives exact text.)
@@ -1453,11 +1863,13 @@ export const createDb = (url: string) => postgres(url, {
 ### Task 9: `apps/api` — profiles module (`GET/PATCH /me`)
 
 **Files:**
+
 - Create: `apps/api/src/modules/profiles/application/profile-repository.ts`, `.../application/get-profile.ts`, `.../application/update-profile.ts`, `.../infrastructure/pg-profile-repository.ts`, `.../infrastructure/memory-profile-repository.ts`, `.../http/routes.ts`
 - Modify: `apps/api/src/app.ts`, `apps/api/test/helpers/deps.ts`
 - Test: `apps/api/test/profiles.test.ts`, `apps/api/test/integration/pg-profile-repository.test.ts`
 
 **Interfaces:**
+
 - Produces: `interface Profile { id: string; displayName: string | null; locale: 'ru' | 'en'; defaultCurrency: string; reportingCurrencies: string[]; onboardingCompletedAt: string | null }`; `interface ProfileRepository { findById(id): Promise<Profile | null>; update(id, patch: Partial<Omit<Profile,'id'>>): Promise<Profile | null> }`; `getProfile(repo)(userId): Promise<Result<Profile, NotFoundError>>`; `updateProfile(repo, registry)(userId, input: UpdateProfileInput): Promise<Result<Profile, NotFoundError | UnknownCurrencyError>>`; `profileRoutes(deps): OpenAPIHono<AppEnv>` mounted at `/me`. `AppDeps` gains `profiles: ProfileRepository`.
 
 - [ ] **Step 1: Failing tests**
@@ -1473,10 +1885,22 @@ import { signTestToken } from './helpers/token.js';
 
 const uid = '11111111-1111-1111-1111-111111111111';
 const secret = 'test-secret-test-secret-test-secret-1234';
-const auth = async () => ({ authorization: `Bearer ${await signTestToken(uid, secret)}`, 'content-type': 'application/json' });
+const auth = async () => ({
+  authorization: `Bearer ${await signTestToken(uid, secret)}`,
+  'content-type': 'application/json',
+});
 
 function setup() {
-  const profiles = new MemoryProfileRepository([{ id: uid, displayName: null, locale: 'ru', defaultCurrency: 'EUR', reportingCurrencies: ['EUR', 'USD', 'RUB'], onboardingCompletedAt: null }]);
+  const profiles = new MemoryProfileRepository([
+    {
+      id: uid,
+      displayName: null,
+      locale: 'ru',
+      defaultCurrency: 'EUR',
+      reportingCurrencies: ['EUR', 'USD', 'RUB'],
+      onboardingCompletedAt: null,
+    },
+  ]);
   return { app: createApp(testDeps({ profiles, jwtSecret: secret })), profiles };
 }
 
@@ -1488,24 +1912,41 @@ describe('/me', () => {
     expect((await res.json()).defaultCurrency).toBe('EUR');
   });
   it('404s when the profile row is missing', async () => {
-    const app = createApp(testDeps({ profiles: new MemoryProfileRepository([]), jwtSecret: secret }));
+    const app = createApp(
+      testDeps({ profiles: new MemoryProfileRepository([]), jwtSecret: secret }),
+    );
     expect((await app.request('/me', { headers: await auth() })).status).toBe(404);
   });
   it('updates reporting currencies and default', async () => {
     const { app } = setup();
-    const res = await app.request('/me', { method: 'PATCH', headers: await auth(), body: JSON.stringify({ reportingCurrencies: ['USD', 'KZT'], defaultCurrency: 'KZT' }) });
+    const res = await app.request('/me', {
+      method: 'PATCH',
+      headers: await auth(),
+      body: JSON.stringify({ reportingCurrencies: ['USD', 'KZT'], defaultCurrency: 'KZT' }),
+    });
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ reportingCurrencies: ['USD', 'KZT'], defaultCurrency: 'KZT' });
+    expect(await res.json()).toMatchObject({
+      reportingCurrencies: ['USD', 'KZT'],
+      defaultCurrency: 'KZT',
+    });
   });
   it('rejects an unknown currency with 400', async () => {
     const { app } = setup();
-    const res = await app.request('/me', { method: 'PATCH', headers: await auth(), body: JSON.stringify({ reportingCurrencies: ['USD', 'XYZ'] }) });
+    const res = await app.request('/me', {
+      method: 'PATCH',
+      headers: await auth(),
+      body: JSON.stringify({ reportingCurrencies: ['USD', 'XYZ'] }),
+    });
     expect(res.status).toBe(400);
     expect((await res.json()).code).toBe('UNKNOWN_CURRENCY');
   });
   it('rejects a default outside the reporting list with 400', async () => {
     const { app } = setup();
-    const res = await app.request('/me', { method: 'PATCH', headers: await auth(), body: JSON.stringify({ reportingCurrencies: ['USD'], defaultCurrency: 'EUR' }) });
+    const res = await app.request('/me', {
+      method: 'PATCH',
+      headers: await auth(),
+      body: JSON.stringify({ reportingCurrencies: ['USD'], defaultCurrency: 'EUR' }),
+    });
     expect(res.status).toBe(400);
   });
 });
@@ -1525,13 +1966,25 @@ describe('PgProfileRepository', () => {
   let id: string;
   beforeAll(async () => {
     const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-    const { data } = await admin.auth.admin.createUser({ email: `p-${Date.now()}@test.local`, password: 'pw-123456', email_confirm: true });
+    const { data } = await admin.auth.admin.createUser({
+      email: `p-${Date.now()}@test.local`,
+      password: 'pw-123456',
+      email_confirm: true,
+    });
     id = data.user!.id;
   });
   it('reads the trigger-created profile and updates it', async () => {
     expect((await repo.findById(id))?.locale).toBe('ru');
-    const updated = await repo.update(id, { locale: 'en', reportingCurrencies: ['USD'], defaultCurrency: 'USD' });
-    expect(updated).toMatchObject({ locale: 'en', reportingCurrencies: ['USD'], defaultCurrency: 'USD' });
+    const updated = await repo.update(id, {
+      locale: 'en',
+      reportingCurrencies: ['USD'],
+      defaultCurrency: 'USD',
+    });
+    expect(updated).toMatchObject({
+      locale: 'en',
+      reportingCurrencies: ['USD'],
+      defaultCurrency: 'USD',
+    });
     expect(await repo.findById('00000000-0000-0000-0000-000000000000')).toBeNull();
   });
 });
@@ -1544,9 +1997,19 @@ describe('PgProfileRepository', () => {
 `application/profile-repository.ts`:
 
 ```ts
-export interface Profile { id: string; displayName: string | null; locale: 'ru' | 'en'; defaultCurrency: string; reportingCurrencies: string[]; onboardingCompletedAt: string | null }
+export interface Profile {
+  id: string;
+  displayName: string | null;
+  locale: 'ru' | 'en';
+  defaultCurrency: string;
+  reportingCurrencies: string[];
+  onboardingCompletedAt: string | null;
+}
 export type ProfilePatch = Partial<Omit<Profile, 'id'>>;
-export interface ProfileRepository { findById(id: string): Promise<Profile | null>; update(id: string, patch: ProfilePatch): Promise<Profile | null> }
+export interface ProfileRepository {
+  findById(id: string): Promise<Profile | null>;
+  update(id: string, patch: ProfilePatch): Promise<Profile | null>;
+}
 ```
 
 `application/get-profile.ts`:
@@ -1555,10 +2018,12 @@ export interface ProfileRepository { findById(id: string): Promise<Profile | nul
 import { err, ok, type Result } from 'neverthrow';
 import { NotFoundError } from '../../../shared/errors/http.js';
 import type { Profile, ProfileRepository } from './profile-repository.js';
-export const getProfile = (repo: ProfileRepository) => async (userId: string): Promise<Result<Profile, NotFoundError>> => {
-  const p = await repo.findById(userId);
-  return p ? ok(p) : err(new NotFoundError('profile'));
-};
+export const getProfile =
+  (repo: ProfileRepository) =>
+  async (userId: string): Promise<Result<Profile, NotFoundError>> => {
+    const p = await repo.findById(userId);
+    return p ? ok(p) : err(new NotFoundError('profile'));
+  };
 ```
 
 `application/update-profile.ts`:
@@ -1570,17 +2035,29 @@ import type { UpdateProfileInput } from '@magermoney/contracts';
 import { NotFoundError } from '../../../shared/errors/http.js';
 import type { Profile, ProfileRepository } from './profile-repository.js';
 
-export const updateProfile = (repo: ProfileRepository, registry: CurrencyRegistry) =>
-  async (userId: string, input: UpdateProfileInput): Promise<Result<Profile, NotFoundError | UnknownCurrencyError>> => {
-    for (const code of [...(input.reportingCurrencies ?? []), ...(input.defaultCurrency ? [input.defaultCurrency] : [])]) {
+export const updateProfile =
+  (repo: ProfileRepository, registry: CurrencyRegistry) =>
+  async (
+    userId: string,
+    input: UpdateProfileInput,
+  ): Promise<Result<Profile, NotFoundError | UnknownCurrencyError>> => {
+    for (const code of [
+      ...(input.reportingCurrencies ?? []),
+      ...(input.defaultCurrency ? [input.defaultCurrency] : []),
+    ]) {
       if (!registry.has(code)) return err(new UnknownCurrencyError(code));
     }
     const current = await repo.findById(userId);
     if (!current) return err(new NotFoundError('profile'));
     const reporting = input.reportingCurrencies ?? current.reportingCurrencies;
     const def = input.defaultCurrency ?? current.defaultCurrency;
-    if (!reporting.includes(def)) return err(new UnknownCurrencyError(`${def} is not in reporting currencies`));
-    const updated = await repo.update(userId, { ...input, reportingCurrencies: reporting, defaultCurrency: def });
+    if (!reporting.includes(def))
+      return err(new UnknownCurrencyError(`${def} is not in reporting currencies`));
+    const updated = await repo.update(userId, {
+      ...input,
+      reportingCurrencies: reporting,
+      defaultCurrency: def,
+    });
     return updated ? ok(updated) : err(new NotFoundError('profile'));
   };
 ```
@@ -1588,14 +2065,25 @@ export const updateProfile = (repo: ProfileRepository, registry: CurrencyRegistr
 `infrastructure/memory-profile-repository.ts`:
 
 ```ts
-import type { Profile, ProfilePatch, ProfileRepository } from '../application/profile-repository.js';
+import type {
+  Profile,
+  ProfilePatch,
+  ProfileRepository,
+} from '../application/profile-repository.js';
 export class MemoryProfileRepository implements ProfileRepository {
   private rows: Map<string, Profile>;
-  constructor(seed: Profile[]) { this.rows = new Map(seed.map((p) => [p.id, p])); }
-  async findById(id: string) { return this.rows.get(id) ?? null; }
+  constructor(seed: Profile[]) {
+    this.rows = new Map(seed.map((p) => [p.id, p]));
+  }
+  async findById(id: string) {
+    return this.rows.get(id) ?? null;
+  }
   async update(id: string, patch: ProfilePatch) {
-    const cur = this.rows.get(id); if (!cur) return null;
-    const next = { ...cur, ...patch }; this.rows.set(id, next); return next;
+    const cur = this.rows.get(id);
+    if (!cur) return null;
+    const next = { ...cur, ...patch };
+    this.rows.set(id, next);
+    return next;
   }
 }
 ```
@@ -1604,12 +2092,19 @@ export class MemoryProfileRepository implements ProfileRepository {
 
 ```ts
 import type { Sql } from '../../../shared/db/client.js';
-import type { Profile, ProfilePatch, ProfileRepository } from '../application/profile-repository.js';
-const cols = 'id, display_name, locale, default_currency, reporting_currencies, onboarding_completed_at';
+import type {
+  Profile,
+  ProfilePatch,
+  ProfileRepository,
+} from '../application/profile-repository.js';
+const cols =
+  'id, display_name, locale, default_currency, reporting_currencies, onboarding_completed_at';
 export class PgProfileRepository implements ProfileRepository {
   constructor(private readonly sql: Sql) {}
   async findById(id: string): Promise<Profile | null> {
-    const [row] = await this.sql<Profile[]>`select ${this.sql.unsafe(cols)} from profiles where id = ${id}`;
+    const [row] = await this.sql<
+      Profile[]
+    >`select ${this.sql.unsafe(cols)} from profiles where id = ${id}`;
     return row ?? null;
   }
   async update(id: string, patch: ProfilePatch): Promise<Profile | null> {
@@ -1617,10 +2112,14 @@ export class PgProfileRepository implements ProfileRepository {
     if (patch.displayName !== undefined) data.display_name = patch.displayName;
     if (patch.locale !== undefined) data.locale = patch.locale;
     if (patch.defaultCurrency !== undefined) data.default_currency = patch.defaultCurrency;
-    if (patch.reportingCurrencies !== undefined) data.reporting_currencies = patch.reportingCurrencies;
-    if (patch.onboardingCompletedAt !== undefined) data.onboarding_completed_at = patch.onboardingCompletedAt;
+    if (patch.reportingCurrencies !== undefined)
+      data.reporting_currencies = patch.reportingCurrencies;
+    if (patch.onboardingCompletedAt !== undefined)
+      data.onboarding_completed_at = patch.onboardingCompletedAt;
     if (Object.keys(data).length === 0) return this.findById(id);
-    const [row] = await this.sql<Profile[]>`update profiles set ${this.sql(data)} where id = ${id} returning ${this.sql.unsafe(cols)}`;
+    const [row] = await this.sql<
+      Profile[]
+    >`update profiles set ${this.sql(data)} where id = ${id} returning ${this.sql.unsafe(cols)}`;
     return row ?? null;
   }
 }
@@ -1637,15 +2136,67 @@ import { toHttpError } from '../../../shared/errors/http.js';
 import { getProfile } from '../application/get-profile.js';
 import { updateProfile } from '../application/update-profile.js';
 
-const errors = { 400: { description: 'Bad request', content: { 'application/json': { schema: ErrorDtoSchema } } }, 401: { description: 'Unauthorized', content: { 'application/json': { schema: ErrorDtoSchema } } }, 404: { description: 'Not found', content: { 'application/json': { schema: ErrorDtoSchema } } } };
+const errors = {
+  400: { description: 'Bad request', content: { 'application/json': { schema: ErrorDtoSchema } } },
+  401: { description: 'Unauthorized', content: { 'application/json': { schema: ErrorDtoSchema } } },
+  404: { description: 'Not found', content: { 'application/json': { schema: ErrorDtoSchema } } },
+};
 
 export function profileRoutes(deps: AppDeps) {
   const r = new OpenAPIHono<AppEnv>();
   r.use('*', requireUser(deps.jwtSecret));
-  r.openapi(createRoute({ method: 'get', path: '/', security: [{ bearer: [] }], responses: { 200: { description: 'Profile', content: { 'application/json': { schema: ProfileDtoSchema } } }, ...errors } }),
-    async (c) => { const res = await getProfile(deps.profiles)(c.var.userId); return res.match((p) => c.json(p, 200), (e) => { const h = toHttpError(e); return c.json(h.body, h.status as 404); }); });
-  r.openapi(createRoute({ method: 'patch', path: '/', security: [{ bearer: [] }], request: { body: { content: { 'application/json': { schema: UpdateProfileInputSchema } } } }, responses: { 200: { description: 'Updated', content: { 'application/json': { schema: ProfileDtoSchema } } }, ...errors } }),
-    async (c) => { const res = await updateProfile(deps.profiles, deps.registry)(c.var.userId, c.req.valid('json')); return res.match((p) => c.json(p, 200), (e) => { const h = toHttpError(e); return c.json(h.body, h.status as 400); }); });
+  r.openapi(
+    createRoute({
+      method: 'get',
+      path: '/',
+      security: [{ bearer: [] }],
+      responses: {
+        200: {
+          description: 'Profile',
+          content: { 'application/json': { schema: ProfileDtoSchema } },
+        },
+        ...errors,
+      },
+    }),
+    async (c) => {
+      const res = await getProfile(deps.profiles)(c.var.userId);
+      return res.match(
+        (p) => c.json(p, 200),
+        (e) => {
+          const h = toHttpError(e);
+          return c.json(h.body, h.status as 404);
+        },
+      );
+    },
+  );
+  r.openapi(
+    createRoute({
+      method: 'patch',
+      path: '/',
+      security: [{ bearer: [] }],
+      request: { body: { content: { 'application/json': { schema: UpdateProfileInputSchema } } } },
+      responses: {
+        200: {
+          description: 'Updated',
+          content: { 'application/json': { schema: ProfileDtoSchema } },
+        },
+        ...errors,
+      },
+    }),
+    async (c) => {
+      const res = await updateProfile(deps.profiles, deps.registry)(
+        c.var.userId,
+        c.req.valid('json'),
+      );
+      return res.match(
+        (p) => c.json(p, 200),
+        (e) => {
+          const h = toHttpError(e);
+          return c.json(h.body, h.status as 400);
+        },
+      );
+    },
+  );
   return r;
 }
 ```
@@ -1661,11 +2212,13 @@ export function profileRoutes(deps: AppDeps) {
 ### Task 10: `apps/api` — currencies and rates read routes
 
 **Files:**
+
 - Create: `apps/api/src/modules/rates/application/rate-repository.ts`, `.../application/get-rates.ts`, `.../application/list-currencies.ts`, `.../infrastructure/memory-rate-repository.ts`, `.../infrastructure/pg-rate-repository.ts`, `.../http/routes.ts`
 - Modify: `apps/api/src/app.ts`, `apps/api/test/helpers/deps.ts`
 - Test: `apps/api/test/rates-read.test.ts`, `apps/api/test/integration/pg-rate-repository.test.ts`
 
 **Interfaces:**
+
 - Produces: `interface RateRow { base: string; quote: 'USD'; value: string; date: string; source: 'api' | 'manual'; userId: string | null }`; `interface RateRepository { latestOnOrBefore(date, userId): Promise<RateRow[]>; upsertMany(rows: Omit<RateRow,'quote'>[]): Promise<number>; listCurrencies(): Promise<CurrencyDto[]> }`; `getRates(repo)(userId, date): Promise<RateDto[]>` — for each base returns the newest row with `date <= requested`, where a user's manual row for the exact date beats the shared api row; `GET /currencies`, `GET /rates?date=`.
 
 - [ ] **Step 1: Failing test**
@@ -1680,7 +2233,8 @@ import { MemoryRateRepository } from '../src/modules/rates/infrastructure/memory
 import { testDeps } from './helpers/deps.js';
 import { signTestToken } from './helpers/token.js';
 
-const uid = '11111111-1111-1111-1111-111111111111'; const other = '22222222-2222-2222-2222-222222222222';
+const uid = '11111111-1111-1111-1111-111111111111';
+const other = '22222222-2222-2222-2222-222222222222';
 const secret = 'test-secret-test-secret-test-secret-1234';
 const auth = async () => ({ authorization: `Bearer ${await signTestToken(uid, secret)}` });
 const rates = new MemoryRateRepository([
@@ -1688,17 +2242,32 @@ const rates = new MemoryRateRepository([
   { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-10', source: 'api', userId: null },
   { base: 'RUB', quote: 'USD', value: '0.0119', date: '2026-09-10', source: 'api', userId: null },
   { base: 'RUB', quote: 'USD', value: '0.0120', date: '2026-09-10', source: 'manual', userId: uid },
-  { base: 'KZT', quote: 'USD', value: '0.0022', date: '2026-09-10', source: 'manual', userId: other },
+  {
+    base: 'KZT',
+    quote: 'USD',
+    value: '0.0022',
+    date: '2026-09-10',
+    source: 'manual',
+    userId: other,
+  },
 ]);
-const app = createApp(testDeps({ rates, jwtSecret: secret, clock: new FixedClock(new Date('2026-09-11T00:00:00Z')) }));
+const app = createApp(
+  testDeps({ rates, jwtSecret: secret, clock: new FixedClock(new Date('2026-09-11T00:00:00Z')) }),
+);
 
 describe('GET /rates', () => {
   it('returns the newest rate per base on or before the date, manual beating api for the caller', async () => {
     const res = await app.request('/rates?date=2026-09-10', { headers: await auth() });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.find((r: { base: string }) => r.base === 'EUR')).toMatchObject({ value: '1.16', source: 'api' });
-    expect(body.find((r: { base: string }) => r.base === 'RUB')).toMatchObject({ value: '0.0120', source: 'manual' });
+    expect(body.find((r: { base: string }) => r.base === 'EUR')).toMatchObject({
+      value: '1.16',
+      source: 'api',
+    });
+    expect(body.find((r: { base: string }) => r.base === 'RUB')).toMatchObject({
+      value: '0.0120',
+      source: 'manual',
+    });
     expect(body.find((r: { base: string }) => r.base === 'KZT')).toBeUndefined();
   });
   it('defaults to today and falls back to older rates', async () => {
@@ -1721,9 +2290,16 @@ describe('GET /rates', () => {
 
 ```ts
 import type { CurrencyDto } from '@magermoney/contracts';
-export interface RateRow { base: string; quote: 'USD'; value: string; date: string; source: 'api' | 'manual'; userId: string | null }
+export interface RateRow {
+  base: string;
+  quote: 'USD';
+  value: string;
+  date: string;
+  source: 'api' | 'manual';
+  userId: string | null;
+}
 export interface RateRepository {
-  latestOnOrBefore(date: string, userId: string): Promise<RateRow[]>;   // all candidate rows visible to userId with date <= date
+  latestOnOrBefore(date: string, userId: string): Promise<RateRow[]>; // all candidate rows visible to userId with date <= date
   upsertMany(rows: Omit<RateRow, 'quote'>[]): Promise<number>;
   listCurrencies(): Promise<CurrencyDto[]>;
 }
@@ -1739,11 +2315,25 @@ export const pickLatest = (rows: RateRow[]): RateDto[] => {
   const best = new Map<string, RateRow>();
   for (const r of rows) {
     const cur = best.get(r.base);
-    if (!cur || r.date > cur.date || (r.date === cur.date && r.source === 'manual' && cur.source === 'api')) best.set(r.base, r);
+    if (
+      !cur ||
+      r.date > cur.date ||
+      (r.date === cur.date && r.source === 'manual' && cur.source === 'api')
+    )
+      best.set(r.base, r);
   }
-  return [...best.values()].map(({ base, quote, value, date, source }) => ({ base, quote, value, date, source }));
+  return [...best.values()].map(({ base, quote, value, date, source }) => ({
+    base,
+    quote,
+    value,
+    date,
+    source,
+  }));
 };
-export const getRates = (repo: RateRepository) => async (userId: string, date: string): Promise<RateDto[]> => pickLatest(await repo.latestOnOrBefore(date, userId));
+export const getRates =
+  (repo: RateRepository) =>
+  async (userId: string, date: string): Promise<RateDto[]> =>
+    pickLatest(await repo.latestOnOrBefore(date, userId));
 ```
 
 `application/list-currencies.ts`: `export const listCurrencies = (repo: RateRepository) => () => repo.listCurrencies();`
@@ -1756,16 +2346,35 @@ import { DEFAULT_CURRENCIES } from '@magermoney/domain';
 import type { RateRepository, RateRow } from '../application/rate-repository.js';
 export class MemoryRateRepository implements RateRepository {
   constructor(public rows: RateRow[] = []) {}
-  async latestOnOrBefore(date: string, userId: string) { return this.rows.filter((r) => r.date <= date && (r.userId === null || r.userId === userId)); }
+  async latestOnOrBefore(date: string, userId: string) {
+    return this.rows.filter((r) => r.date <= date && (r.userId === null || r.userId === userId));
+  }
   async upsertMany(rows: Omit<RateRow, 'quote'>[]) {
     let n = 0;
     for (const r of rows) {
-      const i = this.rows.findIndex((x) => x.base === r.base && x.date === r.date && x.source === r.source && x.userId === r.userId);
-      if (i >= 0) this.rows[i] = { ...r, quote: 'USD' }; else { this.rows.push({ ...r, quote: 'USD' }); n++; }
+      const i = this.rows.findIndex(
+        (x) =>
+          x.base === r.base && x.date === r.date && x.source === r.source && x.userId === r.userId,
+      );
+      if (i >= 0) this.rows[i] = { ...r, quote: 'USD' };
+      else {
+        this.rows.push({ ...r, quote: 'USD' });
+        n++;
+      }
     }
     return n;
   }
-  async listCurrencies(): Promise<CurrencyDto[]> { return DEFAULT_CURRENCIES.map((c) => ({ code: c.code, kind: c.kind, scale: c.scale, symbol: c.symbol ?? null, nameRu: null, nameEn: null, icon: null })); }
+  async listCurrencies(): Promise<CurrencyDto[]> {
+    return DEFAULT_CURRENCIES.map((c) => ({
+      code: c.code,
+      kind: c.kind,
+      scale: c.scale,
+      symbol: c.symbol ?? null,
+      nameRu: null,
+      nameEn: null,
+      icon: null,
+    }));
+  }
 }
 ```
 
@@ -1791,7 +2400,9 @@ export class PgRateRepository implements RateRepository {
     return res.count;
   }
   async listCurrencies(): Promise<CurrencyDto[]> {
-    return this.sql<CurrencyDto[]>`select code, kind, scale, symbol, name_ru, name_en, icon from currencies order by kind, code`;
+    return this.sql<
+      CurrencyDto[]
+    >`select code, kind, scale, symbol, name_ru, name_en, icon from currencies order by kind, code`;
   }
 }
 ```
@@ -1809,11 +2420,13 @@ export class PgRateRepository implements RateRepository {
 ### Task 11: `apps/api` — rate providers, fetch job, manual override
 
 **Files:**
+
 - Create: `apps/api/src/modules/rates/application/rate-provider.ts`, `.../application/fetch-rates.ts`, `.../application/set-manual-rate.ts`, `.../infrastructure/open-er-api-provider.ts`, `.../infrastructure/coingecko-provider.ts`, `apps/api/src/jobs/fetch-rates.ts`
 - Modify: `apps/api/src/modules/rates/http/routes.ts`, `apps/api/src/app.ts`, `apps/api/src/index.ts`, `apps/api/api/index.ts`, `apps/api/test/helpers/deps.ts`
 - Test: `apps/api/test/fetch-rates.test.ts`, `apps/api/test/providers.test.ts`, `apps/api/test/manual-rate.test.ts`
 
 **Interfaces:**
+
 - Produces: `interface RateProvider { kind: 'fiat' | 'crypto'; fetch(codes: string[]): Promise<Result<{ base: string; value: string }[], ProviderError>> }` (values are "1 base = value USD"); `fetchRates(repo, providers, registry, clock)(kind): Promise<Result<{ stored: number }, ProviderError>>`; `setManualRate(repo, registry)(userId, input: ManualRateInput): Promise<Result<RateDto, UnknownCurrencyError>>`; routes `POST /jobs/rates?kind=fiat|crypto` (header `authorization: Bearer <CRON_SECRET>`), `PUT /rates/manual` (user JWT). `AppDeps` gains `rateProviders: RateProvider[]`.
 
 - [ ] **Step 1: Failing tests**
@@ -1827,19 +2440,36 @@ import { CoinGeckoProvider } from '../src/modules/rates/infrastructure/coingecko
 
 describe('providers', () => {
   it('open.er-api: inverts USD-based quotes into 1 base = x USD, exactly as strings', async () => {
-    const fetcher = vi.fn(async () => new Response(JSON.stringify({ result: 'success', rates: { USD: 1, EUR: 0.862069, UZS: 11802.79 } })));
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ result: 'success', rates: { USD: 1, EUR: 0.862069, UZS: 11802.79 } }),
+        ),
+    );
     const p = new OpenErApiProvider('https://x', fetcher);
     const out = (await p.fetch(['EUR', 'UZS', 'XXX']))._unsafeUnwrap();
-    expect(out).toEqual([{ base: 'EUR', value: '1.16' }, { base: 'UZS', value: '0.0000847258' }]);
+    expect(out).toEqual([
+      { base: 'EUR', value: '1.16' },
+      { base: 'UZS', value: '0.0000847258' },
+    ]);
   });
   it('open.er-api: fails on non-success', async () => {
-    const p = new OpenErApiProvider('https://x', async () => new Response('{"result":"error"}', { status: 500 }));
+    const p = new OpenErApiProvider(
+      'https://x',
+      async () => new Response('{"result":"error"}', { status: 500 }),
+    );
     expect((await p.fetch(['EUR'])).isErr()).toBe(true);
   });
   it('coingecko: maps tickers to ids and back', async () => {
-    const fetcher = vi.fn(async (url: string) => { expect(url).toContain('ids=bitcoin%2Ctether'); return new Response(JSON.stringify({ bitcoin: { usd: 77389.36 }, tether: { usd: 1.0004 } })); });
+    const fetcher = vi.fn(async (url: string) => {
+      expect(url).toContain('ids=bitcoin%2Ctether');
+      return new Response(JSON.stringify({ bitcoin: { usd: 77389.36 }, tether: { usd: 1.0004 } }));
+    });
     const p = new CoinGeckoProvider('https://cg', fetcher);
-    expect((await p.fetch(['BTC', 'USDT']))._unsafeUnwrap()).toEqual([{ base: 'BTC', value: '77389.36' }, { base: 'USDT', value: '1.0004' }]);
+    expect((await p.fetch(['BTC', 'USDT']))._unsafeUnwrap()).toEqual([
+      { base: 'BTC', value: '77389.36' },
+      { base: 'USDT', value: '1.0004' },
+    ]);
   });
 });
 ```
@@ -1859,26 +2489,55 @@ import { createApp } from '../src/app.js';
 import { testDeps } from './helpers/deps.js';
 
 const clock = new FixedClock(new Date('2026-09-11T06:15:00Z'));
-const fiat = { kind: 'fiat' as const, fetch: async () => ok([{ base: 'EUR', value: '1.16' }, { base: 'RUB', value: '0.0119' }]) };
-const broken = { kind: 'crypto' as const, fetch: async () => err(new ProviderError('coingecko', 'boom')) };
+const fiat = {
+  kind: 'fiat' as const,
+  fetch: async () =>
+    ok([
+      { base: 'EUR', value: '1.16' },
+      { base: 'RUB', value: '0.0119' },
+    ]),
+};
+const broken = {
+  kind: 'crypto' as const,
+  fetch: async () => err(new ProviderError('coingecko', 'boom')),
+};
 
 describe('fetchRates', () => {
-  it('stores today\'s api rates for the requested kind only', async () => {
+  it("stores today's api rates for the requested kind only", async () => {
     const repo = new MemoryRateRepository();
     const res = await fetchRates(repo, [fiat, broken], CurrencyRegistry.default(), clock)('fiat');
     expect(res._unsafeUnwrap()).toEqual({ stored: 2 });
     expect(repo.rows).toEqual([
       { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api', userId: null },
-      { base: 'RUB', quote: 'USD', value: '0.0119', date: '2026-09-11', source: 'api', userId: null },
+      {
+        base: 'RUB',
+        quote: 'USD',
+        value: '0.0119',
+        date: '2026-09-11',
+        source: 'api',
+        userId: null,
+      },
     ]);
   });
   it('propagates provider failure', async () => {
-    expect((await fetchRates(new MemoryRateRepository(), [broken], CurrencyRegistry.default(), clock)('crypto')).isErr()).toBe(true);
+    expect(
+      (
+        await fetchRates(
+          new MemoryRateRepository(),
+          [broken],
+          CurrencyRegistry.default(),
+          clock,
+        )('crypto')
+      ).isErr(),
+    ).toBe(true);
   });
   it('POST /jobs/rates requires the cron secret', async () => {
     const app = createApp(testDeps({ rateProviders: [fiat], clock }));
     expect((await app.request('/jobs/rates?kind=fiat', { method: 'POST' })).status).toBe(401);
-    const ok2 = await app.request('/jobs/rates?kind=fiat', { method: 'POST', headers: { authorization: 'Bearer cron' } });
+    const ok2 = await app.request('/jobs/rates?kind=fiat', {
+      method: 'POST',
+      headers: { authorization: 'Bearer cron' },
+    });
     expect(ok2.status).toBe(200);
     expect(await ok2.json()).toEqual({ stored: 2 });
   });
@@ -1893,19 +2552,40 @@ import { createApp } from '../src/app.js';
 import { MemoryRateRepository } from '../src/modules/rates/infrastructure/memory-rate-repository.js';
 import { testDeps } from './helpers/deps.js';
 import { signTestToken } from './helpers/token.js';
-const uid = '11111111-1111-1111-1111-111111111111'; const secret = 'test-secret-test-secret-test-secret-1234';
+const uid = '11111111-1111-1111-1111-111111111111';
+const secret = 'test-secret-test-secret-test-secret-1234';
 describe('PUT /rates/manual', () => {
   it('stores a manual rate for the caller and returns it', async () => {
     const rates = new MemoryRateRepository();
     const app = createApp(testDeps({ rates, jwtSecret: secret }));
-    const res = await app.request('/rates/manual', { method: 'PUT', headers: { authorization: `Bearer ${await signTestToken(uid, secret)}`, 'content-type': 'application/json' }, body: JSON.stringify({ base: 'RUB', date: '2026-09-10', value: '0.011855' }) });
+    const res = await app.request('/rates/manual', {
+      method: 'PUT',
+      headers: {
+        authorization: `Bearer ${await signTestToken(uid, secret)}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ base: 'RUB', date: '2026-09-10', value: '0.011855' }),
+    });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ base: 'RUB', quote: 'USD', value: '0.011855', date: '2026-09-10', source: 'manual' });
+    expect(await res.json()).toEqual({
+      base: 'RUB',
+      quote: 'USD',
+      value: '0.011855',
+      date: '2026-09-10',
+      source: 'manual',
+    });
     expect(rates.rows[0]?.userId).toBe(uid);
   });
   it('400s on an unknown currency', async () => {
     const app = createApp(testDeps({ jwtSecret: secret }));
-    const res = await app.request('/rates/manual', { method: 'PUT', headers: { authorization: `Bearer ${await signTestToken(uid, secret)}`, 'content-type': 'application/json' }, body: JSON.stringify({ base: 'XYZ', date: '2026-09-10', value: '1' }) });
+    const res = await app.request('/rates/manual', {
+      method: 'PUT',
+      headers: {
+        authorization: `Bearer ${await signTestToken(uid, secret)}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ base: 'XYZ', date: '2026-09-10', value: '1' }),
+    });
     expect(res.status).toBe(400);
   });
 });
@@ -1919,9 +2599,20 @@ describe('PUT /rates/manual', () => {
 
 ```ts
 import type { Result } from 'neverthrow';
-export class ProviderError extends Error { readonly code = 'PROVIDER_FAILED'; constructor(readonly provider: string, detail: string) { super(`${provider}: ${detail}`); } }
+export class ProviderError extends Error {
+  readonly code = 'PROVIDER_FAILED';
+  constructor(
+    readonly provider: string,
+    detail: string,
+  ) {
+    super(`${provider}: ${detail}`);
+  }
+}
 export type Fetcher = (url: string, init?: RequestInit) => Promise<Response>;
-export interface RateProvider { kind: 'fiat' | 'crypto'; fetch(codes: string[]): Promise<Result<{ base: string; value: string }[], ProviderError>> }
+export interface RateProvider {
+  kind: 'fiat' | 'crypto';
+  fetch(codes: string[]): Promise<Result<{ base: string; value: string }[], ProviderError>>;
+}
 ```
 
 `infrastructure/open-er-api-provider.ts`:
@@ -1932,20 +2623,30 @@ import { err, ok } from 'neverthrow';
 import { ProviderError, type Fetcher, type RateProvider } from '../application/rate-provider.js';
 export class OpenErApiProvider implements RateProvider {
   readonly kind = 'fiat' as const;
-  constructor(private readonly url: string, private readonly fetcher: Fetcher = fetch) {}
+  constructor(
+    private readonly url: string,
+    private readonly fetcher: Fetcher = fetch,
+  ) {}
   async fetch(codes: string[]) {
     try {
       const res = await this.fetcher(this.url);
       if (!res.ok) return err(new ProviderError('open.er-api', `HTTP ${res.status}`));
       const body = (await res.json()) as { result: string; rates?: Record<string, number> };
-      if (body.result !== 'success' || !body.rates) return err(new ProviderError('open.er-api', 'result not success'));
+      if (body.result !== 'success' || !body.rates)
+        return err(new ProviderError('open.er-api', 'result not success'));
       const out: { base: string; value: string }[] = [];
       for (const code of codes) {
         const perUsd = body.rates[code];
-        if (typeof perUsd === 'number' && perUsd > 0 && code !== 'USD') out.push({ base: code, value: new Decimal(1).div(perUsd).toSignificantDigits(10).toFixed() });
+        if (typeof perUsd === 'number' && perUsd > 0 && code !== 'USD')
+          out.push({
+            base: code,
+            value: new Decimal(1).div(perUsd).toSignificantDigits(10).toFixed(),
+          });
       }
       return ok(out);
-    } catch (e) { return err(new ProviderError('open.er-api', String(e))); }
+    } catch (e) {
+      return err(new ProviderError('open.er-api', String(e)));
+    }
   }
 }
 ```
@@ -1956,20 +2657,45 @@ export class OpenErApiProvider implements RateProvider {
 import Decimal from 'decimal.js';
 import { err, ok } from 'neverthrow';
 import { ProviderError, type Fetcher, type RateProvider } from '../application/rate-provider.js';
-export const COINGECKO_IDS: Record<string, string> = { BTC: 'bitcoin', ETH: 'ethereum', USDT: 'tether', XRP: 'ripple', SOL: 'solana', DOGE: 'dogecoin', PEPE: 'pepe', AVAX: 'avalanche-2', ATOM: 'cosmos', TRX: 'tron' };
+export const COINGECKO_IDS: Record<string, string> = {
+  BTC: 'bitcoin',
+  ETH: 'ethereum',
+  USDT: 'tether',
+  XRP: 'ripple',
+  SOL: 'solana',
+  DOGE: 'dogecoin',
+  PEPE: 'pepe',
+  AVAX: 'avalanche-2',
+  ATOM: 'cosmos',
+  TRX: 'tron',
+};
 export class CoinGeckoProvider implements RateProvider {
   readonly kind = 'crypto' as const;
-  constructor(private readonly url: string, private readonly fetcher: Fetcher = fetch) {}
+  constructor(
+    private readonly url: string,
+    private readonly fetcher: Fetcher = fetch,
+  ) {}
   async fetch(codes: string[]) {
     const known = codes.filter((c) => COINGECKO_IDS[c]);
     if (known.length === 0) return ok([]);
     const ids = known.map((c) => COINGECKO_IDS[c]!).join(',');
     try {
-      const res = await this.fetcher(`${this.url}?ids=${encodeURIComponent(ids)}&vs_currencies=usd&precision=full`);
+      const res = await this.fetcher(
+        `${this.url}?ids=${encodeURIComponent(ids)}&vs_currencies=usd&precision=full`,
+      );
       if (!res.ok) return err(new ProviderError('coingecko', `HTTP ${res.status}`));
       const body = (await res.json()) as Record<string, { usd?: number }>;
-      return ok(known.flatMap((c) => { const v = body[COINGECKO_IDS[c]!]?.usd; return typeof v === 'number' && v > 0 ? [{ base: c, value: new Decimal(v).toFixed() }] : []; }));
-    } catch (e) { return err(new ProviderError('coingecko', String(e))); }
+      return ok(
+        known.flatMap((c) => {
+          const v = body[COINGECKO_IDS[c]!]?.usd;
+          return typeof v === 'number' && v > 0
+            ? [{ base: c, value: new Decimal(v).toFixed() }]
+            : [];
+        }),
+      );
+    } catch (e) {
+      return err(new ProviderError('coingecko', String(e)));
+    }
   }
 }
 ```
@@ -1981,15 +2707,21 @@ import { err, ok, type Result } from 'neverthrow';
 import type { Clock, CurrencyRegistry } from '@magermoney/domain';
 import type { RateRepository } from './rate-repository.js';
 import type { ProviderError, RateProvider } from './rate-provider.js';
-export const fetchRates = (repo: RateRepository, providers: RateProvider[], registry: CurrencyRegistry, clock: Clock) =>
+export const fetchRates =
+  (repo: RateRepository, providers: RateProvider[], registry: CurrencyRegistry, clock: Clock) =>
   async (kind: 'fiat' | 'crypto'): Promise<Result<{ stored: number }, ProviderError>> => {
-    const codes = registry.all().filter((c) => c.kind === kind).map((c) => c.code);
+    const codes = registry
+      .all()
+      .filter((c) => c.kind === kind)
+      .map((c) => c.code);
     const today = clock.today();
     let stored = 0;
     for (const p of providers.filter((p) => p.kind === kind)) {
       const res = await p.fetch(codes);
       if (res.isErr()) return err(res.error);
-      stored += await repo.upsertMany(res.value.map((r) => ({ ...r, date: today, source: 'api' as const, userId: null })));
+      stored += await repo.upsertMany(
+        res.value.map((r) => ({ ...r, date: today, source: 'api' as const, userId: null })),
+      );
     }
     return ok({ stored });
   };
@@ -2002,15 +2734,27 @@ import { err, ok, type Result } from 'neverthrow';
 import { type CurrencyRegistry, UnknownCurrencyError } from '@magermoney/domain';
 import type { ManualRateInput, RateDto } from '@magermoney/contracts';
 import type { RateRepository } from './rate-repository.js';
-export const setManualRate = (repo: RateRepository, registry: CurrencyRegistry) =>
-  async (userId: string, input: ManualRateInput): Promise<Result<RateDto, UnknownCurrencyError>> => {
+export const setManualRate =
+  (repo: RateRepository, registry: CurrencyRegistry) =>
+  async (
+    userId: string,
+    input: ManualRateInput,
+  ): Promise<Result<RateDto, UnknownCurrencyError>> => {
     if (!registry.has(input.base)) return err(new UnknownCurrencyError(input.base));
-    await repo.upsertMany([{ base: input.base, value: input.value, date: input.date, source: 'manual', userId }]);
-    return ok({ base: input.base, quote: 'USD', value: input.value, date: input.date, source: 'manual' });
+    await repo.upsertMany([
+      { base: input.base, value: input.value, date: input.date, source: 'manual', userId },
+    ]);
+    return ok({
+      base: input.base,
+      quote: 'USD',
+      value: input.value,
+      date: input.date,
+      source: 'manual',
+    });
   };
 ```
 
-`jobs/fetch-rates.ts` exposes `jobRoutes(deps)` with `POST /jobs/rates` that checks `authorization === \`Bearer ${deps.cronSecret}\`` (401 otherwise), validates `kind` via `z.enum(['fiat','crypto'])`, runs `fetchRates`, returns `{ stored }` or 502 with `{ code: 'PROVIDER_FAILED', message }`. Note: Vercel Cron sends `authorization: Bearer $CRON_SECRET` automatically when the `CRON_SECRET` env var exists.
+`jobs/fetch-rates.ts` exposes `jobRoutes(deps)` with `POST /jobs/rates` that checks `authorization === \`Bearer ${deps.cronSecret}\`` (401 otherwise), validates `kind` via `z.enum(['fiat','crypto'])`, runs `fetchRates`, returns `{ stored }` or 502 with `{ code: 'PROVIDER_FAILED', message }`. Note: Vercel Cron sends `authorization: Bearer $CRON_SECRET`automatically when the`CRON_SECRET` env var exists.
 
 Add `PUT /rates/manual` to the rates routes (body `ManualRateInputSchema`, response `RateDtoSchema`). Wire providers in `index.ts` / `api/index.ts`: `[new OpenErApiProvider(env.FIAT_RATES_URL), new CoinGeckoProvider(env.CRYPTO_RATES_URL)]`. `testDeps` defaults `rateProviders: []`.
 
@@ -2025,10 +2769,12 @@ Add `PUT /rates/manual` to the rates routes (body `ManualRateInputSchema`, respo
 Run `/frontend-design` before this task to settle the visual direction (palette, type, radius, motion character) and write it to `docs/design/direction.md`. This task implements tokens from that document; the values below are placeholders to be replaced by the direction doc's values.
 
 **Files:**
+
 - Create: `packages/ui/package.json`, `packages/ui/tsconfig.json`, `packages/ui/components.json`, `packages/ui/src/styles/tokens.css`, `packages/ui/src/styles/index.css`, `packages/ui/src/lib/utils.ts`, `packages/ui/src/components/ui/**` (generated), `packages/ui/src/components/currency-icon/CurrencyIcon.vue`, `packages/ui/src/components/currency-icon/resolve-icon.ts`, `packages/ui/src/motion/presets.ts`, `packages/ui/src/index.ts`, `docs/design/direction.md`
 - Test: `packages/ui/test/resolve-icon.test.ts`, `packages/ui/test/CurrencyIcon.test.ts`
 
 **Interfaces:**
+
 - Produces: `@magermoney/ui` exporting `Button, Input, Select*, Card*, Sheet*, Toaster + useToast, Skeleton, CurrencyIcon`, `cn()`, `motion presets { fadeUp, scaleIn, listStagger }`, and `@magermoney/ui/styles` (CSS entry). `resolveCurrencyIcon({ code, kind, icon?, country? }): { kind: 'iconify'; name: string } | { kind: 'initials'; text: string }`.
 
 - [ ] **Step 1: Package and shadcn-vue init**
@@ -2043,8 +2789,30 @@ Run `/frontend-design` before this task to settle the visual direction (palette,
   "type": "module",
   "exports": { ".": "./src/index.ts", "./styles": "./src/styles/index.css" },
   "scripts": { "test": "vitest run", "typecheck": "vue-tsc --noEmit", "lint": "eslint src test" },
-  "dependencies": { "vue": "^3.5.42", "reka-ui": "^2.10.4", "motion-v": "^2.4.2", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "tailwind-merge": "^3.3.0", "lucide-vue-next": "^0.544.0", "@vueuse/core": "^13.9.0" },
-  "devDependencies": { "tailwindcss": "^4.3.3", "@tailwindcss/vite": "^4.3.3", "unplugin-icons": "^24.0.0", "@iconify-json/cryptocurrency-color": "^1.2.4", "@iconify-json/circle-flags": "^1.2.11", "@iconify-json/lucide": "^1.2.131", "vitest": "^5.0.0", "@vue/test-utils": "^2.5.0", "happy-dom": "^18.0.0", "vue-tsc": "^3.0.0", "vite": "^7.1.0", "@vitejs/plugin-vue": "^6.0.0" }
+  "dependencies": {
+    "vue": "^3.5.42",
+    "reka-ui": "^2.10.4",
+    "motion-v": "^2.4.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.0",
+    "lucide-vue-next": "^0.544.0",
+    "@vueuse/core": "^13.9.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "unplugin-icons": "^24.0.0",
+    "@iconify-json/cryptocurrency-color": "^1.2.4",
+    "@iconify-json/circle-flags": "^1.2.11",
+    "@iconify-json/lucide": "^1.2.131",
+    "vitest": "^5.0.0",
+    "@vue/test-utils": "^2.5.0",
+    "happy-dom": "^18.0.0",
+    "vue-tsc": "^3.0.0",
+    "vite": "^7.1.0",
+    "@vitejs/plugin-vue": "^6.0.0"
+  }
 }
 ```
 
@@ -2064,21 +2832,48 @@ bunx shadcn-vue@latest add button input select card sheet sonner skeleton
 `src/styles/tokens.css` (values from `docs/design/direction.md`; example shape):
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 @theme {
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
-  --radius-sm: 0.5rem; --radius-md: 0.75rem; --radius-lg: 1rem;
-  --color-bg: oklch(0.985 0.004 250); --color-surface: oklch(1 0 0); --color-ink: oklch(0.22 0.02 260);
-  --color-muted: oklch(0.55 0.02 260); --color-line: oklch(0.9 0.01 260);
-  --color-accent: oklch(0.6 0.14 170); --color-accent-fg: oklch(0.99 0 0);
-  --color-positive: oklch(0.65 0.15 150); --color-negative: oklch(0.6 0.19 25); --color-warning: oklch(0.75 0.15 80);
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --color-bg: oklch(0.985 0.004 250);
+  --color-surface: oklch(1 0 0);
+  --color-ink: oklch(0.22 0.02 260);
+  --color-muted: oklch(0.55 0.02 260);
+  --color-line: oklch(0.9 0.01 260);
+  --color-accent: oklch(0.6 0.14 170);
+  --color-accent-fg: oklch(0.99 0 0);
+  --color-positive: oklch(0.65 0.15 150);
+  --color-negative: oklch(0.6 0.19 25);
+  --color-warning: oklch(0.75 0.15 80);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-  --duration-fast: 150ms; --duration-base: 240ms; --duration-slow: 400ms;
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 400ms;
 }
-:root[data-theme="dark"], :root:not([data-theme="light"]) { @media (prefers-color-scheme: dark) { /* dark overrides for the same tokens */ } }
-:root[data-theme="dark"] { --color-bg: oklch(0.17 0.01 260); --color-surface: oklch(0.21 0.012 260); --color-ink: oklch(0.95 0.005 260); --color-muted: oklch(0.7 0.015 260); --color-line: oklch(0.3 0.01 260); }
-@media (prefers-reduced-motion: reduce) { :root { --duration-fast: 0ms; --duration-base: 0ms; --duration-slow: 0ms; } }
+:root[data-theme='dark'],
+:root:not([data-theme='light']) {
+  @media (prefers-color-scheme: dark) {
+    /* dark overrides for the same tokens */
+  }
+}
+:root[data-theme='dark'] {
+  --color-bg: oklch(0.17 0.01 260);
+  --color-surface: oklch(0.21 0.012 260);
+  --color-ink: oklch(0.95 0.005 260);
+  --color-muted: oklch(0.7 0.015 260);
+  --color-line: oklch(0.3 0.01 260);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}
 ```
 
 `src/styles/index.css` imports `tokens.css` and the shadcn-generated layer, then maps shadcn's `--background/--foreground/--primary…` variables to the tokens above so components inherit the palette.
@@ -2092,18 +2887,36 @@ import { describe, expect, it } from 'vitest';
 import { resolveCurrencyIcon } from '../src/components/currency-icon/resolve-icon.js';
 describe('resolveCurrencyIcon', () => {
   it('uses a circle flag for fiat by country', () => {
-    expect(resolveCurrencyIcon({ code: 'USD', kind: 'fiat' })).toEqual({ kind: 'iconify', name: 'circle-flags:us' });
-    expect(resolveCurrencyIcon({ code: 'EUR', kind: 'fiat' })).toEqual({ kind: 'iconify', name: 'circle-flags:european-union' });
-    expect(resolveCurrencyIcon({ code: 'UZS', kind: 'fiat' })).toEqual({ kind: 'iconify', name: 'circle-flags:uz' });
+    expect(resolveCurrencyIcon({ code: 'USD', kind: 'fiat' })).toEqual({
+      kind: 'iconify',
+      name: 'circle-flags:us',
+    });
+    expect(resolveCurrencyIcon({ code: 'EUR', kind: 'fiat' })).toEqual({
+      kind: 'iconify',
+      name: 'circle-flags:european-union',
+    });
+    expect(resolveCurrencyIcon({ code: 'UZS', kind: 'fiat' })).toEqual({
+      kind: 'iconify',
+      name: 'circle-flags:uz',
+    });
   });
   it('uses cryptocurrency-color by ticker for crypto', () => {
-    expect(resolveCurrencyIcon({ code: 'BTC', kind: 'crypto' })).toEqual({ kind: 'iconify', name: 'cryptocurrency-color:btc' });
+    expect(resolveCurrencyIcon({ code: 'BTC', kind: 'crypto' })).toEqual({
+      kind: 'iconify',
+      name: 'cryptocurrency-color:btc',
+    });
   });
   it('prefers an explicit override', () => {
-    expect(resolveCurrencyIcon({ code: 'PEPE', kind: 'crypto', icon: 'local:pepe' })).toEqual({ kind: 'iconify', name: 'local:pepe' });
+    expect(resolveCurrencyIcon({ code: 'PEPE', kind: 'crypto', icon: 'local:pepe' })).toEqual({
+      kind: 'iconify',
+      name: 'local:pepe',
+    });
   });
   it('falls back to initials for unknown fiat', () => {
-    expect(resolveCurrencyIcon({ code: 'ZZZ', kind: 'fiat' })).toEqual({ kind: 'initials', text: 'ZZ' });
+    expect(resolveCurrencyIcon({ code: 'ZZZ', kind: 'fiat' })).toEqual({
+      kind: 'initials',
+      text: 'ZZ',
+    });
   });
 });
 ```
@@ -2128,13 +2941,59 @@ describe('CurrencyIcon', () => {
 `src/components/currency-icon/resolve-icon.ts`:
 
 ```ts
-const FIAT_FLAG: Record<string, string> = { USD: 'us', EUR: 'european-union', RUB: 'ru', KZT: 'kz', UZS: 'uz', IDR: 'id', EGP: 'eg', GEL: 'ge', KGS: 'kg', GBP: 'gb', TRY: 'tr', AED: 'ae', CNY: 'cn', JPY: 'jp', CHF: 'ch', PLN: 'pl', CZK: 'cz', AMD: 'am', BYN: 'by', UAH: 'ua', THB: 'th', VND: 'vn' };
-const CRYPTO_KNOWN = new Set(['btc', 'eth', 'usdt', 'xrp', 'sol', 'doge', 'avax', 'atom', 'trx', 'bnb', 'ada', 'dot', 'ltc', 'matic', 'link', 'usdc']);
+const FIAT_FLAG: Record<string, string> = {
+  USD: 'us',
+  EUR: 'european-union',
+  RUB: 'ru',
+  KZT: 'kz',
+  UZS: 'uz',
+  IDR: 'id',
+  EGP: 'eg',
+  GEL: 'ge',
+  KGS: 'kg',
+  GBP: 'gb',
+  TRY: 'tr',
+  AED: 'ae',
+  CNY: 'cn',
+  JPY: 'jp',
+  CHF: 'ch',
+  PLN: 'pl',
+  CZK: 'cz',
+  AMD: 'am',
+  BYN: 'by',
+  UAH: 'ua',
+  THB: 'th',
+  VND: 'vn',
+};
+const CRYPTO_KNOWN = new Set([
+  'btc',
+  'eth',
+  'usdt',
+  'xrp',
+  'sol',
+  'doge',
+  'avax',
+  'atom',
+  'trx',
+  'bnb',
+  'ada',
+  'dot',
+  'ltc',
+  'matic',
+  'link',
+  'usdc',
+]);
 export type ResolvedIcon = { kind: 'iconify'; name: string } | { kind: 'initials'; text: string };
-export function resolveCurrencyIcon(c: { code: string; kind: 'fiat' | 'crypto'; icon?: string | null }): ResolvedIcon {
+export function resolveCurrencyIcon(c: {
+  code: string;
+  kind: 'fiat' | 'crypto';
+  icon?: string | null;
+}): ResolvedIcon {
   if (c.icon) return { kind: 'iconify', name: c.icon };
-  if (c.kind === 'fiat' && FIAT_FLAG[c.code]) return { kind: 'iconify', name: `circle-flags:${FIAT_FLAG[c.code]}` };
-  if (c.kind === 'crypto' && CRYPTO_KNOWN.has(c.code.toLowerCase())) return { kind: 'iconify', name: `cryptocurrency-color:${c.code.toLowerCase()}` };
+  if (c.kind === 'fiat' && FIAT_FLAG[c.code])
+    return { kind: 'iconify', name: `circle-flags:${FIAT_FLAG[c.code]}` };
+  if (c.kind === 'crypto' && CRYPTO_KNOWN.has(c.code.toLowerCase()))
+    return { kind: 'iconify', name: `cryptocurrency-color:${c.code.toLowerCase()}` };
   return { kind: 'initials', text: c.code.slice(0, 2).toUpperCase() };
 }
 ```
@@ -2144,9 +3003,20 @@ export function resolveCurrencyIcon(c: { code: string; kind: 'fiat' | 'crypto'; 
 `src/motion/presets.ts`:
 
 ```ts
-export const fadeUp = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.24, ease: [0.25, 1, 0.5, 1] } } as const;
-export const scaleIn = { initial: { opacity: 0, scale: 0.96 }, animate: { opacity: 1, scale: 1 }, transition: { duration: 0.2, ease: [0.25, 1, 0.5, 1] } } as const;
-export const listStagger = (i: number) => ({ ...fadeUp, transition: { ...fadeUp.transition, delay: i * 0.04 } });
+export const fadeUp = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.24, ease: [0.25, 1, 0.5, 1] },
+} as const;
+export const scaleIn = {
+  initial: { opacity: 0, scale: 0.96 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { duration: 0.2, ease: [0.25, 1, 0.5, 1] },
+} as const;
+export const listStagger = (i: number) => ({
+  ...fadeUp,
+  transition: { ...fadeUp.transition, delay: i * 0.04 },
+});
 ```
 
 `src/index.ts` re-exports components, `cn`, presets, `CurrencyIcon`, and registers icon collections.
@@ -2160,10 +3030,12 @@ export const listStagger = (i: number) => ({ ...fadeUp, transition: { ...fadeUp.
 ### Task 13: `apps/web` skeleton — Vite, router, i18n, TanStack Query, PWA, theme, shell
 
 **Files:**
+
 - Create: `apps/web/package.json`, `apps/web/tsconfig.json`, `apps/web/vite.config.ts`, `apps/web/index.html`, `apps/web/src/app/main.ts`, `apps/web/src/app/App.vue`, `apps/web/src/app/router.ts`, `apps/web/src/app/i18n.ts`, `apps/web/src/app/query.ts`, `apps/web/src/app/theme.ts`, `apps/web/src/shared/layout/AppShell.vue`, `apps/web/src/shared/money/format.ts`, `apps/web/src/shared/api/client.ts`, `apps/web/src/locales/ru.json`, `apps/web/src/locales/en.json`, `apps/web/public/icons/*` (PWA icons 192/512/maskable), `apps/web/vercel.ts`, `apps/web/vitest.config.ts`
 - Test: `apps/web/test/format.test.ts`, `apps/web/test/theme.test.ts`
 
 **Interfaces:**
+
 - Produces: `formatMoney(amount: string, code: string, locale: 'ru'|'en', opts?: { scale?: number; symbol?: string | null; hide?: boolean }): string`; `useTheme(): { theme: Ref<'system'|'light'|'dark'>; set(t) }`; `createApiClient(getToken: () => Promise<string | null>): { fetch(path, init?): Promise<Response> }` (adds `Authorization`, base URL `VITE_API_URL`); router with routes `/` (home), `/settings`, `/sign-in`; `queryClient` with IndexedDB persister (`idb-keyval`) and `networkMode: 'offlineFirst'`.
 
 - [ ] **Step 1: Package and Vite config**
@@ -2181,13 +3053,37 @@ import Icons from 'unplugin-icons/vite';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
-  plugins: [vue(), tailwindcss(), Icons({ compiler: 'vue3' }),
+  plugins: [
+    vue(),
+    tailwindcss(),
+    Icons({ compiler: 'vue3' }),
     VitePWA({
       registerType: 'autoUpdate',
-      manifest: { name: 'Magermoney', short_name: 'Magermoney', start_url: '/', display: 'standalone', background_color: '#101418', theme_color: '#101418',
-        icons: [{ src: '/icons/192.png', sizes: '192x192', type: 'image/png' }, { src: '/icons/512.png', sizes: '512x512', type: 'image/png' }, { src: '/icons/maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] },
-      workbox: { navigateFallback: '/index.html', runtimeCaching: [{ urlPattern: ({ url }) => url.origin === import.meta.env.VITE_API_URL, handler: 'NetworkFirst', options: { cacheName: 'api', networkTimeoutSeconds: 4 } }] },
-    })],
+      manifest: {
+        name: 'Magermoney',
+        short_name: 'Magermoney',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#101418',
+        theme_color: '#101418',
+        icons: [
+          { src: '/icons/192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/icons/maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+      workbox: {
+        navigateFallback: '/index.html',
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.origin === import.meta.env.VITE_API_URL,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'api', networkTimeoutSeconds: 4 },
+          },
+        ],
+      },
+    }),
+  ],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: { port: 5173 },
 });
@@ -2226,8 +3122,10 @@ import { describe, expect, it } from 'vitest';
 import { applyTheme } from '../src/app/theme.js';
 describe('applyTheme', () => {
   it('stamps data-theme for explicit choices and clears it for system', () => {
-    applyTheme('dark'); expect(document.documentElement.dataset.theme).toBe('dark');
-    applyTheme('system'); expect(document.documentElement.dataset.theme).toBeUndefined();
+    applyTheme('dark');
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    applyTheme('system');
+    expect(document.documentElement.dataset.theme).toBeUndefined();
   });
 });
 ```
@@ -2237,16 +3135,35 @@ describe('applyTheme', () => {
 `src/shared/money/format.ts`:
 
 ```ts
-export function formatMoney(amount: string, code: string, locale: 'ru' | 'en', opts: { scale?: number; symbol?: string | null; hide?: boolean } = {}): string {
+export function formatMoney(
+  amount: string,
+  code: string,
+  locale: 'ru' | 'en',
+  opts: { scale?: number; symbol?: string | null; hide?: boolean } = {},
+): string {
   const n = Number(amount); // display only; exact value stays in Money
   const isIso = /^[A-Z]{3}$/.test(code) && opts.symbol == null;
   if (isIso) {
-    const f = new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : 'en-US', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' });
+    const f = new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : 'en-US', {
+      style: 'currency',
+      currency: code,
+      currencyDisplay: 'narrowSymbol',
+    });
     if (!opts.hide) return f.format(n);
-    return f.formatToParts(n).map((p) => (['integer', 'group', 'decimal', 'fraction'].includes(p.type) ? '' : p.value)).join('').replace(/\s+/g, ' ').trim().replace(/^/, '•••• ').replace('••••  ', '•••• ');
+    return f
+      .formatToParts(n)
+      .map((p) => (['integer', 'group', 'decimal', 'fraction'].includes(p.type) ? '' : p.value))
+      .join('')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/^/, '•••• ')
+      .replace('••••  ', '•••• ');
   }
   const scale = opts.scale ?? 2;
-  const f = new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : 'en-US', { minimumFractionDigits: Math.min(2, scale), maximumFractionDigits: scale });
+  const f = new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : 'en-US', {
+    minimumFractionDigits: Math.min(2, scale),
+    maximumFractionDigits: scale,
+  });
   const digits = opts.hide ? '••••' : f.format(n);
   const sym = opts.symbol ?? code;
   return locale === 'ru' ? `${digits} ${sym}` : `${sym}${digits}`;
@@ -2258,9 +3175,18 @@ export function formatMoney(amount: string, code: string, locale: 'ru' | 'en', o
 ```ts
 import { ref, watchEffect } from 'vue';
 export type Theme = 'system' | 'light' | 'dark';
-export function applyTheme(t: Theme) { if (t === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t; }
+export function applyTheme(t: Theme) {
+  if (t === 'system') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = t;
+}
 const theme = ref<Theme>((localStorage.getItem('theme') as Theme) ?? 'system');
-export function useTheme() { watchEffect(() => { applyTheme(theme.value); localStorage.setItem('theme', theme.value); }); return { theme, set: (t: Theme) => (theme.value = t) }; }
+export function useTheme() {
+  watchEffect(() => {
+    applyTheme(theme.value);
+    localStorage.setItem('theme', theme.value);
+  });
+  return { theme, set: (t: Theme) => (theme.value = t) };
+}
 ```
 
 `src/app/query.ts`:
@@ -2270,8 +3196,24 @@ import { QueryClient } from '@tanstack/vue-query';
 import { persistQueryClient } from '@tanstack/query-persist-client-core';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
-export const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, gcTime: 7 * 24 * 3_600_000, networkMode: 'offlineFirst', retry: 1 }, mutations: { networkMode: 'offlineFirst' } } });
-persistQueryClient({ queryClient, persister: createAsyncStoragePersister({ storage: { getItem: (k) => get(k), setItem: (k, v) => set(k, v), removeItem: (k) => del(k) } }), maxAge: 7 * 24 * 3_600_000 });
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 7 * 24 * 3_600_000,
+      networkMode: 'offlineFirst',
+      retry: 1,
+    },
+    mutations: { networkMode: 'offlineFirst' },
+  },
+});
+persistQueryClient({
+  queryClient,
+  persister: createAsyncStoragePersister({
+    storage: { getItem: (k) => get(k), setItem: (k, v) => set(k, v), removeItem: (k) => del(k) },
+  }),
+  maxAge: 7 * 24 * 3_600_000,
+});
 ```
 
 `src/app/i18n.ts`: `createI18n({ legacy: false, locale: 'ru', fallbackLocale: 'en', messages: { ru, en } })`. `src/app/router.ts`: `createRouter({ history: createWebHistory(), routes })` with lazy imports from module `index.ts` files (`/` → `modules/rates` HomePage, `/settings` → `modules/profile` SettingsPage, `/sign-in` → `modules/auth` SignInPage), `meta: { public: true }` on sign-in; the auth guard is added in Task 14.
@@ -2281,12 +3223,16 @@ persistQueryClient({ queryClient, persister: createAsyncStoragePersister({ stora
 ```ts
 export type GetToken = () => Promise<string | null>;
 export function createApiClient(base: string, getToken: GetToken) {
-  return { async fetch(path: string, init: RequestInit = {}) {
-    const token = await getToken();
-    const headers = new Headers(init.headers); if (token) headers.set('authorization', `Bearer ${token}`);
-    if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json');
-    return fetch(`${base}${path}`, { ...init, headers });
-  } };
+  return {
+    async fetch(path: string, init: RequestInit = {}) {
+      const token = await getToken();
+      const headers = new Headers(init.headers);
+      if (token) headers.set('authorization', `Bearer ${token}`);
+      if (init.body && !headers.has('content-type'))
+        headers.set('content-type', 'application/json');
+      return fetch(`${base}${path}`, { ...init, headers });
+    },
+  };
 }
 ```
 
@@ -2303,11 +3249,13 @@ export function createApiClient(base: string, getToken: GetToken) {
 ### Task 14: `apps/web` — auth module (Supabase sign-in, guard)
 
 **Files:**
+
 - Create: `apps/web/src/modules/auth/index.ts`, `.../auth/domain/session.ts`, `.../auth/application/use-session.ts`, `.../auth/infrastructure/supabase.ts`, `.../auth/infrastructure/session-store.ts`, `.../auth/ui/SignInPage.vue`, `.../auth/ui/AuthCallbackPage.vue`
 - Modify: `apps/web/src/app/router.ts`, `apps/web/src/app/main.ts`
 - Test: `apps/web/test/auth-guard.test.ts`
 
 **Interfaces:**
+
 - Produces: `useSession(): { user: Ref<{ id: string; email: string | null } | null>; ready: Ref<boolean>; signInWithGoogle(): Promise<void>; signInWithMagicLink(email): Promise<Result<void, Error>>; signOut(): Promise<void>; getAccessToken(): Promise<string | null> }`; `authGuard(session): NavigationGuard` (redirects to `/sign-in` when no user and route is not `public`); route `/auth/callback`.
 
 - [ ] **Step 1: Failing test**
@@ -2321,14 +3269,33 @@ import { authGuard } from '../src/modules/auth/application/auth-guard.js';
 const mk = (user: null | { id: string }) => authGuard({ user: ref(user), ready: ref(true) });
 describe('authGuard', () => {
   it('redirects anonymous users to sign-in with a redirect back', () => {
-    expect(mk(null)({ path: '/settings', fullPath: '/settings', meta: {} } as never, {} as never)).toEqual({ name: 'sign-in', query: { redirect: '/settings' } });
+    expect(
+      mk(null)({ path: '/settings', fullPath: '/settings', meta: {} } as never, {} as never),
+    ).toEqual({ name: 'sign-in', query: { redirect: '/settings' } });
   });
   it('lets public routes through and signed-in users everywhere', () => {
-    expect(mk(null)({ path: '/sign-in', fullPath: '/sign-in', meta: { public: true } } as never, {} as never)).toBe(true);
-    expect(mk({ id: 'u' })({ path: '/', fullPath: '/', meta: {} } as never, {} as never)).toBe(true);
+    expect(
+      mk(null)(
+        { path: '/sign-in', fullPath: '/sign-in', meta: { public: true } } as never,
+        {} as never,
+      ),
+    ).toBe(true);
+    expect(mk({ id: 'u' })({ path: '/', fullPath: '/', meta: {} } as never, {} as never)).toBe(
+      true,
+    );
   });
   it('sends signed-in users away from sign-in', () => {
-    expect(mk({ id: 'u' })({ path: '/sign-in', fullPath: '/sign-in', meta: { public: true }, name: 'sign-in' } as never, {} as never)).toEqual({ path: '/' });
+    expect(
+      mk({ id: 'u' })(
+        {
+          path: '/sign-in',
+          fullPath: '/sign-in',
+          meta: { public: true },
+          name: 'sign-in',
+        } as never,
+        {} as never,
+      ),
+    ).toEqual({ path: '/' });
   });
 });
 ```
@@ -2346,12 +3313,17 @@ describe('authGuard', () => {
 ```ts
 import type { Ref } from 'vue';
 import type { NavigationGuardWithThis, RouteLocationNormalized } from 'vue-router';
-export const authGuard = (s: { user: Ref<{ id: string } | null>; ready: Ref<boolean> }): NavigationGuardWithThis<undefined> => (to: RouteLocationNormalized) => {
-  const isPublic = Boolean(to.meta.public);
-  if (s.user.value && to.name === 'sign-in') return { path: '/' };
-  if (!s.user.value && !isPublic) return { name: 'sign-in', query: { redirect: to.fullPath } };
-  return true;
-};
+export const authGuard =
+  (s: {
+    user: Ref<{ id: string } | null>;
+    ready: Ref<boolean>;
+  }): NavigationGuardWithThis<undefined> =>
+  (to: RouteLocationNormalized) => {
+    const isPublic = Boolean(to.meta.public);
+    if (s.user.value && to.name === 'sign-in') return { path: '/' };
+    if (!s.user.value && !isPublic) return { name: 'sign-in', query: { redirect: to.fullPath } };
+    return true;
+  };
 ```
 
 `application/use-session.ts` wraps the store: `signInWithGoogle` → `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${location.origin}/auth/callback` } })`; `signInWithMagicLink(email)` → `signInWithOtp({ email, options: { emailRedirectTo } })` returning `Result`; `getAccessToken` → `(await supabase.auth.getSession()).data.session?.access_token ?? null`.
@@ -2369,11 +3341,13 @@ Router: `router.beforeEach(authGuard(store))` after `await store.init()` in `mai
 ### Task 15: `apps/web` — profile module (settings)
 
 **Files:**
+
 - Create: `apps/web/src/modules/profile/index.ts`, `.../profile/domain/profile.ts`, `.../profile/application/use-profile.ts`, `.../profile/infrastructure/profile-api.ts`, `.../profile/ui/SettingsPage.vue`, `.../profile/ui/CurrencyListEditor.vue`
 - Modify: `apps/web/src/locales/*.json`
 - Test: `apps/web/test/profile-api.test.ts`, `apps/web/test/use-profile.test.ts`
 
 **Interfaces:**
+
 - Produces: `useProfile(): { profile: Ref<ProfileDto | undefined>; isLoading; update(input: UpdateProfileInput): Promise<void> }` (TanStack `useQuery(['me'])` + `useMutation` with optimistic update and rollback); `useCurrencies(): Ref<CurrencyDto[]>` (`['currencies']`, staleTime 24 h); `profileApi(client): { get(): Promise<ProfileDto>; update(input): Promise<ProfileDto> }` validating responses with `ProfileDtoSchema`.
 
 - [ ] **Step 1: Failing tests**
@@ -2383,8 +3357,16 @@ Router: `router.beforeEach(authGuard(store))` after `await store.init()` in `mai
 ```ts
 import { describe, expect, it, vi } from 'vitest';
 import { profileApi } from '../src/modules/profile/infrastructure/profile-api.js';
-const ok = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
-const profile = { id: '11111111-1111-1111-1111-111111111111', displayName: null, locale: 'ru', defaultCurrency: 'EUR', reportingCurrencies: ['EUR', 'USD'], onboardingCompletedAt: null };
+const ok = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+const profile = {
+  id: '11111111-1111-1111-1111-111111111111',
+  displayName: null,
+  locale: 'ru',
+  defaultCurrency: 'EUR',
+  reportingCurrencies: ['EUR', 'USD'],
+  onboardingCompletedAt: null,
+};
 describe('profileApi', () => {
   it('gets and validates the profile', async () => {
     const client = { fetch: vi.fn(async () => ok(profile)) };
@@ -2392,8 +3374,13 @@ describe('profileApi', () => {
     expect(client.fetch).toHaveBeenCalledWith('/me', expect.anything());
   });
   it('throws a typed ApiError on failure', async () => {
-    const client = { fetch: vi.fn(async () => ok({ code: 'UNAUTHORIZED', message: 'Sign in required' }, 401)) };
-    await expect(profileApi(client).get()).rejects.toMatchObject({ code: 'UNAUTHORIZED', status: 401 });
+    const client = {
+      fetch: vi.fn(async () => ok({ code: 'UNAUTHORIZED', message: 'Sign in required' }, 401)),
+    };
+    await expect(profileApi(client).get()).rejects.toMatchObject({
+      code: 'UNAUTHORIZED',
+      status: 401,
+    });
   });
   it('rejects a malformed body', async () => {
     const client = { fetch: vi.fn(async () => ok({ nope: 1 })) };
@@ -2417,7 +3404,11 @@ import { ProfileDtoSchema, type ProfileDto, type UpdateProfileInput } from '@mag
 import { parse, type ApiClient } from '@/shared/api/client';
 export const profileApi = (client: ApiClient) => ({
   get: async (): Promise<ProfileDto> => parse(await client.fetch('/me'), ProfileDtoSchema),
-  update: async (input: UpdateProfileInput): Promise<ProfileDto> => parse(await client.fetch('/me', { method: 'PATCH', body: JSON.stringify(input) }), ProfileDtoSchema),
+  update: async (input: UpdateProfileInput): Promise<ProfileDto> =>
+    parse(
+      await client.fetch('/me', { method: 'PATCH', body: JSON.stringify(input) }),
+      ProfileDtoSchema,
+    ),
 });
 ```
 
@@ -2429,15 +3420,27 @@ import type { ProfileDto, UpdateProfileInput } from '@magermoney/contracts';
 import { useApi } from '@/shared/api/use-api';
 import { profileApi } from '../infrastructure/profile-api';
 export function useProfile() {
-  const api = profileApi(useApi()); const qc = useQueryClient();
+  const api = profileApi(useApi());
+  const qc = useQueryClient();
   const query = useQuery({ queryKey: ['me'], queryFn: api.get });
   const mutation = useMutation({
     mutationFn: api.update,
-    onMutate: async (input) => { await qc.cancelQueries({ queryKey: ['me'] }); const prev = qc.getQueryData<ProfileDto>(['me']); if (prev) qc.setQueryData(['me'], { ...prev, ...input }); return { prev }; },
-    onError: (_e, _i, ctx) => { if (ctx?.prev) qc.setQueryData(['me'], ctx.prev); },
+    onMutate: async (input) => {
+      await qc.cancelQueries({ queryKey: ['me'] });
+      const prev = qc.getQueryData<ProfileDto>(['me']);
+      if (prev) qc.setQueryData(['me'], { ...prev, ...input });
+      return { prev };
+    },
+    onError: (_e, _i, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['me'], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ['me'] }),
   });
-  return { profile: query.data, isLoading: query.isLoading, update: (input: UpdateProfileInput) => mutation.mutateAsync(input).then(() => undefined) };
+  return {
+    profile: query.data,
+    isLoading: query.isLoading,
+    update: (input: UpdateProfileInput) => mutation.mutateAsync(input).then(() => undefined),
+  };
 }
 ```
 
@@ -2452,11 +3455,13 @@ export function useProfile() {
 ### Task 16: `apps/web` — rates module, Display currency switch, home screen
 
 **Files:**
+
 - Create: `apps/web/src/modules/rates/index.ts`, `.../rates/domain/index.ts`, `.../rates/application/use-rates.ts`, `.../rates/application/use-display-currency.ts`, `.../rates/infrastructure/rates-api.ts`, `.../rates/ui/CurrencySwitch.vue`, `.../rates/ui/HomePage.vue`, `.../rates/ui/MoneyText.vue`
 - Modify: `apps/web/src/shared/layout/AppShell.vue`, `apps/web/src/app/router.ts`, locales
 - Test: `apps/web/test/use-display-currency.test.ts`, `apps/web/test/MoneyText.test.ts`
 
 **Interfaces:**
+
 - Produces: `useRates(date?): { table: Ref<RateTable | undefined>; isLoading }` (query `['rates', date]`, builds `RateTable` from `RateDto[]` with `CurrencyRegistry` derived from `useCurrencies()`); `useDisplayCurrency(): { current: Ref<string>; options: Ref<string[]>; set(code) }` — `options` from profile `reportingCurrencies`, `current` initialised from profile `defaultCurrency`, persisted per device in `localStorage('displayCurrency')` if it is still in `options`; `convertToDisplay(money: Money): Result<Money, RateMissingError | UnknownCurrencyError>`; `<MoneyText :amount :currency />` renders converted + formatted value with a subtle motion on change.
 
 - [ ] **Step 1: Failing tests**
@@ -2472,13 +3477,19 @@ describe('display currency', () => {
     const profile = ref({ defaultCurrency: 'EUR', reportingCurrencies: ['EUR', 'USD', 'RUB'] });
     const d = createDisplayCurrency(profile, { get: () => null, set: () => {} });
     expect(d.current.value).toBe('EUR');
-    d.set('USD'); expect(d.current.value).toBe('USD');
-    d.set('KZT'); expect(d.current.value).toBe('USD');
+    d.set('USD');
+    expect(d.current.value).toBe('USD');
+    d.set('KZT');
+    expect(d.current.value).toBe('USD');
   });
   it('restores a remembered choice when still listed, else falls back', () => {
     const profile = ref({ defaultCurrency: 'EUR', reportingCurrencies: ['EUR', 'USD'] });
-    expect(createDisplayCurrency(profile, { get: () => 'USD', set: () => {} }).current.value).toBe('USD');
-    expect(createDisplayCurrency(profile, { get: () => 'KZT', set: () => {} }).current.value).toBe('EUR');
+    expect(createDisplayCurrency(profile, { get: () => 'USD', set: () => {} }).current.value).toBe(
+      'USD',
+    );
+    expect(createDisplayCurrency(profile, { get: () => 'KZT', set: () => {} }).current.value).toBe(
+      'EUR',
+    );
   });
 });
 ```
@@ -2494,15 +3505,32 @@ describe('display currency', () => {
 ```ts
 import { computed, ref, watch, type Ref } from 'vue';
 type Storage = { get(): string | null; set(v: string): void };
-export function createDisplayCurrency(profile: Ref<{ defaultCurrency: string; reportingCurrencies: string[] } | undefined>, storage: Storage) {
+export function createDisplayCurrency(
+  profile: Ref<{ defaultCurrency: string; reportingCurrencies: string[] } | undefined>,
+  storage: Storage,
+) {
   const options = computed(() => profile.value?.reportingCurrencies ?? []);
-  const pick = () => { const saved = storage.get(); return saved && options.value.includes(saved) ? saved : (profile.value?.defaultCurrency ?? 'USD'); };
+  const pick = () => {
+    const saved = storage.get();
+    return saved && options.value.includes(saved)
+      ? saved
+      : (profile.value?.defaultCurrency ?? 'USD');
+  };
   const current = ref(pick());
-  watch(options, () => { if (!options.value.includes(current.value)) current.value = pick(); });
-  const set = (code: string) => { if (options.value.includes(code)) { current.value = code; storage.set(code); } };
+  watch(options, () => {
+    if (!options.value.includes(current.value)) current.value = pick();
+  });
+  const set = (code: string) => {
+    if (options.value.includes(code)) {
+      current.value = code;
+      storage.set(code);
+    }
+  };
   return { current, options, set };
 }
-export function useDisplayCurrency() { /* singleton over useProfile().profile with localStorage-backed Storage */ }
+export function useDisplayCurrency() {
+  /* singleton over useProfile().profile with localStorage-backed Storage */
+}
 ```
 
 `application/use-rates.ts`: `useQuery({ queryKey: ['rates', date], queryFn: () => ratesApi(api).list(date) })`, `table = computed(() => data && registry ? new RateTable(date, data.map(toRate), registry) : undefined)` where `toRate` builds `Decimal` from the string. Registry comes from `useCurrencies()` mapped to `Currency[]` (so newly added currencies in the DB are known without a release).
@@ -2522,6 +3550,7 @@ export function useDisplayCurrency() { /* singleton over useProfile().profile wi
 ### Task 17: Pre-commit hooks, CI workflows, Playwright smoke
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`, `.github/workflows/db.yml`, `apps/web/playwright.config.ts`, `apps/web/e2e/smoke.spec.ts`, `.husky/pre-commit`, `.lintstagedrc.json`
 - Modify: root `package.json`
 
@@ -2530,7 +3559,10 @@ export function useDisplayCurrency() { /* singleton over useProfile().profile wi
 Run the `setup-pre-commit` skill. Expected result: `.husky/pre-commit` runs `bunx lint-staged`; `.lintstagedrc.json`:
 
 ```json
-{ "*.{ts,vue,js}": ["eslint --fix", "prettier --write"], "*.{json,md,css,sql}": ["prettier --write"] }
+{
+  "*.{ts,vue,js}": ["eslint --fix", "prettier --write"],
+  "*.{json,md,css,sql}": ["prettier --write"]
+}
 ```
 
 - [ ] **Step 2: ci.yml**
@@ -2610,20 +3642,36 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
       - run: supabase link --project-ref ${{ secrets.SUPABASE_STAGING_REF }}
-        env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}", SUPABASE_DB_PASSWORD: "${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}" }
+        env:
+          {
+            SUPABASE_ACCESS_TOKEN: '${{ secrets.SUPABASE_ACCESS_TOKEN }}',
+            SUPABASE_DB_PASSWORD: '${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}',
+          }
       - run: supabase db push
-        env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}", SUPABASE_DB_PASSWORD: "${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}" }
+        env:
+          {
+            SUPABASE_ACCESS_TOKEN: '${{ secrets.SUPABASE_ACCESS_TOKEN }}',
+            SUPABASE_DB_PASSWORD: '${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}',
+          }
   production:
     needs: [staging]
     runs-on: ubuntu-latest
-    environment: production   # requires a manual approval configured in GitHub → Settings → Environments
+    environment: production # requires a manual approval configured in GitHub → Settings → Environments
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
       - run: supabase link --project-ref ${{ secrets.SUPABASE_PROD_REF }}
-        env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}", SUPABASE_DB_PASSWORD: "${{ secrets.SUPABASE_PROD_DB_PASSWORD }}" }
+        env:
+          {
+            SUPABASE_ACCESS_TOKEN: '${{ secrets.SUPABASE_ACCESS_TOKEN }}',
+            SUPABASE_DB_PASSWORD: '${{ secrets.SUPABASE_PROD_DB_PASSWORD }}',
+          }
       - run: supabase db push
-        env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}", SUPABASE_DB_PASSWORD: "${{ secrets.SUPABASE_PROD_DB_PASSWORD }}" }
+        env:
+          {
+            SUPABASE_ACCESS_TOKEN: '${{ secrets.SUPABASE_ACCESS_TOKEN }}',
+            SUPABASE_DB_PASSWORD: '${{ secrets.SUPABASE_PROD_DB_PASSWORD }}',
+          }
 ```
 
 - [ ] **Step 4: Playwright smoke**
@@ -2638,7 +3686,10 @@ import { createClient } from '@supabase/supabase-js';
 
 // Signs in by generating a magic link server-side (no inbox needed), then drives the UI.
 test('sign in, see home, switch currency', async ({ page }) => {
-  const admin = createClient(process.env.E2E_SUPABASE_URL!, process.env.E2E_SUPABASE_SERVICE_ROLE_KEY!);
+  const admin = createClient(
+    process.env.E2E_SUPABASE_URL!,
+    process.env.E2E_SUPABASE_SERVICE_ROLE_KEY!,
+  );
   const email = `e2e-${Date.now()}@magermoney.test`;
   await admin.auth.admin.createUser({ email, email_confirm: true });
   const { data } = await admin.auth.admin.generateLink({ type: 'magiclink', email });
@@ -2647,7 +3698,13 @@ test('sign in, see home, switch currency', async ({ page }) => {
   const { data: s } = await anon.auth.verifyOtp({ token_hash, type: 'magiclink' });
 
   await page.goto('/sign-in');
-  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [`sb-${new URL(process.env.E2E_SUPABASE_URL!).host.split('.')[0]}-auth-token`, JSON.stringify(s.session)]);
+  await page.evaluate(
+    ([k, v]) => localStorage.setItem(k, v),
+    [
+      `sb-${new URL(process.env.E2E_SUPABASE_URL!).host.split('.')[0]}-auth-token`,
+      JSON.stringify(s.session),
+    ],
+  );
   await page.goto('/');
 
   await expect(page.getByTestId('home-greeting')).toBeVisible();
@@ -2671,6 +3728,7 @@ Add `data-testid` attributes `home-greeting`, `sample-amount`, `currency-switch`
 This task is operational; every step is a real command against real accounts. Nothing here is committed except the small config files noted.
 
 **Files:**
+
 - Create: `apps/web/.vercel/` and `apps/api/.vercel/` (ignored), `README.md`
 
 - [ ] **Step 1: GitHub repository**
@@ -2704,7 +3762,7 @@ cd apps/api && vercel link --yes --project magermoney-api
 cd ../web && vercel link --yes --project magermoney-web
 ```
 
-In the Vercel dashboard for each project: Git → connect `magersoft/magermoney`, Root Directory `apps/api` / `apps/web`, Ignored Build Step `npx turbo-ignore`, Node.js version 24. For `magermoney-api` set env vars for Production (prod Supabase) and Preview (staging Supabase): `DATABASE_URL` (use the pooler URL, port 6543, `?sslmode=require`), `SUPABASE_URL`, `SUPABASE_JWT_SECRET` (Project Settings → API → JWT secret), `CRON_SECRET` (random), `NODE_ENV=production`. For `magermoney-web`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` (`https://magermoney-api.vercel.app` for prod; for previews point at the api preview URL pattern or the staging api production URL).
+In the Vercel dashboard for each project: Git → connect `magersoft/magermoney`, Root Directory `apps/api` / `apps/web`, Ignored Build Step `npx turbo-ignore`, Node.js version 24. For `magermoney-api` set env vars for Production (prod Supabase) and Preview (staging Supabase): `DATABASE_URL` (use the pooler URL, port 6543, `?sslmode=require`), `SUPABASE_URL`, `SUPABASE_JWT_SECRET` (Project Settings → API → JWT secret), `CRON_SECRET` (random), `CORS_ORIGINS` (the production web origin, comma-separated), `ALLOW_VERCEL_PREVIEWS=true` (Preview, and Production while previews share the production API), `NODE_ENV=production`. For `magermoney-web`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` (`https://magermoney-api.vercel.app` for prod; for previews point at the api preview URL pattern or the staging api production URL).
 
 GitHub secrets: `STAGING_API_URL`, `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_ANON_KEY`, `STAGING_SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_STAGING_REF`, `SUPABASE_STAGING_DB_PASSWORD`, `SUPABASE_PROD_REF`, `SUPABASE_PROD_DB_PASSWORD`. GitHub Environments: `staging` (no rules), `production` (required reviewer: the owner).
 
@@ -2727,7 +3785,7 @@ curl -s -X POST -H "authorization: Bearer $CRON_SECRET" "https://magermoney-api.
 curl -s -X POST -H "authorization: Bearer $CRON_SECRET" "https://magermoney-api.vercel.app/jobs/rates?kind=crypto"  # {"stored":10}
 ```
 
-Then in the Supabase prod SQL editor: `select base, value, date from rates order by base;` → 18 rows for today. Open the production web URL on the iPhone: Add to Home Screen, sign in with Google, see the greeting, switch currency, values change. Sign in with magic link in a private window works too. Vercel Cron shows both jobs scheduled.
+Then in the Supabase prod SQL editor: `select base, value, date from rates order by base;` → 18 rows for today (USD is the quote and has no row of its own). Open the production web URL on the iPhone: Add to Home Screen, sign in with Google, see the greeting, switch currency, values change. Sign in with magic link in a private window works too. Vercel Cron shows both jobs scheduled.
 
 - [ ] **Step 6: Record**
 

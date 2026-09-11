@@ -1,0 +1,33 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".vercel/output/**"],
+      "env": [
+        "DATABASE_URL",
+        "SUPABASE_URL",
+        "SUPABASE_JWT_SECRET",
+        "CRON_SECRET",
+        "CORS_ORIGINS",
+        "ALLOW_VERCEL_PREVIEWS",
+        "NODE_ENV",
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_ANON_KEY",
+        "VITE_API_URL"
+      ]
+    },
+    "dev": { "cache": false, "persistent": true },
+    "lint": {},
+    "typecheck": { "dependsOn": ["^build"] },
+    "test": { "dependsOn": ["^build", "//#lint:boundaries-check"], "outputs": ["coverage/**"] },
+    "//#lint:boundaries-check": {
+      "inputs": [
+        "eslint.config.js",
+        "tsconfig.eslint.json",
+        "scripts/check-boundaries.ts",
+        "tools/lint-fixtures/**"
+      ]
+    }
+  }
+}

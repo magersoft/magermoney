@@ -1,0 +1,51 @@
+name: ci
+on: { pull_request: {}, push: { branches: [main] } }
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.3.14 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: bun install --frozen-lockfile
+      - run: bunx turbo run lint typecheck test build
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.3.14 }
+      - uses: supabase/setup-cli@v1
+        with: { version: 2.117.0 }
+      - run: bun install --frozen-lockfile
+      - run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector
+      - run: |
+          eval "$(supabase status -o env)"
+          export DATABASE_URL="$DB_URL" SUPABASE_URL="$API_URL" SUPABASE_ANON_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" SUPABASE_JWT_SECRET="$JWT_SECRET" CRON_SECRET=ci-cron
+          bun run --filter @magermoney/api test:integration
+  e2e:
+    needs: [checks]
+    if: github.event_name == 'pull_request' && vars.E2E_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.3.14 }
+      - run: bun install --frozen-lockfile
+      - uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        id: preview
+        with: { token: "${{ secrets.GITHUB_TOKEN }}", max_timeout: 600 }
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run --filter @magermoney/web test:e2e
+        env:
+          E2E_BASE_URL: ${{ steps.preview.outputs.url }}
+          E2E_API_URL: ${{ secrets.STAGING_API_URL }}
+          E2E_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          E2E_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          E2E_CRON_SECRET: ${{ secrets.STAGING_CRON_SECRET }}

@@ -58,7 +58,7 @@ Errors are typed classes; use-case boundaries return `Result<T, E>` (neverthrow)
 Conventions for every future table: `uuid` PK via `gen_random_uuid()`, `user_id uuid not null references profiles(id)` with an index, `created_at`/`updated_at timestamptz`, money and rates as unconstrained `numeric`, no soft delete (active periods where the domain needs them), RLS on every user table.
 
 - **profiles** — `id` (= `auth.users.id`), `display_name`, `locale ('ru'|'en')`, `default_currency`, `reporting_currencies text[]`, `onboarding_completed_at`, timestamps. Trigger on `auth.users` insert creates the row. RLS: owner only.
-- **currencies** — `code` PK, `kind`, `scale`, and nullable overrides `symbol`, `name_ru`, `name_en`, `icon`. Null means the web app derives symbol and name from `Intl.NumberFormat` / `Intl.DisplayNames` by code; overrides exist only for crypto (BTC, ETH, USDT and the like), which Intl does not know. `icon` is an Iconify id used only when auto-selection misses. Seeded by migration with the owner's 18 currencies. Readable by all authenticated users; written by the service role only.
+- **currencies** — `code` PK, `kind`, `scale`, and nullable overrides `symbol`, `name_ru`, `name_en`, `icon`. Null means the web app derives symbol and name from `Intl.NumberFormat` / `Intl.DisplayNames` by code; overrides exist only for crypto (BTC, ETH, USDT and the like), which Intl does not know. `icon` is an Iconify id used only when auto-selection misses. Seeded by migration with the owner's 19 currencies. Readable by all authenticated users; written by the service role only.
 - **rates** — `id`, `base`, `quote` (always `USD`), `value numeric`, `date`, `source ('api'|'manual')`, `user_id null` (null = shared, set = a user's manual override), timestamps. Unique `(base, quote, date, source, coalesce(user_id, ''))`. RLS: shared rows readable by all; manual rows owner only.
 
 Access from the API through `postgres.js` with hand-written SQL; no ORM. The full schema for all phases is documented in `docs/db/schema.dbml` for review and kept current as phases land.
@@ -103,7 +103,7 @@ Domain: Vitest, TDD, 100 %, fast-check. API: use cases with in-memory repositori
 2. A PR produces web and api previews; smoke passes.
 3. Merge to `main` deploys production; migrations applied; `GET /health` 200.
 4. Google and magic-link sign-in work on the production domain; the owner's user exists.
-5. The rates cron has run; `rates` holds today's rows for all 18 currencies.
+5. The rates cron has run; `rates` holds today's rows for all 19 currencies.
 6. The Display currency switch converts the sample amount on home.
 7. `AGENTS.md`, `CLAUDE.md`, `.mcp.json`, `CONTEXT.md`, ADRs 0001–0005, `docs/db/schema.dbml` are in the repo.
 

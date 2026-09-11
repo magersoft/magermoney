@@ -1,0 +1,35 @@
+{
+  "name": "magermoney",
+  "private": true,
+  "packageManager": "bun@1.3.14",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "lint:boundaries-check": "bun run scripts/check-boundaries.ts",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@vue/eslint-config-typescript": "^14.9.0",
+    "eslint": "^9.36.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-boundaries": "^7.2.0",
+    "eslint-plugin-vue": "^10.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
+    "prettier": "^3.6.0",
+    "turbo": "^2.10.12",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.44.0"
+  }
+}

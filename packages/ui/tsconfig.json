@@ -1,0 +1,16 @@
+{
+  "extends": "@magermoney/config/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "types": [],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
+    // reka-ui and vue-sonner declare optional props without `| undefined`, so the
+    // shadcn components generated on top of them cannot satisfy this. Everything
+    // hand-written in this package is checked under the base config's other
+    // strict flags.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src", "test"]
+}

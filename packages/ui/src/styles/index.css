@@ -1,0 +1,175 @@
+/**
+ * `@magermoney/ui/styles` — the single CSS entry for the design system.
+ *
+ * Load order matters: tokens first (they own `@import "tailwindcss"`), then the
+ * shadcn base layer, then the mapping that points every shadcn variable at a
+ * Magermoney token. Fonts are loaded by the consuming app, not from here.
+ */
+
+@import './tokens.css';
+@import 'tw-animate-css';
+@import 'shadcn-vue/tailwind.css';
+
+/*
+ * Dark applies on the system preference unless the light theme is pinned, and
+ * always when the dark theme is pinned — the same two rules as tokens.css.
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+  &:where(:root[data-theme='dark'], :root[data-theme='dark'] *) {
+    @slot;
+  }
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+
+  /* Magermoney semantics. Balances are ink; only changes are coloured. */
+  --color-ink: var(--mm-ink);
+  --color-line: var(--mm-line);
+  --color-surface: var(--mm-surface);
+  --color-surface-raised: var(--mm-surface-raised);
+  --color-line-strong: var(--mm-line-strong);
+  --color-positive: var(--mm-positive);
+  --color-negative: var(--mm-negative);
+  --color-warning: var(--mm-warning);
+
+  --transition-duration-fast: var(--mm-duration-fast);
+  --transition-duration-base: var(--mm-duration-base);
+  --transition-duration-slow: var(--mm-duration-slow);
+
+  /* The shadcn contract. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+ * Every shadcn variable resolves to a token, so the generated components follow
+ * the palette in both themes without being edited. `--mm-*` flips with the
+ * theme; these mappings never need to.
+ */
+:root {
+  /* shadcn's one radius knob is the control radius; containers use the scale. */
+  --radius: var(--radius-lg);
+
+  --background: var(--mm-bg);
+  --foreground: var(--mm-ink);
+  --card: var(--mm-surface);
+  --card-foreground: var(--mm-ink);
+  --popover: var(--mm-surface-raised);
+  --popover-foreground: var(--mm-ink);
+  --primary: var(--mm-accent);
+  --primary-foreground: var(--mm-accent-fg);
+  --secondary: color-mix(in oklab, var(--mm-ink) 6%, transparent);
+  --secondary-foreground: var(--mm-ink);
+  --muted: color-mix(in oklab, var(--mm-ink) 5%, transparent);
+  --muted-foreground: var(--mm-muted);
+  --accent: color-mix(in oklab, var(--mm-accent) 10%, transparent);
+  --accent-foreground: var(--mm-accent);
+  --destructive: var(--mm-negative);
+  --border: var(--mm-line);
+  /* Form-control boundaries need 3:1 (WCAG 1.4.11); the row hairline does not. */
+  --input: var(--mm-line-strong);
+  --ring: var(--mm-accent);
+
+  /* Charts stay on the brand hue and step in lightness: one story, not five. */
+  --chart-1: var(--mm-accent);
+  --chart-2: oklch(from var(--mm-accent) calc(l + 0.1) calc(c - 0.05) h);
+  --chart-3: oklch(from var(--mm-accent) calc(l + 0.2) calc(c - 0.09) h);
+  --chart-4: var(--mm-positive);
+  --chart-5: var(--mm-warning);
+
+  --sidebar: var(--mm-surface);
+  --sidebar-foreground: var(--mm-ink);
+  --sidebar-primary: var(--mm-accent);
+  --sidebar-primary-foreground: var(--mm-accent-fg);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--mm-accent);
+  --sidebar-border: var(--mm-line);
+  --sidebar-ring: var(--mm-accent);
+}
+
+/*
+ * The catch-all for reduced motion. The token durations only reach motion that
+ * reads them, and the generated components hardcode `duration-200` and
+ * tw-animate's `animate-in`/`animate-out`. 0.01ms rather than 0 so animation
+ * and transition end events still fire and nothing waits forever on one.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * Touch pointers get a 44px target whatever size variant the screen chose.
+   * Applied here rather than in the generated components, which the shadcn CLI
+   * rewrites on every `add`.
+   */
+  @media (pointer: coarse) {
+    [data-slot='button'],
+    [data-slot='input'],
+    [data-slot='select-trigger'] {
+      min-height: 2.75rem;
+    }
+
+    [data-slot='button']:is([class*='size-']) {
+      min-width: 2.75rem;
+    }
+  }
+
+  /* The signature lockup: amounts are always tabular, never proportional. */
+  [data-amount],
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: -0.01em;
+  }
+}

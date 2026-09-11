@@ -1,0 +1,9 @@
+/*
+ * The app's CSS entry. The design system owns the tokens and declares its own
+ * `@source`; this file adds the app's own sources so Tailwind sees the classes
+ * used in `apps/web`. Fonts are loaded from `index.html`.
+ */
+
+@import '@magermoney/ui/styles';
+
+@source '../..';

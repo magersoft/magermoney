@@ -1,0 +1,5 @@
+dist
+coverage
+bun.lock
+packages/ui/src/icons/subset.json
+supabase/.temp

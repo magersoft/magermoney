@@ -1,0 +1,77 @@
+{
+  "app": {
+    "name": "Magermoney"
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "theme": {
+    "label": "Switch theme (now {theme})",
+    "system": "system",
+    "light": "light",
+    "dark": "dark"
+  },
+  "home": {
+    "greeting": "Hi, {name}",
+    "greetingPlain": "Hi",
+    "sample": "Sample amount",
+    "rateDate": "Rates for {date}",
+    "soon": "Accounts and transactions come in the next version. For now there is one amount here, to check the conversion."
+  },
+  "settings": {
+    "title": "Settings",
+    "displayName": {
+      "label": "Your name",
+      "placeholder": "Name"
+    },
+    "language": {
+      "label": "Language",
+      "ru": "Русский",
+      "en": "English"
+    },
+    "theme": {
+      "label": "Theme"
+    },
+    "currencies": {
+      "title": "Reporting currencies",
+      "hint": "Amounts on the home screen switch between these. One of them is the main one.",
+      "add": "Add a currency",
+      "default": "main",
+      "defaultOf": "Make {code} the main currency",
+      "remove": "Remove {code}"
+    },
+    "signOut": "Sign out",
+    "saveFailed": "That did not save. Try again."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "subtitle": "No password. We email you a link, or use Google.",
+      "google": "Continue with Google",
+      "or": "or",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you{'@'}example.com",
+      "send": "Email me a link",
+      "sending": "Sending",
+      "sentTitle": "Check your inbox",
+      "sentBody": "We sent a link to {email}. It works for an hour.",
+      "useAnother": "Use a different address"
+    },
+    "callback": {
+      "working": "Signing you in",
+      "failedTitle": "That link did not work",
+      "failedBody": "A link lasts an hour and works once. Ask for a new one.",
+      "retry": "Back to sign in"
+    }
+  },
+  "a11y": {
+    "primaryNav": "Main navigation",
+    "skipToContent": "Skip to content",
+    "displayCurrency": "Display currency",
+    "showIn": "Show amounts in {code}"
+  },
+  "money": {
+    "noRate": "No rate for {code} on {date}"
+  }
+}
