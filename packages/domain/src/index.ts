@@ -7,3 +7,4 @@ export * from './rate-table.js';
 export * from './clock.js';
 export * from './account.js';
 export * from './transfer.js';
+export * from './read-models.js';
