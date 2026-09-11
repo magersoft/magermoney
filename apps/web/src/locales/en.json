@@ -17,7 +17,29 @@
     "sample": "Sample amount"
   },
   "settings": {
-    "title": "Settings"
+    "title": "Settings",
+    "displayName": {
+      "label": "Your name",
+      "placeholder": "Name"
+    },
+    "language": {
+      "label": "Language",
+      "ru": "Русский",
+      "en": "English"
+    },
+    "theme": {
+      "label": "Theme"
+    },
+    "currencies": {
+      "title": "Reporting currencies",
+      "hint": "Amounts on the home screen switch between these. One of them is the main one.",
+      "add": "Add a currency",
+      "default": "main",
+      "defaultOf": "Make {code} the main currency",
+      "remove": "Remove {code}"
+    },
+    "signOut": "Sign out",
+    "saveFailed": "That did not save. Try again."
   },
   "auth": {
     "signIn": {

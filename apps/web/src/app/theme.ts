@@ -1,43 +1,6 @@
-import { ref, watchEffect, type Ref } from 'vue';
-import { applyTheme, type Theme } from '@/shared/theme';
-
-export { applyTheme, type Theme };
-
-const STORAGE_KEY = 'theme';
-const THEME_VALUES: readonly string[] = ['system', 'light', 'dark'];
-
-/** Storage is unavailable in private mode and in tests; a missing preference is not an error. */
-function readStored(): Theme {
-  if (typeof localStorage === 'undefined') return 'system';
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored !== null && THEME_VALUES.includes(stored) ? (stored as Theme) : 'system';
-  } catch {
-    return 'system';
-  }
-}
-
-function writeStored(t: Theme): void {
-  if (typeof localStorage === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY, t);
-  } catch {
-    /* The theme still applies for this session. */
-  }
-}
-
-const theme = ref<Theme>(readStored());
-
-/** The preference, applied to the document and remembered across visits. */
-export function useTheme(): { theme: Ref<Theme>; set: (t: Theme) => void } {
-  watchEffect(() => {
-    applyTheme(theme.value);
-    writeStored(theme.value);
-  });
-  return {
-    theme,
-    set: (t: Theme) => {
-      theme.value = t;
-    },
-  };
-}
+/**
+ * The theme preference lives in `shared/theme`: the settings screen changes it
+ * too, and a module may not import `app`. Re-exported here so the composition
+ * root keeps one import path.
+ */
+export { applyTheme, useTheme, type Theme } from '@/shared/theme';

@@ -1,2 +1,4 @@
-/** Public API of the profile module. Task 15 replaces the placeholder page. */
-export { default as SettingsPage } from './ui/views/SettingsPage.vue';
+/** Public API of the profile module. */
+export { greetingName, LOCALES, type Locale } from './domain/profile';
+export { useProfile } from './application/use-profile';
+export { default as SettingsPage } from './ui/SettingsPage.vue';
