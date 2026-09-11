@@ -23,7 +23,10 @@ describe('env', () => {
   });
 
   it('parses CORS_ORIGINS as a trimmed list and defaults to the dev origin', () => {
-    expect(loadEnv({ ...base }).CORS_ORIGINS).toEqual(['http://localhost:5173']);
+    expect(loadEnv({ ...base }).CORS_ORIGINS).toEqual([
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ]);
     expect(loadEnv({ ...base, CORS_ORIGINS: 'https://a.dev, https://b.dev' }).CORS_ORIGINS).toEqual(
       ['https://a.dev', 'https://b.dev'],
     );

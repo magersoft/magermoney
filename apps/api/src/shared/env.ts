@@ -16,7 +16,7 @@ const schema = z.object({
   CRON_SECRET: z.string().min(8),
   CORS_ORIGINS: z
     .string()
-    .default('http://localhost:5173')
+    .default('http://localhost:5173,http://127.0.0.1:5173')
     .transform(csv)
     .pipe(z.array(z.string()).min(1)),
   ALLOW_VERCEL_PREVIEWS: z
