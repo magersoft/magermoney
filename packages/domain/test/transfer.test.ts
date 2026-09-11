@@ -48,6 +48,13 @@ describe('deriveTransfer', () => {
     })._unsafeUnwrapErr();
     expect((e as TransferError).reason).toBe('non_positive_amount');
   });
+  it('rejects a zero received amount', () => {
+    const e = deriveTransfer({
+      amountSent: m('100', 'USD'),
+      amountReceived: m('0', 'EUR'),
+    })._unsafeUnwrapErr();
+    expect((e as TransferError).reason).toBe('non_positive_amount');
+  });
 });
 
 describe('applyTransfer', () => {

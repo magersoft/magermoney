@@ -15,7 +15,7 @@ describe('transfer properties', () => {
       fc.property(cents, cents, cents, (bal, sent, feeRaw) => {
         const sentM = Money.of(sent, USD);
         const fee = Money.of(feeRaw, USD);
-        if (fee.compare(sentM)._unsafeUnwrap() > 0) return;
+        if (fee.compare(sentM)._unsafeUnwrap() >= 0) return;
         const balance = Money.of(bal, USD).add(sentM)._unsafeUnwrap();
         const received = sentM.subtract(fee)._unsafeUnwrap();
         const d = deriveTransfer({ amountSent: sentM, amountReceived: received })._unsafeUnwrap();
