@@ -2,6 +2,11 @@ import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify, type JWTVerifyGet
 import { err, ok, type Result } from 'neverthrow';
 import { UnauthorizedError } from '../errors/http.js';
 
+/**
+ * At least one of the two must be set, or every token is rejected. The boot
+ * check in `shared/env.ts` (`assertJwtConfigured`) enforces that; the type
+ * stays permissive because callers forward two independently optional deps.
+ */
 export interface VerifySupabaseJwtOptions {
   jwks?: JWTVerifyGetKey | undefined;
   secret?: string | undefined;

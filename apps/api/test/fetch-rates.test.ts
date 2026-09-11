@@ -50,6 +50,15 @@ describe('fetchRates', () => {
       ).isErr(),
     ).toBe(true);
   });
+  it('GET /jobs/rates runs the job for Vercel Cron with the cron secret', async () => {
+    const app = createApp(testDeps({ rateProviders: [fiat], clock }));
+    expect((await app.request('/jobs/rates?kind=fiat')).status).toBe(401);
+    const res = await app.request('/jobs/rates?kind=fiat', {
+      headers: { authorization: 'Bearer cron' },
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ stored: 2 });
+  });
   it('POST /jobs/rates requires the cron secret', async () => {
     const app = createApp(testDeps({ rateProviders: [fiat], clock }));
     expect((await app.request('/jobs/rates?kind=fiat', { method: 'POST' })).status).toBe(401);

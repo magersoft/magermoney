@@ -16,14 +16,34 @@ export type AppEnv = { Variables: { userId: string; requestId: string } };
 
 export interface AppDeps {
   clock: Clock;
-  jwtSecret: string;
-  jwks?: JWTVerifyGetKey;
+  /** HS256 fallback secret. Optional: `jwks` alone is enough. */
+  jwtSecret?: string | undefined;
+  jwks?: JWTVerifyGetKey | undefined;
   cronSecret: string;
-  exposeDocs?: boolean;
+  exposeDocs?: boolean | undefined;
+  /** Exact origins allowed to send credentialed requests. */
+  corsOrigins?: string[] | undefined;
+  /** Also allow `https://*.vercel.app` preview deployments. */
+  allowVercelPreviews?: boolean | undefined;
   profiles: ProfileRepository;
   registry: CurrencyRegistry;
   rates: RateRepository;
   rateProviders: RateProvider[];
+}
+
+const VERCEL_PREVIEW = /^https:\/\/[a-z0-9-]+\.vercel\.app$/;
+
+/**
+ * `credentials: true` plus a reflected origin lets any site read the API as the
+ * signed-in user, so reflect only origins we actually ship.
+ */
+export function originAllowList(deps: AppDeps): (origin: string) => string | null {
+  const allowed = new Set(deps.corsOrigins ?? ['http://localhost:5173']);
+  return (origin) => {
+    if (allowed.has(origin)) return origin;
+    if (deps.allowVercelPreviews && VERCEL_PREVIEW.test(origin)) return origin;
+    return null;
+  };
 }
 
 export function createApp(deps: AppDeps) {
@@ -40,7 +60,7 @@ export function createApp(deps: AppDeps) {
     },
   });
   app.use('*', requestId());
-  app.use('*', cors({ origin: (o) => o, credentials: true }));
+  app.use('*', cors({ origin: originAllowList(deps), credentials: true }));
   app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404));
   app.onError((e, c) => {
     logger.error({ err: e, requestId: c.get('requestId') }, 'unhandled');
