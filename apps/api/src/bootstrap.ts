@@ -1,5 +1,5 @@
 import { CurrencyRegistry, SystemClock } from '@magermoney/domain';
-import type { AppDeps, Repos } from './app.js';
+import type { AppDeps } from './app.js';
 import { assertJwtConfigured, type Env } from './shared/env.js';
 import { createSupabaseJwks } from './shared/auth/jwt.js';
 import { createDb } from './shared/db/client.js';
@@ -7,6 +7,7 @@ import { PgProfileRepository } from './modules/profiles/infrastructure/pg-profil
 import { PgRateRepository } from './modules/rates/infrastructure/pg-rate-repository.js';
 import { OpenErApiProvider } from './modules/rates/infrastructure/open-er-api-provider.js';
 import { CoinGeckoProvider } from './modules/rates/infrastructure/coingecko-provider.js';
+import { pgRepos, pgUnitOfWork } from './shared/db/pg-unit-of-work.js';
 
 /** Shared by the node server (`src/index.ts`) and the Vercel function (`src/vercel-entry.ts`, bundled to `api/index.js`). */
 export function depsFromEnv(env: Env): AppDeps {
@@ -27,9 +28,7 @@ export function depsFromEnv(env: Env): AppDeps {
       new OpenErApiProvider(env.FIAT_RATES_URL),
       new CoinGeckoProvider(env.CRYPTO_RATES_URL),
     ],
-    repos: undefined as unknown as Repos, // replaced in Task 9
-    uow: async () => {
-      throw new Error('pg unit of work arrives with the pg repositories');
-    },
+    repos: pgRepos(sql),
+    uow: pgUnitOfWork(sql),
   };
 }
