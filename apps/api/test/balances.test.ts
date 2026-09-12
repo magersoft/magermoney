@@ -98,4 +98,19 @@ describe('balances', () => {
     expect(a.balance).toBe('101');
     expect((await authed(app, 'DELETE', `/balances/${second.id}`)).status).toBe(404);
   });
+  it('refuses to edit the latest entry to a date before the previous one', async () => {
+    const { app, acc } = await setup();
+    const second = await (
+      await authed(app, 'POST', `/accounts/${acc.id}/balances`, { amount: '200' })
+    ).json();
+    const tooEarly = await authed(app, 'PATCH', `/balances/${second.id}`, {
+      recordedAt: '2026-08-15T00:00:00.000Z',
+    });
+    expect(tooEarly.status).toBe(400);
+    expect((await tooEarly.json()).code).toBe('recorded_before_previous');
+    const ok = await authed(app, 'PATCH', `/balances/${second.id}`, {
+      recordedAt: '2026-09-05T00:00:00.000Z',
+    });
+    expect(ok.status).toBe(200);
+  });
 });

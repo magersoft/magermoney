@@ -36,10 +36,20 @@ export const editBalance =
     if (!entry) return err(new NotFoundError('balance entry'));
     const editable = await assertEditable(deps.repos, userId, entry);
     if (editable.isErr()) return err(editable.error);
-    if (input.recordedAt !== undefined && !notInFuture(input.recordedAt, deps.clock.now()))
-      return err(
-        new ValidationError('A balance cannot be dated in the future', 'recorded_in_future'),
-      );
+    if (input.recordedAt !== undefined) {
+      if (!notInFuture(input.recordedAt, deps.clock.now()))
+        return err(
+          new ValidationError('A balance cannot be dated in the future', 'recorded_in_future'),
+        );
+      const [, second] = await deps.repos.balances.listByAccount(userId, entry.accountId, 2);
+      if (second && input.recordedAt < second.recordedAt)
+        return err(
+          new ValidationError(
+            'The entry must stay the latest one; record a new entry instead',
+            'recorded_before_previous',
+          ),
+        );
+    }
     const row = await deps.repos.balances.update(userId, id, input as BalanceEntryPatch);
     return row ? ok(toBalanceDto(row)) : err(new NotFoundError('balance entry'));
   };
