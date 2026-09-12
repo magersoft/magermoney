@@ -31,8 +31,7 @@ const json = (schema: z.ZodTypeAny, description: string) => ({
 });
 
 /** One place turns a use-case error into a response; the status is narrowed for hono's typed responses. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function fail(c: Context<AppEnv>, e: AppError): any {
+export function fail(c: Context<AppEnv>, e: AppError) {
   const h = toHttpError(e);
   return c.json(h.body, h.status as 400);
 }
@@ -51,7 +50,7 @@ export function accountRoutes(deps: AppDeps) {
       security: [{ bearer: [] }],
       responses: {
         200: json(z.array(AccountDtoSchema), 'Accounts with their latest balance'),
-        401: ERRORS[401],
+        ...ERRORS,
       },
     }),
     async (c) => c.json(await listAccounts(deps.repos)(c.var.userId), 200),
@@ -63,7 +62,7 @@ export function accountRoutes(deps: AppDeps) {
       path: '/accounts',
       security: [{ bearer: [] }],
       request: { body: { content: { 'application/json': { schema: CreateAccountInputSchema } } } },
-      responses: { 201: json(AccountDtoSchema, 'Created'), 400: ERRORS[400], 401: ERRORS[401] },
+      responses: { 201: json(AccountDtoSchema, 'Created'), ...ERRORS },
     }),
     async (c) =>
       (await createAccount(uc)(c.var.userId, c.req.valid('json'))).match(
@@ -81,7 +80,7 @@ export function accountRoutes(deps: AppDeps) {
       request: {
         body: { content: { 'application/json': { schema: ReorderAccountsInputSchema } } },
       },
-      responses: { 204: { description: 'Reordered' }, 400: ERRORS[400], 401: ERRORS[401] },
+      responses: { 204: { description: 'Reordered' }, ...ERRORS },
     }),
     async (c) =>
       (await reorderAccounts(uc)(c.var.userId, c.req.valid('json').ids)).match(
@@ -118,7 +117,7 @@ export function accountRoutes(deps: AppDeps) {
         path: `/accounts/{id}/${action}`,
         security: [{ bearer: [] }],
         request: { params: IdParamSchema },
-        responses: { 200: json(AccountDtoSchema, action), 401: ERRORS[401], 404: ERRORS[404] },
+        responses: { 200: json(AccountDtoSchema, action), ...ERRORS },
       }),
       async (c) =>
         (await setAccountArchived(uc)(c.var.userId, c.req.valid('param').id, archived)).match(
@@ -134,12 +133,7 @@ export function accountRoutes(deps: AppDeps) {
       path: '/accounts/{id}',
       security: [{ bearer: [] }],
       request: { params: IdParamSchema },
-      responses: {
-        204: { description: 'Deleted' },
-        401: ERRORS[401],
-        404: ERRORS[404],
-        409: ERRORS[409],
-      },
+      responses: { 204: { description: 'Deleted' }, ...ERRORS },
     }),
     async (c) =>
       (await deleteAccount(uc)(c.var.userId, c.req.valid('param').id)).match(
