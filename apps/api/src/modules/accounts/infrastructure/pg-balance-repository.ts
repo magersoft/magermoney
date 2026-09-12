@@ -27,7 +27,7 @@ export class PgBalanceRepository implements BalanceRepository {
     const rows = await this.sql<Raw[]>`
       select ${this.sql.unsafe(COLS)} from balance_entries
       where user_id = ${userId} and account_id = ${accountId}
-      ${c ? this.sql`and (recorded_at, coalesce((select created_at from balance_entries where id = ${c.id}), 'infinity'::timestamptz), id) < (${c.recordedAt}::timestamptz, coalesce((select created_at from balance_entries where id = ${c.id}), 'infinity'::timestamptz), ${c.id}::uuid)` : this.sql``}
+      ${c ? this.sql`and (recorded_at, created_at, id) < (${c.recordedAt}::timestamptz, coalesce((select created_at from balance_entries where id = ${c.id} and user_id = ${userId}), 'infinity'::timestamptz), ${c.id}::uuid)` : this.sql``}
       order by recorded_at desc, created_at desc, id desc
       limit ${limit}`;
     return rows.map(fromRaw);
