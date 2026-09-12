@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { FixedClock } from '@magermoney/domain';
 import { createApp } from '../src/app.js';
-import { testDeps } from './helpers/deps.js';
-import { authed, OTHER, SECRET } from './helpers/http.js';
+import { memoryRepos, testDeps } from './helpers/deps.js';
+import { authed, OTHER, SECRET, UID } from './helpers/http.js';
 
 const NOW = new Date('2026-09-11T12:00:00.000Z');
 const alfa = {
@@ -100,5 +100,16 @@ describe('accounts', () => {
     ).toBe(400);
     expect((await authed(app, 'DELETE', `/accounts/${a.id}`)).status).toBe(204);
     expect((await authed(app, 'DELETE', `/accounts/${a.id}`)).status).toBe(404);
+  });
+  it('refuses to delete an account with transfers, but allows it once they are gone', async () => {
+    const repos = memoryRepos();
+    const app = createApp(testDeps({ repos, jwtSecret: SECRET, clock: new FixedClock(NOW) }));
+    const a = await (await authed(app, 'POST', '/accounts', alfa)).json();
+    repos.accounts.transferCounts.set(a.id, 1);
+    const blocked = await authed(app, 'DELETE', `/accounts/${a.id}`);
+    expect(blocked.status).toBe(409);
+    expect((await blocked.json()).code).toBe('account_has_transfers');
+    repos.accounts.transferCounts.set(a.id, 0);
+    expect((await authed(app, 'DELETE', `/accounts/${a.id}`, undefined, UID)).status).toBe(204);
   });
 });
