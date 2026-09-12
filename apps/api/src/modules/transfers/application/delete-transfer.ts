@@ -7,9 +7,11 @@ export const deleteTransfer =
   (deps: TransferDeps) =>
   (userId: string, id: string): Promise<Result<void, NotFoundError | ConflictError>> =>
     deps.uow(async (repos) => {
+      const existing = await repos.transfers.findById(userId, id);
+      if (!existing) return err(new NotFoundError('transfer'));
+      await repos.accounts.lock(userId, [existing.fromAccountId, existing.toAccountId]);
       const current = await repos.transfers.findById(userId, id);
       if (!current) return err(new NotFoundError('transfer'));
-      await repos.accounts.lock(userId, [current.fromAccountId, current.toAccountId]);
       const latest = await latestEntriesOf(repos, userId, current);
       if (latest.isErr()) return err(latest.error);
       await repos.balances.deleteByTransfer(userId, id);
