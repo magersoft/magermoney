@@ -24,8 +24,10 @@ export class UnauthorizedError extends Error {
 }
 
 export class ValidationError extends Error {
-  readonly code = 'VALIDATION';
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly code: string = 'VALIDATION',
+  ) {
     super(message);
   }
 }

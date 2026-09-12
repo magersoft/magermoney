@@ -8,6 +8,7 @@ import { logger } from './shared/logger.js';
 import { profileRoutes } from './modules/profiles/http/routes.js';
 import type { ProfileRepository } from './modules/profiles/application/profile-repository.js';
 import { ratesRoutes } from './modules/rates/http/routes.js';
+import { accountRoutes } from './modules/accounts/http/routes.js';
 import type { RateRepository } from './modules/rates/application/rate-repository.js';
 import type { RateProvider } from './modules/rates/application/rate-provider.js';
 import { jobRoutes } from './jobs/fetch-rates.js';
@@ -97,6 +98,7 @@ export function createApp(deps: AppDeps) {
 
   app.route('/me', profileRoutes(deps));
   app.route('/', ratesRoutes(deps));
+  app.route('/', accountRoutes(deps));
   app.route('/', jobRoutes(deps));
 
   mountOpenApi(app, deps.exposeDocs ?? true);
