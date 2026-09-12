@@ -12,6 +12,7 @@ Project magermoney {
 Enum currency_kind { fiat crypto }
 Enum rate_source { api manual }
 Enum account_kind { bank_account card deposit broker crypto_wallet cash }
+Enum card_type { debit credit }
 Enum balance_entry_origin { manual transfer inflow }
 Enum expense_period { monthly yearly }
 Enum snapshot_status { draft confirmed legacy }
@@ -54,7 +55,7 @@ Table rates [note: 'phase 1. Append-only. quote is always USD. user_id null = sh
 
 // ---------- phase 2: where the money is ----------
 
-Table accounts [note: 'phase 2. Holds exactly one currency. Card-specific fields are optional.'] {
+Table accounts [note: 'phase 2. Holds exactly one currency. Card-specific fields are optional. check: card fields only when kind = card'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
   name text [not null]
@@ -62,8 +63,9 @@ Table accounts [note: 'phase 2. Holds exactly one currency. Card-specific fields
   country text [not null, note: 'ISO 3166-1 alpha-2; "XX" for crypto/cash']
   currency text [not null, ref: > currencies.code]
   kind account_kind [not null]
+  card_type card_type [note: 'card only']
   is_spending bool [not null, default: false, note: 'counts towards available-until-payday']
-  goal_id uuid [ref: > goals.id, note: 'at most one Goal per Account (phase 4)']
+  goal_id uuid [ref: > goals.id, note: 'phase 4: added by a later migration']
   card_last4 text
   card_network text [note: 'Visa, MasterCard, Mir']
   card_tier text [note: 'Classic, Gold, Platinum, Elite, Digital']
@@ -81,14 +83,14 @@ Table balance_entries [note: 'phase 2. Append-only journal. Current balance = la
   recorded_at timestamptz [not null]
   origin balance_entry_origin [not null]
   transfer_id uuid [ref: > transfers.id]
-  inflow_id uuid [ref: > inflows.id]
+  inflow_id uuid [ref: > inflows.id, note: 'phase 3: added by a later migration']
   note text
   Indexes {
-    (account_id, recorded_at)
+    (account_id, recorded_at, created_at) [note: 'latest = order by recorded_at desc, created_at desc']
   }
 }
 
-Table transfers [note: 'phase 2. Produces two balance_entries. Cross-currency: both amounts declared, rate and fee derived.'] {
+Table transfers [note: 'phase 2. Produces two balance_entries. Cross-currency: both amounts declared, rate and fee derived. checks: from <> to, both amounts > 0'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
   from_account_id uuid [not null, ref: > accounts.id]
@@ -97,6 +99,9 @@ Table transfers [note: 'phase 2. Produces two balance_entries. Cross-currency: b
   amount_received numeric [not null]
   occurred_at timestamptz [not null]
   note text
+  Indexes {
+    (user_id, occurred_at)
+  }
 }
 
 // ---------- phase 3: what comes in and goes out ----------

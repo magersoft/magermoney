@@ -23,7 +23,14 @@ _Avoid_: Supported currencies
 ### Where the money is
 
 **Account**:
-A place that holds Money in exactly one currency: a bank account, a card, a deposit, a broker, a crypto wallet, or cash. Belongs to a bank (or wallet provider) and a country. May be flagged as a Spending account.
+A place that holds Money in exactly one currency: a bank account, a card, a deposit, a broker, a crypto wallet, or cash. Belongs to a bank (or wallet provider) and a country. May be flagged as a Spending account. An Account holds one currency, so a wallet with several coins is several Accounts sharing a Provider.
+
+**Provider**:
+The bank, broker, exchange or wallet an Account belongs to (the `bank` field). Accounts are shown grouped by Provider.
+_Avoid_: Institution, group
+
+**Card type**:
+Whether a card Account is debit or credit. Only a credit card may hold a negative balance.
 
 **Spending account**:
 An Account whose balance is what is available until payday. Everything not flagged is treated as savings.
@@ -31,15 +38,12 @@ _Avoid_: Card, current account
 _Avoid_: Card (a card is a kind of Account), balance (that is the Account's amount)
 
 **Balance entry**:
-A dated statement "Account X held amount Y". An Account's current balance is its latest Balance entry; earlier entries are kept. Balances are declared, not computed from transactions.
+A dated statement "Account X held amount Y". An Account's current balance is its latest Balance entry; earlier entries are kept. Balances are declared, not computed from transactions. Only the newest entry of an Account may be edited or deleted; older ones are history.
 _Avoid_: Transaction, adjustment, update
 
 **Transfer**:
-A move of Money between two of the user's Accounts on a date. Produces one Balance entry on each side; when currencies differ, the amount sent and the amount received are both declared and the realised rate and fee are derived. A Transfer never changes total capital except by its fee.
+A move of Money between two of the user's Accounts on a date. Produces one Balance entry on each side; when currencies differ, the amount sent and the amount received are both declared and the realised rate and fee are derived. A Transfer never changes total capital except by its fee. A Transfer can be edited or deleted only while both of its Balance entries are still the newest on their Accounts.
 _Avoid_: Exchange, conversion, swap
-
-**Holding**:
-A single crypto asset inside a wallet Account, e.g. 0.33 ETH on Binance.
 
 ### What comes in
 
