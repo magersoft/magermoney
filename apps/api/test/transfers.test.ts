@@ -195,4 +195,96 @@ describe('transfers', () => {
     expect(eurOnly).toHaveLength(1);
     expect(await (await authed(app, 'GET', '/transfers', undefined, OTHER)).json()).toEqual([]);
   });
+  it('refuses to touch a transfer that is not the caller’s or does not exist', async () => {
+    const { app, usd, usd2 } = await setup();
+    const t = await (
+      await authed(app, 'POST', '/transfers', {
+        fromAccountId: usd.id,
+        toAccountId: usd2.id,
+        amountSent: '10',
+      })
+    ).json();
+    expect(
+      (await authed(app, 'PATCH', `/transfers/${t.id}`, { amountSent: '5' }, OTHER)).status,
+    ).toBe(404);
+    expect((await authed(app, 'DELETE', `/transfers/${t.id}`, undefined, OTHER)).status).toBe(404);
+    const randomId = '99999999-9999-4999-8999-999999999999';
+    expect((await authed(app, 'PATCH', `/transfers/${randomId}`, { amountSent: '5' })).status).toBe(
+      404,
+    );
+    expect((await authed(app, 'DELETE', `/transfers/${randomId}`)).status).toBe(404);
+  });
+  it('refuses to change the accounts of a transfer', async () => {
+    const { app, usd, usd2, eur } = await setup();
+    const t = await (
+      await authed(app, 'POST', '/transfers', {
+        fromAccountId: usd.id,
+        toAccountId: usd2.id,
+        amountSent: '10',
+      })
+    ).json();
+    const res = await authed(app, 'PATCH', `/transfers/${t.id}`, { toAccountId: eur.id });
+    expect(res.status).toBe(400);
+    expect((await res.json()).code).toBe('accounts_immutable');
+  });
+  it('refuses to date an edited transfer in the future', async () => {
+    const { app, usd, usd2 } = await setup();
+    const t = await (
+      await authed(app, 'POST', '/transfers', {
+        fromAccountId: usd.id,
+        toAccountId: usd2.id,
+        amountSent: '10',
+      })
+    ).json();
+    const res = await authed(app, 'PATCH', `/transfers/${t.id}`, {
+      occurredAt: '2027-01-01T00:00:00.000Z',
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).code).toBe('recorded_in_future');
+  });
+  it('refuses to create a transfer behind a newer balance entry', async () => {
+    const { app, usd, usd2 } = await setup();
+    await authed(app, 'POST', `/accounts/${usd2.id}/balances`, {
+      amount: '50',
+      recordedAt: NOW.toISOString(),
+    });
+    const res = await authed(app, 'POST', '/transfers', {
+      fromAccountId: usd.id,
+      toAccountId: usd2.id,
+      amountSent: '10',
+      occurredAt: '2026-09-10T00:00:00.000Z',
+    });
+    expect(res.status).toBe(409);
+    expect((await res.json()).code).toBe('transfer_not_latest');
+  });
+  it('refuses to move a transfer before the entry it would then precede', async () => {
+    const { app, usd, usd2 } = await setup();
+    const t = await (
+      await authed(app, 'POST', '/transfers', {
+        fromAccountId: usd.id,
+        toAccountId: usd2.id,
+        amountSent: '10',
+      })
+    ).json();
+    const res = await authed(app, 'PATCH', `/transfers/${t.id}`, {
+      occurredAt: '2026-08-01T00:00:00.000Z',
+    });
+    expect(res.status).toBe(409);
+    expect((await res.json()).code).toBe('transfer_not_latest');
+  });
+  it('keeps the fee when editing a same-currency transfer without a new received amount', async () => {
+    const { app, usd, usd2 } = await setup();
+    const t = await (
+      await authed(app, 'POST', '/transfers', {
+        fromAccountId: usd.id,
+        toAccountId: usd2.id,
+        amountSent: '100',
+        amountReceived: '95',
+      })
+    ).json();
+    const edited = await (
+      await authed(app, 'PATCH', `/transfers/${t.id}`, { amountSent: '150' })
+    ).json();
+    expect(edited).toMatchObject({ amountReceived: '145', fee: '5' });
+  });
 });

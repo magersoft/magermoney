@@ -13,7 +13,7 @@ import {
 import type { CreateTransferInput, TransferDto } from '@magermoney/contracts';
 import type { Repos } from '../../../app.js';
 import type { UnitOfWork } from '../../../shared/db/unit-of-work.js';
-import { NotFoundError, ValidationError } from '../../../shared/errors/http.js';
+import { ConflictError, NotFoundError, ValidationError } from '../../../shared/errors/http.js';
 import type { AccountRow } from '../../accounts/application/account-repository.js';
 import { notInFuture } from '../../accounts/application/dto.js';
 import { toTransferDto } from './dto.js';
@@ -27,6 +27,7 @@ export interface TransferDeps {
 export type TransferFailure =
   | NotFoundError
   | ValidationError
+  | ConflictError
   | TransferError
   | InsufficientFundsError
   | CurrencyMismatchError
@@ -82,6 +83,16 @@ export const createTransfer =
       if (!notInFuture(occurredAt, now))
         return err(
           new ValidationError('A transfer cannot be dated in the future', 'recorded_in_future'),
+        );
+      if (
+        (from.balanceRecordedAt && from.balanceRecordedAt > occurredAt) ||
+        (to.balanceRecordedAt && to.balanceRecordedAt > occurredAt)
+      )
+        return err(
+          new ConflictError(
+            'transfer_not_latest',
+            'Newer balances exist on one of the accounts; record the transfer with a later date',
+          ),
         );
       const amounts = resolveAmounts(input, pair.value);
       if (amounts.isErr()) return err(amounts.error);
