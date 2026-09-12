@@ -1,0 +1,51 @@
+import { err, ok, type Result } from 'neverthrow';
+import { UnknownCurrencyError, type Clock, type CurrencyRegistry } from '@magermoney/domain';
+import type { AccountDto, CreateAccountInput } from '@magermoney/contracts';
+import type { Repos } from '../../../app.js';
+import { ValidationError } from '../../../shared/errors/http.js';
+import type { NewAccount } from './account-repository.js';
+import { notInFuture, toAccountDto } from './dto.js';
+
+export interface AccountDeps {
+  repos: Pick<Repos, 'accounts' | 'balances' | 'transfers'>;
+  registry: CurrencyRegistry;
+  clock: Clock;
+}
+
+export const toNewAccount = (input: Omit<CreateAccountInput, 'openingBalance'>): NewAccount => ({
+  name: input.name,
+  bank: input.bank,
+  country: input.country,
+  currency: input.currency,
+  kind: input.kind,
+  cardType: input.kind === 'card' ? (input.cardType ?? null) : null,
+  isSpending: input.isSpending,
+  cardLast4: input.kind === 'card' ? (input.cardLast4 ?? null) : null,
+  cardNetwork: input.kind === 'card' ? (input.cardNetwork ?? null) : null,
+  cardTier: input.kind === 'card' ? (input.cardTier ?? null) : null,
+  cardExpires: input.kind === 'card' ? (input.cardExpires ?? null) : null,
+  note: input.note ?? null,
+  sortOrder: input.sortOrder ?? 0,
+});
+
+export const createAccount =
+  (deps: AccountDeps) =>
+  async (
+    userId: string,
+    input: CreateAccountInput,
+  ): Promise<Result<AccountDto, UnknownCurrencyError | ValidationError>> => {
+    if (!deps.registry.has(input.currency)) return err(new UnknownCurrencyError(input.currency));
+    const { openingBalance, ...fields } = input;
+    const now = deps.clock.now();
+    const recordedAt = openingBalance?.recordedAt ?? now.toISOString();
+    if (openingBalance && !notInFuture(recordedAt, now))
+      return err(
+        new ValidationError('A balance cannot be dated in the future', 'recorded_in_future'),
+      );
+    const row = await deps.repos.accounts.create(
+      userId,
+      toNewAccount(fields),
+      openingBalance ? { amount: openingBalance.amount, recordedAt } : undefined,
+    );
+    return ok(toAccountDto(row));
+  };
