@@ -11,6 +11,16 @@ import { ratesRoutes } from './modules/rates/http/routes.js';
 import type { RateRepository } from './modules/rates/application/rate-repository.js';
 import type { RateProvider } from './modules/rates/application/rate-provider.js';
 import { jobRoutes } from './jobs/fetch-rates.js';
+import type { UnitOfWork } from './shared/db/unit-of-work.js';
+import type { AccountRepository } from './modules/accounts/application/account-repository.js';
+import type { BalanceRepository } from './modules/accounts/application/balance-repository.js';
+import type { TransferRepository } from './modules/transfers/application/transfer-repository.js';
+
+export interface Repos {
+  accounts: AccountRepository;
+  balances: BalanceRepository;
+  transfers: TransferRepository;
+}
 
 export type AppEnv = { Variables: { userId: string; requestId: string } };
 
@@ -29,6 +39,8 @@ export interface AppDeps {
   registry: CurrencyRegistry;
   rates: RateRepository;
   rateProviders: RateProvider[];
+  repos: Repos;
+  uow: UnitOfWork<Repos>;
 }
 
 const VERCEL_PREVIEW = /^https:\/\/[a-z0-9-]+\.vercel\.app$/;

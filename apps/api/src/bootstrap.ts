@@ -1,5 +1,5 @@
 import { CurrencyRegistry, SystemClock } from '@magermoney/domain';
-import type { AppDeps } from './app.js';
+import type { AppDeps, Repos } from './app.js';
 import { assertJwtConfigured, type Env } from './shared/env.js';
 import { createSupabaseJwks } from './shared/auth/jwt.js';
 import { createDb } from './shared/db/client.js';
@@ -27,5 +27,9 @@ export function depsFromEnv(env: Env): AppDeps {
       new OpenErApiProvider(env.FIAT_RATES_URL),
       new CoinGeckoProvider(env.CRYPTO_RATES_URL),
     ],
+    repos: undefined as unknown as Repos, // replaced in Task 9
+    uow: async () => {
+      throw new Error('pg unit of work arrives with the pg repositories');
+    },
   };
 }
