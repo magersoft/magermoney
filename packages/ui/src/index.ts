@@ -33,6 +33,13 @@ export * from './components/ui/card';
 export * from './components/ui/sheet';
 export * from './components/ui/sonner';
 export * from './components/ui/skeleton';
+export * from './components/ui/badge';
+export * from './components/ui/separator';
+export * from './components/ui/dropdown-menu';
+export * from './components/ui/alert-dialog';
+
+export { default as MoneyInput } from './components/money-input/MoneyInput.vue';
+export { parseAmountInput, formatAmountInput } from './components/money-input/parse';
 
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
