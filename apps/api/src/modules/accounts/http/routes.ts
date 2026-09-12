@@ -1,11 +1,15 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import {
   AccountDtoSchema,
+  BalanceEntryDtoSchema,
   CreateAccountInputSchema,
+  CursorQuerySchema,
   ErrorDtoSchema,
   IdParamSchema,
+  RecordBalanceInputSchema,
   ReorderAccountsInputSchema,
   UpdateAccountInputSchema,
+  UpdateBalanceInputSchema,
 } from '@magermoney/contracts';
 import type { Context } from 'hono';
 import type { AppDeps, AppEnv } from '../../../app.js';
@@ -14,7 +18,11 @@ import { toHttpError, type AppError } from '../../../shared/errors/http.js';
 import { setAccountArchived } from '../application/archive-account.js';
 import { createAccount, type AccountDeps } from '../application/create-account.js';
 import { deleteAccount } from '../application/delete-account.js';
+import { deleteBalance } from '../application/delete-balance.js';
+import { editBalance } from '../application/edit-balance.js';
 import { listAccounts } from '../application/list-accounts.js';
+import { listBalances } from '../application/list-balances.js';
+import { recordBalance } from '../application/record-balance.js';
 import { reorderAccounts } from '../application/reorder-accounts.js';
 import { updateAccount } from '../application/update-account.js';
 
@@ -137,6 +145,69 @@ export function accountRoutes(deps: AppDeps) {
     }),
     async (c) =>
       (await deleteAccount(uc)(c.var.userId, c.req.valid('param').id)).match(
+        () => c.body(null, 204),
+        (e) => fail(c, e),
+      ),
+  );
+
+  r.openapi(
+    createRoute({
+      method: 'get',
+      path: '/accounts/{id}/balances',
+      security: [{ bearer: [] }],
+      request: { params: IdParamSchema, query: CursorQuerySchema },
+      responses: { 200: json(z.array(BalanceEntryDtoSchema), 'Newest first'), ...ERRORS },
+    }),
+    async (c) =>
+      (await listBalances(uc)(c.var.userId, c.req.valid('param').id, c.req.valid('query'))).match(
+        (rows) => c.json(rows, 200),
+        (e) => fail(c, e),
+      ),
+  );
+  r.openapi(
+    createRoute({
+      method: 'post',
+      path: '/accounts/{id}/balances',
+      security: [{ bearer: [] }],
+      request: {
+        params: IdParamSchema,
+        body: { content: { 'application/json': { schema: RecordBalanceInputSchema } } },
+      },
+      responses: { 201: json(BalanceEntryDtoSchema, 'Recorded'), ...ERRORS },
+    }),
+    async (c) =>
+      (await recordBalance(uc)(c.var.userId, c.req.valid('param').id, c.req.valid('json'))).match(
+        (dto) => c.json(dto, 201),
+        (e) => fail(c, e),
+      ),
+  );
+  r.openapi(
+    createRoute({
+      method: 'patch',
+      path: '/balances/{id}',
+      security: [{ bearer: [] }],
+      request: {
+        params: IdParamSchema,
+        body: { content: { 'application/json': { schema: UpdateBalanceInputSchema } } },
+      },
+      responses: { 200: json(BalanceEntryDtoSchema, 'Updated'), ...ERRORS },
+    }),
+    async (c) =>
+      (await editBalance(uc)(c.var.userId, c.req.valid('param').id, c.req.valid('json'))).match(
+        (dto) => c.json(dto, 200),
+        (e) => fail(c, e),
+      ),
+  );
+  r.openapi(
+    createRoute({
+      method: 'delete',
+      path: '/balances/{id}',
+      security: [{ bearer: [] }],
+      request: { params: IdParamSchema },
+      responses: { 204: { description: 'Deleted' }, ...ERRORS },
+    }),
+    async (c) =>
+      (await deleteBalance(uc)(c.var.userId, c.req.valid('param').id)).match(
         () => c.body(null, 204),
         (e) => fail(c, e),
       ),
