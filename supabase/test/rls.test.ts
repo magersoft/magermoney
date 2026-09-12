@@ -51,4 +51,67 @@ describe('RLS', () => {
       .insert({ base: 'RUB', value: '1', date: '2026-01-02', source: 'manual', user_id: b.id });
     expect(error).not.toBeNull();
   });
+
+  it('isolates accounts and balance entries between users', async () => {
+    const { data: acc, error } = await a.c
+      .from('accounts')
+      .insert({
+        user_id: a.id,
+        name: 'Alfa',
+        bank: 'Alfa',
+        country: 'RU',
+        currency: 'RUB',
+        kind: 'bank_account',
+      })
+      .select('id')
+      .single();
+    expect(error).toBeNull();
+    await a.c.from('balance_entries').insert({
+      user_id: a.id,
+      account_id: acc!.id,
+      amount: '10',
+      recorded_at: new Date().toISOString(),
+      origin: 'manual',
+    });
+    expect((await b.c.from('accounts').select('id').eq('id', acc!.id)).data).toHaveLength(0);
+    expect(
+      (await b.c.from('balance_entries').select('id').eq('account_id', acc!.id)).data,
+    ).toHaveLength(0);
+    const forged = await b.c.from('accounts').insert({
+      user_id: a.id,
+      name: 'X',
+      bank: 'X',
+      country: 'RU',
+      currency: 'RUB',
+      kind: 'cash',
+    });
+    expect(forged.error).not.toBeNull();
+  });
+
+  it('refuses card fields on a non-card and a transfer to the same account', async () => {
+    const bad = await a.c.from('accounts').insert({
+      user_id: a.id,
+      name: 'C',
+      bank: 'C',
+      country: 'RU',
+      currency: 'RUB',
+      kind: 'cash',
+      card_last4: '1234',
+    });
+    expect(bad.error).not.toBeNull();
+    const { data: acc } = await a.c
+      .from('accounts')
+      .insert({ user_id: a.id, name: 'S', bank: 'S', country: 'RU', currency: 'RUB', kind: 'cash' })
+      .select('id')
+      .single();
+    const same = await a.c.from('transfers').insert({
+      user_id: a.id,
+      from_account_id: acc!.id,
+      to_account_id: acc!.id,
+      amount_sent: '1',
+      amount_received: '1',
+      occurred_at: new Date().toISOString(),
+    });
+    expect(same.error).not.toBeNull();
+  });
 });
