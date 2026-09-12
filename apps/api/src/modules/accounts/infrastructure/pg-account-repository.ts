@@ -26,7 +26,7 @@ const SELECT = `
   from accounts a
   left join lateral (
     select amount, recorded_at from balance_entries e
-    where e.account_id = a.id
+    where e.account_id = a.id and e.user_id = a.user_id
     order by e.recorded_at desc, e.created_at desc, e.id desc
     limit 1
   ) b on true`;
@@ -107,7 +107,7 @@ export class PgAccountRepository implements AccountRepository {
     >`select count(*)::int as n from accounts where user_id = ${userId} and id in ${this.sql(ids)}`;
     if (owned!.n !== ids.length) return false;
     await this.sql`
-      update accounts a set sort_order = v.ord
+      update accounts a set sort_order = v.ord - 1
       from (select * from unnest(${this.sql.array(ids)}::uuid[]) with ordinality as t(id, ord)) v
       where a.id = v.id and a.user_id = ${userId}`;
     return true;

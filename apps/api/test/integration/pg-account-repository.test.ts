@@ -103,10 +103,45 @@ describe('PgAccountRepository', () => {
     expect(page2.map((e) => e.id)).toEqual([e1.id]);
   });
 
+  it('paginates balances with a tied recordedAt across pages without loss or duplication', async () => {
+    const card = await repos.accounts.create(uid, { ...newAccount, name: 'Tied' });
+    const tied = '2026-09-05T00:00:00.000Z';
+    const e1 = await repos.balances.insert(uid, {
+      accountId: card.id,
+      amount: '1',
+      recordedAt: tied,
+      origin: 'manual',
+      transferId: null,
+      note: null,
+    });
+    const e2 = await repos.balances.insert(uid, {
+      accountId: card.id,
+      amount: '2',
+      recordedAt: tied,
+      origin: 'manual',
+      transferId: null,
+      note: null,
+    });
+    // Same instant for both rows: order is (created_at desc, id desc), so e2 (inserted second) comes first.
+    const page1 = await repos.balances.listByAccount(uid, card.id, 1);
+    expect(page1.map((e) => e.id)).toEqual([e2.id]);
+    const page2 = await repos.balances.listByAccount(
+      uid,
+      card.id,
+      1,
+      `${page1[0]!.recordedAt}|${page1[0]!.id}`,
+    );
+    expect(page2.map((e) => e.id)).toEqual([e1.id]);
+    const allIds = [...page1, ...page2].map((e) => e.id).sort();
+    expect(allIds).toEqual([e1.id, e2.id].sort());
+  });
+
   it('reorders, archives, refuses delete with transfers, cascades entries otherwise', async () => {
     const a = await repos.accounts.create(uid, { ...newAccount, name: 'A', currency: 'USD' });
     const b = await repos.accounts.create(uid, { ...newAccount, name: 'B', currency: 'USD' });
     expect(await repos.accounts.reorder(uid, [b.id, a.id])).toBe(true);
+    expect((await repos.accounts.findById(uid, b.id))?.sortOrder).toBe(0);
+    expect((await repos.accounts.findById(uid, a.id))?.sortOrder).toBe(1);
     expect(await repos.accounts.reorder(other, [b.id])).toBe(false);
     expect(
       (await repos.accounts.setArchived(uid, a.id, '2026-09-11T00:00:00.000Z'))?.archivedAt,
