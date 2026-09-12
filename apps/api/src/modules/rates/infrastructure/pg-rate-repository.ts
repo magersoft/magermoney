@@ -21,4 +21,9 @@ export class PgRateRepository implements RateRepository {
       CurrencyDto[]
     >`select code, kind, scale, symbol, name_ru, name_en, icon from currencies order by kind, code`;
   }
+  async deleteManual(userId: string, base: string, date: string) {
+    const res = await this
+      .sql`delete from rates where source = 'manual' and user_id = ${userId} and base = ${base} and date = ${date}`;
+    return res.count > 0;
+  }
 }

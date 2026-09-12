@@ -1,6 +1,7 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import {
   CurrencyDtoSchema,
+  DeleteManualRateQuerySchema,
   ErrorDtoSchema,
   ManualRateInputSchema,
   RateDtoSchema,
@@ -11,6 +12,7 @@ import { requireUser } from '../../../shared/auth/middleware.js';
 import { toHttpError } from '../../../shared/errors/http.js';
 import { getRates } from '../application/get-rates.js';
 import { listCurrencies } from '../application/list-currencies.js';
+import { removeManualRate } from '../application/remove-manual-rate.js';
 import { setManualRate } from '../application/set-manual-rate.js';
 
 const errors = {
@@ -88,6 +90,31 @@ export function ratesRoutes(deps: AppDeps) {
         },
       );
     },
+  );
+
+  r.openapi(
+    createRoute({
+      method: 'delete',
+      path: '/rates/manual',
+      security: [{ bearer: [] }],
+      request: { query: DeleteManualRateQuerySchema },
+      responses: {
+        204: { description: 'Removed' },
+        404: {
+          description: 'No override',
+          content: { 'application/json': { schema: ErrorDtoSchema } },
+        },
+        ...errors,
+      },
+    }),
+    async (c) =>
+      (await removeManualRate(deps.rates)(c.var.userId, c.req.valid('query'))).match(
+        () => c.body(null, 204),
+        (e) => {
+          const h = toHttpError(e);
+          return c.json(h.body, h.status as 404);
+        },
+      ),
   );
 
   return r;

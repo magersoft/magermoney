@@ -32,4 +32,11 @@ export class MemoryRateRepository implements RateRepository {
       icon: null,
     }));
   }
+  async deleteManual(userId: string, base: string, date: string) {
+    const before = this.rows.length;
+    this.rows = this.rows.filter(
+      (r) => !(r.source === 'manual' && r.userId === userId && r.base === base && r.date === date),
+    );
+    return this.rows.length < before;
+  }
 }

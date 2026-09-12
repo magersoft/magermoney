@@ -1,11 +1,27 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
+import { createClient } from '@supabase/supabase-js';
 import { createDb } from '../../src/shared/db/client.js';
 import { PgRateRepository } from '../../src/modules/rates/infrastructure/pg-rate-repository.js';
+
+async function newUser(): Promise<string> {
+  const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const { data, error } = await admin.auth.admin.createUser({
+    email: `rate-${Date.now()}-${Math.random()}@test.local`,
+    email_confirm: true,
+  });
+  if (error) throw error;
+  return data.user!.id;
+}
 
 describe('PgRateRepository', () => {
   const sql = createDb(process.env.DATABASE_URL!);
   const repo = new PgRateRepository(sql);
   const anyUuid = '00000000-0000-0000-0000-000000000000';
+  let userId: string;
+
+  beforeEach(async () => {
+    userId = await newUser();
+  });
 
   it('upserts api rows and returns the newest on or before a date', async () => {
     await repo.upsertMany([
@@ -27,5 +43,13 @@ describe('PgRateRepository', () => {
     );
     expect(eurRows).toHaveLength(1);
     expect(eurRows[0]?.value).toBe('1.20');
+  });
+
+  it('deletes a manual override by user, base and date', async () => {
+    await repo.upsertMany([
+      { base: 'RUB', value: '0.01', date: '2026-01-01', source: 'manual', userId },
+    ]);
+    expect(await repo.deleteManual(userId, 'RUB', '2026-01-01')).toBe(true);
+    expect(await repo.deleteManual(userId, 'RUB', '2026-01-01')).toBe(false);
   });
 });
