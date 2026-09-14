@@ -27,8 +27,10 @@ const invalid = ref(false);
 watch(
   () => props.modelValue,
   (v) => {
-    if (parseAmountInput(text.value, props.scale, props.allowNegative) !== v)
+    if (parseAmountInput(text.value, props.scale, props.allowNegative) !== v) {
       text.value = formatAmountInput(v, props.locale);
+      invalid.value = false;
+    }
   },
 );
 

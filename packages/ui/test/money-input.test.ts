@@ -10,12 +10,20 @@ describe('parseAmountInput', () => {
     expect(parseAmountInput('0,33', 8, false)).toBe('0.33');
     expect(parseAmountInput('', 2, false)).toBe('');
   });
+  it('accepts the narrow no-break space Intl.NumberFormat("ru-RU") uses as a group separator', () => {
+    expect(parseAmountInput('13 723,27', 2, false)).toBe('13723.27');
+    expect(parseAmountInput('13 723,27', 2, false)).toBe('13723.27');
+  });
   it('rejects junk, two separators, too many decimals, and negatives unless allowed', () => {
     expect(parseAmountInput('1.2.3', 2, false)).toBeNull();
     expect(parseAmountInput('abc', 2, false)).toBeNull();
     expect(parseAmountInput('1.234', 2, false)).toBeNull();
     expect(parseAmountInput('-5', 2, false)).toBeNull();
     expect(parseAmountInput('-5', 2, true)).toBe('-5');
+  });
+  it('treats a leading-dot fraction as zero point something', () => {
+    expect(parseAmountInput('.5', 2, false)).toBe('0.5');
+    expect(parseAmountInput(',5', 2, false)).toBe('0.5');
   });
   it('formats for the locale without rounding', () => {
     expect(formatAmountInput('13723.27', 'ru')).toBe('13 723,27');
@@ -37,5 +45,14 @@ describe('MoneyInput', () => {
   it('uses the decimal keyboard', () => {
     const w = mount(MoneyInput, { props: { modelValue: '', scale: 2, locale: 'en' } });
     expect(w.get('input').attributes('inputmode')).toBe('decimal');
+  });
+  it('clears invalid once an external update replaces the text', async () => {
+    const w = mount(MoneyInput, { props: { modelValue: '', scale: 2, locale: 'ru' } });
+    const input = w.get('input');
+    await input.setValue('1,2,3');
+    expect(input.attributes('aria-invalid')).toBe('true');
+    await w.setProps({ modelValue: '7' });
+    expect(input.element.value).toBe('7');
+    expect(input.attributes('aria-invalid')).toBeUndefined();
   });
 });
