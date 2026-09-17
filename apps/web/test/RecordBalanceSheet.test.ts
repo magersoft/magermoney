@@ -129,8 +129,71 @@ describe('RecordBalanceSheet', () => {
     await flushPromises();
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(post?.[0]).toBe(`/accounts/${acc.id}/balances`);
-    expect(JSON.parse(post?.[1]?.body as string)).toMatchObject({ amount: '1250.5' });
+    const postBody = JSON.parse(post?.[1]?.body as string);
+    expect(postBody).toMatchObject({ amount: '1250.5' });
+    // The date field was never touched: the server should stamp the real
+    // "now" rather than receive the coarse (minute-precision) default value.
+    expect(postBody).not.toHaveProperty('recordedAt');
     expect(w.emitted('update:open')?.at(-1)).toEqual([false]);
+    w.unmount();
+  });
+
+  it('sends recordedAt only once the date field has been edited', async () => {
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies')
+        return json([
+          {
+            code: 'RUB',
+            kind: 'fiat',
+            scale: 2,
+            symbol: null,
+            nameRu: null,
+            nameEn: null,
+            icon: null,
+          },
+        ]);
+      if (init?.method === 'POST')
+        return json(
+          {
+            id: '22222222-2222-4222-8222-222222222222',
+            accountId: acc.id,
+            amount: '1250.5',
+            recordedAt: '2026-09-11T00:00:00.000Z',
+            origin: 'manual',
+            transferId: null,
+            note: null,
+          },
+          201,
+        );
+      return json([acc]);
+    });
+    const w = mount(RecordBalanceSheet, {
+      props: { accountId: acc.id, open: true },
+      global: {
+        plugins: [
+          [
+            VueQueryPlugin,
+            {
+              queryClient: new QueryClient({
+                defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+              }),
+            },
+          ],
+          createI18n({ legacy: false, locale: 'ru', messages: { ru } }),
+        ],
+        provide: { [API_KEY as unknown as string]: { fetch } },
+      },
+      attachTo: document.body,
+    });
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="balance-amount"]').setValue('1 250,5');
+    await body.get('[data-testid="balance-recorded-at"]').setValue('2026-09-01T10:00');
+    await body.get('form').trigger('submit');
+    await flushPromises();
+    const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    const postBody = JSON.parse(post?.[1]?.body as string);
+    expect(postBody).toHaveProperty('recordedAt');
     w.unmount();
   });
 
