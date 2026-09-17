@@ -41,3 +41,24 @@ export function settledOrParked(
     );
   });
 }
+
+/**
+ * A write that was made by another account. Not a network failure, so the retry
+ * policy drops it instead of sending it: it is never retried, and never sent.
+ */
+export class ForeignWriteError extends Error {
+  constructor() {
+    super('This write was made by another account');
+    this.name = 'ForeignWriteError';
+  }
+}
+
+/**
+ * A parked write outlives the session that made it — the tab can be closed,
+ * signed out and signed in as somebody else before it ever goes out. The write
+ * carries the id of the account that made it, and refuses to travel under
+ * anyone else's token (or with no session at all).
+ */
+export function assertOwner(ownerId: string | null, signedIn: string | null): void {
+  if (ownerId !== signedIn) throw new ForeignWriteError();
+}

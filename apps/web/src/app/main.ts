@@ -10,7 +10,7 @@ import { registerAccountMutations } from '@/modules/accounts/offline';
 import { authGuard, useSession, useSessionStore } from '@/modules/auth';
 import { registerTransferMutations } from '@/modules/transfers/offline';
 import { createApiClient } from '@/shared/api/client';
-import { API_KEY } from '@/shared/api/use-api';
+import { API_KEY, OWNER_KEY } from '@/shared/api/use-api';
 import '@/app/styles/index.css';
 
 registerSW({ immediate: true });
@@ -21,15 +21,19 @@ const session = useSession();
 
 const api = createApiClient(import.meta.env.VITE_API_URL, session.getAccessToken);
 
+/** Who every request goes as; a write parked offline records it and refuses to travel under anyone else's token. */
+const ownerId = () => session.user.value?.id ?? null;
+
 app.provide(API_KEY, api);
+app.provide(OWNER_KEY, ownerId);
 /**
  * A write that paused offline is restored from IndexedDB without any screen
  * behind it, so the client has to know what those mutations do before it is
  * asked to replay them. The modules say it; only the root, which owns the API
  * client, can wire it.
  */
-registerAccountMutations(queryClient, api);
-registerTransferMutations(queryClient, api);
+registerAccountMutations(queryClient, api, ownerId);
+registerTransferMutations(queryClient, api, ownerId);
 app.use(VueQueryPlugin, { queryClient, clientPersister });
 
 /**

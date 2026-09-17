@@ -11,6 +11,7 @@ import { ApiError } from '../src/shared/api/client.js';
 import { RECORD_BALANCE_KEY, registerAccountMutations } from '../src/modules/accounts/index.js';
 
 const ACCOUNT_ID = '11111111-1111-4111-8111-111111111111';
+const OWNER = '99999999-9999-4999-8999-999999999999';
 const entry = {
   id: '22222222-2222-4222-8222-222222222222',
   accountId: ACCOUNT_ID,
@@ -98,11 +99,15 @@ describe('mutations made offline', () => {
   it('replays a recordBalance that was persisted while the tab was closed', async () => {
     // --- The tab that went offline: the mutation pauses and is dehydrated ---
     const offline = newClient();
-    registerAccountMutations(offline, {
-      fetch: async () => {
-        throw new TypeError('Failed to fetch');
+    registerAccountMutations(
+      offline,
+      {
+        fetch: async () => {
+          throw new TypeError('Failed to fetch');
+        },
       },
-    });
+      () => OWNER,
+    );
     onlineManager.setOnline(false);
     void offline
       .getMutationCache()
@@ -110,7 +115,7 @@ describe('mutations made offline', () => {
         ...offline.getMutationDefaults(RECORD_BALANCE_KEY),
         mutationKey: RECORD_BALANCE_KEY,
       })
-      .execute({ id: ACCOUNT_ID, input: { amount: '99' } })
+      .execute({ ownerId: OWNER, id: ACCOUNT_ID, input: { amount: '99' } })
       .catch(() => undefined);
     await whenPaused(offline);
     const persisted = JSON.parse(JSON.stringify(dehydrate(offline))) as DehydratedState;
@@ -123,12 +128,52 @@ describe('mutations made offline', () => {
       return json([]);
     });
     const restored = newClient();
-    registerAccountMutations(restored, { fetch });
+    registerAccountMutations(restored, { fetch }, () => OWNER);
     hydrate(restored, persisted);
     await restored.resumePausedMutations();
 
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(post?.[0]).toBe(`/accounts/${ACCOUNT_ID}/balances`);
     expect(JSON.parse(post?.[1]?.body as string)).toMatchObject({ amount: '99' });
+  });
+
+  it('refuses to replay a write that belongs to another account', async () => {
+    // The tab was signed out and signed in as someone else while the write was
+    // parked: sending it now would file this money in the wrong journal.
+    const fetch = vi.fn<(path: string, init?: RequestInit) => Promise<Response>>(async () =>
+      json(entry, 201),
+    );
+    const client = newClient();
+    registerAccountMutations(client, { fetch }, () => 'somebody-else');
+
+    const settled = client
+      .getMutationCache()
+      .build(client, {
+        ...client.getMutationDefaults(RECORD_BALANCE_KEY),
+        mutationKey: RECORD_BALANCE_KEY,
+      })
+      .execute({ ownerId: OWNER, id: ACCOUNT_ID, input: { amount: '99' } });
+
+    await expect(settled).rejects.toThrow();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('sends the write without the owner id in the body', async () => {
+    const fetch = vi.fn<(path: string, init?: RequestInit) => Promise<Response>>(async () =>
+      json(entry, 201),
+    );
+    const client = newClient();
+    registerAccountMutations(client, { fetch }, () => OWNER);
+
+    await client
+      .getMutationCache()
+      .build(client, {
+        ...client.getMutationDefaults(RECORD_BALANCE_KEY),
+        mutationKey: RECORD_BALANCE_KEY,
+      })
+      .execute({ ownerId: OWNER, id: ACCOUNT_ID, input: { amount: '99' } });
+
+    const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(JSON.parse(post?.[1]?.body as string)).toEqual({ amount: '99' });
   });
 });
