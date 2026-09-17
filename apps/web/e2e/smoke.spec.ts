@@ -89,6 +89,11 @@ test('sign in, see home, switch currency', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('capital-total')).toBeVisible();
 
+    // New profiles default to EUR (spec §1); switch to USD so the totals
+    // checked below can be compared against the accounts' own currency
+    // without a conversion in the way. The final step switches back to EUR.
+    await page.getByTestId('currency-switch').getByRole('button', { name: 'USD' }).click();
+
     // Create two accounts through the form.
     for (const [name, , opening] of [
       ['Alfa', 'USD', '100'],
