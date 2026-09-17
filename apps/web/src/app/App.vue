@@ -14,6 +14,7 @@ import { Toaster } from '@magermoney/ui';
 import AppShell from '@/shared/layout/AppShell.vue';
 import { CurrencySwitch } from '@/modules/rates';
 import { useTheme } from '@/app/theme';
+import QuickActions from '@/app/QuickActions.vue';
 
 const { theme, set } = useTheme();
 const route = useRoute();
@@ -32,6 +33,9 @@ const bare = computed(() => Boolean(route.meta.public));
     <AppShell v-else :theme="theme" @update:theme="set">
       <template #currency>
         <CurrencySwitch />
+      </template>
+      <template #fab>
+        <QuickActions />
       </template>
       <RouterView />
     </AppShell>
