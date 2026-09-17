@@ -7,9 +7,11 @@ import { Decimal } from '@magermoney/domain';
 import { Badge } from '@magermoney/ui';
 import { formatDateTime } from '@/shared/dates/format';
 
-const { entries, currency } = defineProps<{
+const { entries, scale } = defineProps<{
   entries: BalanceEntryDto[];
   currency: string;
+  /** Fraction digits of the account's currency: a bare `toFixed()` writes 0.00000002 as 0.00000002 on one row and 0.5 on the next. */
+  scale: number;
   editableId: string | null;
 }>();
 const emit = defineEmits<{ edit: [entry: BalanceEntryDto] }>();
@@ -21,7 +23,8 @@ const rows = computed(() =>
     const delta = prev ? new Decimal(e.amount).minus(prev.amount) : null;
     return {
       e,
-      delta: delta && !delta.isZero() ? `${delta.isPositive() ? '+' : ''}${delta.toFixed()}` : null,
+      delta:
+        delta && !delta.isZero() ? `${delta.isPositive() ? '+' : ''}${delta.toFixed(scale)}` : null,
     };
   }),
 );

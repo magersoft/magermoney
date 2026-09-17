@@ -4,6 +4,7 @@ import { computed, defineAsyncComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import type { BalanceEntryDto } from '@magermoney/contracts';
+import { Decimal } from '@magermoney/domain';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +22,7 @@ import {
   Skeleton,
   useToast,
 } from '@magermoney/ui';
+import { useCurrencies } from '@/modules/currencies';
 import { MoneyText } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import { formatDate } from '@/shared/dates/format';
@@ -46,6 +48,15 @@ const { t, locale } = useI18n();
 const { toast } = useToast();
 const id = computed(() => String(route.params.id));
 const account = useAccount(id);
+const currencies = useCurrencies();
+/** The account's own currency decides how many digits belong on screen; the stored amount keeps all of them. */
+const scale = computed(
+  () => currencies.value.find((c) => c.code === account.value?.currency)?.scale ?? 2,
+);
+/** Rounded for display exactly as the list does it, never for storage. */
+const shownBalance = computed(() =>
+  account.value?.balance == null ? null : new Decimal(account.value.balance).toFixed(scale.value),
+);
 const { entries, isLoading } = useAccountBalances(id);
 const { setArchived } = useArchiveAccount();
 const { remove } = useDeleteAccount();
@@ -124,7 +135,7 @@ async function del() {
 
     <div class="mt-6">
       <p class="font-mono text-[32px] leading-[1.1] tabular-nums" data-testid="account-balance">
-        {{ account.balance ?? '—' }} {{ account.currency }}
+        {{ shownBalance ?? '—' }} {{ account.currency }}
       </p>
       <MoneyText
         v-if="account.balance"
@@ -191,6 +202,7 @@ async function del() {
         class="mt-2"
         :entries="entries"
         :currency="account.currency"
+        :scale="scale"
         :editable-id="latestManualId"
         @edit="openRecord"
       />

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseArgs, renderPlan, renderTotals } from '../../scripts/import/run.js';
+import { avoidTakenNames, parseArgs, renderPlan, renderTotals } from '../../scripts/import/run.js';
 
 describe('import CLI', () => {
   it('parses flags and requires a user', () => {
@@ -17,6 +17,27 @@ describe('import CLI', () => {
     expect(() => parseArgs(['--user'])).toThrow('--user needs a value');
     expect(() => parseArgs(['--user', '--dry-run'])).toThrow('--user needs a value');
     expect(() => parseArgs(['--user', 'a@b.c', '--accounts'])).toThrow('--accounts needs a value');
+  });
+  it('rejects a --recorded-at that is not an ISO datetime, before any database work', () => {
+    expect(() => parseArgs(['--user', 'a@b.c', '--recorded-at', '2026-09-11'])).toThrow(
+      /--recorded-at/,
+    );
+    expect(() => parseArgs(['--user', 'a@b.c', '--recorded-at', 'yesterday'])).toThrow(
+      /--recorded-at/,
+    );
+    expect(
+      parseArgs(['--user', 'a@b.c', '--recorded-at', '2026-09-11T12:00:00.000Z']).recordedAt,
+    ).toBe('2026-09-11T12:00:00.000Z');
+  });
+  it('numbers an imported name that an account kept for its transfers already uses', () => {
+    const acc = (name: string) => ({ name }) as Parameters<typeof avoidTakenNames>[0][number];
+    expect(avoidTakenNames([acc('Alfa'), acc('Beta')], ['Alfa']).map((a) => a.name)).toEqual([
+      'Alfa 2',
+      'Beta',
+    ]);
+    expect(avoidTakenNames([acc('Alfa')], ['Alfa', 'Alfa 2']).map((a) => a.name)).toEqual([
+      'Alfa 3',
+    ]);
   });
   it('rejects an unknown flag', () => {
     expect(() => parseArgs(['--user', 'a@b.c', '--nope'])).toThrow('Unknown option --nope');

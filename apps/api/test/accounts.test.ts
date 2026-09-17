@@ -112,4 +112,15 @@ describe('accounts', () => {
     repos.accounts.transferCounts.set(a.id, 0);
     expect((await authed(app, 'DELETE', `/accounts/${a.id}`, undefined, UID)).status).toBe(204);
   });
+
+  it("refuses to reorder when an id is not the user's", async () => {
+    const app = createApp(testDeps({ jwtSecret: SECRET }));
+    const mine = await (await authed(app, 'POST', '/accounts', alfa)).json();
+    const foreign = await (await authed(app, 'POST', '/accounts', alfa, OTHER)).json();
+
+    const res = await authed(app, 'PATCH', '/accounts/order', { ids: [mine.id, foreign.id] });
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).code).toBe('unknown_account');
+  });
 });
