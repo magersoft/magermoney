@@ -3,6 +3,8 @@
  * — both this module and the profile's editor need it, and neither should have
  * to import the other to get it.
  */
+import { defineComponent, h } from 'vue';
+
 export { todayIso } from './domain';
 export { useRates } from './application/use-rates';
 export {
@@ -19,4 +21,9 @@ export {
 } from './application/use-display-currency';
 export { default as CurrencySwitch } from './ui/CurrencySwitch.vue';
 export { default as MoneyText } from './ui/MoneyText.vue';
-export { default as HomePage } from './ui/HomePage.vue';
+
+/** Placeholder until Task 16 delivers the real screen. */
+export const RatesPage = defineComponent({
+  name: 'RatesPage',
+  setup: () => () => h('div'),
+});

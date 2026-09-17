@@ -29,7 +29,8 @@ function mountShell() {
 describe('AppShell', () => {
   it('renders both navigations, so a phone and a desktop each have one', () => {
     const text = mountShell().text();
-    expect(text).toContain('Home');
+    expect(text).toContain('Accounts');
+    expect(text).toContain('Rates');
     expect(text).toContain('Settings');
   });
 
