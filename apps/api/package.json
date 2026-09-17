@@ -10,7 +10,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test scripts vercel.ts",
-    "build:vercel": "bun scripts/build-vercel.ts"
+    "build:vercel": "bun scripts/build-vercel.ts",
+    "import": "bun --env-file=.env.local scripts/import-sheet.ts"
   },
   "dependencies": {
     "hono": "^4.13.7",

@@ -100,6 +100,16 @@ Both apps deploy to Vercel as separate projects. The API entry is `apps/api/src/
 
 CI on every pull request runs lint, typecheck, unit tests and build, then integration tests against a throwaway Supabase stack. Changes under `supabase/migrations/` also get `supabase db lint` and a schema-drift check that re-applies every migration from scratch. End-to-end tests run against the Vercel preview when the `E2E_ENABLED` repository variable is set.
 
+## Import from the spreadsheet
+
+Export the "Счета" sheet and the "Курсы пересчёта" block (History by years) as CSV into `imports/` (git-ignored), then:
+
+    cd apps/api
+    bun run import -- --user you@example.com --accounts ../../imports/accounts.csv --rates ../../imports/rates.csv --dry-run
+    bun run import -- --user you@example.com --accounts ../../imports/accounts.csv --rates ../../imports/rates.csv
+
+Every row becomes an Account with one Balance entry dated now (or `--recorded-at <ISO>`). A second run refuses unless `--force`, which replaces the accounts that have no transfers. Against production use `bun --env-file=.env.prod.local scripts/import-sheet.ts …`.
+
 ## Working on the code
 
 - Read [`AGENTS.md`](AGENTS.md) first: it maps the repo and lists the rules the code follows.
