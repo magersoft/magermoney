@@ -3,6 +3,7 @@
 export { toAccount } from './domain/mappers';
 export { ACCOUNT_KIND_KEYS } from './domain/labels';
 export { useAccounts, useAccount, ACCOUNTS_KEY } from './application/use-accounts';
+export { registerAccountMutations, RECORD_BALANCE_KEY } from './application/mutation-defaults';
 export {
   useCreateAccount,
   useUpdateAccount,

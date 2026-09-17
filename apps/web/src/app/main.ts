@@ -4,9 +4,11 @@ import { VueQueryPlugin } from '@tanstack/vue-query';
 import { registerSW } from 'virtual:pwa-register';
 import App from '@/app/App.vue';
 import { i18n } from '@/app/i18n';
-import { clientPersister, queryClient } from '@/app/query';
+import { cacheRestored, clientPersister, queryClient, replayOfflineMutations } from '@/app/query';
 import { router } from '@/app/router';
+import { registerAccountMutations } from '@/modules/accounts';
 import { authGuard, useSession, useSessionStore } from '@/modules/auth';
+import { registerTransferMutations } from '@/modules/transfers';
 import { createApiClient } from '@/shared/api/client';
 import { API_KEY } from '@/shared/api/use-api';
 import '@/app/styles/index.css';
@@ -17,7 +19,17 @@ const app = createApp(App).use(createPinia()).use(router).use(i18n);
 
 const session = useSession();
 
-app.provide(API_KEY, createApiClient(import.meta.env.VITE_API_URL, session.getAccessToken));
+const api = createApiClient(import.meta.env.VITE_API_URL, session.getAccessToken);
+
+app.provide(API_KEY, api);
+/**
+ * A write that paused offline is restored from IndexedDB without any screen
+ * behind it, so the client has to know what those mutations do before it is
+ * asked to replay them. The modules say it; only the root, which owns the API
+ * client, can wire it.
+ */
+registerAccountMutations(queryClient, api);
+registerTransferMutations(queryClient, api);
 app.use(VueQueryPlugin, { queryClient, clientPersister });
 
 /**
@@ -36,4 +48,12 @@ void useSessionStore()
   .finally(() => {
     router.beforeEach(authGuard(session));
     app.mount('#app');
+    // Only now are both halves true: the persisted cache is back (paused
+    // mutations included) and the session is known, so a write made offline can
+    // go out with a token behind it.
+    void cacheRestored
+      .then(() => replayOfflineMutations(queryClient))
+      .catch((error: unknown) => {
+        console.error('Could not replay the writes made offline', error);
+      });
   });

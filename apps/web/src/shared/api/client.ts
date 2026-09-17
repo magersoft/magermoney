@@ -41,6 +41,17 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * True when the request never reached the API: `fetch` rejects with a
+ * `TypeError` when the device is offline, the DNS fails or the connection
+ * drops. An `ApiError` is the opposite — the server answered, and answering
+ * twice would not change its mind — so only the former is worth retrying.
+ */
+export function isNetworkFailure(error: unknown): boolean {
+  if (error instanceof ApiError) return false;
+  return error instanceof TypeError;
+}
+
 /** What `parse` needs from a schema, so this file does not depend on a zod version. */
 export interface ResponseSchema<T> {
   safeParse(input: unknown): { success: true; data: T } | { success: false; error: Error };

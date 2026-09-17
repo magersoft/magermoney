@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { onlineManager } from '@tanstack/vue-query';
 
 const signOut = vi.fn(async () => ({ error: null }));
 vi.mock('@supabase/supabase-js', () => ({
@@ -17,6 +18,12 @@ describe('signing out on a shared device', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    onlineManager.setOnline(true);
+    vi.restoreAllMocks();
+    queryClient.unmount();
   });
 
   it('drops the query cache, its stored copy, the API cache and the display currency', async () => {
@@ -38,6 +45,30 @@ describe('signing out on a shared device', () => {
 
     vi.unstubAllGlobals();
     removeClient.mockRestore();
+  });
+
+  it('drops the writes that were still waiting for a connection', async () => {
+    // They belong to the account that is leaving: replayed under the next
+    // person's token they would write into someone else's journal.
+    queryClient.mount();
+    onlineManager.setOnline(false);
+    void queryClient
+      .getMutationCache()
+      .build(queryClient, {
+        mutationFn: async () => {
+          throw new TypeError('Failed to fetch');
+        },
+      })
+      .execute(undefined)
+      .catch(() => undefined);
+    for (let i = 0; i < 400 && !queryClient.getMutationCache().getAll()[0]?.state.isPaused; i++)
+      await new Promise((r) => setTimeout(r, 10));
+    expect(queryClient.getMutationCache().getAll()[0]?.state.isPaused).toBe(true);
+
+    vi.spyOn(persister, 'removeClient').mockResolvedValue(undefined);
+    await useSession().signOut();
+
+    expect(queryClient.getMutationCache().getAll()).toHaveLength(0);
   });
 
   it('forgets the display currency singleton so the next account re-picks it', () => {
