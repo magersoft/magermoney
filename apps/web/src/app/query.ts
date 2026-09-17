@@ -5,8 +5,8 @@ import {
 } from '@tanstack/query-persist-client-core';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { del, get, set } from 'idb-keyval';
-import { ACCOUNTS_KEY } from '@/modules/accounts';
-import { TRANSFERS_KEY } from '@/modules/transfers';
+import { ACCOUNTS_KEY } from '@/modules/accounts/offline';
+import { TRANSFERS_KEY } from '@/modules/transfers/offline';
 import { isNetworkFailure } from '@/shared/api/client';
 import { onClearClientCaches } from '@/shared/cache/client-caches';
 

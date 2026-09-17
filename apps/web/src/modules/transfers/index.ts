@@ -1,10 +1,13 @@
+import { defineAsyncComponent } from 'vue';
+
 /** Public API of the transfers module. */
-export { useTransfers, TRANSFERS_KEY } from './application/use-transfers';
-export { registerTransferMutations, CREATE_TRANSFER_KEY } from './application/mutation-defaults';
+export { useTransfers } from './application/use-transfers';
+export { TRANSFERS_KEY, registerTransferMutations, CREATE_TRANSFER_KEY } from './offline';
 export {
   useCreateTransfer,
   useUpdateTransfer,
   useDeleteTransfer,
 } from './application/use-transfer-mutations';
 export { default as TransferSheet } from './ui/TransferSheet.vue';
-export { default as TransfersPage } from './ui/TransfersPage.vue';
+/** Routed screen, async for the same reason as the accounts pages. */
+export const TransfersPage = defineAsyncComponent(() => import('./ui/TransfersPage.vue'));

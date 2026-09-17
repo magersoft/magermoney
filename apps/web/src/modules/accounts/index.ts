@@ -1,9 +1,11 @@
+import { defineAsyncComponent } from 'vue';
+
 /** Public API of the accounts module: the list, the journal, and the home screen built from them. */
 
 export { toAccount } from './domain/mappers';
 export { ACCOUNT_KIND_KEYS } from './domain/labels';
-export { useAccounts, useAccount, ACCOUNTS_KEY } from './application/use-accounts';
-export { registerAccountMutations, RECORD_BALANCE_KEY } from './application/mutation-defaults';
+export { useAccounts, useAccount } from './application/use-accounts';
+export { ACCOUNTS_KEY, registerAccountMutations, RECORD_BALANCE_KEY } from './offline';
 export {
   useCreateAccount,
   useUpdateAccount,
@@ -22,7 +24,13 @@ export {
   type CapitalSummary,
   type GroupSummary,
 } from './application/use-capital-summary';
-export { default as AccountsPage } from './ui/AccountsPage.vue';
-export { default as AccountDetailPage } from './ui/AccountDetailPage.vue';
-export { default as AccountFormPage } from './ui/AccountFormPage.vue';
+/**
+ * The routed screens are async components: the app shell imports this barrel
+ * statically (`QuickActions` needs `useAccounts` and the sheet), and a static
+ * edge would drag every page into the entry chunk however lazily the router
+ * asks for them.
+ */
+export const AccountsPage = defineAsyncComponent(() => import('./ui/AccountsPage.vue'));
+export const AccountDetailPage = defineAsyncComponent(() => import('./ui/AccountDetailPage.vue'));
+export const AccountFormPage = defineAsyncComponent(() => import('./ui/AccountFormPage.vue'));
 export { default as RecordBalanceSheet } from './ui/RecordBalanceSheet.vue';
