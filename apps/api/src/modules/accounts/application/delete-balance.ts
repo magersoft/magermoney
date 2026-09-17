@@ -5,11 +5,17 @@ import { assertEditable } from './edit-balance.js';
 
 export const deleteBalance =
   (deps: AccountDeps) =>
-  async (userId: string, id: string): Promise<Result<void, NotFoundError | ConflictError>> => {
-    const entry = await deps.repos.balances.findById(userId, id);
-    if (!entry) return err(new NotFoundError('balance entry'));
-    const editable = await assertEditable(deps.repos, userId, entry);
-    if (editable.isErr()) return err(editable.error);
-    await deps.repos.balances.delete(userId, id);
-    return ok(undefined);
-  };
+  (userId: string, id: string): Promise<Result<void, NotFoundError | ConflictError>> =>
+    // Same lock as `editBalance`: "is this still the latest entry" is only true
+    // for as long as the account row is held.
+    deps.uow(async (repos) => {
+      const found = await repos.balances.findById(userId, id);
+      if (!found) return err(new NotFoundError('balance entry'));
+      await repos.accounts.lock(userId, [found.accountId]);
+      const entry = await repos.balances.findById(userId, id);
+      if (!entry) return err(new NotFoundError('balance entry'));
+      const editable = await assertEditable(repos, userId, entry);
+      if (editable.isErr()) return err(editable.error);
+      await repos.balances.delete(userId, id);
+      return ok(undefined);
+    });

@@ -46,7 +46,12 @@ export function fail(c: Context<AppEnv>, e: AppError) {
 
 export function accountRoutes(deps: AppDeps) {
   const r = new OpenAPIHono<AppEnv>();
-  const uc: AccountDeps = { repos: deps.repos, registry: deps.registry, clock: deps.clock };
+  const uc: AccountDeps = {
+    uow: deps.uow,
+    repos: deps.repos,
+    registry: deps.registry,
+    clock: deps.clock,
+  };
   r.use('/accounts', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
   r.use('/accounts/*', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
   r.use('/balances/*', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));

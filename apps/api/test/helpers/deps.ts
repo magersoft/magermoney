@@ -15,7 +15,9 @@ export function memoryRepos() {
 }
 
 export function testDeps(over: Partial<AppDeps> = {}): AppDeps {
-  const repos = memoryRepos();
+  // The unit of work must hand out the repositories the test actually inspects,
+  // so it is built from the overridden ones when there are any.
+  const repos = over.repos ?? memoryRepos();
   return {
     clock: new SystemClock() as Clock,
     jwtSecret: 'test-secret-test-secret-test-secret-1234',
@@ -24,8 +26,8 @@ export function testDeps(over: Partial<AppDeps> = {}): AppDeps {
     registry: CurrencyRegistry.default(),
     rates: new MemoryRateRepository(),
     rateProviders: [],
-    repos,
-    uow: memoryUnitOfWork(repos),
     ...over,
+    repos,
+    uow: over.uow ?? memoryUnitOfWork(repos),
   } as AppDeps;
 }
