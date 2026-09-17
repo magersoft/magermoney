@@ -8,8 +8,33 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'home',
-    component: () => import('@/modules/rates').then((m) => m.HomePage),
+    name: 'accounts',
+    component: () => import('@/modules/accounts').then((m) => m.AccountsPage),
+  },
+  {
+    path: '/accounts/new',
+    name: 'account-new',
+    component: () => import('@/modules/accounts').then((m) => m.AccountFormPage),
+  },
+  {
+    path: '/accounts/:id',
+    name: 'account',
+    component: () => import('@/modules/accounts').then((m) => m.AccountDetailPage),
+  },
+  {
+    path: '/accounts/:id/edit',
+    name: 'account-edit',
+    component: () => import('@/modules/accounts').then((m) => m.AccountFormPage),
+  },
+  {
+    path: '/transfers',
+    name: 'transfers',
+    component: () => import('@/modules/transfers').then((m) => m.TransfersPage),
+  },
+  {
+    path: '/rates',
+    name: 'rates',
+    component: () => import('@/modules/rates').then((m) => m.RatesPage),
   },
   {
     path: '/settings',

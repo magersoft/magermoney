@@ -88,11 +88,11 @@ test('sign in, see home, switch currency', async ({ page }) => {
     ] as [string, string]);
     await page.goto('/');
 
-    await expect(page.getByTestId('home-greeting')).toBeVisible();
-    const before = await page.getByTestId('sample-amount').innerText();
+    await expect(page.getByTestId('capital-total')).toBeVisible();
+    const before = await page.getByTestId('capital-total').innerText();
     await page.getByTestId('currency-switch').getByRole('button', { name: 'USD' }).click();
-    await expect(page.getByTestId('sample-amount')).not.toHaveText(before);
-    await expect(page.getByTestId('sample-amount')).toContainText('$');
+    await expect(page.getByTestId('capital-total')).not.toHaveText(before);
+    await expect(page.getByTestId('capital-total')).toContainText('$');
   } finally {
     await admin.auth.admin.deleteUser(userId);
   }

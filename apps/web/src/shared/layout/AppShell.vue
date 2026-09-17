@@ -19,7 +19,8 @@ const emit = defineEmits<{ 'update:theme': [theme: Theme] }>();
 const { t } = useI18n();
 
 const NAV = [
-  { to: '/', label: 'nav.home' },
+  { to: '/', label: 'nav.accounts' },
+  { to: '/rates', label: 'nav.rates' },
   { to: '/settings', label: 'nav.settings' },
 ] as const;
 
@@ -115,6 +116,12 @@ function cycleTheme(): void {
     <main id="main" tabindex="-1" class="mx-auto w-full max-w-3xl px-4 pb-24 pt-6 md:px-6 md:pb-12">
       <slot />
     </main>
+
+    <div
+      class="fixed bottom-[calc(env(safe-area-inset-bottom)+4.25rem)] right-4 z-20 md:bottom-8 md:right-[max(1rem,calc(50%-24rem))]"
+    >
+      <slot name="fab" />
+    </div>
 
     <nav
       class="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface md:hidden"
