@@ -17,7 +17,7 @@ import {
   useToast,
 } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
-import { ApiError } from '@/shared/api/client';
+import { errorKeyFor } from '@/shared/api/error-messages';
 import { fromLocalInput, toLocalInput, type DateLocale } from '@/shared/dates/format';
 import { useAccount } from '../application/use-accounts';
 import {
@@ -86,11 +86,7 @@ async function submit() {
     else await record(props.accountId, input);
     emit('update:open', false);
   } catch (e) {
-    toast(
-      e instanceof ApiError && e.status === 409
-        ? t('accounts.balance.notLatest')
-        : t('accounts.balance.failed'),
-    );
+    toast(t(errorKeyFor(e, 'accounts.balance.failed')));
   }
 }
 async function del() {
@@ -99,11 +95,7 @@ async function del() {
     await remove(props.accountId, props.entry.id);
     emit('update:open', false);
   } catch (e) {
-    toast(
-      e instanceof ApiError && e.status === 409
-        ? t('accounts.balance.notLatest')
-        : t('accounts.balance.failed'),
-    );
+    toast(t(errorKeyFor(e, 'accounts.balance.failed')));
   }
 }
 </script>

@@ -242,7 +242,7 @@ describe('RecordBalanceSheet', () => {
             icon: null,
           },
         ]);
-      if (init?.method === 'DELETE') return errorJson('BALANCE_NOT_LATEST', 'Not latest', 409);
+      if (init?.method === 'DELETE') return errorJson('entry_not_latest', 'Not latest', 409);
       return json([acc]);
     });
     const w = mountSheet(fetch);
@@ -255,6 +255,66 @@ describe('RecordBalanceSheet', () => {
       'Изменить можно только последнюю запись. Добавьте новую с верной суммой.',
     );
     expect(w.emitted('update:open')).toBeFalsy();
+    w.unmount();
+  });
+
+  it('says the date is too early when the API answers recorded_before_previous', async () => {
+    toast.mockClear();
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies')
+        return json([
+          {
+            code: 'RUB',
+            kind: 'fiat',
+            scale: 2,
+            symbol: null,
+            nameRu: null,
+            nameEn: null,
+            icon: null,
+          },
+        ]);
+      if (init?.method === 'PATCH') return errorJson('recorded_before_previous', 'Too early', 400);
+      return json([acc]);
+    });
+    const w = mountSheet(fetch);
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="balance-amount"]').setValue('12');
+    await body.get('form').trigger('submit');
+    await flushPromises();
+
+    expect(toast).toHaveBeenCalledWith(ru.errors.recordedBeforePrevious);
+    expect(toast).not.toHaveBeenCalledWith(ru.accounts.balance.notLatest);
+    w.unmount();
+  });
+
+  it('points at the transfer when the entry is not a manual one', async () => {
+    toast.mockClear();
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies')
+        return json([
+          {
+            code: 'RUB',
+            kind: 'fiat',
+            scale: 2,
+            symbol: null,
+            nameRu: null,
+            nameEn: null,
+            icon: null,
+          },
+        ]);
+      if (init?.method === 'DELETE')
+        return errorJson('entry_not_manual', 'Change the transfer instead', 409);
+      return json([acc]);
+    });
+    const w = mountSheet(fetch);
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="balance-delete"]').trigger('click');
+    await flushPromises();
+
+    expect(toast).toHaveBeenCalledWith(ru.errors.entryNotManual);
+    expect(toast).not.toHaveBeenCalledWith(ru.accounts.balance.notLatest);
     w.unmount();
   });
 });
