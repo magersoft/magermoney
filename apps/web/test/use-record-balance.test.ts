@@ -29,7 +29,7 @@ const acc: AccountDto = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
-/** A POST that never settles until the test lets it, so the optimistic value can be observed. */
+/** A response that never settles until the test lets it, so an in-between state can be observed. */
 function deferred<T>() {
   let resolve!: (v: T) => void;
   let reject!: (e: unknown) => void;
@@ -64,23 +64,30 @@ function mountIt(fetchImpl: (path: string, init?: RequestInit) => Promise<Respon
 
 describe('useRecordBalance', () => {
   it('shows the optimistic balance before the POST answers, then reconciles with the server, and rolls back on failure', async () => {
-    // The GET is stateful: it answers with whatever the last successful POST
-    // actually committed, so a passing test proves the list really is
-    // reconciled with the server after settle — not just left at the guess.
+    // The server's own truth ('99.00') deliberately differs from the optimistic
+    // guess ('99'): only a real GET after settle can produce '99.00', so this
+    // assertion is falsifiable by a settle that skips the refetch (e.g. a
+    // `refetchType: 'none'` regression), not just by the optimistic patch itself.
     let stored: AccountDto = acc;
-    const post = { current: deferred<Response>() };
+    // When set, a GET blocks on this instead of answering immediately — used to
+    // prove the rollback value comes from `onError`, not from a refetch that
+    // just happens to agree with it.
+    let pendingGet: ReturnType<typeof deferred<Response>> | null = null;
+    let post = deferred<Response>();
     const { accounts, record } = mountIt(async (path, init) => {
-      if (init?.method === 'POST') return post.current.promise;
-      return json([stored]);
+      if (init?.method === 'POST') return post.promise;
+      return pendingGet ? pendingGet.promise : json([stored]);
     });
     await flushPromises();
+    expect(accounts().accounts.value[0]?.balance).toBe('10');
 
-    const p = record().record(acc.id, { amount: '99' });
+    // --- Optimistic value, then reconciliation with the server ---
+    const p1 = record().record(acc.id, { amount: '99' });
     await flushPromises();
     expect(accounts().accounts.value[0]?.balance).toBe('99');
 
-    stored = { ...stored, balance: '99', balanceRecordedAt: '2026-09-11T00:00:00.000Z' };
-    post.current.resolve(
+    stored = { ...stored, balance: '99.00', balanceRecordedAt: '2026-09-11T00:00:00.000Z' };
+    post.resolve(
       json(
         {
           id: '22222222-2222-4222-8222-222222222222',
@@ -94,19 +101,27 @@ describe('useRecordBalance', () => {
         201,
       ),
     );
-    await p;
+    await p1;
     await flushPromises();
-    // Reconciled with the server's own GET, not just the optimistic guess.
-    expect(accounts().accounts.value[0]?.balance).toBe('99');
+    // Only the settle-triggered refetch could have produced this exact value.
+    expect(accounts().accounts.value[0]?.balance).toBe('99.00');
 
-    post.current = deferred<Response>();
-    const failing = record()
+    // --- Rollback on a failing POST ---
+    post = deferred<Response>();
+    pendingGet = deferred<Response>();
+    const p2 = record()
       .record(acc.id, { amount: '5' })
       .catch(() => undefined);
     await flushPromises();
-    post.current.resolve(json({ code: 'recorded_in_future', message: 'no' }, 400));
-    await failing;
+    post.resolve(json({ code: 'recorded_in_future', message: 'no' }, 400));
     await flushPromises();
-    expect(accounts().accounts.value[0]?.balance).toBe('99');
+    // The settle-triggered GET is still pending (blocked on `pendingGet`), so
+    // this value can only have come from `onError`'s rollback.
+    expect(accounts().accounts.value[0]?.balance).toBe('99.00');
+
+    pendingGet.resolve(json([stored]));
+    await p2;
+    await flushPromises();
+    expect(accounts().accounts.value[0]?.balance).toBe('99.00');
   });
 });
