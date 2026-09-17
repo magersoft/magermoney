@@ -155,6 +155,22 @@
   "money": {
     "noRate": "Нет курса {code} на {date}"
   },
+  "rates": {
+    "title": "Курсы",
+    "asOf": "Курсы на {date}, в {code}",
+    "manual": "вручную",
+    "one": "1 {code}",
+    "setManual": "Задать курс вручную",
+    "sheetTitle": "Ручной курс",
+    "currency": "Валюта",
+    "date": "Дата",
+    "value": "1 {code} в USD",
+    "hint": "Курс хранится к доллару. Для {code} сегодня по API: {value}.",
+    "save": "Сохранить",
+    "remove": "Убрать ручной курс",
+    "failed": "Не удалось сохранить курс.",
+    "noRate": "нет курса"
+  },
   "transfers": {
     "title": "Переводы",
     "sheetTitle": "Перевод",

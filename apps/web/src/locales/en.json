@@ -155,6 +155,22 @@
   "money": {
     "noRate": "No rate for {code} on {date}"
   },
+  "rates": {
+    "title": "Rates",
+    "asOf": "Rates for {date}, in {code}",
+    "manual": "manual",
+    "one": "1 {code}",
+    "setManual": "Set a rate manually",
+    "sheetTitle": "Manual rate",
+    "currency": "Currency",
+    "date": "Date",
+    "value": "1 {code} in USD",
+    "hint": "Rates are stored against the dollar. Today's API rate for {code}: {value}.",
+    "save": "Save",
+    "remove": "Remove manual rate",
+    "failed": "Could not save the rate.",
+    "noRate": "no rate"
+  },
   "transfers": {
     "title": "Transfers",
     "sheetTitle": "Transfer",

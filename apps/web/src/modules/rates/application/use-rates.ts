@@ -1,5 +1,6 @@
 import { computed, type ComputedRef } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
+import type { RateDto } from '@magermoney/contracts';
 import { RateTable } from '@magermoney/domain';
 import { toRate, useCurrencyRegistry } from '@/modules/currencies';
 import { useApi } from '@/shared/api/use-api';
@@ -15,6 +16,10 @@ export function useRates(date?: string): {
   table: ComputedRef<RateTable | undefined>;
   isLoading: ComputedRef<boolean>;
   date: ComputedRef<string>;
+  /** The rows behind the table, unmodelled — a screen that needs to know which
+   * base carries a manual override reads this instead of fetching `/rates` a
+   * second time under a different query key. */
+  rows: ComputedRef<RateDto[]>;
 } {
   const api = ratesApi(useApi());
   const registry = useCurrencyRegistry();
@@ -30,5 +35,6 @@ export function useRates(date?: string): {
     table,
     isLoading: computed(() => query.isLoading.value),
     date: computed(() => table.value?.date ?? date ?? todayIso()),
+    rows: computed(() => query.data.value ?? []),
   };
 }
