@@ -113,8 +113,13 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['@/modules/*/*'],
-              message: 'Import a module through its index.ts, not one of its files.',
+              // `offline.ts` is the one other public entry a module may have:
+              // the composition root needs a module's query keys and mutation
+              // registration without its screens, and reaching them through the
+              // barrel would pull every lazily routed page into the entry chunk.
+              group: ['@/modules/*/*', '!@/modules/*/offline'],
+              message:
+                'Import a module through its index.ts (or offline.ts), not one of its files.',
             },
           ],
         },
