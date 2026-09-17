@@ -233,4 +233,26 @@ describe('TransferSheet', () => {
     onlineManager.setOnline(true);
     w.unmount();
   }, 15000);
+
+  it('tells a new transfer its date is too early, not to edit it', async () => {
+    toast.mockClear();
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path.startsWith('/rates')) return json([]);
+      if (init?.method === 'POST')
+        return json({ code: 'transfer_not_latest', message: 'Newer balances exist' }, 409);
+      return json([acc(USD_ID, 'USD'), acc(USD2_ID, 'USD'), acc(EUR_ID, 'EUR')]);
+    });
+    const w = mountSheet(fetch);
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="transfer-to"]').setValue(USD2_ID);
+    await body.get('[data-testid="transfer-sent"]').setValue('10');
+    await body.get('form').trigger('submit');
+    await flushPromises();
+
+    expect(toast).toHaveBeenCalledWith(ru.errors.transferBackdated);
+    expect(toast).not.toHaveBeenCalledWith(ru.errors.transferNotLatest);
+    w.unmount();
+  });
 });

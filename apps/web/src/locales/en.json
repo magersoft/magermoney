@@ -206,6 +206,7 @@
     "entryNotLatest": "Only the latest entry can be edited. Add a new one with the right amount.",
     "entryNotManual": "A transfer made this entry. Edit the transfer instead.",
     "transferNotLatest": "Balances have moved since this transfer. Make a correcting transfer instead.",
+    "transferBackdated": "One of the accounts already has a later balance. Give the transfer a later date.",
     "insufficientFunds": "Not enough on that account.",
     "accountHasHistory": "This account already has entries. Its currency cannot change now.",
     "accountHasTransfers": "This account has transfers. You can only archive it.",
