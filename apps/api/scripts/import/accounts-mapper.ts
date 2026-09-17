@@ -62,6 +62,18 @@ function kindOf(
   return { kind: 'bank_account', tier: null };
 }
 
+/**
+ * Groups rows under one provider: strips a trailing " Вклад"/" Инвест" account-type
+ * word and/or a trailing " <currency>" (the row's own `Валюта`, matched case-sensitively,
+ * never a fixed list) so "Demo Bank USD", "Demo Bank EUR" and "Demo Bank Вклад" all
+ * report `bank: "Demo Bank"`. Cash rows keep their full name as the bank.
+ */
+function bankName(name: string, kind: AccountKind, currency: string): string {
+  if (kind === 'cash') return name;
+  const escapedCurrency = currency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return name.replace(/\s+(Вклад|Инвест)$/i, '').replace(new RegExp(`\\s+${escapedCurrency}$`), '');
+}
+
 export function mapAccounts(
   rows: string[][],
   opts: { known: Set<string> },
@@ -106,7 +118,7 @@ export function mapAccounts(
     );
     out.push({
       name,
-      bank: name.replace(/\s+(Вклад|Инвест)$/i, ''),
+      bank: bankName(name, kind, currency),
       country,
       currency,
       kind,
@@ -126,12 +138,20 @@ export function mapAccounts(
     });
   }
   // Two accounts of one bank in one currency get a suffix so the list can tell them apart.
+  // The dedup key is name+currency, not bank+currency: rows with a different name need no suffix.
   const key = (a: MappedAccount) => `${a.name}|${a.currency}`;
   const counts = new Map<string, number>();
   for (const a of out) counts.set(key(a), (counts.get(key(a)) ?? 0) + 1);
   for (const a of out)
     if ((counts.get(key(a)) ?? 0) > 1)
       a.name = `${a.name} · ${a.cardTier ?? (a.kind === 'card' ? 'Card' : 'Account')}`;
+  // Names must be unique for display; number any that still collide, in row order.
+  const seen = new Map<string, number>();
+  for (const a of out) {
+    const n = (seen.get(a.name) ?? 0) + 1;
+    seen.set(a.name, n);
+    if (n > 1) a.name = `${a.name} ${n}`;
+  }
   return ok(out);
 }
 

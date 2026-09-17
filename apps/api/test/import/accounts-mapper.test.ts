@@ -14,6 +14,9 @@ const CSV = [
   'Cash EUR,💰 Cash,"310,00",EUR,$359,€310,,Account,,,,,,,,,,,,,,,,',
   'Twin Bank,🇬🇪 Грузия,"0,00",USD,$0,€0,VISA,Platinum,************2236,08/28,DEBIT,,,,,,,,,,,,,',
   'Twin Bank,🇬🇪 Грузия,"5,00",USD,$5,€4,MasterCard,Digital,************9827,08/28,CREDIT,,,,,,,,,,,,,',
+  'Demo Bank USD,🇷🇺 Россия,"100,00",USD,$100,€90,,Account,,,,,,,,,,,,,,,,',
+  'Twin Acc,🇰🇿 Казахстан,"1,00",USD,$1,€1,,Account,,,,,,,,,,,,,,,,',
+  'Twin Acc,🇰🇿 Казахстан,"2,00",USD,$2,€2,,Account,,,,,,,,,,,,,,,,',
   ',,,,$1 000,€900,,,,,,,,,,,,,,,,,,',
 ].join('\n');
 
@@ -23,7 +26,7 @@ describe('mapAccounts', () => {
   const accounts = result._unsafeUnwrap();
 
   it('maps every non-empty row and skips the totals row', () => {
-    expect(accounts).toHaveLength(7);
+    expect(accounts).toHaveLength(10);
   });
   it('maps a card with its fields and a markdown note', () => {
     const card = accounts[0]!;
@@ -65,6 +68,21 @@ describe('mapAccounts', () => {
   it('disambiguates two accounts of one bank in one currency by tier and keeps the card type', () => {
     expect(accounts[5]!.name).toBe('Twin Bank · Platinum');
     expect(accounts[6]).toMatchObject({ name: 'Twin Bank · Digital', cardType: 'credit' });
+  });
+  it('groups a non-cash account under its provider by stripping a trailing currency code', () => {
+    expect(accounts[7]).toMatchObject({
+      name: 'Demo Bank USD',
+      bank: 'Demo Bank',
+      currency: 'USD',
+      kind: 'bank_account',
+    });
+  });
+  it('numbers still-duplicate names after the tier suffix, in row order', () => {
+    expect(accounts[8]).toMatchObject({ name: 'Twin Acc · Account', currency: 'USD' });
+    expect(accounts[9]).toMatchObject({ name: 'Twin Acc · Account 2', currency: 'USD' });
+  });
+  it('gives every mapped account a unique name', () => {
+    expect(new Set(accounts.map((a) => a.name)).size).toBe(accounts.length);
   });
   it('fails on an unknown currency, naming it', () => {
     const r = mapAccounts(rows, { known: new Set(['RUB', 'USD', 'EUR']) });
