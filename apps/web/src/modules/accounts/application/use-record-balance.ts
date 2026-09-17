@@ -34,10 +34,7 @@ export function useRecordBalance() {
     },
     onSettled: (_d, _e, { id }) =>
       Promise.all([
-        // `refetchType: 'none'`: the optimistic value (or its rollback) is already
-        // correct, so this only marks the list stale for the next natural refetch
-        // instead of racing an eager one that would overwrite what we just set.
-        qc.invalidateQueries({ queryKey: ACCOUNTS_KEY, refetchType: 'none' }),
+        qc.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
         qc.invalidateQueries({ queryKey: balancesKey(id) }),
       ]),
   });

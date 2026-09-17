@@ -29,6 +29,17 @@ const acc: AccountDto = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
+/** A POST that never settles until the test lets it, so the optimistic value can be observed. */
+function deferred<T>() {
+  let resolve!: (v: T) => void;
+  let reject!: (e: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
 function mountIt(fetchImpl: (path: string, init?: RequestInit) => Promise<Response>) {
   let accounts!: ReturnType<typeof useAccounts>;
   let record!: ReturnType<typeof useRecordBalance>;
@@ -52,35 +63,49 @@ function mountIt(fetchImpl: (path: string, init?: RequestInit) => Promise<Respon
 }
 
 describe('useRecordBalance', () => {
-  it('patches the account balance before the POST answers and rolls back on failure', async () => {
-    let fail = false;
+  it('shows the optimistic balance before the POST answers, then reconciles with the server, and rolls back on failure', async () => {
+    // The GET is stateful: it answers with whatever the last successful POST
+    // actually committed, so a passing test proves the list really is
+    // reconciled with the server after settle — not just left at the guess.
+    let stored: AccountDto = acc;
+    const post = { current: deferred<Response>() };
     const { accounts, record } = mountIt(async (path, init) => {
-      if (init?.method === 'POST')
-        return fail
-          ? json({ code: 'recorded_in_future', message: 'no' }, 400)
-          : json(
-              {
-                id: '22222222-2222-4222-8222-222222222222',
-                accountId: acc.id,
-                amount: '99',
-                recordedAt: '2026-09-11T00:00:00.000Z',
-                origin: 'manual',
-                transferId: null,
-                note: null,
-              },
-              201,
-            );
-      return json([acc]);
+      if (init?.method === 'POST') return post.current.promise;
+      return json([stored]);
     });
     await flushPromises();
+
     const p = record().record(acc.id, { amount: '99' });
     await flushPromises();
     expect(accounts().accounts.value[0]?.balance).toBe('99');
+
+    stored = { ...stored, balance: '99', balanceRecordedAt: '2026-09-11T00:00:00.000Z' };
+    post.current.resolve(
+      json(
+        {
+          id: '22222222-2222-4222-8222-222222222222',
+          accountId: acc.id,
+          amount: '99',
+          recordedAt: '2026-09-11T00:00:00.000Z',
+          origin: 'manual',
+          transferId: null,
+          note: null,
+        },
+        201,
+      ),
+    );
     await p;
-    fail = true;
-    await record()
+    await flushPromises();
+    // Reconciled with the server's own GET, not just the optimistic guess.
+    expect(accounts().accounts.value[0]?.balance).toBe('99');
+
+    post.current = deferred<Response>();
+    const failing = record()
       .record(acc.id, { amount: '5' })
       .catch(() => undefined);
+    await flushPromises();
+    post.current.resolve(json({ code: 'recorded_in_future', message: 'no' }, 400));
+    await failing;
     await flushPromises();
     expect(accounts().accounts.value[0]?.balance).toBe('99');
   });
