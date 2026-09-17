@@ -49,6 +49,15 @@ const allowNegative = computed(
 const amount = ref('');
 const recordedAt = ref(toLocalInput(new Date().toISOString()));
 const note = ref('');
+/**
+ * The `datetime-local` field only has minute precision, so its default value
+ * ("now") is coarser than the server's own `now()` — sending it unconditionally
+ * can make a fresh entry appear earlier than a sub-minute-old sibling (e.g. the
+ * account's opening balance) and lose the "latest" race. Send `recordedAt` only
+ * once the person has actually touched the field; otherwise the server stamps
+ * the real, full-precision time.
+ */
+const dateTouched = ref(false);
 watch(
   () => props.open,
   (open) => {
@@ -56,6 +65,7 @@ watch(
     amount.value = props.entry?.amount ?? '';
     recordedAt.value = toLocalInput(props.entry?.recordedAt ?? new Date().toISOString());
     note.value = props.entry?.note ?? '';
+    dateTouched.value = false;
   },
 );
 
@@ -68,7 +78,7 @@ async function submit() {
   if (amount.value === '') return;
   const input = {
     amount: amount.value,
-    recordedAt: fromLocalInput(recordedAt.value),
+    ...(dateTouched.value ? { recordedAt: fromLocalInput(recordedAt.value) } : {}),
     note: note.value.trim() || null,
   };
   try {
@@ -125,7 +135,13 @@ async function del() {
           <span class="text-xs font-medium text-muted-foreground">{{
             t('accounts.balance.recordedAt')
           }}</span>
-          <Input v-model="recordedAt" type="datetime-local" class="mt-1" />
+          <Input
+            v-model="recordedAt"
+            type="datetime-local"
+            class="mt-1"
+            data-testid="balance-recorded-at"
+            @change="dateTouched = true"
+          />
         </label>
         <label class="block">
           <span class="text-xs font-medium text-muted-foreground">{{

@@ -54,6 +54,14 @@ const received = ref('');
 const fee = ref('');
 const occurredAt = ref(toLocalInput(new Date().toISOString()));
 const note = ref('');
+/**
+ * The `datetime-local` field only has minute precision, so its default value
+ * ("now") is coarser than the server's own `now()` — sending it unconditionally
+ * can make a fresh transfer appear earlier than a sub-minute-old sibling entry
+ * and lose the "latest" race. Send `occurredAt` only once the person has
+ * actually touched the field; otherwise the server stamps the real time.
+ */
+const dateTouched = ref(false);
 watch(
   () => props.open,
   (open) => {
@@ -65,6 +73,7 @@ watch(
     fee.value = props.transfer?.fee ?? '';
     occurredAt.value = toLocalInput(props.transfer?.occurredAt ?? new Date().toISOString());
     note.value = props.transfer?.note ?? '';
+    dateTouched.value = false;
   },
   { immediate: true },
 );
@@ -135,7 +144,7 @@ async function submit() {
   if (!canSubmit.value) return;
   const input = {
     ...amounts(),
-    occurredAt: fromLocalInput(occurredAt.value),
+    ...(dateTouched.value ? { occurredAt: fromLocalInput(occurredAt.value) } : {}),
     note: note.value.trim() || null,
   };
   try {
@@ -240,7 +249,13 @@ const label = (a: (typeof accounts.value)[number]) =>
           <span class="text-xs font-medium text-muted-foreground">{{
             t('transfers.occurredAt')
           }}</span>
-          <Input v-model="occurredAt" type="datetime-local" class="mt-1" />
+          <Input
+            v-model="occurredAt"
+            type="datetime-local"
+            class="mt-1"
+            data-testid="transfer-occurred-at"
+            @change="dateTouched = true"
+          />
         </label>
         <label class="block">
           <span class="text-xs font-medium text-muted-foreground">{{ t('transfers.note') }}</span>

@@ -112,13 +112,64 @@ describe('TransferSheet', () => {
     await body.get('form').trigger('submit');
     await flushPromises();
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
-    expect(JSON.parse(post?.[1]?.body as string)).toMatchObject({
+    const postBody = JSON.parse(post?.[1]?.body as string);
+    expect(postBody).toMatchObject({
       fromAccountId: USD_ID,
       toAccountId: EUR_ID,
       amountSent: '100',
       amountReceived: '86',
     });
+    // The date field was never touched: the server should stamp the real
+    // "now" rather than receive the coarse (minute-precision) default value.
+    expect(postBody).not.toHaveProperty('occurredAt');
     expect(w.emitted('update:open')?.at(-1)).toEqual([false]);
+    w.unmount();
+  });
+
+  it('sends occurredAt only once the date field has been edited', async () => {
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path.startsWith('/rates'))
+        return json([
+          { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api' },
+        ]);
+      if (path === '/me')
+        return json({
+          id: 'u',
+          displayName: null,
+          locale: 'ru',
+          defaultCurrency: 'USD',
+          reportingCurrencies: ['USD'],
+          onboardingCompletedAt: null,
+        });
+      if (init?.method === 'POST')
+        return json(
+          {
+            id: TRANSFER_ID,
+            fromAccountId: USD_ID,
+            toAccountId: USD2_ID,
+            amountSent: '100',
+            amountReceived: '100',
+            occurredAt: '2026-09-01T10:00:00.000Z',
+            note: null,
+            realisedRate: null,
+            fee: null,
+          },
+          201,
+        );
+      return json([acc(USD_ID, 'USD'), acc(USD2_ID, 'USD'), acc(EUR_ID, 'EUR')]);
+    });
+    const w = mountSheet(fetch);
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="transfer-to"]').setValue(USD2_ID);
+    await body.get('[data-testid="transfer-sent"]').setValue('100');
+    await body.get('[data-testid="transfer-occurred-at"]').setValue('2026-09-01T10:00');
+    await body.get('form').trigger('submit');
+    await flushPromises();
+    const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    const postBody = JSON.parse(post?.[1]?.body as string);
+    expect(postBody).toHaveProperty('occurredAt');
     w.unmount();
   });
 });
