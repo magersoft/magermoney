@@ -135,7 +135,8 @@ describe('mutations made offline', () => {
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(post?.[0]).toBe(`/accounts/${ACCOUNT_ID}/balances`);
     expect(JSON.parse(post?.[1]?.body as string)).toMatchObject({ amount: '99' });
-  });
+    // The pause waits out the retryer's back-off before anything is dehydrated.
+  }, 15000);
 
   it('refuses to replay a write that belongs to another account', async () => {
     // The tab was signed out and signed in as someone else while the write was

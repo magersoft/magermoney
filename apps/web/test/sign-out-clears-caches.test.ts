@@ -18,6 +18,9 @@ describe('signing out on a shared device', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    // Mounted first, always: only a mounted client resumes what it restored,
+    // and `afterEach` unmounts whatever `beforeEach` mounted.
+    queryClient.mount();
   });
 
   afterEach(() => {
@@ -50,7 +53,6 @@ describe('signing out on a shared device', () => {
   it('drops the writes that were still waiting for a connection', async () => {
     // They belong to the account that is leaving: replayed under the next
     // person's token they would write into someone else's journal.
-    queryClient.mount();
     onlineManager.setOnline(false);
     void queryClient
       .getMutationCache()
