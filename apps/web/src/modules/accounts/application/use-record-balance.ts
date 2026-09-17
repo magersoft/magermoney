@@ -6,7 +6,7 @@ import type {
   UpdateBalanceInput,
 } from '@magermoney/contracts';
 import { settledOrParked } from '@/shared/api/offline-write';
-import { useApi } from '@/shared/api/use-api';
+import { useApi, useOwnerId } from '@/shared/api/use-api';
 import { accountsApi } from '../infrastructure/accounts-api';
 import { ACCOUNTS_KEY, balancesKey } from './use-accounts';
 import {
@@ -23,14 +23,15 @@ import {
  */
 export function useRecordBalance() {
   const qc = useQueryClient();
-  registerAccountMutations(qc, useApi());
+  const ownerId = useOwnerId();
+  registerAccountMutations(qc, useApi(), ownerId);
   const m = useMutation<BalanceEntryDto, Error, RecordBalanceVars>({
     mutationKey: RECORD_BALANCE_KEY,
   });
   return {
     /** Resolves `'parked'` when the write is waiting for a connection, so the sheet can close. */
     record: (id: string, input: RecordBalanceInput) =>
-      settledOrParked(m.mutateAsync({ id, input }), m.isPaused),
+      settledOrParked(m.mutateAsync({ ownerId: ownerId(), id, input }), m.isPaused),
     // A parked write is not pending on anything the person should wait for.
     isPending: computed(() => m.isPending.value && !m.isPaused.value),
   };

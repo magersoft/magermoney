@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/vue-query';
 import type { AccountDto, BalanceEntryDto, RecordBalanceInput } from '@magermoney/contracts';
 import type { ApiClient } from '@/shared/api/client';
+import { assertOwner } from '@/shared/api/offline-write';
 import { accountsApi } from '../infrastructure/accounts-api';
 import { ACCOUNTS_KEY, balancesKey } from './use-accounts';
 
@@ -15,6 +16,8 @@ import { ACCOUNTS_KEY, balancesKey } from './use-accounts';
 export const RECORD_BALANCE_KEY = ['accounts', 'record-balance'] as const;
 
 export interface RecordBalanceVars {
+  /** Who made the write; checked against the session before it is sent, never part of the body. */
+  ownerId: string | null;
   id: string;
   input: RecordBalanceInput;
 }
@@ -29,11 +32,19 @@ export interface RecordBalanceContext {
  * (so a test mounting a bare client behaves the same way); registering twice is
  * the same registration.
  */
-export function registerAccountMutations(queryClient: QueryClient, client: ApiClient): void {
+export function registerAccountMutations(
+  queryClient: QueryClient,
+  client: ApiClient,
+  signedInId: () => string | null = () => null,
+): void {
   const api = accountsApi(client);
   queryClient.setMutationDefaults(RECORD_BALANCE_KEY, {
-    mutationFn: ({ id, input }: RecordBalanceVars): Promise<BalanceEntryDto> =>
-      api.recordBalance(id, input),
+    // The owner id travels with the mutation, not in the request: it decides
+    // whether the write may be sent at all, and the API knows the user from the token.
+    mutationFn: ({ ownerId, id, input }: RecordBalanceVars): Promise<BalanceEntryDto> => {
+      assertOwner(ownerId, signedInId());
+      return api.recordBalance(id, input);
+    },
     // The new number is shown before the POST answers and taken back if it
     // fails. A backdated entry does not touch the shown balance: the server
     // decides what is current, and the refetch after settle agrees with it.
