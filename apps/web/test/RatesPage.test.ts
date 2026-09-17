@@ -64,6 +64,9 @@ describe('RatesPage', () => {
     const row = w.get('[data-testid="rate-row-EUR"]');
     expect(row.text()).toContain('manual');
 
+    // The rate itself is a button too: without a label it is read out as just a number.
+    expect(row.get('button[aria-label="1 EUR"]').text()).toBe('$1.16');
+
     await row.get('button[aria-label="Remove manual rate"]').trigger('click');
     await flushPromises();
 

@@ -86,6 +86,7 @@ async function removeManual(code: string) {
         <button
           type="button"
           class="min-h-9 font-mono text-sm tabular-nums pointer-coarse:min-h-11"
+          :aria-label="t('rates.one', { code: r.code })"
           @click="edit(r.code)"
         >
           {{ r.text }}
