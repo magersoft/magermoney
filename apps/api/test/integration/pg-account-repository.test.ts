@@ -71,6 +71,20 @@ describe('PgAccountRepository', () => {
     expect(await repos.accounts.countEntries(uid, a.id)).toBe(3);
   });
 
+  it('persists a note on the opening balance entry', async () => {
+    const a = await repos.accounts.create(
+      uid,
+      { ...newAccount, name: 'Noted' },
+      {
+        amount: '5',
+        recordedAt: '2026-09-01T00:00:00.000Z',
+        note: 'Imported from spreadsheet',
+      },
+    );
+    const [entry] = await repos.balances.listByAccount(uid, a.id, 10);
+    expect(entry?.note).toBe('Imported from spreadsheet');
+  });
+
   it('paginates balances by cursor and round-trips a card date', async () => {
     const card = await repos.accounts.create(uid, {
       ...newAccount,

@@ -30,6 +30,7 @@ export type AccountPatch = Partial<NewAccount>;
 export interface OpeningBalance {
   amount: string;
   recordedAt: string;
+  note?: string | null;
 }
 
 export interface AccountRepository {

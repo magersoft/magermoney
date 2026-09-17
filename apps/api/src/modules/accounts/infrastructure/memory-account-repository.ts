@@ -51,7 +51,7 @@ export class MemoryAccountRepository implements AccountRepository {
         recordedAt: opening.recordedAt,
         origin: 'manual',
         transferId: null,
-        note: null,
+        note: opening.note ?? null,
       });
     return this.withBalance(row);
   }
