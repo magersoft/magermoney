@@ -99,3 +99,13 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-11-phase-2-accounts.md` (
 ## Not run
 
 - Task 18 (deploy) was not run by the automated classifier for its cloud-provisioning side effects (public repo creation, push, cloud project creation, reading CLI tokens); it was handed to the owner with exact steps and completed manually — repo public, `main` protected, Supabase prod + migrations applied, Vercel ×2 projects with env configured, PR #1–#3 merged.
+
+## Known follow-ups after the final review
+
+- Editing or deleting a balance entry, and updating or deleting a transfer, still wait for the network — offline, those sheets stay busy until the connection returns and the write is not persisted; only recording a balance and creating a transfer are parked and replayed.
+- `transfers/application/mutation-defaults.ts` imports `ACCOUNTS_KEY` from the accounts barrel rather than from `@/modules/accounts/offline`.
+- The routed screens are async components with no loading or error fallback, so a chunk that fails to load after a deploy leaves a blank content area instead of a retry prompt.
+- A refused foreign replay still runs its rollback; it should skip the rollback on `ForeignWriteError` instead.
+- The eslint exception permitting `@/modules/*/offline` imports is not pinned by a lint fixture, so a future rule change could silently stop enforcing it.
+- A backdated transfer edit shares its 409 message with a stale (already-superseded) edit, so the two distinct cases read the same to the person.
+- A lost HTTP response can make a replayed balance appear twice in the journal; accepted for phase 2, idempotency keys deferred to a later phase.
