@@ -21,6 +21,7 @@ import {
 import { useAccounts } from '@/modules/accounts';
 import { useCurrencies, useCurrencyRegistry } from '@/modules/currencies';
 import { useRates } from '@/modules/rates';
+import { ApiError } from '@/shared/api/client';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import { fromLocalInput, toLocalInput, type DateLocale } from '@/shared/dates/format';
 import {
@@ -134,7 +135,16 @@ function amounts() {
       .unwrapOr(sent.value),
   };
 }
-const messageFor = (e: unknown): string => t(errorKeyFor(e, 'transfers.failed'));
+/**
+ * The API answers `transfer_not_latest` to both paths, but the advice differs:
+ * an existing transfer can no longer be edited, while a new one simply needs a
+ * later date than the balances already on its accounts.
+ */
+function messageFor(e: unknown): string {
+  if (!props.transfer && e instanceof ApiError && e.code === 'transfer_not_latest')
+    return t('errors.transferBackdated');
+  return t(errorKeyFor(e, 'transfers.failed'));
+}
 async function submit() {
   if (!canSubmit.value) return;
   const input = {
