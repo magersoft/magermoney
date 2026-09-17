@@ -154,5 +154,34 @@
   },
   "money": {
     "noRate": "No rate for {code} on {date}"
+  },
+  "transfers": {
+    "title": "Transfers",
+    "sheetTitle": "Transfer",
+    "editTitle": "Edit transfer",
+    "from": "From",
+    "to": "To",
+    "sent": "Sent",
+    "received": "Received",
+    "fee": "Fee (optional)",
+    "hint": "Today's rate ≈ {amount}",
+    "rate": "Actual rate: 1 {from} = {rate} {to}",
+    "occurredAt": "When",
+    "note": "Note",
+    "save": "Transfer",
+    "update": "Save",
+    "delete": "Delete transfer",
+    "empty": "No transfers yet",
+    "notLatest": "Balances have moved since this transfer. Make a correcting transfer instead.",
+    "insufficient": "Not enough on that account.",
+    "failed": "That did not transfer. Try again.",
+    "option": "{name} · {balance} {currency}",
+    "row": "{from} → {to}"
+  },
+  "quick": {
+    "open": "Add",
+    "record": "Update balance",
+    "transfer": "Transfer",
+    "pickAccount": "Which account?"
   }
 }
