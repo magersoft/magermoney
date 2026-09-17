@@ -89,4 +89,46 @@ describe('AccountsPage', () => {
     expect(w.findAll('[data-testid^="account-row-"]')).toHaveLength(2);
     expect(w.text()).toContain('Other');
   });
+
+  it('exposes the archived disclosure state to assistive tech', async () => {
+    resetDisplayCurrency();
+    const archivedId = '33333333-3333-4333-8333-333333333333';
+    const fetch = vi.fn(async (path: string) => {
+      if (path === '/me') return json(profile);
+      if (path === '/currencies') return json(currencies);
+      if (path.startsWith('/rates')) return json(rates);
+      return json([acc(archivedId, { archivedAt: '2026-01-01T00:00:00.000Z' })]);
+    });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: AccountsPage },
+        { path: '/accounts/:id', component: { template: '<div />' } },
+      ],
+    });
+    const w = mount(AccountsPage, {
+      global: {
+        plugins: [
+          [
+            VueQueryPlugin,
+            { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) },
+          ],
+          createI18n({ legacy: false, locale: 'ru', messages: { ru } }),
+          router,
+        ],
+        provide: { [API_KEY as unknown as string]: { fetch } },
+        stubs: { Motion: { template: '<div><slot /></div>' } },
+      },
+    });
+    await flushPromises();
+
+    const toggle = w.get('button[aria-controls="archived-accounts"]');
+    expect(toggle.attributes('aria-expanded')).toBe('false');
+    expect(w.find(`[data-testid="account-row-${archivedId}"]`).exists()).toBe(false);
+
+    await toggle.trigger('click');
+
+    expect(toggle.attributes('aria-expanded')).toBe('true');
+    expect(w.find(`[data-testid="account-row-${archivedId}"]`).exists()).toBe(true);
+  });
 });
