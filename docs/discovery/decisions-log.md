@@ -76,3 +76,4 @@ Execution rulings that changed owner-visible behaviour:
 - Import names are made unique with `" · <tier | Card | Account>"`, then a numeric suffix (` 2`, ` 3`, …) if still equal; the duplicate key is name + currency, not bank + currency.
 - Imported balance entries carry the note "Imported from spreadsheet".
 - The import prints its preview table only with `--dry-run`; a real run prints counts only.
+- A balance or transfer is stamped with the server's current time unless the date field was edited.

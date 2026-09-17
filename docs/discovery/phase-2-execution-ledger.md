@@ -29,6 +29,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-11-phase-2-accounts.md` (
 - Task 18 (public repo, cloud Supabase/Vercel projects, PR merge to `main`) executes now — explicitly authorised in the phase 1 interview; steps requiring the owner (Google OAuth client, GitHub Environment reviewer) are stopped and reported instead of attempted.
 - Create only the `magermoney-prod` Supabase project now (fits the free tier); staging Supabase is deferred to the owner's decision. Preview deployments get no database until then; the e2e job stays gated on the `E2E_ENABLED` repo variable so PR CI stays green. Cost if wrong: one repo variable flip and a later staging `db.yml` run.
 - The `api` Vercel project's SSO protection is disabled so previews stay reachable for smoke/e2e (the API is bearer-protected anyway); deploy switched to the Build Output API (`scripts/build-vercel.ts`) after two failed zero-config attempts. Cost if wrong: a script to maintain instead of zero-config.
+- The balance and transfer sheets send `recordedAt` / `occurredAt` only when the person edited the date field; an untouched field is omitted so the server stamps the real "now" (create) or keeps the stored value (edit). Why: the `datetime-local` default has minute precision, so a truncated "now" could predate an entry made in the same minute and the new balance never became current (found by the local e2e run). Cost if wrong: none; the alternative (seconds in the input) is poor on a phone.
+- The smoke scenario switches the display currency to USD before asserting totals, because new profiles default to EUR; it was a defect in the plan's scenario, not in the app. Cost if wrong: none.
 
 ## Deferred minors
 
@@ -67,6 +69,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-11-phase-2-accounts.md` (
 **Task 17** (import mapping): `mapRates` skips a parsed `'0'` like a blank value, and its single error names no row.
 
 **Task 18** (import CLI/deploy): no test asserts the CLI's exit code for a missing `--user`; CI's integration job flaked once on port 54322 already in use (runner-side, not app-side) — consider a random db port or a retry.
+
+**Task 19** (e2e/decisions/wrap-up docs): the smoke scenario's `selectAccountByName` helper matches an account by substring of its formatted `<select>` option label (`"<name> · <balance> <currency>"`), not by an exact account name.
 
 ## Plan errata
 
