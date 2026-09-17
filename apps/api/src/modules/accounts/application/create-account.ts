@@ -2,11 +2,14 @@ import { err, ok, type Result } from 'neverthrow';
 import { UnknownCurrencyError, type Clock, type CurrencyRegistry } from '@magermoney/domain';
 import type { AccountDto, CreateAccountInput } from '@magermoney/contracts';
 import type { Repos } from '../../../app.js';
+import type { UnitOfWork } from '../../../shared/db/unit-of-work.js';
 import { ValidationError } from '../../../shared/errors/http.js';
 import type { NewAccount } from './account-repository.js';
 import { notInFuture, toAccountDto } from './dto.js';
 
 export interface AccountDeps {
+  /** Balance writes and the account delete take the account lock inside one transaction, exactly like transfers. */
+  uow: UnitOfWork<Repos>;
   repos: Pick<Repos, 'accounts' | 'balances' | 'transfers'>;
   registry: CurrencyRegistry;
   clock: Clock;
