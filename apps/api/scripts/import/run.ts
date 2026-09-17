@@ -15,21 +15,42 @@ export interface ImportArgs {
   force: boolean;
 }
 
+const VALUE_FLAGS = ['--user', '--accounts', '--rates', '--recorded-at'];
+const BOOL_FLAGS = ['--dry-run', '--force'];
+
 export function parseArgs(argv: string[]): ImportArgs {
-  const get = (flag: string) => {
-    const i = argv.indexOf(flag);
-    return i >= 0 ? argv[i + 1] : undefined;
-  };
-  const user = get('--user');
+  const values: Record<string, string> = {};
+  const flags = new Set<string>();
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]!;
+    if (VALUE_FLAGS.includes(arg)) {
+      const value = argv[i + 1];
+      if (value === undefined || value.startsWith('--')) throw new Error(`${arg} needs a value`);
+      values[arg] = value;
+      i++;
+    } else if (BOOL_FLAGS.includes(arg)) {
+      flags.add(arg);
+    } else {
+      throw new Error(`Unknown option ${arg}`);
+    }
+  }
+  const user = values['--user'];
   if (!user) throw new Error('--user <email> is required');
   return {
     user,
-    accounts: get('--accounts'),
-    rates: get('--rates'),
-    recordedAt: get('--recorded-at'),
-    dryRun: argv.includes('--dry-run'),
-    force: argv.includes('--force'),
+    accounts: values['--accounts'],
+    rates: values['--rates'],
+    recordedAt: values['--recorded-at'],
+    dryRun: flags.has('--dry-run'),
+    force: flags.has('--force'),
   };
+}
+
+export function renderTotals(
+  accounts: MappedAccount[],
+  rates: { base: string; date: string; value: string }[],
+): string {
+  return `${accounts.length} accounts, ${rates.length} rates`;
 }
 
 export function renderPlan(
@@ -47,7 +68,7 @@ export function renderPlan(
       `note ${a.note?.length ?? 0}`,
     ].join('  '),
   );
-  return [...lines, `${accounts.length} accounts, ${rates.length} rates`].join('\n');
+  return [...lines, renderTotals(accounts, rates)].join('\n');
 }
 
 class DryRun extends Error {}
@@ -60,7 +81,7 @@ export async function runImport(
   const [userRow] = await sql<
     { id: string }[]
   >`select id from auth.users where email = ${args.user}`;
-  if (!userRow) throw new ImportError(`No user with email ${args.user}`);
+  if (!userRow) throw new ImportError('No user found for the given --user email');
   const userId = userRow.id;
   const known = new Set(
     (await sql<{ code: string }[]>`select code from currencies`).map((r) => r.code),
@@ -82,7 +103,7 @@ export async function runImport(
         },
       )
     : [];
-  io.log(renderPlan(accounts, rates));
+  io.log(args.dryRun ? renderPlan(accounts, rates) : renderTotals(accounts, rates));
 
   const recordedAt = args.recordedAt ?? new Date().toISOString();
   try {
@@ -101,7 +122,11 @@ export async function runImport(
         }
       }
       for (const { balance, ...data } of accounts)
-        await accountRepo.create(userId, data, { amount: balance, recordedAt });
+        await accountRepo.create(userId, data, {
+          amount: balance,
+          recordedAt,
+          note: 'Imported from spreadsheet',
+        });
       if (rates.length > 0)
         await new PgRateRepository(t).upsertMany(
           rates.map((r) => ({ ...r, source: 'manual' as const, userId })),

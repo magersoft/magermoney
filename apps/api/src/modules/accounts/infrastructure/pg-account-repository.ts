@@ -78,7 +78,7 @@ export class PgAccountRepository implements AccountRepository {
     >`insert into accounts ${this.sql({ ...toColumns(data), user_id: userId })} returning id`;
     if (opening)
       await this
-        .sql`insert into balance_entries (user_id, account_id, amount, recorded_at, origin) values (${userId}, ${created!.id}, ${opening.amount}, ${opening.recordedAt}, 'manual')`;
+        .sql`insert into balance_entries (user_id, account_id, amount, recorded_at, origin, note) values (${userId}, ${created!.id}, ${opening.amount}, ${opening.recordedAt}, 'manual', ${opening.note ?? null})`;
     return (await this.findById(userId, created!.id))!;
   }
   async update(userId: string, id: string, patch: AccountPatch) {

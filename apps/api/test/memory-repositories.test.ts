@@ -79,6 +79,17 @@ describe('memory repositories', () => {
       (await balances.listByAccount(uid, a.id, 10, `${e2.recordedAt}|${e2.id}`)).map((e) => e.id),
     ).toEqual([e1.id]);
   });
+  it('persists a note on the opening balance entry', async () => {
+    const balances = new MemoryBalanceRepository();
+    const accounts = new MemoryAccountRepository(balances);
+    const a = await accounts.create(uid, newAccount, {
+      amount: '5',
+      recordedAt: '2026-09-01T00:00:00.000Z',
+      note: 'Imported from spreadsheet',
+    });
+    const [entry] = await balances.listByAccount(uid, a.id, 10);
+    expect(entry?.note).toBe('Imported from spreadsheet');
+  });
   it('delete reports transfers and cascades entries', async () => {
     const balances = new MemoryBalanceRepository();
     const accounts = new MemoryAccountRepository(balances);
