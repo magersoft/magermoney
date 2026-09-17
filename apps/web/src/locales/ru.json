@@ -44,6 +44,7 @@
     },
     "spending": "Расходный",
     "detail": {
+      "menu": "Действия со счётом",
       "recordBalance": "Обновить остаток",
       "transfer": "Перевод",
       "transfers": "Переводы",

@@ -44,6 +44,7 @@
     },
     "spending": "Spending",
     "detail": {
+      "menu": "Account actions",
       "recordBalance": "Update balance",
       "transfer": "Transfer",
       "transfers": "Transfers",
