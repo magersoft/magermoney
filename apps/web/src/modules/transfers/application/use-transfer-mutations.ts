@@ -1,5 +1,7 @@
+import { computed } from 'vue';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { CreateTransferInput, TransferDto, UpdateTransferInput } from '@magermoney/contracts';
+import { settledOrParked } from '@/shared/api/offline-write';
 import { useApi } from '@/shared/api/use-api';
 import { transfersApi } from '../infrastructure/transfers-api';
 import {
@@ -24,7 +26,12 @@ export function useCreateTransfer() {
   const m = useMutation<TransferDto, Error, CreateTransferInput>({
     mutationKey: CREATE_TRANSFER_KEY,
   });
-  return { create: (input: CreateTransferInput) => m.mutateAsync(input), isPending: m.isPending };
+  return {
+    /** Resolves `'parked'` when the transfer is waiting for a connection, so the sheet can close. */
+    create: (input: CreateTransferInput) => settledOrParked(m.mutateAsync(input), m.isPaused),
+    // A parked transfer is not pending on anything the person should wait for.
+    isPending: computed(() => m.isPending.value && !m.isPaused.value),
+  };
 }
 export function useUpdateTransfer() {
   const api = transfersApi(useApi());

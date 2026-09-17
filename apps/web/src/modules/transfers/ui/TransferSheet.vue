@@ -143,9 +143,15 @@ async function submit() {
     note: note.value.trim() || null,
   };
   try {
+    // A transfer made with no network is parked on the device rather than lost,
+    // so the sheet closes and says so instead of waiting for a connection.
+    let parked = false;
     if (props.transfer) await update(props.transfer.id, input);
-    else await create({ fromAccountId: from.value, toAccountId: to.value, ...input });
+    else
+      parked =
+        (await create({ fromAccountId: from.value, toAccountId: to.value, ...input })) === 'parked';
     emit('update:open', false);
+    if (parked) toast(t('offline.saved'));
   } catch (e) {
     toast(messageFor(e));
   }

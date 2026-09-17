@@ -1,9 +1,11 @@
+import { computed } from 'vue';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import type {
   BalanceEntryDto,
   RecordBalanceInput,
   UpdateBalanceInput,
 } from '@magermoney/contracts';
+import { settledOrParked } from '@/shared/api/offline-write';
 import { useApi } from '@/shared/api/use-api';
 import { accountsApi } from '../infrastructure/accounts-api';
 import { ACCOUNTS_KEY, balancesKey } from './use-accounts';
@@ -26,8 +28,11 @@ export function useRecordBalance() {
     mutationKey: RECORD_BALANCE_KEY,
   });
   return {
-    record: (id: string, input: RecordBalanceInput) => m.mutateAsync({ id, input }),
-    isPending: m.isPending,
+    /** Resolves `'parked'` when the write is waiting for a connection, so the sheet can close. */
+    record: (id: string, input: RecordBalanceInput) =>
+      settledOrParked(m.mutateAsync({ id, input }), m.isPaused),
+    // A parked write is not pending on anything the person should wait for.
+    isPending: computed(() => m.isPending.value && !m.isPaused.value),
   };
 }
 
