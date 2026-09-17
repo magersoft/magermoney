@@ -86,14 +86,21 @@ const isEmpty = computed(
     </div>
 
     <div v-if="summary && summary.archived.length > 0" class="mt-8">
-      <Button variant="ghost" size="sm" class="min-h-11" @click="showArchived = !showArchived">
+      <Button
+        variant="ghost"
+        size="sm"
+        class="min-h-9 pointer-coarse:min-h-11"
+        :aria-expanded="showArchived"
+        aria-controls="archived-accounts"
+        @click="showArchived = !showArchived"
+      >
         {{
           showArchived
             ? t('accounts.archived.hide')
             : t('accounts.archived.show', { n: summary.archived.length })
         }}
       </Button>
-      <ul v-if="showArchived" class="mt-2 divide-y divide-border/60">
+      <ul v-if="showArchived" id="archived-accounts" class="mt-2 divide-y divide-border/60">
         <li v-for="a in summary.archived" :key="a.id" class="grayscale">
           <AccountRow :account="a" />
         </li>
