@@ -4,7 +4,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 
 ## Layout
 
-- `apps/web` Vue 3 PWA. Modules in `src/modules/<name>/{domain,application,infrastructure,ui}` with a single public `index.ts`. Follow the `/vue-ddd-architecture` skill.
+- `apps/web` Vue 3 PWA. Modules in `src/modules/<name>/{domain,application,infrastructure,ui}` with a public `index.ts`, plus one optional second entry `offline.ts` — query keys and the offline mutation registration only, no UI — which the composition root imports so a static import from `app/` cannot drag every screen into the entry chunk. Routed screens are exported from the barrel as async components for the same reason. Follow the `/vue-ddd-architecture` skill.
 - `apps/api` Hono API on Vercel Functions (entry `src/vercel-entry.ts`, bundled by esbuild into `api/index.js` at deploy time, never committed). Modules in `src/modules/<name>/{application,infrastructure,http}`; `src/shared` for auth, db, errors, openapi. JWT verified via Supabase JWKS (ES256) with HS256 secret fallback. `src/shared/db/unit-of-work.ts` + `pg-unit-of-work.ts` provide `UnitOfWork<Repos>`: every multi-table write goes through `deps.uow(async (repos) => …)` so its statements share one transaction (`pgUnitOfWork` opens `sql.begin`; `memoryUnitOfWork` just hands over the same repositories for use-case tests).
 - `packages/domain` pure model (Money, Currency, Rate…). No framework imports. 100 % test coverage.
 - `packages/contracts` zod schemas for DTOs and routes → OpenAPI + client types. The web talks to the API through `apps/web/src/shared/api/client.ts` plus those zod schemas, not `hono/client`: importing the API's app type would break the package boundary.
