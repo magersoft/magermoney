@@ -73,6 +73,9 @@ Table accounts [note: 'phase 2. Holds exactly one currency. Card-specific fields
   note text [note: 'free-form: phone, passport, fees, perks']
   sort_order int [not null, default: 0]
   archived_at timestamptz [note: 'hidden from lists, kept for history']
+  Indexes {
+    (user_id, archived_at, sort_order)
+  }
 }
 
 Table balance_entries [note: 'phase 2. Append-only journal. Current balance = latest entry per account. ADR 0002.'] {
@@ -87,6 +90,7 @@ Table balance_entries [note: 'phase 2. Append-only journal. Current balance = la
   note text
   Indexes {
     (account_id, recorded_at, created_at) [note: 'latest = order by recorded_at desc, created_at desc']
+    (transfer_id) [note: 'partial, where transfer_id is not null']
   }
 }
 
@@ -100,7 +104,9 @@ Table transfers [note: 'phase 2. Produces two balance_entries. Cross-currency: b
   occurred_at timestamptz [not null]
   note text
   Indexes {
-    (user_id, occurred_at)
+    (user_id, occurred_at, id) [note: 'order by occurred_at desc, id desc']
+    (from_account_id)
+    (to_account_id)
   }
 }
 

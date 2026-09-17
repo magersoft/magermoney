@@ -87,12 +87,53 @@ test('sign in, see home, switch currency', async ({ page }) => {
       JSON.stringify(s.session),
     ] as [string, string]);
     await page.goto('/');
-
     await expect(page.getByTestId('capital-total')).toBeVisible();
-    const before = await page.getByTestId('capital-total').innerText();
-    await page.getByTestId('currency-switch').getByRole('button', { name: 'USD' }).click();
-    await expect(page.getByTestId('capital-total')).not.toHaveText(before);
-    await expect(page.getByTestId('capital-total')).toContainText('$');
+
+    // Create two accounts through the form.
+    for (const [name, , opening] of [
+      ['Alfa', 'USD', '100'],
+      ['Beta', 'USD', '0'],
+    ] as const) {
+      await page.goto('/accounts/new');
+      await page.getByTestId('form-name').fill(name);
+      await page.getByTestId('form-bank').fill(name);
+      await page.getByTestId('form-country').fill('RU');
+      await page.getByTestId('form-opening').fill(opening);
+      await page.getByTestId('form-submit').click();
+      await expect(page.getByTestId('account-name')).toHaveText(name);
+    }
+
+    // Record a balance on Beta from its detail page.
+    await page.getByTestId('account-record').click();
+    await page.getByTestId('balance-amount').fill('10');
+    await page.getByTestId('balance-save').click();
+    await expect(page.getByTestId('account-balance')).toContainText('10');
+
+    // Transfer 40 from Alfa to Beta; the total stays 110, Beta shows 50.
+    // The <select> options are labelled "<name> · <balance> <currency>", so the
+    // account name is matched as a substring rather than an exact label; the
+    // installed @playwright/test types accept only a string label, not RegExp,
+    // so the matching option is found via its text and selected by value.
+    const selectAccountByName = async (
+      select: ReturnType<typeof page.getByTestId>,
+      name: string,
+    ) => {
+      const value = await select.locator('option', { hasText: name }).getAttribute('value');
+      await select.selectOption(value!);
+    };
+    await page.getByTestId('account-transfer').click();
+    const from = page.getByTestId('transfer-from');
+    await selectAccountByName(from, 'Alfa');
+    await selectAccountByName(page.getByTestId('transfer-to'), 'Beta');
+    await page.getByTestId('transfer-sent').fill('40');
+    await page.getByTestId('transfer-save').click();
+    await expect(page.getByTestId('account-balance')).toContainText('50');
+    await page.goto('/');
+    await expect(page.getByTestId('capital-total')).toContainText('110');
+
+    // The display currency switch still converts everything.
+    await page.getByTestId('currency-switch').getByRole('button', { name: 'EUR' }).click();
+    await expect(page.getByTestId('capital-total')).toContainText('€');
   } finally {
     await admin.auth.admin.deleteUser(userId);
   }

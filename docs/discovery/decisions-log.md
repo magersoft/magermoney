@@ -53,3 +53,26 @@ Chronological, one line each. Rationale lives in the ADRs where it matters.
 - Sign in from the iPhone (Add to Home Screen), switch the display currency on the home screen.
 - Staging Supabase project: pause/delete the unused `magersoft's Project` or upgrade the org, then create `magermoney-staging`, set `STAGING_*` secrets, `STAGING_ENABLED=true` and `E2E_ENABLED=true`.
 - Phase 2 on Vercel Pro: crypto cron back to hourly.
+
+## Phase 2 (2026-09-12)
+
+Brainstorm decisions (spec §1, `docs/superpowers/specs/2026-09-11-phase-2-accounts-design.md`):
+
+1. Crypto is an Account per coin (`kind = crypto_wallet`, `bank` = exchange, `currency` = the coin); the UI groups Accounts by provider (`bank`). "Holding" is removed from `CONTEXT.md`.
+2. Card conditions live in `note`; only fields that affect logic or the list are structured (`kind`, `card_type`, `card_network`, `card_tier`, `card_last4`, `card_expires`).
+3. Only the latest Balance entry per Account is editable; Transfer-origin entries are edited only as part of the Transfer, and only while both entries are the latest on their Accounts.
+4. Import is a local CLI over CSV (`imports/`, git-ignored); no Google API, no in-app screen; `--dry-run` prints what would be created.
+5. Accounts are the home screen (total capital, available-until-payday, grouped Account list, bottom tab bar, floating "+"); the phase 3 dashboard takes over home later.
+6. Current balance is computed server-side (`GET /accounts` returns each Account's latest Balance entry); totals and conversions are pure client functions in `packages/domain` — no materialised balance column.
+
+Execution rulings that changed owner-visible behaviour:
+
+- The account form is a routed page (`/accounts/new`, `/accounts/:id/edit`), not a sheet as originally sketched.
+- `PATCH /accounts/order` is registered before `/accounts/:id` so the literal route wins.
+- Both transfer amounts (`amountSent`, `amountReceived`) must be greater than zero; a 100%-fee transfer needs a manual balance entry instead.
+- A transfer must stay the newest movement on both of its Accounts: a backdated create or update that is not the latest returns 409 `transfer_not_latest`.
+- Editing a balance entry cannot move its `recordedAt` before the previous entry's — the edited entry must remain the latest; rejected with 400 `recorded_before_previous`.
+- A same-currency edit of `amountSent` alone keeps the stored fee (received is recomputed as `newSent − oldFee`) instead of silently zeroing it.
+- Import names are made unique with `" · <tier | Card | Account>"`, then a numeric suffix (` 2`, ` 3`, …) if still equal; the duplicate key is name + currency, not bank + currency.
+- Imported balance entries carry the note "Imported from spreadsheet".
+- The import prints its preview table only with `--dry-run`; a real run prints counts only.

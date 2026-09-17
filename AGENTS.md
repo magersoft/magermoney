@@ -5,7 +5,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 ## Layout
 
 - `apps/web` Vue 3 PWA. Modules in `src/modules/<name>/{domain,application,infrastructure,ui}` with a single public `index.ts`. Follow the `/vue-ddd-architecture` skill.
-- `apps/api` Hono API on Vercel Functions (entry `src/vercel-entry.ts`, bundled by esbuild into `api/index.js` at deploy time, never committed). Modules in `src/modules/<name>/{application,infrastructure,http}`; `src/shared` for auth, db, errors, openapi. JWT verified via Supabase JWKS (ES256) with HS256 secret fallback.
+- `apps/api` Hono API on Vercel Functions (entry `src/vercel-entry.ts`, bundled by esbuild into `api/index.js` at deploy time, never committed). Modules in `src/modules/<name>/{application,infrastructure,http}`; `src/shared` for auth, db, errors, openapi. JWT verified via Supabase JWKS (ES256) with HS256 secret fallback. `src/shared/db/unit-of-work.ts` + `pg-unit-of-work.ts` provide `UnitOfWork<Repos>`: every multi-table write goes through `deps.uow(async (repos) => …)` so its statements share one transaction (`pgUnitOfWork` opens `sql.begin`; `memoryUnitOfWork` just hands over the same repositories for use-case tests).
 - `packages/domain` pure model (Money, Currency, Rate…). No framework imports. 100 % test coverage.
 - `packages/contracts` zod schemas for DTOs and routes → OpenAPI + client types. The web talks to the API through `apps/web/src/shared/api/client.ts` plus those zod schemas, not `hono/client`: importing the API's app type would break the package boundary.
 - `packages/ui` the design system (shadcn-vue + Tailwind v4 + motion-v). Add components only via the shadcn-vue MCP / CLI. Components it generates import `@/…`; rewrite those to relative paths, or every consumer has to reproduce the alias. After changing `FIAT_FLAG` / `CRYPTO_KNOWN`, run `bun run icons:build` in `packages/ui` and commit `src/icons/subset.json`.
@@ -36,3 +36,7 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 - `bun install` · `bun run dev` · `bun run test` · `bun run lint` · `bun run typecheck` · `bun run build`
 - Local DB: `supabase start` / `supabase db reset` (applies migrations + seed).
 - Env: `vercel env pull .env.local` inside `apps/api` and `apps/web`.
+
+## Scripts
+
+- `apps/api/scripts/import-sheet.ts` — local-only CLI that imports the owner's spreadsheet export into `accounts`/`balance_entries`/`rates`. Never reads real data from the repo (`imports/` is git-ignored); run from `apps/api` as `bun run import -- --user <email> [...]`.
