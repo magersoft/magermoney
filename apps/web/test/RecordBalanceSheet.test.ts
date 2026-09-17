@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
-import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
+import { QueryClient, VueQueryPlugin, onlineManager } from '@tanstack/vue-query';
 import { createI18n } from 'vue-i18n';
 import ru from '../src/locales/ru.json';
 import { API_KEY } from '../src/shared/api/use-api.js';
+import { defaultQueryOptions } from '../src/app/query.js';
 import RecordBalanceSheet from '../src/modules/accounts/ui/RecordBalanceSheet.vue';
 
 /**
@@ -317,4 +318,53 @@ describe('RecordBalanceSheet', () => {
     expect(toast).not.toHaveBeenCalledWith(ru.accounts.balance.notLatest);
     w.unmount();
   });
+
+  it('closes and says the write is parked when there is no network', async () => {
+    toast.mockClear();
+    onlineManager.setOnline(false);
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies')
+        return json([
+          {
+            code: 'RUB',
+            kind: 'fiat',
+            scale: 2,
+            symbol: null,
+            nameRu: null,
+            nameEn: null,
+            icon: null,
+          },
+        ]);
+      // What `fetch` rejects with when the device is offline.
+      if (init?.method === 'POST') throw new TypeError('Failed to fetch');
+      return json([acc]);
+    });
+    const queryClient = new QueryClient({ defaultOptions: defaultQueryOptions });
+    const w = mount(RecordBalanceSheet, {
+      props: { accountId: acc.id, open: true },
+      global: {
+        plugins: [
+          [VueQueryPlugin, { queryClient }],
+          createI18n({ legacy: false, locale: 'ru', messages: { ru } }),
+        ],
+        provide: { [API_KEY as unknown as string]: { fetch } },
+      },
+      attachTo: document.body,
+    });
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="balance-amount"]').setValue('12');
+    await body.get('form').trigger('submit');
+    // The mutation pauses only after the retryer's back-off.
+    for (let i = 0; i < 400 && !w.emitted('update:open'); i++) {
+      await new Promise((r) => setTimeout(r, 10));
+      await flushPromises();
+    }
+
+    expect(w.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(toast).toHaveBeenCalledWith(ru.offline.saved);
+    expect(body.get('[data-testid="balance-save"]').attributes('disabled')).toBeUndefined();
+    onlineManager.setOnline(true);
+    w.unmount();
+  }, 15000);
 });

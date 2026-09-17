@@ -1,10 +1,22 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
-import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
+import { QueryClient, VueQueryPlugin, onlineManager } from '@tanstack/vue-query';
 import { createI18n } from 'vue-i18n';
 import ru from '../src/locales/ru.json';
 import { API_KEY } from '../src/shared/api/use-api.js';
+import { defaultQueryOptions } from '../src/app/query.js';
 import TransferSheet from '../src/modules/transfers/ui/TransferSheet.vue';
+
+/**
+ * `vue-sonner` isn't a direct dependency of `apps/web` (only of
+ * `@magermoney/ui`, which re-exports its `toast` through `useToast`), so stub
+ * `useToast` on the package and keep every other export real.
+ */
+const { toast } = vi.hoisted(() => ({ toast: vi.fn() }));
+vi.mock('@magermoney/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@magermoney/ui')>();
+  return { ...actual, useToast: () => ({ toast }) };
+});
 
 const USD_ID = '11111111-1111-4111-8111-111111111111';
 const USD2_ID = '22222222-2222-4222-8222-222222222222';
@@ -172,4 +184,53 @@ describe('TransferSheet', () => {
     expect(postBody).toHaveProperty('occurredAt');
     w.unmount();
   });
+
+  it('closes and says the transfer is parked when there is no network', async () => {
+    toast.mockClear();
+    onlineManager.setOnline(false);
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path.startsWith('/rates')) return json([]);
+      if (path === '/me')
+        return json({
+          id: 'u',
+          displayName: null,
+          locale: 'ru',
+          defaultCurrency: 'USD',
+          reportingCurrencies: ['USD'],
+          onboardingCompletedAt: null,
+        });
+      if (init?.method === 'POST') throw new TypeError('Failed to fetch');
+      return json([acc(USD_ID, 'USD'), acc(USD2_ID, 'USD'), acc(EUR_ID, 'EUR')]);
+    });
+    const w = mount(TransferSheet, {
+      props: { open: true, fromAccountId: USD_ID },
+      global: {
+        plugins: [
+          [
+            VueQueryPlugin,
+            { queryClient: new QueryClient({ defaultOptions: defaultQueryOptions }) },
+          ],
+          createI18n({ legacy: false, locale: 'ru', messages: { ru } }),
+        ],
+        provide: { [API_KEY as unknown as string]: { fetch } },
+      },
+      attachTo: document.body,
+    });
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="transfer-to"]').setValue(USD2_ID);
+    await body.get('[data-testid="transfer-sent"]').setValue('10');
+    await body.get('form').trigger('submit');
+    for (let i = 0; i < 400 && !w.emitted('update:open'); i++) {
+      await new Promise((r) => setTimeout(r, 10));
+      await flushPromises();
+    }
+
+    expect(w.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(toast).toHaveBeenCalledWith(ru.offline.saved);
+    expect(body.get('[data-testid="transfer-save"]').attributes('disabled')).toBeUndefined();
+    onlineManager.setOnline(true);
+    w.unmount();
+  }, 15000);
 });
