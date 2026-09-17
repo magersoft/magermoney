@@ -1,23 +1,29 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { CreateTransferInput, UpdateTransferInput } from '@magermoney/contracts';
-import { ACCOUNTS_KEY } from '@/modules/accounts';
+import type { CreateTransferInput, TransferDto, UpdateTransferInput } from '@magermoney/contracts';
 import { useApi } from '@/shared/api/use-api';
 import { transfersApi } from '../infrastructure/transfers-api';
+import {
+  CREATE_TRANSFER_KEY,
+  invalidateAfterTransfer,
+  registerTransferMutations,
+} from './mutation-defaults';
 
 /** A transfer changes two balances and two journals, so everything account-shaped is refetched. */
 function useInvalidateAll() {
   const qc = useQueryClient();
-  return () =>
-    Promise.all([
-      qc.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
-      qc.invalidateQueries({ queryKey: ['transfers'] }),
-    ]);
+  return () => invalidateAfterTransfer(qc);
 }
 
+/**
+ * What a new transfer does lives in the client's mutation defaults, so one made
+ * offline can be restored from IndexedDB and replayed without this screen.
+ */
 export function useCreateTransfer() {
-  const api = transfersApi(useApi());
-  const invalidate = useInvalidateAll();
-  const m = useMutation({ mutationFn: api.create, onSettled: invalidate });
+  const qc = useQueryClient();
+  registerTransferMutations(qc, useApi());
+  const m = useMutation<TransferDto, Error, CreateTransferInput>({
+    mutationKey: CREATE_TRANSFER_KEY,
+  });
   return { create: (input: CreateTransferInput) => m.mutateAsync(input), isPending: m.isPending };
 }
 export function useUpdateTransfer() {

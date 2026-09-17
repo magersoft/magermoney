@@ -1,5 +1,6 @@
 /** Public API of the transfers module. */
-export { useTransfers } from './application/use-transfers';
+export { useTransfers, TRANSFERS_KEY } from './application/use-transfers';
+export { registerTransferMutations, CREATE_TRANSFER_KEY } from './application/mutation-defaults';
 export {
   useCreateTransfer,
   useUpdateTransfer,

@@ -4,6 +4,8 @@ import type { TransferDto } from '@magermoney/contracts';
 import { useApi } from '@/shared/api/use-api';
 import { transfersApi } from '../infrastructure/transfers-api';
 
+/** Every transfer list, whichever account it is filtered by. */
+export const TRANSFERS_KEY = ['transfers'] as const;
 export const transfersKey = (accountId?: string) => ['transfers', accountId ?? 'all'] as const;
 
 export function useTransfers(accountId?: MaybeRefOrGetter<string | undefined>): {

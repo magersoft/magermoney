@@ -1,42 +1,29 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { AccountDto, RecordBalanceInput, UpdateBalanceInput } from '@magermoney/contracts';
+import type {
+  BalanceEntryDto,
+  RecordBalanceInput,
+  UpdateBalanceInput,
+} from '@magermoney/contracts';
 import { useApi } from '@/shared/api/use-api';
 import { accountsApi } from '../infrastructure/accounts-api';
 import { ACCOUNTS_KEY, balancesKey } from './use-accounts';
+import {
+  RECORD_BALANCE_KEY,
+  registerAccountMutations,
+  type RecordBalanceVars,
+} from './mutation-defaults';
 
 /**
- * Recording a balance is the most frequent thing a person does here, so the
- * new number is shown before the POST answers and taken back if it fails.
- * A backdated entry does not touch the shown balance: the server decides
- * what is current, and the refetch after settle agrees with it.
+ * Recording a balance is the most frequent thing a person does here. What the
+ * mutation does — the POST, the optimistic patch, the rollback — lives in the
+ * client's mutation defaults, so a mutation that paused offline and was
+ * restored from IndexedDB behaves exactly like one this screen started.
  */
 export function useRecordBalance() {
-  const api = accountsApi(useApi());
   const qc = useQueryClient();
-  const m = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: RecordBalanceInput }) =>
-      api.recordBalance(id, input),
-    onMutate: async ({ id, input }) => {
-      await qc.cancelQueries({ queryKey: ACCOUNTS_KEY });
-      const prev = qc.getQueryData<AccountDto[]>(ACCOUNTS_KEY);
-      const recordedAt = input.recordedAt ?? new Date().toISOString();
-      qc.setQueryData<AccountDto[]>(ACCOUNTS_KEY, (list) =>
-        (list ?? []).map((a) =>
-          a.id === id && (a.balanceRecordedAt === null || recordedAt >= a.balanceRecordedAt)
-            ? { ...a, balance: input.amount, balanceRecordedAt: recordedAt }
-            : a,
-        ),
-      );
-      return { prev };
-    },
-    onError: (_e, _v, ctx) => {
-      if (ctx?.prev) qc.setQueryData(ACCOUNTS_KEY, ctx.prev);
-    },
-    onSettled: (_d, _e, { id }) =>
-      Promise.all([
-        qc.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
-        qc.invalidateQueries({ queryKey: balancesKey(id) }),
-      ]),
+  registerAccountMutations(qc, useApi());
+  const m = useMutation<BalanceEntryDto, Error, RecordBalanceVars>({
+    mutationKey: RECORD_BALANCE_KEY,
   });
   return {
     record: (id: string, input: RecordBalanceInput) => m.mutateAsync({ id, input }),
