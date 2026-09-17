@@ -199,5 +199,18 @@
     "record": "Update balance",
     "transfer": "Transfer",
     "pickAccount": "Which account?"
+  },
+  "errors": {
+    "recordedInFuture": "That date is in the future. Pick today or earlier.",
+    "recordedBeforePrevious": "This entry has to stay the latest one. Pick a date after the previous entry.",
+    "entryNotLatest": "Only the latest entry can be edited. Add a new one with the right amount.",
+    "entryNotManual": "A transfer made this entry. Edit the transfer instead.",
+    "transferNotLatest": "Balances have moved since this transfer. Make a correcting transfer instead.",
+    "insufficientFunds": "Not enough on that account.",
+    "accountHasHistory": "This account already has entries. Its currency cannot change now.",
+    "accountHasTransfers": "This account has transfers. You can only archive it.",
+    "accountsImmutable": "A transfer keeps its accounts. Delete it and make a new one.",
+    "amountReceivedRequired": "Say how much arrived on the other account.",
+    "transferInvalid": "That transfer will not work. Check the accounts and the amounts."
   }
 }

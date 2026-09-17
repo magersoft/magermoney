@@ -22,7 +22,7 @@ import {
   useToast,
 } from '@magermoney/ui';
 import { MoneyText } from '@/modules/rates';
-import { ApiError } from '@/shared/api/client';
+import { errorKeyFor } from '@/shared/api/error-messages';
 import { formatDate } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
 import { useAccount } from '../application/use-accounts';
@@ -64,7 +64,11 @@ function openRecord(entry?: BalanceEntryDto) {
 }
 async function archive() {
   if (!account.value) return;
-  await setArchived(account.value.id, account.value.archivedAt === null);
+  try {
+    await setArchived(account.value.id, account.value.archivedAt === null);
+  } catch (e) {
+    toast(t(errorKeyFor(e, 'accounts.form.saveFailed')));
+  }
 }
 async function del() {
   if (!account.value) return;
@@ -72,11 +76,7 @@ async function del() {
     await remove(account.value.id);
     await router.replace('/');
   } catch (e) {
-    toast(
-      e instanceof ApiError && e.status === 409
-        ? t('accounts.detail.hasTransfers')
-        : t('accounts.form.saveFailed'),
-    );
+    toast(t(errorKeyFor(e, 'accounts.form.saveFailed')));
   }
 }
 </script>

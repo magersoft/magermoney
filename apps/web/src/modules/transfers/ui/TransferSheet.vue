@@ -21,7 +21,7 @@ import {
 import { useAccounts } from '@/modules/accounts';
 import { useCurrencies, useCurrencyRegistry } from '@/modules/currencies';
 import { useRates } from '@/modules/rates';
-import { ApiError } from '@/shared/api/client';
+import { errorKeyFor } from '@/shared/api/error-messages';
 import { fromLocalInput, toLocalInput, type DateLocale } from '@/shared/dates/format';
 import {
   useCreateTransfer,
@@ -134,12 +134,7 @@ function amounts() {
       .unwrapOr(sent.value),
   };
 }
-function messageFor(e: unknown): string {
-  if (!(e instanceof ApiError)) return t('transfers.failed');
-  if (e.status === 409 && e.code === 'transfer_not_latest') return t('transfers.notLatest');
-  if (e.code === 'INSUFFICIENT_FUNDS') return t('transfers.insufficient');
-  return t('transfers.failed');
-}
+const messageFor = (e: unknown): string => t(errorKeyFor(e, 'transfers.failed'));
 async function submit() {
   if (!canSubmit.value) return;
   const input = {

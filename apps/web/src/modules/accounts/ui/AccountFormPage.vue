@@ -20,6 +20,7 @@ import {
   useToast,
 } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
+import { errorKeyFor } from '@/shared/api/error-messages';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
 import { useAccount } from '../application/use-accounts';
@@ -124,8 +125,8 @@ async function submit() {
       });
       await router.replace(`/accounts/${created.id}`);
     }
-  } catch {
-    toast(t('accounts.form.saveFailed'));
+  } catch (e) {
+    toast(t(errorKeyFor(e, 'accounts.form.saveFailed')));
   }
 }
 </script>
