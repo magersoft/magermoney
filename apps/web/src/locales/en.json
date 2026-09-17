@@ -64,8 +64,7 @@
       "noHistory": "No balances yet",
       "sinceLast": "since last",
       "byTransfer": "transfer",
-      "recordedAt": "Date",
-      "hasTransfers": "Has transfers. Archive it instead."
+      "recordedAt": "Date"
     },
     "form": {
       "createTitle": "New account",
@@ -96,7 +95,6 @@
       "note": "Note",
       "save": "Record",
       "delete": "Delete entry",
-      "notLatest": "Only the latest entry can be edited. Add a new one with the right amount.",
       "failed": "That did not record. Try again."
     }
   },
@@ -188,8 +186,6 @@
     "update": "Save",
     "delete": "Delete transfer",
     "empty": "No transfers yet",
-    "notLatest": "Balances have moved since this transfer. Make a correcting transfer instead.",
-    "insufficient": "Not enough on that account.",
     "failed": "That did not transfer. Try again.",
     "option": "{name} · {balance} {currency}",
     "row": "{from} → {to}"

@@ -252,9 +252,7 @@ describe('RecordBalanceSheet', () => {
     await body.get('[data-testid="balance-delete"]').trigger('click');
     await flushPromises();
 
-    expect(toast).toHaveBeenCalledWith(
-      'Изменить можно только последнюю запись. Добавьте новую с верной суммой.',
-    );
+    expect(toast).toHaveBeenCalledWith(ru.errors.entryNotLatest);
     expect(w.emitted('update:open')).toBeFalsy();
     w.unmount();
   });
@@ -285,7 +283,7 @@ describe('RecordBalanceSheet', () => {
     await flushPromises();
 
     expect(toast).toHaveBeenCalledWith(ru.errors.recordedBeforePrevious);
-    expect(toast).not.toHaveBeenCalledWith(ru.accounts.balance.notLatest);
+    expect(toast).not.toHaveBeenCalledWith(ru.errors.entryNotLatest);
     w.unmount();
   });
 
@@ -315,7 +313,7 @@ describe('RecordBalanceSheet', () => {
     await flushPromises();
 
     expect(toast).toHaveBeenCalledWith(ru.errors.entryNotManual);
-    expect(toast).not.toHaveBeenCalledWith(ru.accounts.balance.notLatest);
+    expect(toast).not.toHaveBeenCalledWith(ru.errors.entryNotLatest);
     w.unmount();
   });
 
