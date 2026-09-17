@@ -188,7 +188,7 @@ async function submit() {
       </Select>
     </label>
 
-    <label class="flex min-h-11 items-center gap-3"
+    <label class="flex min-h-9 items-center gap-3 pointer-coarse:min-h-11"
       ><input
         v-model="form.isSpending"
         type="checkbox"

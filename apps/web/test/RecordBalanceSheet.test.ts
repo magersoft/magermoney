@@ -6,6 +6,18 @@ import ru from '../src/locales/ru.json';
 import { API_KEY } from '../src/shared/api/use-api.js';
 import RecordBalanceSheet from '../src/modules/accounts/ui/RecordBalanceSheet.vue';
 
+/**
+ * `vue-sonner` isn't a direct dependency of `apps/web` (only of
+ * `@magermoney/ui`, which re-exports its `toast` through `useToast`), so it
+ * can't be mocked directly — stub `useToast` on the package instead and keep
+ * every other export real.
+ */
+const { toast } = vi.hoisted(() => ({ toast: vi.fn() }));
+vi.mock('@magermoney/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@magermoney/ui')>();
+  return { ...actual, useToast: () => ({ toast }) };
+});
+
 const acc = {
   id: '11111111-1111-4111-8111-111111111111',
   name: 'Alfa',
@@ -25,8 +37,40 @@ const acc = {
   balance: '10',
   balanceRecordedAt: null,
 };
+const entry = {
+  id: '22222222-2222-4222-8222-222222222222',
+  accountId: acc.id,
+  amount: '10',
+  recordedAt: '2026-09-11T00:00:00.000Z',
+  origin: 'manual' as const,
+  transferId: null,
+  note: null,
+};
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+const errorJson = (code: string, message: string, status: number) =>
+  json({ code, message }, status);
+
+function mountSheet(fetch: (path: string, init?: RequestInit) => Promise<Response>) {
+  return mount(RecordBalanceSheet, {
+    props: { accountId: acc.id, open: true, entry },
+    global: {
+      plugins: [
+        [
+          VueQueryPlugin,
+          {
+            queryClient: new QueryClient({
+              defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+            }),
+          },
+        ],
+        createI18n({ legacy: false, locale: 'ru', messages: { ru } }),
+      ],
+      provide: { [API_KEY as unknown as string]: { fetch } },
+    },
+    attachTo: document.body,
+  });
+}
 
 describe('RecordBalanceSheet', () => {
   it('posts the parsed amount for the account and closes', async () => {
@@ -87,5 +131,67 @@ describe('RecordBalanceSheet', () => {
     expect(post?.[0]).toBe(`/accounts/${acc.id}/balances`);
     expect(JSON.parse(post?.[1]?.body as string)).toMatchObject({ amount: '1250.5' });
     expect(w.emitted('update:open')?.at(-1)).toEqual([false]);
+    w.unmount();
+  });
+
+  it('reports a plain failure when deleting the entry errors', async () => {
+    toast.mockClear();
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies')
+        return json([
+          {
+            code: 'RUB',
+            kind: 'fiat',
+            scale: 2,
+            symbol: null,
+            nameRu: null,
+            nameEn: null,
+            icon: null,
+          },
+        ]);
+      if (init?.method === 'DELETE')
+        return errorJson('INTERNAL_ERROR', 'Something went wrong', 500);
+      return json([acc]);
+    });
+    const w = mountSheet(fetch);
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="balance-delete"]').trigger('click');
+    await flushPromises();
+
+    expect(toast).toHaveBeenCalledWith('Не удалось записать. Попробуйте ещё раз.');
+    expect(w.emitted('update:open')).toBeFalsy();
+    w.unmount();
+  });
+
+  it('reports a conflict when deleting a non-latest entry', async () => {
+    toast.mockClear();
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (path === '/currencies')
+        return json([
+          {
+            code: 'RUB',
+            kind: 'fiat',
+            scale: 2,
+            symbol: null,
+            nameRu: null,
+            nameEn: null,
+            icon: null,
+          },
+        ]);
+      if (init?.method === 'DELETE') return errorJson('BALANCE_NOT_LATEST', 'Not latest', 409);
+      return json([acc]);
+    });
+    const w = mountSheet(fetch);
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    await body.get('[data-testid="balance-delete"]').trigger('click');
+    await flushPromises();
+
+    expect(toast).toHaveBeenCalledWith(
+      'Изменить можно только последнюю запись. Добавьте новую с верной суммой.',
+    );
+    expect(w.emitted('update:open')).toBeFalsy();
+    w.unmount();
   });
 });

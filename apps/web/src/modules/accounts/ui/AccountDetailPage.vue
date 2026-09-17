@@ -97,7 +97,7 @@ async function del() {
           <Button
             variant="ghost"
             size="icon"
-            :aria-label="t('accounts.detail.edit')"
+            :aria-label="t('accounts.detail.menu')"
             data-testid="account-menu"
           >
             <span aria-hidden="true">⋯</span>

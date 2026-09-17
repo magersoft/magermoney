@@ -32,7 +32,7 @@ const rows = computed(() =>
     <li v-for="{ e, delta } in rows" :key="e.id">
       <button
         type="button"
-        class="flex w-full items-center gap-3 py-3 text-left disabled:cursor-default"
+        class="flex min-h-9 w-full items-center gap-3 py-3 text-left disabled:cursor-default pointer-coarse:min-h-11"
         :disabled="e.id !== editableId"
         :data-testid="`balance-entry-${e.id}`"
         @click="emit('edit', e)"

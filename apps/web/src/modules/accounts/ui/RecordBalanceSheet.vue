@@ -88,8 +88,12 @@ async function del() {
   try {
     await remove(props.accountId, props.entry.id);
     emit('update:open', false);
-  } catch {
-    toast(t('accounts.balance.notLatest'));
+  } catch (e) {
+    toast(
+      e instanceof ApiError && e.status === 409
+        ? t('accounts.balance.notLatest')
+        : t('accounts.balance.failed'),
+    );
   }
 }
 </script>
@@ -139,7 +143,14 @@ async function del() {
           >
             {{ t('accounts.balance.save') }}
           </Button>
-          <Button v-if="entry" type="button" size="lg" variant="destructive" @click="del">
+          <Button
+            v-if="entry"
+            type="button"
+            size="lg"
+            variant="destructive"
+            data-testid="balance-delete"
+            @click="del"
+          >
             {{ t('accounts.balance.delete') }}
           </Button>
         </div>
