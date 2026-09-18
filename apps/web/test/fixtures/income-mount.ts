@@ -76,10 +76,12 @@ export async function mountAt<C extends Component>(
       { path: '/', component: blank },
       { path: '/accounts', component: blank },
       { path: '/accounts/:id', component: blank },
-      { path: '/plan', component: blank },
+      { path: '/plan', name: 'plan', component: blank },
       { path: '/plan/income/new', component: blank },
       { path: '/plan/income/:id', component: blank },
       { path: '/plan/income/:id/edit', component: blank },
+      { path: '/plan/budgets/new', name: 'budget-new', component: blank },
+      { path: '/plan/budgets/:id/edit', name: 'budget-edit', component: blank },
     ],
   });
   await router.push(at);

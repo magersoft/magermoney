@@ -121,6 +121,43 @@
       "notFound": "This expense is gone. It was probably deleted."
     }
   },
+  "budgets": {
+    "title": "Budgets",
+    "add": "Add budget",
+    "perMonth": "/ mo",
+    "total": "Limits per month",
+    "unconvertible": "No rate for: {names}. Left out of the total.",
+    "ended": {
+      "show": "Ended ({n})",
+      "hide": "Hide ended"
+    },
+    "empty": {
+      "title": "No budgets yet",
+      "body": "Groceries, restaurants, taxis — spending with a ceiling rather than a fixed price."
+    },
+    "error": {
+      "title": "Could not load budgets",
+      "retry": "Try again"
+    },
+    "form": {
+      "createTitle": "New budget",
+      "editTitle": "Budget",
+      "name": "Name",
+      "limit": "Monthly limit",
+      "currency": "Currency",
+      "activeFrom": "Active from",
+      "activeTo": "Until (optional)",
+      "create": "Create",
+      "save": "Save",
+      "endToday": "End today",
+      "delete": "Delete",
+      "deleteTitle": "Delete this budget?",
+      "deleteBody": "It leaves the month plan.",
+      "cancel": "Cancel",
+      "saveFailed": "Could not save",
+      "notFound": "This budget is gone. It was probably deleted."
+    }
+  },
   "theme": {
     "label": "Switch theme (now {theme})",
     "system": "system",
