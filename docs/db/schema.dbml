@@ -138,9 +138,9 @@ Table inflows [note: 'phase 3 (history import in phase 5). Actual dated receipts
   amount numeric [not null, note: 'check > 0']
   currency text [not null, ref: > currencies.code]
   received_on date [not null]
-  realised_rate_to_usd numeric [note: 'rate actually obtained that day; null → use rates table']
+  realised_rate_to_usd numeric [note: 'check > 0; rate actually obtained that day; null → use rates table']
   account_id uuid [ref: > accounts.id, note: 'set when credited to an account; on delete no action (refused like restrict; deferred for the profile cascade)']
-  credited_amount numeric [note: 'what landed on the account, in the account currency; realised rate = credited / amount']
+  credited_amount numeric [note: 'check > 0; what landed on the account, in the account currency; realised rate = credited / amount']
   note text
   Indexes {
     (user_id, received_on, id) [note: 'order by received_on desc, id desc']

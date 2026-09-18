@@ -77,3 +77,41 @@ Execution rulings that changed owner-visible behaviour:
 - Imported balance entries carry the note "Imported from spreadsheet".
 - The import prints its preview table only with `--dry-run`; a real run prints counts only.
 - A balance or transfer is stamped with the server's current time unless the date field was edited.
+
+## Phase 3 (2026-09-17)
+
+Brainstorm decisions (spec §1, `docs/superpowers/specs/2026-09-17-phase-3-income-expenses-design.md`):
+
+1. The import covers phase 3 data: income sources, expenses and inflows join the phase 2 CLI. Budgets have no sheet; a named expense row can be imported as a Budget.
+2. The Dashboard has four blocks besides capital: available until payday, month plan, inflows of the month against the plan, upcoming events for 30 days. Goals, assets and savings analytics arrive in phases 4 and 5.
+3. An Inflow credited to an Account in another currency declares both amounts, like a cross-currency Transfer; the realised rate is derived and nothing is converted automatically (ADR 0002).
+4. Four tabs: Home · Accounts · Plan · Settings. Plan is one screen with segments Income / Expenses / Budgets. Rates moves under Settings. Phase 4 adds Goals as the fifth tab.
+5. `gross_amount` is monthly and is split evenly across pay days. A source without pay days is irregular: it counts in the month plan and never appears in upcoming events.
+6. Every Inflow has an Income source; one-off receipts go to a source such as "Other", which the Inflow form can create on the fly.
+
+Import rulings made while reading the exported sheets:
+
+7. The sheets show every amount in USD, EUR and RUB without saying which is native. The import picks the currency whose amount has no fractional part when exactly one qualifies, otherwise `--fallback-currency` (default EUR) with the row marked `ambiguous`; `--currency-of "<name>=<CODE>"` overrides.
+8. The expenses sheet has no category, essential mark, period or billing day. Category and period are derived from the name ("Подписка …" → "Подписки", `(year…` → yearly with amount × 12, marked `approx`); `is_essential = false` and `billing_day = null` until set in the UI.
+9. The income sheet has no pay days and no primary mark; the import leaves both empty, so "days to payday" appears only after the owner sets them.
+10. Inflows are imported without crediting Accounts: the imported balances already include them. A source named only in the inflows sheet is created ended, with a zero expected amount.
+11. The "planned purchases" and "PC" blocks of the expenses sheet are ignored (item 13).
+
+Execution rulings that changed owner-visible behaviour (the full list, with the cost accepted for each, is in `docs/discovery/phase-3-execution-ledger.md`):
+
+- An active period whose end is before its start is refused with 400 `active_period_invalid` on income sources, expenses and budgets.
+- The API answers a named 400 code instead of a generic validation message: `negative_amount`, `rate_out_of_range`, `pay_days_invalid`, `non_positive_amount`, `rate_not_positive`, `credited_without_account`, `category_required`, `category_ambiguous`.
+- A balance entry made by an Inflow carries `inflowId`, is labelled in the journal, and is refused there for editing or deleting with 409 `entry_not_manual`: it changes only through its Inflow.
+- Editing a cross-currency credited Inflow's amount, currency or Account requires the credited amount to be declared again (400 `credited_amount_required`); nothing is converted on the owner's behalf.
+- Editing a credited Inflow replaces its balance entry, so the entry's id changes; nothing else refers to that id.
+- An Inflow moved to another Income source keeps its own currency; the source's currency is only the default at creation. In the app, moving a receipt is delete-and-recreate — the source picker is locked while editing.
+- Two concurrent changes of the primary Income source both succeed and the later one wins, instead of one failing with a 500.
+- Days to payday is counted from the device's date (UTC), like the rest of the app; payday today reads as zero.
+- The dashboard names the sources today's rates cannot price, and says how much is waiting without a date even when nothing dated is listed.
+- The quick action for recording an Inflow appears with zero accounts, because an Inflow needs none; balance and transfer stay hidden until an Account exists. A source created from that sheet starts on the Inflow's date, and is not parked offline — only the Inflow itself is.
+- A credited amount is cleared whenever the chosen Account or the source's currency changes, and Save waits for it to be typed again.
+- An Expense or Budget whose active period has not started yet is listed as current and counted in the month total, rather than falling between the two lists.
+- Each Plan segment keeps its "add" button in the non-empty state, not only in the empty one.
+- The expense form's category field is a text input backed by a `<datalist>`: a known name sends the category id, anything else creates the category by name.
+- Import: a forced inflows import is refused while any Inflow is still credited to an Account. Forcing the expenses kind deletes every expense, every budget, and then every category left without an expense — including categories created in the app, with their sort order.
+- Import: rows that cannot be read stop the run and are listed together — every mapping problem of all three sheets at once.
