@@ -9,6 +9,8 @@ export * from './calendar.js';
 export * from './active-period.js';
 export * from './income-source.js';
 export * from './inflow.js';
+export * from './expense.js';
+export * from './budget.js';
 export * from './account.js';
 export * from './transfer.js';
 export * from './read-models.js';
