@@ -7,13 +7,15 @@ import { MemoryAccountRepository } from '../../src/modules/accounts/infrastructu
 import { MemoryBalanceRepository } from '../../src/modules/accounts/infrastructure/memory-balance-repository.js';
 import { MemoryTransferRepository } from '../../src/modules/transfers/infrastructure/memory-transfer-repository.js';
 import { MemoryIncomeSourceRepository } from '../../src/modules/income-sources/infrastructure/memory-income-source-repository.js';
+import { MemoryInflowRepository } from '../../src/modules/inflows/infrastructure/memory-inflow-repository.js';
 
 export function memoryRepos() {
   const balances = new MemoryBalanceRepository();
   const accounts = new MemoryAccountRepository(balances);
   const transfers = new MemoryTransferRepository(accounts);
   const incomeSources = new MemoryIncomeSourceRepository();
-  return { accounts, balances, transfers, incomeSources };
+  const inflows = new MemoryInflowRepository(incomeSources, accounts);
+  return { accounts, balances, transfers, incomeSources, inflows };
 }
 
 export function testDeps(over: Partial<AppDeps> = {}): AppDeps {

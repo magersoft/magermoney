@@ -14,6 +14,8 @@ export class MemoryAccountRepository implements AccountRepository {
   public rows: Stored[] = [];
   /** Transfer counts per account, set by MemoryTransferRepository. */
   public transferCounts = new Map<string, number>();
+  /** How many inflows were credited to an account; MemoryInflowRepository plugs itself in here. */
+  public inflowCountOf: (accountId: string) => number = () => 0;
   constructor(private readonly balances: MemoryBalanceRepository) {}
 
   private async withBalance(row: Stored): Promise<AccountRow> {

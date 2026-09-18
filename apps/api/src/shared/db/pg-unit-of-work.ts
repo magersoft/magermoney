@@ -3,6 +3,7 @@ import { PgAccountRepository } from '../../modules/accounts/infrastructure/pg-ac
 import { PgBalanceRepository } from '../../modules/accounts/infrastructure/pg-balance-repository.js';
 import { PgTransferRepository } from '../../modules/transfers/infrastructure/pg-transfer-repository.js';
 import { PgIncomeSourceRepository } from '../../modules/income-sources/infrastructure/pg-income-source-repository.js';
+import { PgInflowRepository } from '../../modules/inflows/infrastructure/pg-inflow-repository.js';
 import type { Sql } from './client.js';
 import type { UnitOfWork } from './unit-of-work.js';
 
@@ -11,6 +12,7 @@ export const pgRepos = (sql: Sql): Repos => ({
   balances: new PgBalanceRepository(sql),
   transfers: new PgTransferRepository(sql),
   incomeSources: new PgIncomeSourceRepository(sql),
+  inflows: new PgInflowRepository(sql),
 });
 
 /** One transaction per unit of work; the repositories inside see the same connection, so `for update` locks hold until commit. */
