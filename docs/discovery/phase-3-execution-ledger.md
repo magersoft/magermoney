@@ -30,6 +30,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - `inflows.income_source_id`, `inflows.account_id` and `expenses.category_id` use `on delete no action` instead of the spec's `restrict` — Postgres checks a `restrict` FK immediately inside the nested statement that a `profiles` delete cascades through, so deleting a user failed once `income_sources`/`accounts`/`expense_categories` rows cascaded before their dependent `inflows`/`expenses` rows did; `no action` refuses a direct delete of the parent identically (the API's 409s are unaffected) but defers the check to the end of the statement, so the profile cascade completes. Cost if wrong: a stray FK violation surfaces at statement end instead of immediately, which is only observable in `EXPLAIN`, not behaviour.
 - `balance_entries.inflow_id` got a partial UNIQUE index (not just an index) so one balance entry per credited inflow is enforced in the database, matching the ADR 0002 invariant. Cost if wrong: a legitimate case needing two entries per inflow would need the index dropped; none is known.
 - Import (Task 17): the manual verification of Step 5 wrote its three synthetic demo CSVs to a scratch directory outside the repository instead of `imports/demo-*.csv`, so nothing ever read or wrote inside the git-ignored `imports/` tree; the README keeps the `imports/…` paths as the placeholders they are. The run itself was against local Supabase only, with a throwaway `@test.local` user created through the local admin API and deleted afterwards. Cost if wrong: none.
+- Import: a forced inflows import is refused outright while any inflow of the user is still credited to an Account — `--force` deletes only uncredited inflows, so the credited ones would survive and the sheet's rows would be inserted beside them, and nothing distinguishes a duplicate from a genuine second receipt. The count is taken before any delete and the message names the way out (un-credit or delete them in the app, or run without `--inflows`). Cost if wrong: one more manual step for the owner before a re-import.
+- Import: the README says plainly that forcing the expenses kind deletes every expense and every budget of the user and then every expense category left without an expense — after such a run that is all of them, including categories created in the app and their sort order. The behaviour is the plan's; only the wording changed, so the owner is not surprised by it. Cost if wrong: none.
 
 ## Deferred minors
 
@@ -46,6 +48,12 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 ### Task 6
 
 - `.default(null)` on the output DTO `BalanceEntryDtoSchema.inflowId` is a back-compat shim, worth a one-line comment.
+
+### Task 17
+
+- `renderInflows` prints "1 inflows" for a single-inflow source; the plural is not chosen.
+- Income source names are matched case-sensitively (`sourceIds` keyed by the raw name) while expense categories are matched case-insensitively; the two could agree.
+- The phase 2 `--force` path still prints account names in its `removed: …` / `kept (still referenced): …` lines, unlike the phase 3 kinds, which print counts only.
 
 ## Plan errata
 

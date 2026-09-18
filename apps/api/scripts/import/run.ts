@@ -185,6 +185,27 @@ export interface Phase3Input {
   asBudget: ReadonlySet<string>;
 }
 
+/**
+ * The import day: the UTC date of `--recorded-at`. Slicing the string would
+ * read the local date the person wrote, which is a different day either side
+ * of midnight in any zone but UTC.
+ */
+export const importDayOf = (recordedAt: string): string =>
+  new Date(recordedAt).toISOString().slice(0, 10);
+
+/**
+ * A forced inflows import deletes only the uncredited inflows, so the credited
+ * ones would survive and the sheet's rows would be inserted next to them. There
+ * is no safe way to tell a duplicate from a genuine second receipt, so the run
+ * stops and leaves the choice to the person.
+ */
+export function refuseForcedInflows(creditedCount: number): ImportError | null {
+  if (creditedCount === 0) return null;
+  return new ImportError(
+    `${creditedCount} inflows are already credited to accounts; a forced inflows import would duplicate them — delete or un-credit them in the app, or run without --inflows`,
+  );
+}
+
 /** Everything the three phase 3 sheets turn into, decided without touching the database. */
 export function planPhase3(input: Phase3Input): Result<Phase3Plan, ImportError> {
   const native = { currencyOf: input.currencyOf, fallback: input.fallback, known: input.known };
@@ -423,6 +444,11 @@ async function writePhase3(
   }
 
   if (force && kinds.has('inflows')) {
+    const [credited] = await t<{ n: number }[]>`
+      select count(*)::int as n from inflows
+      where user_id = ${userId} and account_id is not null`;
+    const refusal = refuseForcedInflows(credited!.n);
+    if (refusal) throw refusal;
     const gone = await t`delete from inflows where user_id = ${userId} and account_id is null`;
     io.log(`removed ${gone.count} uncredited inflows`);
   }
@@ -430,7 +456,7 @@ async function writePhase3(
     const gone = await t`
       delete from income_sources s
       where s.user_id = ${userId}
-        and not exists (select 1 from inflows i where i.income_source_id = s.id)`;
+        and not exists (select 1 from inflows i where i.income_source_id = s.id and i.user_id = s.user_id)`;
     io.log(`removed ${gone.count} income sources without inflows`);
   }
   if (force && kinds.has('expenses')) {
@@ -439,7 +465,7 @@ async function writePhase3(
     await t`
       delete from expense_categories c
       where c.user_id = ${userId}
-        and not exists (select 1 from expenses e where e.category_id = c.id)`;
+        and not exists (select 1 from expenses e where e.category_id = c.id and e.user_id = c.user_id)`;
   }
 
   const sourceIds = new Map<string, { id: string; currency: string }>();
@@ -552,7 +578,7 @@ export async function runImport(
       inflowRows: await rowsOf('inflows', args.inflows),
       expenseRows: await rowsOf('expenses', args.expenses),
       existingSources,
-      importDay: recordedAt.slice(0, 10),
+      importDay: importDayOf(recordedAt),
       known,
       currencyOf,
       fallback: args.fallbackCurrency,

@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { parseCsv } from '../../scripts/import/csv.js';
 import {
   activeKinds,
+  importDayOf,
   parseArgs,
   planPhase3,
+  refuseForcedInflows,
   renderDryRun,
   renderTotals,
 } from '../../scripts/import/run.js';
@@ -102,6 +104,25 @@ describe('activeKinds', () => {
     expect(() => activeKinds(parseArgs(['--user', 'a@b.c', '--only', 'inflows']))).toThrow(
       /--inflows was not passed/,
     );
+  });
+});
+
+describe('importDayOf', () => {
+  it('is the UTC date of --recorded-at, whatever zone it was written in', () => {
+    expect(importDayOf('2026-09-17T12:00:00Z')).toBe('2026-09-17');
+    // 01:30 in Vladivostok (+10) is still the previous day in UTC.
+    expect(importDayOf('2026-09-18T01:30:00+10:00')).toBe('2026-09-17');
+    expect(importDayOf('2026-09-17T23:00:00-05:00')).toBe('2026-09-18');
+  });
+});
+
+describe('refuseForcedInflows', () => {
+  it('refuses a forced inflows import that would duplicate credited inflows', () => {
+    expect(refuseForcedInflows(0)).toBeNull();
+    const message = refuseForcedInflows(2)!.message;
+    expect(message).toContain('2 inflows are already credited to accounts');
+    expect(message).toMatch(/would duplicate them/);
+    expect(message).toMatch(/--inflows/);
   });
 });
 
