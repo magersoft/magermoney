@@ -81,14 +81,22 @@ test('sign in, see home, switch currency', async ({ page }) => {
 
     const storageKey = `sb-${new URL(process.env.E2E_SUPABASE_URL!).hostname.split('.')[0]}-auth-token`;
 
+    // The <select> options of this app are labelled "<name> · <balance>
+    // <currency>" (accounts) or by the source name (inflows), so an option is
+    // matched as a substring rather than an exact label; the installed
+    // @playwright/test types accept only a string label, not RegExp, so the
+    // matching option is found via its text and selected by value.
+    const selectByText = async (select: ReturnType<typeof page.getByTestId>, name: string) => {
+      const value = await select.locator('option', { hasText: name }).getAttribute('value');
+      await select.selectOption(value!);
+    };
+
     await page.goto('/sign-in');
     await page.evaluate(([k, v]: [string, string]) => localStorage.setItem(k, v), [
       storageKey,
       JSON.stringify(s.session),
     ] as [string, string]);
-    // Home is a dashboard placeholder until Task 26; the capital total lives on
-    // the accounts tab now. Task 27 revisits the scenario.
-    await page.goto('/accounts');
+    await page.goto('/');
     await expect(page.getByTestId('capital-total')).toBeVisible();
 
     // New profiles default to EUR (spec §1); switch to USD so the totals
@@ -117,26 +125,47 @@ test('sign in, see home, switch currency', async ({ page }) => {
     await expect(page.getByTestId('account-balance')).toContainText('10');
 
     // Transfer 40 from Alfa to Beta; the total stays 110, Beta shows 50.
-    // The <select> options are labelled "<name> · <balance> <currency>", so the
-    // account name is matched as a substring rather than an exact label; the
-    // installed @playwright/test types accept only a string label, not RegExp,
-    // so the matching option is found via its text and selected by value.
-    const selectAccountByName = async (
-      select: ReturnType<typeof page.getByTestId>,
-      name: string,
-    ) => {
-      const value = await select.locator('option', { hasText: name }).getAttribute('value');
-      await select.selectOption(value!);
-    };
     await page.getByTestId('account-transfer').click();
     const from = page.getByTestId('transfer-from');
-    await selectAccountByName(from, 'Alfa');
-    await selectAccountByName(page.getByTestId('transfer-to'), 'Beta');
+    await selectByText(from, 'Alfa');
+    await selectByText(page.getByTestId('transfer-to'), 'Beta');
     await page.getByTestId('transfer-sent').fill('40');
     await page.getByTestId('transfer-save').click();
     await expect(page.getByTestId('account-balance')).toContainText('50');
-    await page.goto('/accounts');
+    await page.goto('/');
     await expect(page.getByTestId('capital-total')).toContainText('110');
+
+    // Phase 3: an income source, then an inflow credited to Beta.
+    await page.goto('/plan/income/new');
+    await page.getByTestId('source-name').fill('Job');
+    await page.getByTestId('source-gross').fill('3000');
+    await page.getByTestId('source-currency').selectOption('USD');
+    await page.getByTestId('source-submit').click();
+    await expect(page).toHaveURL(/\/plan/);
+
+    await page.goto('/');
+    await page.getByTestId('dash-record-inflow').click();
+    await selectByText(page.getByTestId('inflow-source'), 'Job');
+    await page.getByTestId('inflow-amount').fill('1000');
+    await selectByText(page.getByTestId('inflow-account'), 'Beta');
+    await page.getByTestId('inflow-save').click();
+
+    // The dashboard shows it against the plan, and total capital grew by the credit: 110 -> 1110.
+    await expect(page.locator('[data-testid^="dash-inflow-row-"]').first()).toContainText('1');
+    await expect(page.locator('[data-testid^="dash-inflow-row-"]').first()).toContainText('000');
+    await expect(page.getByTestId('capital-total')).toContainText('1');
+    await expect(page.getByTestId('capital-total')).toContainText('110');
+
+    // And the Account's own balance grew: Beta held 50.
+    // The accounts list groups by provider, and this account's bank is its own
+    // name, so an exact-text match finds the group heading — which is not a
+    // link. The row itself is matched by role: its accessible name is the whole
+    // lockup ("USD Beta Счёт … 1 050,00 $ USD"), so 'Beta' is a substring of the
+    // Beta row's name and of no other row's.
+    await page.goto('/accounts');
+    await page.getByRole('link', { name: 'Beta' }).first().click();
+    await expect(page.getByTestId('account-balance')).toContainText('1050');
+    await page.goto('/');
 
     // The display currency switch still converts everything.
     await page.getByTestId('currency-switch').getByRole('button', { name: 'EUR' }).click();
