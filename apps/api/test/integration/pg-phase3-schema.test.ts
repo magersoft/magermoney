@@ -69,7 +69,7 @@ describe('phase 3 schema', () => {
     await rejects(sql`delete from income_sources where id = ${sourceId}`);
   });
 
-  it('balance_entries: an inflow entry names its inflow, cascades with it, and pins the account', async () => {
+  it('balance_entries: an inflow entry names its inflow, cascades with it, is unique per inflow, and refuses deleting the credited account', async () => {
     const [inflow] = await sql<{ id: string }[]>`
       insert into inflows (user_id, income_source_id, amount, currency, received_on, account_id, credited_amount)
       values (${uid}, ${sourceId}, '50', 'USD', '2026-09-11', ${accountId}, '50') returning id`;
@@ -85,6 +85,9 @@ describe('phase 3 schema', () => {
       sql`insert into balance_entries ${sql(entry({ origin: 'manual', inflow_id: inflow!.id }))}`,
     );
     await sql`insert into balance_entries ${sql(entry({ origin: 'inflow', inflow_id: inflow!.id }))}`;
+    await rejects(
+      sql`insert into balance_entries ${sql(entry({ origin: 'inflow', inflow_id: inflow!.id, recorded_at: '2026-09-11T11:00:00.000Z' }))}`,
+    );
     await rejects(sql`delete from accounts where id = ${accountId}`);
     await sql`delete from inflows where id = ${inflow!.id}`;
     const left = await sql`select id from balance_entries where inflow_id = ${inflow!.id}`;

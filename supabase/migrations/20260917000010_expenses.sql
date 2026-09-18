@@ -22,7 +22,7 @@ create policy "expense_categories: owner delete" on public.expense_categories fo
 create table public.expenses (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
-  category_id uuid not null references public.expense_categories(id) on delete restrict,
+  category_id uuid not null references public.expense_categories(id) on delete no action,
   name text not null check (length(name) between 1 and 120),
   amount numeric not null check (amount >= 0),
   currency text not null references public.currencies(code),

@@ -27,6 +27,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Import: the totals line always names all six kinds, which changed three phase 2 assertions in `run.test.ts`. Cost: none.
 - `BalanceEntryDto.inflowId` and its api dto placeholder (`inflowId: null` until the inflows column lands), plus the two web fixtures, were added in Task 6 at the controller's request instead of Task 10 as the plan places them; Task 10 completes the remaining fixtures. Cost if wrong: none beyond a redundant edit.
 - The read-model parameter is named `table` (as `read-models.ts`) where spec §2 writes `rates` — kept `table`. Cost if wrong: a rename.
+- `inflows.income_source_id`, `inflows.account_id` and `expenses.category_id` use `on delete no action` instead of the spec's `restrict` — Postgres checks a `restrict` FK immediately inside the nested statement that a `profiles` delete cascades through, so deleting a user failed once `income_sources`/`accounts`/`expense_categories` rows cascaded before their dependent `inflows`/`expenses` rows did; `no action` refuses a direct delete of the parent identically (the API's 409s are unaffected) but defers the check to the end of the statement, so the profile cascade completes. Cost if wrong: a stray FK violation surfaces at statement end instead of immediately, which is only observable in `EXPLAIN`, not behaviour.
+- `balance_entries.inflow_id` got a partial UNIQUE index (not just an index) so one balance entry per credited inflow is enforced in the database, matching the ADR 0002 invariant. Cost if wrong: a legitimate case needing two entries per inflow would need the index dropped; none is known.
 
 ## Deferred minors
 
@@ -58,3 +60,4 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Offline parking covers record-balance, create-transfer and create-inflow only; edits and deletes still wait for the network (carried from phase 2).
 - Idempotency keys for replayed writes (carried from phase 2): a lost response can make a replayed inflow appear twice.
 - "Received this month" converts past Inflows with today's rates; historical-rate conversion belongs to phase 5 analytics.
+- The phase 2 `transfers` FKs (`from_account_id`, `to_account_id` on `public.accounts`) still use `on delete restrict`, unlike the three phase 3 FKs moved to `no action` for the profile-cascade fix above; revisit if a future migration nests a cascade through `transfers`.

@@ -91,7 +91,7 @@ Table balance_entries [note: 'phase 2. Append-only journal. Current balance = la
   Indexes {
     (account_id, recorded_at, created_at) [note: 'latest = order by recorded_at desc, created_at desc']
     (transfer_id) [note: 'partial, where transfer_id is not null']
-    (inflow_id) [note: 'partial, where inflow_id is not null']
+    (inflow_id) [unique, note: 'partial, where inflow_id is not null; one balance entry per credited inflow (ADR 0002)']
   }
 }
 
@@ -134,12 +134,12 @@ Table income_sources [note: 'phase 3. Net is derived, never stored. Active perio
 Table inflows [note: 'phase 3 (history import in phase 5). Actual dated receipts. check: account_id and credited_amount are set together.'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
-  income_source_id uuid [not null, ref: > income_sources.id, note: 'on delete restrict']
+  income_source_id uuid [not null, ref: > income_sources.id, note: 'on delete no action (a direct delete is refused the same as restrict; deferred so a profile cascade completes)']
   amount numeric [not null, note: 'check > 0']
   currency text [not null, ref: > currencies.code]
   received_on date [not null]
   realised_rate_to_usd numeric [note: 'rate actually obtained that day; null → use rates table']
-  account_id uuid [ref: > accounts.id, note: 'set when credited to an account; on delete restrict']
+  account_id uuid [ref: > accounts.id, note: 'set when credited to an account; on delete no action (refused like restrict; deferred for the profile cascade)']
   credited_amount numeric [note: 'what landed on the account, in the account currency; realised rate = credited / amount']
   note text
   Indexes {
@@ -163,7 +163,7 @@ Table expense_categories [note: 'phase 3. Housing, subscriptions, car, health, t
 Table expenses [note: 'phase 3. Fixed obligations only. Yearly normalised to monthly for totals.'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
-  category_id uuid [not null, ref: > expense_categories.id, note: 'on delete restrict']
+  category_id uuid [not null, ref: > expense_categories.id, note: 'on delete no action (refused like restrict; deferred for the profile cascade)']
   name text [not null]
   amount numeric [not null, note: 'check >= 0']
   currency text [not null, ref: > currencies.code]
@@ -172,7 +172,7 @@ Table expenses [note: 'phase 3. Fixed obligations only. Yearly normalised to mon
   billing_month int [note: '1..12, yearly only (check)']
   is_essential bool [not null, default: false]
   active_from date [not null]
-  active_to date
+  active_to date [note: 'check: >= active_from']
   Indexes {
     (user_id, category_id)
   }
@@ -186,7 +186,7 @@ Table budgets [note: 'phase 3. Variable category with a monthly limit.'] {
   monthly_limit numeric [not null, note: 'check >= 0']
   currency text [not null, ref: > currencies.code]
   active_from date [not null]
-  active_to date
+  active_to date [note: 'check: >= active_from']
   Indexes {
     (user_id, active_from)
   }

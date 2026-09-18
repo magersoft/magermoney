@@ -1,13 +1,13 @@
 create table public.inflows (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
-  income_source_id uuid not null references public.income_sources(id) on delete restrict,
+  income_source_id uuid not null references public.income_sources(id) on delete no action,
   amount numeric not null check (amount > 0),
   currency text not null references public.currencies(code),
   received_on date not null,
   realised_rate_to_usd numeric check (realised_rate_to_usd > 0),
   -- Set together: the account the money landed on and how much arrived in that account's currency.
-  account_id uuid references public.accounts(id) on delete restrict,
+  account_id uuid references public.accounts(id) on delete no action,
   credited_amount numeric check (credited_amount is null or credited_amount > 0),
   note text,
   created_at timestamptz not null default now(),
