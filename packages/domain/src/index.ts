@@ -5,6 +5,8 @@ export { default as Decimal } from 'decimal.js';
 export * from './rate.js';
 export * from './rate-table.js';
 export * from './clock.js';
+export * from './calendar.js';
+export * from './active-period.js';
 export * from './account.js';
 export * from './transfer.js';
 export * from './read-models.js';
