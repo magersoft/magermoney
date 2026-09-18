@@ -38,7 +38,7 @@ _Avoid_: Card, current account
 _Avoid_: Card (a card is a kind of Account), balance (that is the Account's amount)
 
 **Balance entry**:
-A dated statement "Account X held amount Y". An Account's current balance is its latest Balance entry; earlier entries are kept. Balances are declared, not computed from transactions. Only the newest entry of an Account may be edited or deleted; older ones are history.
+A dated statement "Account X held amount Y". An Account's current balance is its latest Balance entry; earlier entries are kept. Balances are declared, not computed from transactions. Only the newest entry of an Account may be edited or deleted; older ones are history. An entry made by a Transfer or an Inflow is changed only through that Transfer or Inflow.
 _Avoid_: Transaction, adjustment, update
 
 **Transfer**:
@@ -48,18 +48,18 @@ _Avoid_: Exchange, conversion, swap
 ### What comes in
 
 **Income source**:
-A recurring origin of income with a gross amount, tax rate, commission rate, a pay schedule (days of month) and an active period. Net is derived, never stored. One source is marked primary.
+A recurring origin of income with a monthly gross amount, tax rate, commission rate, a pay schedule (days of month) and an active period. Net is derived, never stored: gross × (1 − tax) × (1 − commission). One source is marked primary. A source with no pay days is irregular: it counts in the month plan with its expected amount (which may be zero) and never appears among upcoming events. One-off receipts belong to such a source ("Other"), so every Inflow has a source.
 _Avoid_: Salary, job
 
 **Pay schedule**:
-The days of the month on which an Income source is expected to pay. "Days to payday" counts to the primary source's next pay day.
+The days of the month on which an Income source is expected to pay. The monthly net is split evenly across them; the last payout of the month absorbs the rounding remainder. A pay day beyond the month's length falls on the month's last day. "Days to payday" counts to the primary source's next pay day; payday today is zero.
 
 **Active period**:
 The dates between which an Income source or Expense counts towards current totals. Nothing is deleted when it ends; history keeps referring to it.
 _Avoid_: Disabled, archived, deleted
 
 **Inflow**:
-An actual dated receipt of money from an Income source, with the rate on that day. May optionally be credited to an Account, producing a Balance entry.
+An actual dated receipt of money from an Income source, in its own currency, optionally with the USD rate realised that day. May be credited to an Account, producing one Balance entry (new balance = latest balance + credited amount). When the Account's currency differs, both amounts are declared — the Inflow amount and the credited amount — and the realised rate is derived, exactly as for a cross-currency Transfer; nothing is converted automatically. A credited Inflow must be the newest entry on its Account when recorded, and can be edited or deleted only while it still is.
 _Avoid_: Поступление as a separate concept from Inflow, transaction
 
 ### What goes out
@@ -114,7 +114,7 @@ _Avoid_: Expenses (those are the planned recurring obligations)
 ### Views (not stored)
 
 **Dashboard**:
-A read model assembled from Accounts, Income sources, Expenses, Goals and Rates. Has no data of its own.
+The home screen: a read model assembled from Accounts, Income sources, Inflows, Expenses, Budgets and Rates (Goals from phase 4). Shows total capital, what is available until payday and per day, the month plan (net income − Planned monthly outgo = remainder), this month's Inflows against the expected net per source, and the payouts and charges of the next 30 days. Has no data of its own.
 
 **Savings analytics**:
 A read model over Snapshots and Inflows: monthly delta, averages, forecast.

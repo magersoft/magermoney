@@ -22,16 +22,16 @@ The vocabulary (Account, Balance entry, Transfer, Goal, Snapshot, Saved, Revalua
 
 ## Repository layout
 
-| Path                  | What it is                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web`            | Vue 3 PWA (Vite, TanStack Query). Modules in `src/modules/<name>/{domain,application,infrastructure,ui}`, one public `index.ts` each. |
-| `apps/api`            | Hono API on Vercel Functions. Zod validation, OpenAPI at `/openapi.json` and Swagger UI at `/docs`. JWT verified via Supabase JWKS.   |
-| `packages/domain`     | Pure model: `Money`, `Currency`, `Rate`, read models. No framework imports, 100 % test coverage (Vitest + fast-check).                |
-| `packages/contracts`  | Zod schemas for DTOs and routes, shared by the API and the web client.                                                                |
-| `packages/ui`         | Design system: shadcn-vue, Tailwind v4, motion-v, currency icon subset.                                                               |
-| `packages/config`     | Shared TypeScript and tooling config.                                                                                                 |
-| `supabase/migrations` | Hand-written SQL migrations with RLS. No ORM.                                                                                         |
-| `docs/`               | ADRs, DB schema (`db/schema.dbml`), visual direction, discovery log.                                                                  |
+| Path                  | What it is                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/web`            | Vue 3 PWA (Vite, TanStack Query). Modules in `src/modules/<name>/{domain,application,infrastructure,ui}`, one public `index.ts` each.                  |
+| `apps/api`            | Hono API on Vercel Functions. Zod validation, OpenAPI at `/openapi.json` and Swagger UI at `/docs`. JWT verified via Supabase JWKS.                    |
+| `packages/domain`     | Pure model: `Money`, `Currency`, `Rate`, calendar and pay schedule, plan read models. No framework imports, 100 % test coverage (Vitest + fast-check). |
+| `packages/contracts`  | Zod schemas for DTOs and routes, shared by the API and the web client.                                                                                 |
+| `packages/ui`         | Design system: shadcn-vue, Tailwind v4, motion-v, currency icon subset.                                                                                |
+| `packages/config`     | Shared TypeScript and tooling config.                                                                                                                  |
+| `supabase/migrations` | Hand-written SQL migrations with RLS. No ORM.                                                                                                          |
+| `docs/`               | ADRs, DB schema (`db/schema.dbml`), visual direction, discovery log.                                                                                   |
 
 Package boundaries are enforced by `eslint-plugin-boundaries` and `bun run lint:boundaries-check`.
 
