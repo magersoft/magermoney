@@ -1,17 +1,41 @@
 import { err, ok, type Result } from 'neverthrow';
 import {
   Decimal,
+  Money,
   type Clock,
   type Currency,
+  type CurrencyMismatchError,
   type CurrencyRegistry,
+  type InflowError,
   type UnknownCurrencyError,
 } from '@magermoney/domain';
 import type { CreateInflowInput, InflowDto } from '@magermoney/contracts';
 import type { Repos } from '../../../app.js';
 import type { UnitOfWork } from '../../../shared/db/unit-of-work.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../../shared/errors/http.js';
+import {
+  freshTarget,
+  planCredit,
+  writeCredit,
+  type CreditPlan,
+  type CreditTarget,
+} from './credit.js';
 import { toInflowDto } from './dto.js';
 import type { NewInflow } from './inflow-repository.js';
+
+export type InflowFailure =
+  | NotFoundError
+  | ValidationError
+  | ConflictError
+  | UnknownCurrencyError
+  | InflowError
+  | CurrencyMismatchError;
+
+export const creditedWithoutAccount = () =>
+  new ValidationError(
+    'A credited amount needs the account it landed on',
+    'credited_without_account',
+  );
 
 export interface InflowDeps {
   uow: UnitOfWork<Repos>;
@@ -19,7 +43,6 @@ export interface InflowDeps {
   registry: CurrencyRegistry;
   clock: Clock;
 }
-export type InflowFailure = NotFoundError | ValidationError | ConflictError | UnknownCurrencyError;
 
 /** What an inflow is before anyone asks where it landed. */
 export interface InflowFields {
@@ -76,11 +99,16 @@ export async function resolveInflow(
 export const createInflow =
   (deps: InflowDeps) =>
   (userId: string, input: CreateInflowInput): Promise<Result<InflowDto, InflowFailure>> =>
+    // Every check runs before the first write: an `err` returned from a unit of work does not roll it back.
     deps.uow(async (repos) => {
-      if (input.accountId)
-        return err(
-          new ValidationError('Crediting an account is not available yet', 'credit_unavailable'),
-        );
+      let target: CreditTarget | null = null;
+      if (input.accountId) {
+        const [account] = await repos.accounts.lock(userId, [input.accountId]);
+        if (!account) return err(new NotFoundError('account'));
+        const fresh = freshTarget(deps.registry, account);
+        if (fresh.isErr()) return err(fresh.error);
+        target = fresh.value;
+      } else if (input.creditedAmount != null) return err(creditedWithoutAccount());
       const resolved = await resolveInflow(deps, repos, userId, {
         incomeSourceId: input.incomeSourceId,
         amount: input.amount,
@@ -90,10 +118,24 @@ export const createInflow =
         note: input.note ?? null,
       });
       if (resolved.isErr()) return err(resolved.error);
+      const { data, currency } = resolved.value;
+      let plan: CreditPlan | null = null;
+      if (target) {
+        const planned = planCredit({
+          target,
+          amount: Money.of(data.amount, currency),
+          creditedAmount: input.creditedAmount ?? undefined,
+          receivedOn: data.receivedOn,
+          clock: deps.clock,
+        });
+        if (planned.isErr()) return err(planned.error);
+        plan = planned.value;
+      }
       const row = await repos.inflows.insert(userId, {
-        ...resolved.value.data,
-        accountId: null,
-        creditedAmount: null,
+        ...data,
+        accountId: plan?.accountId ?? null,
+        creditedAmount: plan?.credited.toString() ?? null,
       });
-      return ok(toInflowDto(row));
+      if (plan) await writeCredit(repos, userId, row.id, plan);
+      return ok(toInflowDto(row, plan?.realisedRate?.toFixed() ?? null));
     });

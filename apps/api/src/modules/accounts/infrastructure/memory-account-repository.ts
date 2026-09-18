@@ -73,6 +73,7 @@ export class MemoryAccountRepository implements AccountRepository {
     const row = this.mine(userId).find((r) => r.id === id);
     if (!row) return 'not_found' as const;
     if ((this.transferCounts.get(id) ?? 0) > 0) return 'has_transfers' as const;
+    if (this.inflowCountOf(id) > 0) return 'has_inflows' as const;
     this.rows = this.rows.filter((r) => r !== row);
     this.balances.dropAccount(id);
     return 'deleted' as const;

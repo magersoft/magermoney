@@ -18,7 +18,7 @@ const fromRaw = (r: Raw): BalanceEntryRow => ({
   createdAt: iso(r.createdAt),
 });
 const COLS =
-  'id, user_id, account_id, amount::text as amount, recorded_at, origin, transfer_id, note, created_at';
+  'id, user_id, account_id, amount::text as amount, recorded_at, origin, transfer_id, inflow_id, note, created_at';
 
 export class PgBalanceRepository implements BalanceRepository {
   constructor(private readonly sql: Sql) {}
@@ -47,10 +47,16 @@ export class PgBalanceRepository implements BalanceRepository {
     >`select ${this.sql.unsafe(COLS)} from balance_entries where user_id = ${userId} and transfer_id = ${transferId}`;
     return rows.map(fromRaw);
   }
+  async findByInflow(userId: string, inflowId: string) {
+    const [row] = await this.sql<
+      Raw[]
+    >`select ${this.sql.unsafe(COLS)} from balance_entries where user_id = ${userId} and inflow_id = ${inflowId}`;
+    return row ? fromRaw(row) : null;
+  }
   async insert(userId: string, data: NewBalanceEntry) {
     const [row] = await this.sql<Raw[]>`
-      insert into balance_entries (user_id, account_id, amount, recorded_at, origin, transfer_id, note)
-      values (${userId}, ${data.accountId}, ${data.amount}, ${data.recordedAt}, ${data.origin}, ${data.transferId}, ${data.note})
+      insert into balance_entries (user_id, account_id, amount, recorded_at, origin, transfer_id, inflow_id, note)
+      values (${userId}, ${data.accountId}, ${data.amount}, ${data.recordedAt}, ${data.origin}, ${data.transferId}, ${data.inflowId ?? null}, ${data.note})
       returning ${this.sql.unsafe(COLS)}`;
     return fromRaw(row!);
   }
@@ -75,6 +81,12 @@ export class PgBalanceRepository implements BalanceRepository {
     return (
       await this
         .sql`delete from balance_entries where user_id = ${userId} and transfer_id = ${transferId}`
+    ).count;
+  }
+  async deleteByInflow(userId: string, inflowId: string) {
+    return (
+      await this
+        .sql`delete from balance_entries where user_id = ${userId} and inflow_id = ${inflowId}`
     ).count;
   }
 }

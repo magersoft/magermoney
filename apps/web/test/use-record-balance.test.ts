@@ -96,6 +96,7 @@ describe('useRecordBalance', () => {
           recordedAt: '2026-09-11T00:00:00.000Z',
           origin: 'manual',
           transferId: null,
+          inflowId: null,
           note: null,
         },
         201,

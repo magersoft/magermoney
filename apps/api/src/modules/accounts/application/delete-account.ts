@@ -20,5 +20,12 @@ export const deleteAccount =
             'Archive the account instead: it has transfers',
           ),
         );
+      if (outcome === 'has_inflows')
+        return err(
+          new ConflictError(
+            'account_has_inflows',
+            'Archive the account instead: inflows were credited to it',
+          ),
+        );
       return ok(undefined);
     });

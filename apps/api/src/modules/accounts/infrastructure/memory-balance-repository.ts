@@ -33,9 +33,13 @@ export class MemoryBalanceRepository implements BalanceRepository {
   async findByTransfer(userId: string, transferId: string) {
     return this.mine(userId).filter((r) => r.transferId === transferId);
   }
+  async findByInflow(userId: string, inflowId: string) {
+    return this.mine(userId).find((r) => r.inflowId === inflowId) ?? null;
+  }
   async insert(userId: string, data: NewBalanceEntry) {
     const row: BalanceEntryRow = {
       ...data,
+      inflowId: data.inflowId ?? null,
       id: randomUUID(),
       userId,
       createdAt: new Date().toISOString(),
@@ -61,6 +65,11 @@ export class MemoryBalanceRepository implements BalanceRepository {
   async deleteByTransfer(userId: string, transferId: string) {
     const before = this.rows.length;
     this.rows = this.rows.filter((r) => !(r.userId === userId && r.transferId === transferId));
+    return before - this.rows.length;
+  }
+  async deleteByInflow(userId: string, inflowId: string) {
+    const before = this.rows.length;
+    this.rows = this.rows.filter((r) => !(r.userId === userId && r.inflowId === inflowId));
     return before - this.rows.length;
   }
   /** Test helper: drop every entry of an account (the pg cascade). */
