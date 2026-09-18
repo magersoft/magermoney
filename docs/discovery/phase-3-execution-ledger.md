@@ -44,6 +44,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 
 - Task 19 (fix round 1): the full page load a failed barrel triggers is spent once per path, recorded in `sessionStorage` so the marker outlives the reload, and cleared by `router.afterEach`; a second failure for the same path is left to surface so `RouteError` renders. If `sessionStorage` refuses to store anything there is no way to bound the loop, so nothing reloads at all. Cost if wrong: in a browser without session storage a genuinely stale precache shows the error screen instead of curing itself.
 
+- Task 20: `toInflow` takes the Account's currency as an optional third argument, because `InflowDto.creditedAmount` carries no currency; without it the domain object's `creditedAmount` is null.
+
 ## Deferred minors
 
 (grouped by task as they arise)

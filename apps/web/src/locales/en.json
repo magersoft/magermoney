@@ -220,7 +220,20 @@
     "accountHasTransfers": "This account has transfers. You can only archive it.",
     "accountsImmutable": "A transfer keeps its accounts. Delete it and make a new one.",
     "amountReceivedRequired": "Say how much arrived on the other account.",
-    "transferInvalid": "That transfer will not work. Check the accounts and the amounts."
+    "transferInvalid": "That transfer will not work. Check the accounts and the amounts.",
+    "receivedInFuture": "That date is in the future. Use today or earlier.",
+    "creditNotLatest": "This account already has a later balance. Record the inflow without an account and update the balance by hand.",
+    "inflowNotLatest": "The account's balance has changed since this inflow. Only the most recent one can be edited.",
+    "creditedAmountRequired": "The currencies differ. Enter how much reached the account.",
+    "creditedMismatch": "Same currency, so the account received the same amount. Remove the second number.",
+    "nonPositiveAmount": "The amount has to be more than zero.",
+    "creditedWithoutAccount": "There's a credited amount but no account. Pick an account or clear the amount.",
+    "activePeriodInvalid": "The end date is before the start date.",
+    "payDaysInvalid": "Pay days are numbers from 1 to 31, each once.",
+    "rateOutOfRange": "Tax and commission go from 0 to 99.99%.",
+    "sourceHasInflows": "This source already has inflows. You can end it, but not delete it or change its currency.",
+    "defaultAccountNotFound": "The default account wasn't found. Pick another one.",
+    "accountHasInflows": "Inflows were credited to this account. It can only be archived."
   },
   "offline": {
     "saved": "Saved on this device. It will be sent when you are back online."
