@@ -10,6 +10,8 @@ import type { ProfileRepository } from './modules/profiles/application/profile-r
 import { ratesRoutes } from './modules/rates/http/routes.js';
 import { accountRoutes } from './modules/accounts/http/routes.js';
 import { transferRoutes } from './modules/transfers/http/routes.js';
+import { incomeSourceRoutes } from './modules/income-sources/http/routes.js';
+import type { IncomeSourceRepository } from './modules/income-sources/application/income-source-repository.js';
 import type { RateRepository } from './modules/rates/application/rate-repository.js';
 import type { RateProvider } from './modules/rates/application/rate-provider.js';
 import { jobRoutes } from './jobs/fetch-rates.js';
@@ -22,6 +24,7 @@ export interface Repos {
   accounts: AccountRepository;
   balances: BalanceRepository;
   transfers: TransferRepository;
+  incomeSources: IncomeSourceRepository;
 }
 
 export type AppEnv = { Variables: { userId: string; requestId: string } };
@@ -101,6 +104,7 @@ export function createApp(deps: AppDeps) {
   app.route('/', ratesRoutes(deps));
   app.route('/', accountRoutes(deps));
   app.route('/', transferRoutes(deps));
+  app.route('/', incomeSourceRoutes(deps));
   app.route('/', jobRoutes(deps));
 
   mountOpenApi(app, deps.exposeDocs ?? true);

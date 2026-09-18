@@ -50,6 +50,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 
 (defects found in the plan's code or expected values, with the correction)
 
+- Task 8's file list did not mention `apps/api/test/integration/pg-balance-concurrency.test.ts`, which builds a `Repos` object literal by hand; extending `Repos` with `incomeSources` broke its typecheck. Fixed by adding `incomeSources: repos.incomeSources` to that literal.
+
 ## Not run
 
 (anything the plan asked to run that could not be run here, and why)
