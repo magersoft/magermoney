@@ -16,6 +16,9 @@ export {
 export { useInflows, INFLOWS_KEY, inflowsKey, type InflowParams } from './application/use-inflows';
 export { useUpdateInflow, useDeleteInflow } from './application/use-inflow-mutations';
 
-/** Still the Task 19 stand-ins; Task 21 points these at the real screens. */
-export const IncomeSourcePage = routeComponent(() => import('@/shared/layout/PendingPage.vue'));
-export const IncomeSourceFormPage = routeComponent(() => import('@/shared/layout/PendingPage.vue'));
+export { payDaysLabel } from './domain/labels';
+export { default as IncomeSegment } from './ui/IncomeSegment.vue';
+export { default as InflowRow } from './ui/InflowRow.vue';
+/** Routed screens, async: the Plan screen imports this barrel statically for `IncomeSegment`. */
+export const IncomeSourcePage = routeComponent(() => import('./ui/IncomeSourcePage.vue'));
+export const IncomeSourceFormPage = routeComponent(() => import('./ui/IncomeSourceFormPage.vue'));

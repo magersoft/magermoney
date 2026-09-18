@@ -14,6 +14,61 @@
   "plan": {
     "title": "Plan"
   },
+  "income": {
+    "title": "Income",
+    "add": "Add a source",
+    "primary": "Primary",
+    "irregular": "Irregular",
+    "payDays": "Paid on: {days}",
+    "perMonth": "net per month",
+    "gross": "Before tax: {amount}",
+    "period": "Since {from}",
+    "periodEnded": "{from} to {to}",
+    "ended": {
+      "show": "Ended · {n}",
+      "hide": "Hide ended"
+    },
+    "empty": {
+      "title": "No income sources yet",
+      "body": "Add a salary or any other income. The month plan and the days to payday are worked out from it."
+    },
+    "source": {
+      "edit": "Edit",
+      "end": "End today",
+      "delete": "Delete",
+      "deleteTitle": "Delete this source?",
+      "deleteBody": "Only a source with no inflows can be deleted. If money has already come in, end it instead.",
+      "cancel": "Cancel",
+      "inflows": "Inflows",
+      "noInflows": "No inflows yet.",
+      "failed": "That didn't work. Try again."
+    },
+    "inflow": {
+      "credited": "to {account}",
+      "creditedAmount": "credited {amount}"
+    },
+    "form": {
+      "createTitle": "New source",
+      "editTitle": "Income source",
+      "name": "Name",
+      "gross": "Monthly amount before tax",
+      "currency": "Currency",
+      "tax": "Tax",
+      "commission": "Commission",
+      "net": "Net per month",
+      "payDays": "Pay days",
+      "payDaysHint": "The amount is split evenly between the days. With no days the source counts as irregular.",
+      "primary": "Primary source",
+      "primaryHint": "Days to payday are counted from it.",
+      "activeFrom": "Active from",
+      "activeTo": "Until (optional)",
+      "defaultAccount": "Where it usually lands",
+      "noAccount": "None",
+      "create": "Create",
+      "save": "Save",
+      "saveFailed": "Couldn't save. Try again."
+    }
+  },
   "theme": {
     "label": "Switch theme (now {theme})",
     "system": "system",

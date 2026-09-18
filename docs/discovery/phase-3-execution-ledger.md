@@ -46,6 +46,10 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 
 - Task 20: `toInflow` takes the Account's currency as an optional third argument, because `InflowDto.creditedAmount` carries no currency; without it the domain object's `creditedAmount` is null.
 
+- Task 21: `InflowRow.vue` is built in this task, not deferred to Task 22 — the brief's own file list and the `inflow-row-<id>` assertion of `IncomeSourcePage.test.ts` both require it, while the dispatch note grouped it with the Task 22 sheet. Task 22 builds `InflowSheet` only and reuses this row. Cost if wrong: Task 22 finds the component already there.
+- Task 21: the ended-sources list is drawn at full contrast instead of the brief markup's `opacity-70` — 12px muted text at 70% opacity falls under AA in dark mode, and the disclosure already says the rows are ended. Cost if wrong: an ended source reads as loud as a current one until the person collapses the disclosure again.
+- Task 21: the ended-sources toggle carries `aria-controls` only while the list is expanded, because the list is `v-if`-ed away when collapsed and a dangling `aria-controls` points at nothing. Cost if wrong: none; `aria-expanded` still tells the state.
+
 ## Deferred minors
 
 (grouped by task as they arise)
