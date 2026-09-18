@@ -5,3 +5,7 @@ export * from './profile.js';
 export * from './account.js';
 export * from './balance-entry.js';
 export * from './transfer.js';
+export * from './income-source.js';
+export * from './inflow.js';
+export * from './expense.js';
+export * from './budget.js';

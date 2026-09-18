@@ -10,7 +10,7 @@ export const toBalanceDto = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   createdAt: _c,
   ...row
-}: BalanceEntryRow): BalanceEntryDto => row;
+}: BalanceEntryRow): BalanceEntryDto => ({ ...row, inflowId: null });
 
 /** Nothing may be dated after now: a balance "as of next week" is a guess, not a statement. */
 export const notInFuture = (iso: string, now: Date): boolean =>

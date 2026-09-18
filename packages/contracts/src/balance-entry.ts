@@ -11,6 +11,7 @@ export const BalanceEntryDtoSchema = z
     recordedAt: z.iso.datetime(),
     origin: BalanceEntryOriginSchema,
     transferId: z.uuid().nullable(),
+    inflowId: z.uuid().nullable().default(null),
     note: z.string().nullable(),
   })
   .openapi('BalanceEntry');
