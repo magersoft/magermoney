@@ -183,6 +183,9 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 
 ## Known follow-ups after the final review
 
+- Final re-review: when the `InflowSheet` chunk cannot load, `QuickActions` renders the `RouteError` view inline at the bottom of the page and `inflowWanted` is never reset, so the only exit is the reload it offers; a dismissable sheet-shaped fallback belongs to a later pass.
+- Final re-review: `apps/web/test/fixtures/income-mount.ts` exports a profile whose `id` is not a uuid, so `/me` never resolves in the tests that use it (they pass on the fallback currency); fix the fixture in a separate pass.
+- Final re-review: `useDisplayCurrency()` is a module-level singleton built by the first component that calls it and holds that component's query refs; the two form pages can now be that first caller on a deep link (same shape as `useCapitalSummary`).
 - The plan commit b23a89d carried three real inflow dates in the Task 15 fixture (replaced in this commit); squash-merge the PR so main does not carry them.
 - Spends and month close, Snapshots, Goals, Assets, the yearly-history import: phases 4–5.
 - Offline parking covers record-balance, create-transfer and create-inflow only; edits and deletes still wait for the network (carried from phase 2).
