@@ -34,6 +34,9 @@ const KEY_BY_CODE: Record<string, string> = {
   source_has_inflows: 'errors.sourceHasInflows',
   default_account_not_found: 'errors.defaultAccountNotFound',
   account_has_inflows: 'errors.accountHasInflows',
+  billing_month_requires_yearly: 'errors.billingMonthRequiresYearly',
+  category_name_taken: 'errors.categoryNameTaken',
+  category_has_expenses: 'errors.categoryHasExpenses',
 };
 
 /** The i18n key for a failure, or `fallbackKey` when it is not one the UI has words for. */

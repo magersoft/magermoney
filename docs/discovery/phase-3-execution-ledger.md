@@ -61,6 +61,13 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 22: the "More" disclosure keeps its fields in the DOM with `v-show` instead of `v-if`, so the button's `aria-controls` always points at an element that exists. Cost if wrong: two fields are parsed but hidden while the disclosure is closed.
 - Task 22 (fix round 1): a credited amount is cleared whenever the chosen account or the source's currency changes, and Save waits for it to be typed again — the brief's form kept the value across an account change, so a number typed for euros could be submitted as pounds. A declared balance must never carry a number typed for another currency. Cost if wrong: one number retyped after a change of mind.
 
+- Task 23: the expense form uses native `<select>` elements for currency, period and billing month, not the brief's shadcn `Select`/`SelectTrigger`/`SelectValue`. `IncomeSourceFormPage.vue` — the sibling form and the pattern web-common points at — already chose native selects with a comment saying why (the e2e drives them with `selectOption`, and on a phone the platform picker wins), and reka-ui's `SelectValue` renders nothing for a value chosen before its content has mounted, so the default "Каждый месяц" would show as an empty trigger. The `data-testid`s of the brief are kept. Cost if wrong: two forms to convert together the day the project moves to the shadcn Select.
+- Task 23: the Expenses segment keeps an "Добавить расход" button in the non-empty state as well, not only in the empty state the brief's markup gives it — otherwise a person with one expense has no way to add a second. It is the same outline button, in the same place, as `IncomeSegment.vue`'s. Cost if wrong: one extra button on the Plan screen.
+- Task 23: a row's converted amount (the 12px line under the mono figure) is drawn only when the expense's currency differs from the display currency; in one currency it printed the same number twice on every row. The group and footer totals are unconditional. Cost if wrong: a single-currency ledger loses a line that said nothing new.
+- Task 23: the ended-expenses `<ul>` is always rendered and hidden with `[hidden]` (its `<li>`s come from a computed that is empty while collapsed), so the toggle's `aria-controls="ended-expenses"` always points at an element that exists — the Task 21 income segment solved the same problem the other way, by dropping `aria-controls` while collapsed, and the brief's own segment test requires the attribute before expanding. Cost if wrong: an empty `<ul>` in the DOM.
+- Task 23: expense row name and amount are set at 16px (`text-base`) rather than the brief markup's `text-[15px]`, which is off the type scale `docs/design/direction.md` fixes (12/13/14/16/20/24/32/44). Cost if wrong: rows are 1px looser than the brief imagined.
+- Task 23: `expenses.ended.show` keeps the brief's "Завершённые ({n})" although the income segment next to it says "Завершённые · {n}"; the brief's copy is verbatim requirement, and the two strings will be seen on the same screen. Cost if wrong: one inconsistent separator between two tabs of the Plan screen.
+
 ## Deferred minors
 
 (grouped by task as they arise)
@@ -131,12 +138,14 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 
 - Task 22's `use-create-inflow.test.ts` awaits the create promise while every GET is still blocked. It cannot resolve: `onSettled` returns `invalidateAfterInflow`, and the mutation settles only after that invalidation's refetch of the (active) accounts and inflows queries has answered, so the test timed out at 5s. Fixed in the test, not the implementation: the blocked GETs are collected and released with their normal answers after the rollback has been asserted, so the rollback is still proven to come from `onError` and the write is then awaited as every caller awaits it.
 - Task 22's `InflowSheet.test.ts` gives `api()` a default parameter `sources = [{ ...sourceDto, defaultAccountId: USD_ACC }]`, which infers `defaultAccountId: string` and makes the second test's `api(calls, [sourceDto])` (`defaultAccountId: null`) a type error under `vue-tsc`. Fixed by typing the parameter explicitly.
+- Task 23's Step 9 form imports `Select`, `SelectContent`, `SelectItem`, `SelectTrigger`, `SelectValue` from `@magermoney/ui`; the repo's own form pattern (`IncomeSourceFormPage.vue`, Task 20) deliberately uses native `<select>` elements for the same three kinds of choice. Native selects were used, keeping the brief's `data-testid`s.
 
 ## Not run
 
 (anything the plan asked to run that could not be run here, and why)
 
 - Task 19: `apps/web/e2e` (Playwright). Its two `page.goto('/')` calls before a `capital-total` assertion were moved to `/accounts`, but the suite was not run — it needs a browser binary and a live Supabase plus `E2E_*` env.
+- Task 23: the `/impeccable` pass at 390px and desktop, light and dark, was done by reading the markup against `docs/design/direction.md` and the skill's checklist, not in a browser — `ExpensesSegment` has no host screen until Task 25 mounts it on the Plan screen, and the form route needs a live Supabase session. The findings it produced are in the Rulings above.
 
 ## Known follow-ups after the final review
 

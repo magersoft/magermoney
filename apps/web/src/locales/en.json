@@ -70,6 +70,52 @@
       "saveFailed": "Couldn't save. Try again."
     }
   },
+  "expenses": {
+    "title": "Expenses",
+    "add": "Add expense",
+    "perMonth": "/ mo",
+    "yearly": "{amount} / yr · ≈ {monthly} / mo",
+    "essential": "essential",
+    "planned": "Per month",
+    "essentialTotal": "of which essential",
+    "unconvertible": "No rate for: {names}. Left out of the total.",
+    "ended": {
+      "show": "Ended ({n})",
+      "hide": "Hide ended"
+    },
+    "empty": {
+      "title": "No expenses yet",
+      "body": "Rent, phone, subscriptions — anything that recurs."
+    },
+    "period": {
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "form": {
+      "createTitle": "New expense",
+      "editTitle": "Expense",
+      "name": "Name",
+      "amount": "Amount",
+      "currency": "Currency",
+      "period": "How often",
+      "billingDay": "Billing day",
+      "billingMonth": "Billing month",
+      "noMonth": "Not set",
+      "category": "Category",
+      "categoryHint": "Pick one or type a new one",
+      "essential": "Essential",
+      "activeFrom": "Active from",
+      "activeTo": "Until (optional)",
+      "create": "Create",
+      "save": "Save",
+      "endToday": "End today",
+      "delete": "Delete",
+      "deleteTitle": "Delete this expense?",
+      "deleteBody": "It leaves the plan. If it simply stopped, end it instead.",
+      "cancel": "Cancel",
+      "saveFailed": "Could not save"
+    }
+  },
   "theme": {
     "label": "Switch theme (now {theme})",
     "system": "system",
@@ -315,7 +361,10 @@
     "rateOutOfRange": "Tax and commission go from 0 to 99.99%.",
     "sourceHasInflows": "This source already has inflows. You can end it, but not delete it or change its currency.",
     "defaultAccountNotFound": "The default account wasn't found. Pick another one.",
-    "accountHasInflows": "Inflows were credited to this account. It can only be archived."
+    "accountHasInflows": "Inflows were credited to this account. It can only be archived.",
+    "billingMonthRequiresYearly": "Only a yearly expense has a billing month",
+    "categoryNameTaken": "That category already exists",
+    "categoryHasExpenses": "The category still has expenses"
   },
   "offline": {
     "saved": "Saved on this device. It will be sent when you are back online."
