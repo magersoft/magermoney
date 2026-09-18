@@ -3,9 +3,16 @@
     "name": "Magermoney"
   },
   "nav": {
+    "home": "Home",
     "accounts": "Accounts",
-    "rates": "Rates",
+    "plan": "Plan",
     "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Home"
+  },
+  "plan": {
+    "title": "Plan"
   },
   "theme": {
     "label": "Switch theme (now {theme})",
@@ -120,6 +127,10 @@
       "defaultOf": "Make {code} the main currency",
       "remove": "Remove {code}"
     },
+    "rates": {
+      "label": "Exchange rates",
+      "hint": "Today's rates, and your own rate for any date."
+    },
     "signOut": "Sign out",
     "saveFailed": "That did not save. Try again."
   },
@@ -148,7 +159,8 @@
     "primaryNav": "Main navigation",
     "skipToContent": "Skip to content",
     "displayCurrency": "Display currency",
-    "showIn": "Show amounts in {code}"
+    "showIn": "Show amounts in {code}",
+    "openRates": "Exchange rates"
   },
   "money": {
     "noRate": "No rate for {code} on {date}"
@@ -212,5 +224,10 @@
   },
   "offline": {
     "saved": "Saved on this device. It will be sent when you are back online."
+  },
+  "route": {
+    "loading": "Loading the screen",
+    "failed": "This screen did not load. An update has most likely shipped.",
+    "reload": "Reload"
   }
 }

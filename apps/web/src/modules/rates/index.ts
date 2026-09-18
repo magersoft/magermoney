@@ -1,4 +1,4 @@
-import { defineAsyncComponent } from 'vue';
+import { routeComponent } from '@/shared/layout/route-fallback';
 
 /**
  * Public API of the rates module. Reference data lives in `@/modules/currencies`
@@ -23,5 +23,5 @@ export {
 export { default as CurrencySwitch } from './ui/CurrencySwitch.vue';
 export { default as MoneyText } from './ui/MoneyText.vue';
 /** Routed screen, async: the shell imports this barrel statically for `CurrencySwitch` and `MoneyText`. */
-export const RatesPage = defineAsyncComponent(() => import('./ui/RatesPage.vue'));
+export const RatesPage = routeComponent(() => import('./ui/RatesPage.vue'));
 export { default as ManualRateSheet } from './ui/ManualRateSheet.vue';

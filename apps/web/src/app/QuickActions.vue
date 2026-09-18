@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** The "+" on the accounts tab: record a balance (pick the account first) or make a transfer. */
+/** The "+" on Home and Accounts: record a balance (pick the account first) or make a transfer. */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -16,7 +16,9 @@ const record = ref(false);
 const transfer = ref(false);
 const chosen = ref('');
 const active = computed(() => accounts.value.filter((a) => a.archivedAt === null));
-const onHome = computed(() => route.path === '/');
+/** The "+" belongs to the two screens about money on hand: the dashboard and the accounts list. */
+const FAB_PATHS = ['/', '/accounts'];
+const showFab = computed(() => FAB_PATHS.includes(route.path));
 function choose(id: string) {
   chosen.value = id;
   pick.value = false;
@@ -25,7 +27,7 @@ function choose(id: string) {
 </script>
 
 <template>
-  <template v-if="onHome && accounts.length > 0">
+  <template v-if="showFab && accounts.length > 0">
     <Button
       size="icon-lg"
       class="size-14 rounded-full shadow-lg"

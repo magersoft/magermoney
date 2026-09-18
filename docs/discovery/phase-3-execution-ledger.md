@@ -37,6 +37,11 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 18: a `SegmentedControl` segment truncates its label (`min-w-0 truncate`) rather than letting the row grow — the Russian labels of the Plan screen are longer than the English ones and three of them must fit a 360px phone. Cost if wrong: a very long label reads as an ellipsis; the caller shortens the word.
 - Task 18: `ProgressRule` draws its fill in ink (`bg-foreground`) and takes no colour prop, although `docs/design/direction.md` lists "goal progress" among the changes that may take colour — the phase 3 screens draw several rules at once (the inflows-vs-plan rows) and spend colour on the month-plan remainder figure instead, so a neutral rule keeps those screens calm. A later phase that needs a tinted rule (goals) adds a `tone` / `fillClass` prop then. Cost if wrong: one prop added later.
 
+- Task 19: a module barrel that fails to load triggers a full-page navigation to the target (`router.onError` + `isChunkLoadError`), in addition to the per-screen Reload fallback the spec names — the barrel import fails before any `routeComponent` exists to catch it, so the person would otherwise sit on a dead link. Cost if wrong: a genuine non-chunk error inside a barrel would reload once before showing itself.
+- Task 19: a tab stays lit by path prefix (`/transfers` lights Accounts, `/settings/rates` lights Settings) rather than by vue-router's `isActive`, which only follows nested records and would light nothing on a flat route. Cost if wrong: a future route under a prefix lights a tab it does not belong to; the `owns` list is one line per tab.
+- Task 19: the wordmark in the header is rendered `custom` without `aria-current`, so on `/` only the Home tab claims to be the current page. Cost if wrong: none; the link still navigates home.
+- Task 19: below `sm:` the currency switch drops its currency codes to the screen reader (`max-sm:sr-only`) only when there are more than two reporting currencies — with three or four, the codes, the new rates link and the theme button do not fit a 375px header. At 320px with four currencies the header is still ~30px over and the switch compresses; 320px with four reporting currencies is out of the design target (`docs/design/direction.md` sets 375px). Cost if wrong: on a phone with 3–4 currencies the segments are identified by their currency mark alone.
+
 ## Deferred minors
 
 (grouped by task as they arise)
@@ -79,9 +84,13 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 18's Step 2 expects "the six older test files still pass": `packages/ui/test` held four test files before this task (`CurrencyIcon`, `icon-registry`, `money-input`, `resolve-icon`), so the run is 4 older + 6 new = 10 files, not 12.
 - Task 18's Step 3 warns only that the shadcn-vue CLI may edit `package.json`. It also edits `src/styles/index.css` (adds a Geist Google-Fonts `@import` and a `@layer base` block) and bumps dependency majors; all of that has to be reverted after the `add`, keeping only `src/components/ui/switch/**`.
 
+- Task 19's `test/route-fallback.test.ts` mounts the async component as the mount root and resolves its loader to a bare `{ default: Page }`. Neither works: `@vue/test-utils` 2.5 leaves `wrapper.vm` null for an async root (every `get`/`text` throws `Cannot read properties of null`), and Vue only unwraps `default` when the resolved object carries `__esModule` (a real `import()` does, a literal does not), so the test's own component never rendered. Fixed by rendering the screen from a one-line host component and marking the resolved module `__esModule: true`.
+
 ## Not run
 
 (anything the plan asked to run that could not be run here, and why)
+
+- Task 19: `apps/web/e2e` (Playwright). Its two `page.goto('/')` calls before a `capital-total` assertion were moved to `/accounts`, but the suite was not run — it needs a browser binary and a live Supabase plus `E2E_*` env.
 
 ## Known follow-ups after the final review
 

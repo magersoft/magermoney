@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h } from 'vue';
-import { flushPromises, mount } from '@vue/test-utils';
+import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { createI18n } from 'vue-i18n';
 import type { CurrencyDto, ProfileDto } from '@magermoney/contracts';
@@ -41,6 +41,7 @@ function mountSwitch() {
         createI18n({ legacy: false, locale: 'en', fallbackLocale: 'en', messages: { ru, en } }),
       ],
       provide: { api: { fetch: () => Promise.reject(new Error('offline')) } },
+      stubs: { RouterLink: RouterLinkStub },
     },
   });
 }
@@ -69,5 +70,15 @@ describe('CurrencySwitch', () => {
 
     expect(wrapper.get('[data-testid="currency-switch"]').text()).toContain('USD');
     expect(wrapper.get('[data-testid="currency-switch"]').text()).toContain('EUR');
+  });
+
+  it('links to the rates screen, which no longer has a tab of its own', async () => {
+    const wrapper = mountSwitch();
+    await flushPromises();
+
+    const link = wrapper.getComponent(RouterLinkStub);
+
+    expect(link.props('to')).toBe('/settings/rates');
+    expect(link.attributes('aria-label')).toBe('Exchange rates');
   });
 });

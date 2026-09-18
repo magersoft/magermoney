@@ -4,12 +4,15 @@
  * replaces it as navigation on a phone. It renders chrome only — screens fill
  * the default slot, the currency switch fills its named slot (Task 16).
  *
+ * Four tabs: Home · Accounts · Plan · Settings; Goals joins in phase 4.
+ *
  * Chrome recedes and amounts carry the contrast (docs/design/direction.md), so
  * the bars are hairline-separated surfaces, labels sit at 12–13px, and the
  * accent marks exactly one thing: where you are.
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import { Button } from '@magermoney/ui';
 import { THEMES, type Theme } from '@/shared/theme';
 
@@ -18,11 +21,25 @@ const emit = defineEmits<{ 'update:theme': [theme: Theme] }>();
 
 const { t } = useI18n();
 
+const route = useRoute();
+
+/**
+ * `owns` is the set of path prefixes a tab stays lit for. vue-router's own
+ * `isActive` only follows nested records, and these routes are flat, so an
+ * account's page would otherwise light nothing. Home owns nothing but itself —
+ * every path starts with "/".
+ */
 const NAV = [
-  { to: '/', label: 'nav.accounts' },
-  { to: '/rates', label: 'nav.rates' },
-  { to: '/settings', label: 'nav.settings' },
+  { to: '/', label: 'nav.home', owns: [] },
+  { to: '/accounts', label: 'nav.accounts', owns: ['/accounts', '/transfers'] },
+  { to: '/plan', label: 'nav.plan', owns: ['/plan'] },
+  { to: '/settings', label: 'nav.settings', owns: ['/settings'] },
 ] as const;
+
+const isCurrent = (item: (typeof NAV)[number]): boolean =>
+  item.owns.length === 0
+    ? route.path === '/'
+    : item.owns.some((p) => route.path === p || route.path.startsWith(`${p}/`));
 
 const themeLabel = computed(() => t('theme.label', { theme: t(`theme.${theme}`) }));
 
@@ -46,26 +63,32 @@ function cycleTheme(): void {
       style="padding-top: env(safe-area-inset-top)"
     >
       <div class="mx-auto flex h-14 w-full max-w-3xl items-center gap-4 px-4 md:px-6">
-        <RouterLink
-          to="/"
-          class="text-base font-semibold outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
-        >
-          {{ t('app.name') }}
+        <!-- The wordmark goes home, but it is not a tab: the Home tab is what says where you are. -->
+        <RouterLink v-slot="{ href, navigate }" to="/" custom>
+          <a
+            :href="href"
+            class="text-base font-semibold outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+            @click="navigate"
+          >
+            {{ t('app.name') }}
+          </a>
         </RouterLink>
 
         <nav class="hidden gap-4 md:flex" :aria-label="t('a11y.primaryNav')">
           <RouterLink
             v-for="item in NAV"
             :key="item.to"
-            v-slot="{ isActive, href, navigate }"
+            v-slot="{ href, navigate }"
             :to="item.to"
             custom
           >
             <a
               :href="href"
-              :aria-current="isActive ? 'page' : undefined"
+              :aria-current="isCurrent(item) ? 'page' : undefined"
               class="text-sm outline-offset-4 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring"
-              :class="isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'"
+              :class="
+                isCurrent(item) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+              "
               @click="navigate"
             >
               {{ t(item.label) }}
@@ -132,15 +155,15 @@ function cycleTheme(): void {
         <RouterLink
           v-for="item in NAV"
           :key="item.to"
-          v-slot="{ isActive, href, navigate }"
+          v-slot="{ href, navigate }"
           :to="item.to"
           custom
         >
           <a
             :href="href"
-            :aria-current="isActive ? 'page' : undefined"
+            :aria-current="isCurrent(item) ? 'page' : undefined"
             class="flex min-h-11 flex-1 items-center justify-center py-3 text-[13px] -outline-offset-2 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring"
-            :class="isActive ? 'text-primary' : 'text-muted-foreground'"
+            :class="isCurrent(item) ? 'text-primary' : 'text-muted-foreground'"
             @click="navigate"
           >
             {{ t(item.label) }}

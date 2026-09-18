@@ -1,6 +1,6 @@
-import { defineAsyncComponent } from 'vue';
+import { routeComponent } from '@/shared/layout/route-fallback';
 
-/** Public API of the accounts module: the list, the journal, and the home screen built from them. */
+/** Public API of the accounts module: the list, the journal, and the capital summary built from them. */
 
 export { toAccount } from './domain/mappers';
 export { ACCOUNT_KIND_KEYS } from './domain/labels';
@@ -30,7 +30,7 @@ export {
  * edge would drag every page into the entry chunk however lazily the router
  * asks for them.
  */
-export const AccountsPage = defineAsyncComponent(() => import('./ui/AccountsPage.vue'));
-export const AccountDetailPage = defineAsyncComponent(() => import('./ui/AccountDetailPage.vue'));
-export const AccountFormPage = defineAsyncComponent(() => import('./ui/AccountFormPage.vue'));
+export const AccountsPage = routeComponent(() => import('./ui/AccountsPage.vue'));
+export const AccountDetailPage = routeComponent(() => import('./ui/AccountDetailPage.vue'));
+export const AccountFormPage = routeComponent(() => import('./ui/AccountFormPage.vue'));
 export { default as RecordBalanceSheet } from './ui/RecordBalanceSheet.vue';

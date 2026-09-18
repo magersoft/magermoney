@@ -86,7 +86,9 @@ test('sign in, see home, switch currency', async ({ page }) => {
       storageKey,
       JSON.stringify(s.session),
     ] as [string, string]);
-    await page.goto('/');
+    // Home is a dashboard placeholder until Task 26; the capital total lives on
+    // the accounts tab now. Task 27 revisits the scenario.
+    await page.goto('/accounts');
     await expect(page.getByTestId('capital-total')).toBeVisible();
 
     // New profiles default to EUR (spec §1); switch to USD so the totals
@@ -133,7 +135,7 @@ test('sign in, see home, switch currency', async ({ page }) => {
     await page.getByTestId('transfer-sent').fill('40');
     await page.getByTestId('transfer-save').click();
     await expect(page.getByTestId('account-balance')).toContainText('50');
-    await page.goto('/');
+    await page.goto('/accounts');
     await expect(page.getByTestId('capital-total')).toContainText('110');
 
     // The display currency switch still converts everything.
