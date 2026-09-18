@@ -9,7 +9,44 @@
     "settings": "Settings"
   },
   "dashboard": {
-    "title": "Home"
+    "title": "Home",
+    "capital": {
+      "total": "Total money",
+      "rateDate": "at the rates of {date}",
+      "open": "Open accounts"
+    },
+    "unconvertible": "No rate for: {codes}. Left out of the total.",
+    "payday": {
+      "available": "Available until payday",
+      "today": "Payday today",
+      "days": "{n} day to payday | {n} days to payday",
+      "perDay": "per day",
+      "setup": "Mark a primary source and its pay days to see the countdown"
+    },
+    "plan": {
+      "title": "Month plan",
+      "netIncome": "Net income",
+      "outgo": "Planned outgo",
+      "essential": "of which essential",
+      "remainder": "Remainder",
+      "empty": "Add income and expenses to see the month plan",
+      "emptyCta": "Open the plan"
+    },
+    "inflows": {
+      "title": "Inflows this month",
+      "of": "of",
+      "record": "Record inflow",
+      "empty": "No income sources yet",
+      "emptyCta": "Add a source"
+    },
+    "upcoming": {
+      "title": "Next 30 days",
+      "payout": "payout",
+      "expense": "charge",
+      "undated": "{n} more without a date",
+      "empty": "Set pay days and billing days to see what is coming",
+      "emptyCta": "To expenses"
+    }
   },
   "plan": {
     "title": "Plan",

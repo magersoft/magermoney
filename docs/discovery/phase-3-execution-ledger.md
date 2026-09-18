@@ -78,6 +78,14 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 25: `ExpensesSegment.vue`'s ended-row links get the same `outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring` classes the budgets rows already carry (Task 24's ruling above), closing the gap now that all three segments share one screen. Cost if wrong: none; the class is additive.
 - Task 25: `expenses.ended.show` and `budgets.ended.show` are changed from "Завершённые ({n})" / "Ended ({n})" to the income form "Завершённые · {n}" / "Ended · {n}" in both locales, so the three tabs of the Plan screen read the same toggle copy; no test asserted the old parenthesised form. Cost if wrong: a one-line copy revert in two files.
 
+- Task 26: the dashboard blocks set row names and own-currency figures at 16px (`text-base`) rather than the brief markup's `text-[15px]`, which is off the type scale `docs/design/direction.md` fixes — the same correction Task 23 made in the expenses rows the home screen sits beside. Cost if wrong: rows are 1px looser than the brief imagined.
+- Task 26: an Upcoming row draws its converted amount (the 12px line under the mono figure) only when the event's currency differs from the display currency; the brief drew it unconditionally, which printed the same number twice on every row of a single-currency ledger. Same reading as the expenses rows (Task 23). Cost if wrong: a single-currency ledger loses a line that said nothing new.
+- Task 26: the capital block's label is an `<h2>`, not a `<p>` — it is the only text naming that section, and `<h1>` on this screen is `sr-only`. The until-payday block stays headingless: it is two rows continuing the capital figure, not a section of its own. Cost if wrong: one more heading in the outline than a reader expects.
+- Task 26: the four text links (the payday setup link and the three empty-state CTAs) got `pointer-coarse:min-h-11` and the `outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring` the rows already carry; the brief's markup left them at text height with the browser default focus. Cost if wrong: none; both are additive.
+- Task 26: `ProgressRule` is given `:label="r.name"`. It renders `role="progressbar"`, and without a label a screen reader announces an unnamed progress bar on every inflow row. Cost if wrong: one more announced word per row.
+- Task 26: `settings.currencies.hint` ("Между этими валютами можно переключать суммы на главной") is left as it is. Task 19 moved the capital total to `/accounts` and made the phrase stale; this task puts the total back on the home screen, so it is true again. Cost if wrong: one sentence to reword.
+- Task 26: the blocks enter with `listStagger(0..4)` from `packages/ui/src/motion`, wrapped at the page rather than inside each block — the page is the only thing that knows their order, and the account groups already arrive the same way. Purpose: state indication, that the numbers have landed; nothing counts up and nothing bounces (`docs/design/direction.md`). Cost if wrong: five wrapper elements to delete.
+
 ## Deferred minors
 
 (grouped by task as they arise)
@@ -159,12 +167,16 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 22's `InflowSheet.test.ts` gives `api()` a default parameter `sources = [{ ...sourceDto, defaultAccountId: USD_ACC }]`, which infers `defaultAccountId: string` and makes the second test's `api(calls, [sourceDto])` (`defaultAccountId: null`) a type error under `vue-tsc`. Fixed by typing the parameter explicitly.
 - Task 23's Step 9 form imports `Select`, `SelectContent`, `SelectItem`, `SelectTrigger`, `SelectValue` from `@magermoney/ui`; the repo's own form pattern (`IncomeSourceFormPage.vue`, Task 20) deliberately uses native `<select>` elements for the same three kinds of choice. Native selects were used, keeping the brief's `data-testid`s.
 
+- Task 26's `UpcomingBlock.vue` keys its event rows `${e.kind}-${e.refId}`. Two pay days of one source can fall on the same date (the domain keeps them as two payouts, `payoutsBetween`), which makes two rows of one day share a key. Fixed by adding the row's index within the day.
+
 ## Not run
 
 (anything the plan asked to run that could not be run here, and why)
 
 - Task 19: `apps/web/e2e` (Playwright). Its two `page.goto('/')` calls before a `capital-total` assertion were moved to `/accounts`, but the suite was not run — it needs a browser binary and a live Supabase plus `E2E_*` env.
 - Task 23: the `/impeccable` pass at 390px and desktop, light and dark, was done by reading the markup against `docs/design/direction.md` and the skill's checklist, not in a browser — `ExpensesSegment` has no host screen until Task 25 mounts it on the Plan screen, and the form route needs a live Supabase session. The findings it produced are in the Rulings above.
+
+- Task 26: the `/impeccable` pass at 390px and desktop, light and dark, over the three data states (full data, a brand-new account, a negative remainder) was done by reading the markup against `docs/design/direction.md` and the skill's checklist, not in a browser — the home screen needs a live Supabase session and seeded accounts, sources and expenses to render any of the three. What it produced is in the Rulings above.
 
 ## Known follow-ups after the final review
 
@@ -174,3 +186,4 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Idempotency keys for replayed writes (carried from phase 2): a lost response can make a replayed inflow appear twice.
 - "Received this month" converts past Inflows with today's rates; historical-rate conversion belongs to phase 5 analytics.
 - The phase 2 `transfers` FKs (`from_account_id`, `to_account_id` on `public.accounts`) still use `on delete restrict`, unlike the three phase 3 FKs moved to `no action` for the profile-cascade fix above; revisit if a future migration nests a cascade through `transfers`.
+- The home screen shows its skeletons for as long as `buildDashboard` returns undefined, which includes the case where the rates table never arrives (offline first load) rather than is merely late; `AccountsPage` has behaved the same way since phase 2. An error state for both belongs in one change.
