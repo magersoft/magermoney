@@ -86,6 +86,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 26: `settings.currencies.hint` ("Между этими валютами можно переключать суммы на главной") is left as it is. Task 19 moved the capital total to `/accounts` and made the phrase stale; this task puts the total back on the home screen, so it is true again. Cost if wrong: one sentence to reword.
 - Task 26: the blocks enter with `listStagger(0..4)` from `packages/ui/src/motion`, wrapped at the page rather than inside each block — the page is the only thing that knows their order, and the account groups already arrive the same way. Purpose: state indication, that the numbers have landed; nothing counts up and nothing bounces (`docs/design/direction.md`). Cost if wrong: five wrapper elements to delete.
 
+- Task 26 (fix round 1): two places where the spec overrides the brief's markup. The inflows block now names the sources today's rates cannot price (`dash-inflows-unconvertible`, the `dashboard.unconvertible` message the plan block already reuses) — without it a source in an unrated currency reads "0 из 0" with a full rule and no explanation (spec §2). And the Upcoming block's "ещё {n} без даты" is shown whenever the count is above zero, not only beside a non-empty list (spec §5.5) — the person most likely to have nothing dated is exactly the one who needs to be told how much is waiting. Cost if wrong: one extra line on the home screen.
+
 ## Deferred minors
 
 (grouped by task as they arise)
@@ -145,6 +147,15 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - `expenses.ended.show` says "Завершённые ({n})" while the income segment beside it says "Завершённые · {n}"; Task 25 reconciles the two on the Plan screen.
 - `isEmpty` still tests `model.value !== undefined`, which is dead now that the template checks `isError` and `!model` ahead of it.
 
+### Task 26
+
+- The Upcoming row's own-currency figure is a string concat (`amount round + code`), not the `MoneyText` amount lockup; it is the same shortcut `ExpensesSegment.vue` takes, and both should become one component.
+- `UpcomingBlock.vue` reads `useDisplayCurrency()` itself to decide whether the converted line says anything new; the display currency could be a prop, like every other value the page hands its blocks.
+- `unconvertibleCodes` (the set of unrated currency codes, joined) is written out in both `CapitalBlock.vue` and `AccountsPage.vue`.
+- `useDashboard` captures `today` once at setup: a session left open across midnight UTC keeps yesterday's countdown until the screen is remounted.
+- `useDashboard` returns `isLoading`, which the page does not use — it renders skeletons on `!model` instead.
+- `useDashboard` ignores `isError` on the sources, expenses and budgets queries, so a failed list renders as an empty one (see the known follow-up below).
+
 ## Plan errata
 
 (defects found in the plan's code or expected values, with the correction)
@@ -186,4 +197,4 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Idempotency keys for replayed writes (carried from phase 2): a lost response can make a replayed inflow appear twice.
 - "Received this month" converts past Inflows with today's rates; historical-rate conversion belongs to phase 5 analytics.
 - The phase 2 `transfers` FKs (`from_account_id`, `to_account_id` on `public.accounts`) still use `on delete restrict`, unlike the three phase 3 FKs moved to `no action` for the profile-cascade fix above; revisit if a future migration nests a cascade through `transfers`.
-- The home screen shows its skeletons for as long as `buildDashboard` returns undefined, which includes the case where the rates table never arrives (offline first load) rather than is merely late; `AccountsPage` has behaved the same way since phase 2. An error state for both belongs in one change.
+- The home screen has no failure state, in two directions. It shows its skeletons for as long as `buildDashboard` returns undefined, which includes the case where the rates table never arrives (offline first load) rather than is merely late; `AccountsPage` has behaved the same way since phase 2. And `useDashboard` ignores the `isError` of the sources, expenses and budgets queries, so a failed list answers with no rows and the month plan, the inflows block and the Upcoming list print a confident wrong number instead of saying the request failed — the `RouteError` + refetch treatment the Plan segments already have. Phase 4, as one change covering both screens.

@@ -130,6 +130,25 @@ describe('buildDashboard', () => {
     expect(d.undatedExpenses).toBe(1);
   });
 
+  it("names a source the day's rates cannot price, so its empty row is explained", () => {
+    const RUB = reg.get('RUB')._unsafeUnwrap();
+    const d = buildDashboard(
+      input({
+        sources: [
+          source(),
+          source({
+            id: 's2',
+            name: 'Lessons',
+            grossAmount: Money.of('50000', RUB),
+            isPrimary: false,
+          }),
+        ],
+      }),
+    )!;
+    expect(d.inflows.unconvertible.map((r) => r.name)).toEqual(['Lessons']);
+    expect(d.inflows.rows.find((r) => r.sourceId === 's2')?.expected.toString()).toBe('0');
+  });
+
   it('says what is missing, so each block can show its empty state', () => {
     const d = buildDashboard(input({ sources: [], expenses: [], budgets: [], inflows: [] }))!;
     expect(d.has).toEqual({ sources: false, outgo: false });

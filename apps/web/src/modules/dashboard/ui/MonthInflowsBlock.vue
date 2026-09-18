@@ -1,13 +1,16 @@
 <script setup lang="ts">
 /** Did the money arrive: received of expected, per source, this month. */
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { InflowsVsPlan, InflowsVsPlanRow } from '@magermoney/domain';
 import { Button, ProgressRule } from '@magermoney/ui';
 import { MoneyText } from '@/modules/rates';
 
-defineProps<{ inflows: InflowsVsPlan; empty: boolean }>();
+const { inflows } = defineProps<{ inflows: InflowsVsPlan; empty: boolean }>();
 const emit = defineEmits<{ record: [] }>();
 const { t } = useI18n();
+/** A source in a currency today's table cannot price: its row reads "0 of 0", so it has to be named. */
+const names = computed(() => inflows.unconvertible.map((r) => r.name).join(', '));
 /** Drawing only: the bar's length. Amounts stay decimal everywhere else (ADR 0001). */
 const ratio = (r: InflowsVsPlanRow) => ({
   value: r.received.amount.toNumber(),
@@ -53,6 +56,13 @@ const ratio = (r: InflowsVsPlanRow) => ({
           </RouterLink>
         </li>
       </ul>
+      <p
+        v-if="inflows.unconvertible.length > 0"
+        class="mt-1 text-xs text-muted-foreground"
+        data-testid="dash-inflows-unconvertible"
+      >
+        {{ t('dashboard.unconvertible', { codes: names }) }}
+      </p>
       <Button
         variant="outline"
         class="mt-3 min-h-9 w-full pointer-coarse:min-h-11"

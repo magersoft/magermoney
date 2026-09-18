@@ -63,7 +63,7 @@ const own = (m: Money) => `${m.round().toString()} ${m.currency.code}`;
       </ul>
     </div>
     <p
-      v-if="undated > 0 && days.length > 0"
+      v-if="undated > 0"
       class="mt-3 text-xs text-muted-foreground"
       data-testid="dash-upcoming-undated"
     >

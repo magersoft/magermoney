@@ -56,6 +56,16 @@ const sourceDto = {
   defaultAccountId: null,
   netMonthly: '3000',
 };
+/** Its currency has no rate in the table above, so the month cannot price it. */
+const unratedSourceDto = {
+  ...sourceDto,
+  id: '66666666-6666-4666-8666-666666666666',
+  name: 'Lessons',
+  currency: 'RUB',
+  grossAmount: '50000',
+  netMonthly: '50000',
+  isPrimary: false,
+};
 const inflowDto = {
   id: '33333333-3333-4333-8333-333333333333',
   incomeSourceId: SRC,
@@ -81,6 +91,18 @@ const expenseDto = {
   activeFrom: '2026-01-01',
   activeTo: null,
 };
+/** No billing day: the Upcoming list cannot place it, so it is only ever a count. */
+const undatedExpenseDto = {
+  ...expenseDto,
+  id: '77777777-7777-4777-8777-777777777777',
+  name: 'Gym',
+  amount: '30',
+  currency: 'USD',
+  billingDay: null,
+  isEssential: false,
+};
+/** ru-RU groups with a non-breaking space; the assertions care about the digits, not the codepoint. */
+const norm = (text: string) => text.replace(/\s/g, ' ');
 const json = (body: unknown) =>
   new Response(JSON.stringify(body), {
     status: 200,
@@ -144,13 +166,21 @@ describe('DashboardPage', () => {
   afterEach(() => vi.useRealTimers());
 
   it('shows capital, days to payday, the month plan, inflows and what is coming', async () => {
-    const w = mountPage({ sources: [sourceDto], inflows: [inflowDto], expenses: [expenseDto] });
+    const w = mountPage({
+      sources: [sourceDto, unratedSourceDto],
+      inflows: [inflowDto],
+      expenses: [expenseDto, undatedExpenseDto],
+    });
     await flushPromises();
     expect(w.get('[data-testid="capital-total"]').text()).toContain('800');
+    expect(norm(w.get('[data-testid="dash-available"]').text())).toContain('800,00');
     expect(w.get('[data-testid="dash-days"]').text()).toContain('8 дней');
     expect(w.get('[data-testid="dash-per-day"]').text()).toContain('100');
-    expect(w.get('[data-testid="dash-net-income"]').text()).toContain('3');
+    expect(norm(w.get('[data-testid="dash-net-income"]').text())).toContain('3 000,00');
     expect(w.get('[data-testid="dash-remainder"]').attributes('data-sign')).toBe('positive');
+    // The month cannot price Lessons, so its "0 of 0" row is named rather than left standing.
+    expect(w.get('[data-testid="dash-inflows-unconvertible"]').text()).toContain('Lessons');
+    expect(w.get('[data-testid="dash-upcoming-undated"]').text()).toContain('ещё 1');
     expect(w.get(`[data-testid="dash-inflow-row-${SRC}"]`).text()).toContain('из');
     expect(w.find('[data-testid="dash-upcoming-day-2026-09-25"]').exists()).toBe(true);
     expect(w.find('[data-testid="dash-upcoming-day-2026-10-05"]').exists()).toBe(true);
@@ -162,6 +192,13 @@ describe('DashboardPage', () => {
     expect(w.get('[data-testid="inflow-sheet"]').attributes('data-open')).toBe('false');
     await w.get('[data-testid="dash-record-inflow"]').trigger('click');
     expect(w.get('[data-testid="inflow-sheet"]').attributes('data-open')).toBe('true');
+  });
+
+  it('counts the expenses it cannot place even when nothing is dated', async () => {
+    const w = mountPage({ sources: [], inflows: [], expenses: [undatedExpenseDto] });
+    await flushPromises();
+    expect(w.find('[data-testid="dash-upcoming-empty"]').exists()).toBe(true);
+    expect(w.get('[data-testid="dash-upcoming-undated"]').text()).toContain('ещё 1');
   });
 
   it('leads to the matching Plan segment from each empty state', async () => {
