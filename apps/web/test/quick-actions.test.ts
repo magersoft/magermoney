@@ -1,7 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DOMWrapper, flushPromises } from '@vue/test-utils';
 import QuickActions from '../src/app/QuickActions.vue';
 import { acc, apiOf, json, mountAt } from './fixtures/income-mount.js';
+
+/** The inflow sheet is the one lazy child here; a deploy can take its chunk away mid-session. */
+vi.mock('@/modules/income', () => {
+  throw new Error('Failed to fetch dynamically imported module');
+});
+
+afterEach(() => vi.restoreAllMocks());
 
 describe('QuickActions', () => {
   it('offers the inflow even before there is an account, and the account actions only once there is one', async () => {
@@ -34,5 +41,21 @@ describe('QuickActions', () => {
     await flushPromises();
     expect(plan.wrapper.find('[data-testid="fab"]').exists()).toBe(false);
     plan.wrapper.unmount();
+  });
+
+  it('offers a reload instead of nothing when the inflow sheet chunk is gone', async () => {
+    // Vue warns about the rejected loader; that warning is the point of the test.
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { wrapper } = await mountAt(
+      QuickActions,
+      '/',
+      apiOf(() => undefined),
+    );
+    await flushPromises();
+    await wrapper.get('[data-testid="fab"]').trigger('click');
+    await new DOMWrapper(document.body).get('[data-testid="quick-inflow"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain('Обновить страницу');
+    wrapper.unmount();
   });
 });

@@ -27,7 +27,7 @@ import {
   useToast,
 } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
-import { todayIso } from '@/modules/rates';
+import { todayIso, useDisplayCurrency } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import type { DateLocale } from '@/shared/dates/format';
 import { useExpenseCategories } from '../application/use-expense-categories';
@@ -57,7 +57,7 @@ const NO_MONTH = '0';
 const form = reactive({
   name: '',
   amount: '',
-  currency: 'EUR',
+  currency: '',
   period: 'monthly' as ExpensePeriod,
   billingDay: null as number | null,
   billingMonth: NO_MONTH,
@@ -66,10 +66,13 @@ const form = reactive({
   activeFrom: todayIso(),
   activeTo: '',
 });
+/** The field is the person's, or the edited row's, from the first time either sets it. */
+const currencyPicked = ref(false);
 watch(
   [existing, categories],
   ([e, cats]) => {
     if (!e) return;
+    currencyPicked.value = true;
     Object.assign(form, {
       name: e.name,
       amount: e.amount,
@@ -82,6 +85,27 @@ watch(
       activeFrom: e.activeFrom,
       activeTo: e.activeTo ?? '',
     });
+  },
+  { immediate: true },
+);
+
+/**
+ * A new row opens in the currency the screens already report in; if that one is
+ * not offered the first of the list does. The currency list and the profile
+ * behind the display currency arrive in either order, so the default keeps
+ * following them until the field is claimed — by the row being edited or by the
+ * person — and never after.
+ */
+const { current: displayCurrency } = useDisplayCurrency();
+const defaultCurrency = computed(() => {
+  const codes = currencies.value.map((c) => c.code);
+  if (codes.length === 0) return '';
+  return codes.includes(displayCurrency.value) ? displayCurrency.value : codes[0]!;
+});
+watch(
+  defaultCurrency,
+  (code) => {
+    if (code !== '' && !currencyPicked.value) form.currency = code;
   },
   { immediate: true },
 );
@@ -182,6 +206,7 @@ async function del() {
         v-model="form.currency"
         data-testid="expense-currency"
         class="mt-1 flex min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
+        @change="currencyPicked = true"
       >
         <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }}</option>
       </select>
@@ -276,7 +301,13 @@ async function del() {
       type="submit"
       size="lg"
       class="w-full"
-      :disabled="busy || !hasAmount || form.name.trim() === '' || form.category.trim() === ''"
+      :disabled="
+        busy ||
+        !hasAmount ||
+        form.name.trim() === '' ||
+        form.category.trim() === '' ||
+        form.currency === ''
+      "
       data-testid="expense-submit"
     >
       {{ editingId ? t('expenses.form.save') : t('expenses.form.create') }}

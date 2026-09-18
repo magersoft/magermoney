@@ -46,6 +46,10 @@
       "undated": "{n} more without a date",
       "empty": "Set pay days and billing days to see what is coming",
       "emptyCta": "To expenses"
+    },
+    "error": {
+      "title": "Could not load the home screen",
+      "retry": "Try again"
     }
   },
   "plan": {

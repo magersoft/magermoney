@@ -109,9 +109,13 @@ const json = (body: unknown) =>
     headers: { 'content-type': 'application/json' },
   });
 
-function mountPage(data: { sources: unknown[]; inflows: unknown[]; expenses: unknown[] }) {
+function mountPage(
+  data: { sources: unknown[]; inflows: unknown[]; expenses: unknown[] },
+  failing?: string,
+) {
   resetDisplayCurrency();
   const fetch = vi.fn(async (path: string) => {
+    if (failing && path.startsWith(failing)) return new Response('boom', { status: 500 });
     if (path === '/me') return json(profile);
     if (path === '/currencies') return json(currencies);
     if (path.startsWith('/rates')) return json(rates);
@@ -199,6 +203,14 @@ describe('DashboardPage', () => {
     await flushPromises();
     expect(w.find('[data-testid="dash-upcoming-empty"]').exists()).toBe(true);
     expect(w.get('[data-testid="dash-upcoming-undated"]').text()).toContain('ещё 1');
+  });
+
+  it('says the numbers are missing instead of showing wrong ones when a list fails', async () => {
+    const w = mountPage({ sources: [sourceDto], inflows: [], expenses: [] }, '/expenses');
+    await flushPromises();
+    expect(w.find('[data-testid="dash-error"]').exists()).toBe(true);
+    // Everything here is derived from every list at once: one missing list makes the total a lie.
+    expect(w.find('[data-testid="dash-net-income"]').exists()).toBe(false);
   });
 
   it('leads to the matching Plan segment from each empty state', async () => {

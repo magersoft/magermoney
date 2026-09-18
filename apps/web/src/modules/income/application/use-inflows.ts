@@ -34,6 +34,8 @@ export function useInflows(params: MaybeRefOrGetter<InflowParams>): {
   inflows: ComputedRef<Inflow[]>;
   dtos: ComputedRef<InflowDto[]>;
   isLoading: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  refetch: () => void;
 } {
   const api = inflowsApi(useApi());
   const registry = useCurrencyRegistry();
@@ -46,5 +48,7 @@ export function useInflows(params: MaybeRefOrGetter<InflowParams>): {
     dtos,
     inflows: computed(() => dtos.value.map((d) => toInflow(d, registry.value))),
     isLoading: computed(() => query.isLoading.value),
+    isError: computed(() => query.isError.value),
+    refetch: () => void query.refetch(),
   };
 }

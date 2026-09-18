@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises } from '@vue/test-utils';
+import { resetDisplayCurrency } from '../src/modules/rates/application/use-display-currency.js';
 import IncomeSourceFormPage from '../src/modules/income/ui/IncomeSourceFormPage.vue';
 import { sourceDto } from './fixtures/income.js';
 import { apiOf, json, mountAt } from './fixtures/income-mount.js';
@@ -10,6 +11,33 @@ vi.mock('@magermoney/ui', async (importOriginal) => {
 });
 
 describe('IncomeSourceFormPage', () => {
+  // The display currency is one instance for the whole app; each mount gets its own.
+  beforeEach(() => resetDisplayCurrency());
+
+  it('opens a new source in the currency the screens already report in', async () => {
+    const { wrapper } = await mountAt(
+      IncomeSourceFormPage,
+      '/plan/income/new',
+      apiOf((p) =>
+        p === '/me'
+          ? json({
+              id: '11111111-1111-4111-8111-111111111111',
+              displayName: null,
+              locale: 'ru',
+              defaultCurrency: 'RUB',
+              reportingCurrencies: ['RUB', 'USD'],
+              onboardingCompletedAt: null,
+            })
+          : undefined,
+      ),
+    );
+    await flushPromises();
+    expect(
+      (wrapper.get('[data-testid="source-currency"]').element as HTMLSelectElement).value,
+    ).toBe('RUB');
+    wrapper.unmount();
+  });
+
   it('posts rates as fractions and pay days sorted, previews the net, and opens the new source', async () => {
     let body: Record<string, unknown> | undefined;
     const { wrapper, router } = await mountAt(

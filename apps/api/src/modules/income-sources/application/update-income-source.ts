@@ -20,8 +20,12 @@ export const updateIncomeSource =
     input: UpdateIncomeSourceInput,
   ): Promise<Result<IncomeSourceDto, IncomeSourceFailure>> =>
     deps.uow(async (repos) => {
-      // Before the read, so `current.isPrimary` is what the previous claimant committed.
-      if (input.isPrimary === true) await repos.incomeSources.lockAll(userId);
+      // Unconditional, and before the read: every patch merges `isPrimary` from
+      // the row it read, so even one that never mentions the flag re-writes it.
+      // Only inside the lock is that read what the previous claimant committed —
+      // otherwise renaming the current primary can re-assert a flag another
+      // request has just moved, and the partial unique index answers 500.
+      await repos.incomeSources.lockAll(userId);
       const current = await repos.incomeSources.findById(userId, id);
       if (!current) return err(new NotFoundError('income source'));
       const merged: NewIncomeSource = {

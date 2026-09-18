@@ -6,7 +6,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Motion } from 'motion-v';
-import { Skeleton, listStagger } from '@magermoney/ui';
+import { RouteError, Skeleton, listStagger } from '@magermoney/ui';
 import { InflowSheet } from '@/modules/income';
 import { useDashboard } from '../application/use-dashboard';
 import CapitalBlock from './CapitalBlock.vue';
@@ -16,7 +16,7 @@ import UntilPaydayBlock from './UntilPaydayBlock.vue';
 import UpcomingBlock from './UpcomingBlock.vue';
 
 const { t } = useI18n();
-const { model, rateDate } = useDashboard();
+const { model, isError, refetch, rateDate } = useDashboard();
 const inflowOpen = ref(false);
 </script>
 
@@ -25,7 +25,15 @@ const inflowOpen = ref(false);
     <h1 class="sr-only">
       {{ t('dashboard.title') }}
     </h1>
-    <div v-if="!model" class="space-y-4 pt-1">
+    <div v-if="isError" data-testid="dash-error">
+      <RouteError
+        :title="t('dashboard.error.title')"
+        :action-label="t('dashboard.error.retry')"
+        @retry="refetch"
+      />
+    </div>
+
+    <div v-else-if="!model" class="space-y-4 pt-1">
       <Skeleton class="h-10 w-48" />
       <Skeleton class="h-5 w-full" />
       <Skeleton class="h-24 w-full" />

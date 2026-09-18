@@ -67,6 +67,31 @@ describe('income sources', () => {
     expect(second.isPrimary).toBe(true);
   });
 
+  it('locks the user’s sources on every edit, so a patch that never mentions the flag keeps it', async () => {
+    const { app, repos } = setup();
+    const order: string[] = [];
+    const lockAll = repos.incomeSources.lockAll.bind(repos.incomeSources);
+    repos.incomeSources.lockAll = async () => {
+      order.push('lock');
+      await lockAll();
+    };
+    const findById = repos.incomeSources.findById.bind(repos.incomeSources);
+    repos.incomeSources.findById = async (userId: string, id: string) => {
+      order.push('read');
+      return findById(userId, id);
+    };
+    const dto = await (await create(app, salary)).json();
+    order.length = 0;
+    // Renaming the primary source says nothing about `isPrimary`, and the merge
+    // re-writes the flag it read. Under a concurrent promotion that read is stale
+    // unless it happens inside the lock, so the lock is taken before it, always.
+    const renamed = await authed(app, 'PATCH', `/income-sources/${dto.id}`, { name: 'Renamed' });
+    expect(renamed.status).toBe(200);
+    expect(await renamed.json()).toMatchObject({ name: 'Renamed', isPrimary: true });
+    // `countInflows` reads again later; what matters is that nothing precedes the lock.
+    expect(order.slice(0, 2)).toEqual(['lock', 'read']);
+  });
+
   it('refuses an unknown currency, a foreign default account and a period that ends before it starts', async () => {
     const { app } = setup();
     const unknown = await create(app, { ...salary, currency: 'XYZ' });

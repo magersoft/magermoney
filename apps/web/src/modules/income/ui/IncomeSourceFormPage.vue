@@ -4,7 +4,7 @@
  * typed as percentages and travel as fractions; the net under them is the
  * domain's own `netMonthly`, so the preview and the dashboard cannot disagree.
  */
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { Decimal, Money, netMonthly } from '@magermoney/domain';
@@ -19,7 +19,7 @@ import {
 } from '@magermoney/ui';
 import { useAccounts } from '@/modules/accounts';
 import { useCurrencies, useCurrencyRegistry } from '@/modules/currencies';
-import { todayIso } from '@/modules/rates';
+import { todayIso, useDisplayCurrency } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import type { DateLocale } from '@/shared/dates/format';
 import { useIncomeSource } from '../application/use-income-sources';
@@ -44,7 +44,7 @@ const NO_ACCOUNT = '';
 const form = reactive({
   name: '',
   grossAmount: '',
-  currency: 'USD',
+  currency: '',
   taxRate: '0',
   commissionRate: '0',
   payDays: [] as number[],
@@ -53,10 +53,13 @@ const form = reactive({
   activeTo: '',
   defaultAccountId: NO_ACCOUNT,
 });
+/** The field is the person's, or the edited row's, from the first time either sets it. */
+const currencyPicked = ref(false);
 watch(
   existing,
   (s) => {
     if (!s) return;
+    currencyPicked.value = true;
     Object.assign(form, {
       name: s.name,
       grossAmount: s.grossAmount,
@@ -69,6 +72,27 @@ watch(
       activeTo: s.activeTo ?? '',
       defaultAccountId: s.defaultAccountId ?? NO_ACCOUNT,
     });
+  },
+  { immediate: true },
+);
+
+/**
+ * A new row opens in the currency the screens already report in; if that one is
+ * not offered the first of the list does. The currency list and the profile
+ * behind the display currency arrive in either order, so the default keeps
+ * following them until the field is claimed — by the row being edited or by the
+ * person — and never after.
+ */
+const { current: displayCurrency } = useDisplayCurrency();
+const defaultCurrency = computed(() => {
+  const codes = currencies.value.map((c) => c.code);
+  if (codes.length === 0) return '';
+  return codes.includes(displayCurrency.value) ? displayCurrency.value : codes[0]!;
+});
+watch(
+  defaultCurrency,
+  (code) => {
+    if (code !== '' && !currencyPicked.value) form.currency = code;
   },
   { immediate: true },
 );
@@ -144,6 +168,7 @@ async function submit() {
         v-model="form.currency"
         data-testid="source-currency"
         class="mt-1 flex min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
+        @change="currencyPicked = true"
       >
         <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }}</option>
       </select>
@@ -243,7 +268,7 @@ async function submit() {
       type="submit"
       size="lg"
       class="w-full"
-      :disabled="busy || form.name.trim() === ''"
+      :disabled="busy || form.name.trim() === '' || form.currency === ''"
       data-testid="source-submit"
     >
       {{ editingId ? t('income.form.save') : t('income.form.create') }}

@@ -15,6 +15,7 @@ export function useIncomeSources(): {
   dtos: ComputedRef<IncomeSourceDto[]>;
   isLoading: ComputedRef<boolean>;
   isError: ComputedRef<boolean>;
+  refetch: () => void;
 } {
   const api = incomeSourcesApi(useApi());
   const registry = useCurrencyRegistry();
@@ -25,6 +26,7 @@ export function useIncomeSources(): {
     sources: computed(() => dtos.value.map((d) => toIncomeSource(d, registry.value))),
     isLoading: computed(() => query.isLoading.value),
     isError: computed(() => query.isError.value),
+    refetch: () => void query.refetch(),
   };
 }
 

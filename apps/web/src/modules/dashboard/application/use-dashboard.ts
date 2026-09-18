@@ -12,6 +12,11 @@ import { buildDashboard, type DashboardModel } from './build-dashboard';
 export function useDashboard(): {
   model: ComputedRef<DashboardModel | undefined>;
   isLoading: ComputedRef<boolean>;
+  /** Any of the composed lists failed: every number here is derived from all of
+   * them at once, so one missing answer makes the whole screen wrong rather
+   * than incomplete. The screen says so instead of showing a total. */
+  isError: ComputedRef<boolean>;
+  refetch: () => void;
   rateDate: ComputedRef<string>;
 } {
   const today = todayIso();
@@ -46,6 +51,21 @@ export function useDashboard(): {
         budgets.isLoading.value ||
         inflows.isLoading.value,
     ),
+    isError: computed(
+      () =>
+        capital.isError.value ||
+        sources.isError.value ||
+        expenses.isError.value ||
+        budgets.isError.value ||
+        inflows.isError.value,
+    ),
+    refetch: () => {
+      capital.refetch();
+      sources.refetch();
+      expenses.refetch();
+      budgets.refetch();
+      inflows.refetch();
+    },
     rateDate: capital.rateDate,
   };
 }

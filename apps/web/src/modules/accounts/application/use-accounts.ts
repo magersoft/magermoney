@@ -11,12 +11,16 @@ export const balancesKey = (id: string) => ['accounts', id, 'balances'] as const
 export function useAccounts(): {
   accounts: ComputedRef<AccountDto[]>;
   isLoading: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  refetch: () => void;
 } {
   const api = accountsApi(useApi());
   const query = useQuery({ queryKey: ACCOUNTS_KEY, queryFn: api.list });
   return {
     accounts: computed(() => query.data.value ?? []),
     isLoading: computed(() => query.isLoading.value),
+    isError: computed(() => query.isError.value),
+    refetch: () => void query.refetch(),
   };
 }
 

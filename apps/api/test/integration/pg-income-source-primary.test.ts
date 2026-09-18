@@ -39,6 +39,23 @@ describe('the primary income source', () => {
     expect([a.id, b.id]).toContain(now[0]);
   });
 
+  it('survives a promotion racing a rename of the source that is currently primary', async () => {
+    const uid = await newUser('prim');
+    const a = (
+      await createIncomeSource(deps)(uid, { ...salary, name: 'A', isPrimary: true })
+    )._unsafeUnwrap();
+    const b = (await createIncomeSource(deps)(uid, { ...salary, name: 'B' }))._unsafeUnwrap();
+    // The rename says nothing about `isPrimary` and still writes back what it read.
+    // Without the unconditional lock it reads A as primary while B is being promoted,
+    // and re-asserting that flag trips `income_sources_one_primary_idx`.
+    const results = await Promise.all([
+      updateIncomeSource(deps)(uid, b.id, { isPrimary: true }),
+      updateIncomeSource(deps)(uid, a.id, { name: 'A renamed' }),
+    ]);
+    expect(results.every((r) => r.isOk())).toBe(true);
+    expect(await primaries(uid)).toHaveLength(1);
+  });
+
   it('stays single when two new sources are created as primary at the same moment, the user having none', async () => {
     const uid = await newUser('prim');
     // No rows to lock yet: this is why the lock is advisory and not `for update`.

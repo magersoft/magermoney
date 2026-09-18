@@ -1,10 +1,11 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import ru from '../src/locales/ru.json';
 import { API_KEY } from '../src/shared/api/use-api.js';
+import { resetDisplayCurrency } from '../src/modules/rates/application/use-display-currency.js';
 import ExpenseFormPage from '../src/modules/expenses/ui/ExpenseFormPage.vue';
 
 const { toast } = vi.hoisted(() => ({ toast: vi.fn() }));
@@ -77,6 +78,40 @@ const base = (path: string) => {
 };
 
 describe('ExpenseFormPage', () => {
+  // The display currency is one instance for the whole app; each mount gets its own.
+  beforeEach(() => resetDisplayCurrency());
+
+  it('opens a new expense in the currency the screens already report in', async () => {
+    const fetch = vi.fn(async (path: string) => {
+      if (path === '/me')
+        return json({
+          id: '11111111-1111-4111-8111-111111111111',
+          displayName: null,
+          locale: 'ru',
+          defaultCurrency: 'RUB',
+          reportingCurrencies: ['RUB', 'EUR'],
+          onboardingCompletedAt: null,
+        });
+      if (path === '/currencies')
+        return json(
+          ['EUR', 'RUB'].map((code) => ({
+            code,
+            kind: 'fiat',
+            scale: 2,
+            symbol: null,
+            nameRu: null,
+            nameEn: null,
+            icon: null,
+          })),
+        );
+      return base(path) ?? json([]);
+    });
+    const { w } = await mountForm('/plan/expenses/new', fetch);
+    expect((w.get('[data-testid="expense-currency"]').element as HTMLSelectElement).value).toBe(
+      'RUB',
+    );
+  });
+
   it('sends categoryName for a category typed in, and categoryId for a known one', async () => {
     const posts: unknown[] = [];
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
