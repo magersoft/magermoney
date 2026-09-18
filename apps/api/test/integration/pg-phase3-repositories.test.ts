@@ -191,5 +191,35 @@ describe('phase 3 pg repositories', () => {
     expect(entries[0]).toEqual({ origin: 'inflow', inflowId: inflow.id, amount: '150' });
     // The account can no longer be deleted: an inflow points at it.
     expect(await repos.accounts.delete(uid, account.id)).toBe('has_inflows');
+    // Nor can the income source it came from: an inflow still points at it.
+    expect(await repos.incomeSources.delete(uid, source.id)).toBe('has_inflows');
+    expect(await repos.incomeSources.findById(uid, source.id)).not.toBeNull();
+  });
+
+  it('income sources: an empty pay_days array round-trips through the hand-built int[] literal', async () => {
+    const inserted = await repos.incomeSources.insert(uid, {
+      name: 'Freelance',
+      grossAmount: '500',
+      currency: 'USD',
+      taxRate: '0',
+      commissionRate: '0',
+      payDays: [],
+      isPrimary: false,
+      activeFrom: '2026-01-01',
+      activeTo: null,
+      defaultAccountId: null,
+    });
+    expect(inserted.payDays).toEqual([]);
+    expect((await repos.incomeSources.findById(uid, inserted.id))?.payDays).toEqual([]);
+    const updated = await repos.incomeSources.update(uid, inserted.id, {
+      ...inserted,
+      payDays: [15],
+    });
+    expect(updated?.payDays).toEqual([15]);
+    const cleared = await repos.incomeSources.update(uid, inserted.id, {
+      ...inserted,
+      payDays: [],
+    });
+    expect(cleared?.payDays).toEqual([]);
   });
 });

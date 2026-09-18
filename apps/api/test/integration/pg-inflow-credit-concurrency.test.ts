@@ -59,13 +59,19 @@ describe('credited inflows under concurrency', () => {
     const run = (amount: string) =>
       createInflow(deps)(uid, { incomeSourceId: source.id, amount, accountId: main.id });
     const results = await Promise.all([run('5'), run('7')]);
-    const landed = results.filter((r) => r.isOk());
-    expect(landed.length).toBeGreaterThanOrEqual(1);
-    const sum = results.reduce(
-      (acc, r, i) => (r.isOk() ? acc.plus(i === 0 ? 5 : 7) : acc),
-      new Decimal(10),
+    // The account lock in `createInflow` is taken before the balance is read, and `planCredit` stamps
+    // `recordedAt` after the lock is held, so whichever credit runs second always builds on the first
+    // one's balance: both succeed deterministically, never a `..._not_latest` refusal.
+    expect(results.every((r) => r.isOk())).toBe(true);
+    expect((await repos.accounts.findById(uid, main.id))?.balance).toBe(
+      new Decimal(10).plus(5).plus(7).toFixed(),
     );
-    expect((await repos.accounts.findById(uid, main.id))?.balance).toBe(sum.toFixed());
+    for (const r of results) {
+      const inflow = r._unsafeUnwrap();
+      const [row] = await sql<{ count: number }[]>`
+        select count(*)::int as count from balance_entries where user_id = ${uid} and inflow_id = ${inflow.id}`;
+      expect(row!.count).toBe(1);
+    }
   });
 
   it('refuses to edit or delete a credited inflow once a newer entry exists, and leaves everything intact', async () => {
