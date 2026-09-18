@@ -55,6 +55,7 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Same for Task 11: extending `Repos` with `expenseCategories` and `expenses` broke that same hand-built literal in `pg-balance-concurrency.test.ts`. Fixed by adding both to it.
 - Same for Task 12: extending `Repos` with `budgets` broke that same hand-built literal in `pg-balance-concurrency.test.ts`. Fixed by adding `budgets: repos.budgets`.
 - 400 `active_period_invalid`, `negative_amount`, `category_required`, `category_ambiguous` added to the expenses API beyond spec §4, so table checks never surface as 500; over HTTP the Task 6 contracts answer `VALIDATION` first for anything wrong within one payload, and these codes appear only when the merged row of a PATCH is wrong (or for callers that bypass zod).
+- Task 13's brief gives `const [{ count }] = await sql<{ count: number }[]>...` twice in `pg-inflow-credit-concurrency.test.ts`; under this repo's `noUncheckedIndexedAccess`, destructuring an array element directly types it as possibly `undefined`, so `tsc --noEmit` refuses the nested-object pattern. Fixed by destructuring the row (`const [row] = await sql...`) and reading `row!.count`, matching the `!`-after-single-row pattern already used elsewhere in `test/integration/`.
 
 ## Not run
 
