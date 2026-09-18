@@ -31,4 +31,22 @@ describe('BalanceTimeline', () => {
     expect(mountTimeline(8, ['1.00000002', '1']).text()).toContain('+0.00000002');
     expect(mountTimeline(2, ['1.5', '1']).text()).toContain('+0.50');
   });
+
+  it('says which entries an inflow wrote, and offers no edit for them', () => {
+    const w = mount(BalanceTimeline, {
+      props: {
+        entries: [
+          { ...entry('9', '600'), origin: 'inflow' as const, inflowId: 'i' },
+          entry('2', '100'),
+        ],
+        currency: 'USD',
+        scale: 2,
+        editableId: null,
+      },
+      global: { plugins: [createI18n({ legacy: false, locale: 'ru', messages: { ru } })] },
+    });
+    const row = w.get('[data-testid="balance-entry-9"]');
+    expect(row.text()).toContain('поступление');
+    expect(row.attributes('disabled')).toBeDefined();
+  });
 });

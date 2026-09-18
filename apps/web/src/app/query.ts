@@ -6,6 +6,7 @@ import {
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { del, get, set } from 'idb-keyval';
 import { ACCOUNTS_KEY } from '@/modules/accounts/offline';
+import { INFLOWS_KEY } from '@/modules/income/offline';
 import { TRANSFERS_KEY } from '@/modules/transfers/offline';
 import { isNetworkFailure } from '@/shared/api/client';
 import { onClearClientCaches } from '@/shared/cache/client-caches';
@@ -85,6 +86,7 @@ export async function replayOfflineMutations(client: QueryClient): Promise<void>
   await Promise.all([
     client.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
     client.invalidateQueries({ queryKey: TRANSFERS_KEY }),
+    client.invalidateQueries({ queryKey: INFLOWS_KEY }),
   ]);
 }
 

@@ -8,6 +8,7 @@ import { cacheRestored, clientPersister, queryClient, replayOfflineMutations } f
 import { router } from '@/app/router';
 import { registerAccountMutations } from '@/modules/accounts/offline';
 import { authGuard, useSession, useSessionStore } from '@/modules/auth';
+import { registerIncomeMutations } from '@/modules/income/offline';
 import { registerTransferMutations } from '@/modules/transfers/offline';
 import { createApiClient } from '@/shared/api/client';
 import { API_KEY, OWNER_KEY } from '@/shared/api/use-api';
@@ -34,6 +35,7 @@ app.provide(OWNER_KEY, ownerId);
  */
 registerAccountMutations(queryClient, api, ownerId);
 registerTransferMutations(queryClient, api, ownerId);
+registerIncomeMutations(queryClient, api, ownerId);
 app.use(VueQueryPlugin, { queryClient, clientPersister });
 
 /**

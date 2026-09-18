@@ -127,6 +127,7 @@
       "noHistory": "No balances yet",
       "sinceLast": "since last",
       "byTransfer": "transfer",
+      "byInflow": "inflow",
       "recordedAt": "Date"
     },
     "form": {
@@ -258,11 +259,36 @@
     "option": "{name} · {balance} {currency}",
     "row": "{from} → {to}"
   },
+  "inflows": {
+    "title": "Inflow",
+    "editTitle": "Edit inflow",
+    "source": "From",
+    "newSource": "New source…",
+    "newName": "Source name",
+    "newCurrency": "Source currency",
+    "amount": "Amount received",
+    "date": "When",
+    "account": "Credit to account",
+    "noAccount": "Don't credit",
+    "credited": "Amount that reached the account",
+    "hint": "At today's rate ≈ {amount}",
+    "rate": "Rate: 1 {from} = {rate} {to}",
+    "more": "More",
+    "usdRate": "Rate to the dollar that day",
+    "usdRateHint": "Dollars per 1 {code}. Leave empty to use the rates table.",
+    "note": "Note",
+    "save": "Record",
+    "update": "Save",
+    "delete": "Delete",
+    "record": "Record an inflow",
+    "failed": "Couldn't record that. Try again."
+  },
   "quick": {
     "open": "Add",
     "record": "Update balance",
     "transfer": "Transfer",
-    "pickAccount": "Which account?"
+    "pickAccount": "Which account?",
+    "inflow": "Inflow"
   },
   "errors": {
     "recordedInFuture": "That date is in the future. Pick today or earlier.",

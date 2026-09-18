@@ -50,6 +50,16 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 21: the ended-sources list is drawn at full contrast instead of the brief markup's `opacity-70` — 12px muted text at 70% opacity falls under AA in dark mode, and the disclosure already says the rows are ended. Cost if wrong: an ended source reads as loud as a current one until the person collapses the disclosure again.
 - Task 21: the ended-sources toggle carries `aria-controls` only while the list is expanded, because the list is `v-if`-ed away when collapsed and a dangling `aria-controls` points at nothing. Cost if wrong: none; `aria-expanded` still tells the state.
 
+- Task 22: `useCreateInflow().create` resolves `'sent' | 'parked'`, like the other parked writes, not the DTO. Cost if wrong: a caller that wants the created inflow reads it from the cache instead.
+- Task 22: a source created from the inflow sheet starts on the inflow's date (today unless the date was changed), so a backdated first receipt is inside its active period. Cost if wrong: a source's `activeFrom` is earlier than the person would have typed.
+- Task 22: creating that source is not parked offline — only the inflow itself is; offline, "New source…" fails with the generic message and keeps the sheet open with everything typed. Cost if wrong: an inflow from a brand-new source cannot be recorded without a connection.
+- Task 22: the quick-action button now shows with zero accounts, because an inflow needs none; balance and transfer stay hidden until an account exists. Cost if wrong: an empty-handed person sees one action instead of none.
+- Task 22: a parked inflow refused as another account's write skips the snapshot rollback and relies on the refetch (closes the matching phase 2 follow-up for this mutation only). Cost if wrong: the optimistic row stays on screen until the refetch answers.
+- Task 22: the source picker is locked when editing an inflow; moving a receipt to another source is delete-and-recreate. Cost if wrong: one extra step for a misfiled receipt.
+- Task 22: the "credited" block fades in with an inline 150ms linear opacity transition rather than a `packages/ui` preset — `fadeUp`/`scaleIn` both move, and a second movement inside a sheet that is already sliding reads as the form jumping. The values are the ones the presets use for their own fades. Cost if wrong: one more place to change if the fade duration is ever retuned.
+- Task 22: `inflows.hint` reads "По курсу дня ≈ {amount}" (capitalised), not the brief's lowercase "по курсу дня", so it matches the sibling `transfers.hint` the person sees in the transfer sheet. Cost if wrong: none.
+- Task 22: the "More" disclosure keeps its fields in the DOM with `v-show` instead of `v-if`, so the button's `aria-controls` always points at an element that exists. Cost if wrong: two fields are parsed but hidden while the disclosure is closed.
+
 ## Deferred minors
 
 (grouped by task as they arise)
@@ -111,6 +121,9 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 18's Step 3 warns only that the shadcn-vue CLI may edit `package.json`. It also edits `src/styles/index.css` (adds a Geist Google-Fonts `@import` and a `@layer base` block) and bumps dependency majors; all of that has to be reverted after the `add`, keeping only `src/components/ui/switch/**`.
 
 - Task 19's `test/route-fallback.test.ts` mounts the async component as the mount root and resolves its loader to a bare `{ default: Page }`. Neither works: `@vue/test-utils` 2.5 leaves `wrapper.vm` null for an async root (every `get`/`text` throws `Cannot read properties of null`), and Vue only unwraps `default` when the resolved object carries `__esModule` (a real `import()` does, a literal does not), so the test's own component never rendered. Fixed by rendering the screen from a one-line host component and marking the resolved module `__esModule: true`.
+
+- Task 22's `use-create-inflow.test.ts` awaits the create promise while every GET is still blocked. It cannot resolve: `onSettled` returns `invalidateAfterInflow`, and the mutation settles only after that invalidation's refetch of the (active) accounts and inflows queries has answered, so the test timed out at 5s. Fixed in the test, not the implementation: the blocked GETs are collected and released with their normal answers after the rollback has been asserted, so the rollback is still proven to come from `onError` and the write is then awaited as every caller awaits it.
+- Task 22's `InflowSheet.test.ts` gives `api()` a default parameter `sources = [{ ...sourceDto, defaultAccountId: USD_ACC }]`, which infers `defaultAccountId: string` and makes the second test's `api(calls, [sourceDto])` (`defaultAccountId: null`) a type error under `vue-tsc`. Fixed by typing the parameter explicitly.
 
 ## Not run
 

@@ -3,6 +3,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import type { InflowDto } from '@magermoney/contracts';
 import { netMonthly } from '@magermoney/domain';
 import {
   AlertDialog,
@@ -32,6 +33,7 @@ import {
 } from '../application/use-income-source-mutations';
 import { useInflows } from '../application/use-inflows';
 import InflowRow from './InflowRow.vue';
+import InflowSheet from './InflowSheet.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -55,6 +57,12 @@ const isCurrent = computed(() => dto.value?.activeTo == null || dto.value.active
 const accountName = (accountId: string | null) =>
   accounts.value.find((a) => a.id === accountId)?.name;
 const confirmDelete = ref(false);
+const sheetOpen = ref(false);
+const editing = ref<InflowDto | undefined>();
+function openSheet(inflow?: InflowDto) {
+  editing.value = inflow;
+  sheetOpen.value = true;
+}
 
 async function end() {
   if (!dto.value) return;
@@ -119,6 +127,13 @@ async function del() {
 
     <div class="mt-6 flex flex-wrap gap-2">
       <Button
+        class="min-h-9 pointer-coarse:min-h-11"
+        data-testid="source-record-inflow"
+        @click="openSheet()"
+      >
+        {{ t('inflows.record') }}
+      </Button>
+      <Button
         variant="outline"
         class="min-h-9 pointer-coarse:min-h-11"
         data-testid="source-edit"
@@ -155,9 +170,11 @@ async function del() {
     </p>
     <ul v-else class="mt-1 divide-y divide-border/60 border-t border-border">
       <li v-for="i in inflows" :key="i.id">
-        <InflowRow :inflow="i" :account-name="accountName(i.accountId)" />
+        <InflowRow :inflow="i" :account-name="accountName(i.accountId)" @select="openSheet" />
       </li>
     </ul>
+
+    <InflowSheet v-model:open="sheetOpen" :source-id="dto.id" :inflow="editing" />
 
     <AlertDialog v-model:open="confirmDelete">
       <AlertDialogContent>

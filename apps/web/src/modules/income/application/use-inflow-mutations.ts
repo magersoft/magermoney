@@ -1,8 +1,35 @@
+import { computed } from 'vue';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { UpdateInflowInput } from '@magermoney/contracts';
-import { useApi } from '@/shared/api/use-api';
+import type { CreateInflowInput, InflowDto, UpdateInflowInput } from '@magermoney/contracts';
+import { settledOrParked } from '@/shared/api/offline-write';
+import { useApi, useOwnerId } from '@/shared/api/use-api';
 import { inflowsApi } from '../infrastructure/inflows-api';
 import { invalidateAfterInflow } from './invalidate';
+import {
+  CREATE_INFLOW_KEY,
+  registerIncomeMutations,
+  type CreateInflowVars,
+} from './mutation-defaults';
+
+/**
+ * What recording an inflow does — the POST, the optimistic receipt and balance,
+ * the rollback — lives in the client's mutation defaults, so one that paused
+ * offline and was restored from IndexedDB behaves exactly like one this screen
+ * started.
+ */
+export function useCreateInflow() {
+  const qc = useQueryClient();
+  const ownerId = useOwnerId();
+  registerIncomeMutations(qc, useApi(), ownerId);
+  const m = useMutation<InflowDto, Error, CreateInflowVars>({ mutationKey: CREATE_INFLOW_KEY });
+  return {
+    /** Resolves `'parked'` when the write is waiting for a connection, so the sheet can close. */
+    create: (input: CreateInflowInput) =>
+      settledOrParked(m.mutateAsync({ ownerId: ownerId(), input }), m.isPaused),
+    // A parked write is not pending on anything the person should wait for.
+    isPending: computed(() => m.isPending.value && !m.isPaused.value),
+  };
+}
 
 export function useUpdateInflow() {
   const api = inflowsApi(useApi());
