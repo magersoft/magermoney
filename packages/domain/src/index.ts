@@ -7,6 +7,7 @@ export * from './rate-table.js';
 export * from './clock.js';
 export * from './calendar.js';
 export * from './active-period.js';
+export * from './income-source.js';
 export * from './account.js';
 export * from './transfer.js';
 export * from './read-models.js';
