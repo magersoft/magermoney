@@ -42,6 +42,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 19: the wordmark in the header is rendered `custom` without `aria-current`, so on `/` only the Home tab claims to be the current page. Cost if wrong: none; the link still navigates home.
 - Task 19: below `sm:` the currency switch drops its currency codes to the screen reader (`max-sm:sr-only`) only when there are more than two reporting currencies — with three or four, the codes, the new rates link and the theme button do not fit a 375px header. At 320px with four currencies the header is still ~30px over and the switch compresses; 320px with four reporting currencies is out of the design target (`docs/design/direction.md` sets 375px). Cost if wrong: on a phone with 3–4 currencies the segments are identified by their currency mark alone.
 
+- Task 19 (fix round 1): the full page load a failed barrel triggers is spent once per path, recorded in `sessionStorage` so the marker outlives the reload, and cleared by `router.afterEach`; a second failure for the same path is left to surface so `RouteError` renders. If `sessionStorage` refuses to store anything there is no way to bound the loop, so nothing reloads at all. Cost if wrong: in a browser without session storage a genuinely stale precache shows the error screen instead of curing itself.
+
 ## Deferred minors
 
 (grouped by task as they arise)
@@ -68,6 +70,14 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 
 - `motion-reduce:transition-none` on the `ProgressRule` fill is redundant with the global reduced-motion catch-all in `styles/index.css`, which already zeroes `--mm-duration-*`.
 - `SegmentedControl` moves keyboard focus by walking `parentElement.children` instead of template refs, which assumes the segments are the group's only children.
+
+### Task 19
+
+- The rates link lives inside the currency switch, which is hidden when a profile has a single reporting currency — such a profile has no header route to the rates screen at all, only the Settings row.
+- `FAB_PATHS` gained `/accounts`, and no test covers where the FAB appears; the phase 2 suite never asserted it either.
+- `settings.currencies.hint` still says "на главной" / "home screen" while the totals it describes now live on `/accounts`; Task 26 revisits the copy once the dashboard carries them.
+- The e2e smoke test is still titled "sign in, see home, switch currency" but no longer visits home; Task 27 restores the home leg and the title with it.
+- `SettingsPage.test.ts` asserts the link by finding the `RouterLinkStub` whose `to` is `/settings/rates`; a failure reads as `undefined`, and naming the cause (assert the row exists, then its target) would say what broke.
 
 ## Plan errata
 

@@ -19,10 +19,18 @@ import { RouteError, RouteLoading } from '@magermoney/ui';
  * skeleton instead of nothing.
  */
 
-/** Behind an object so a test can replace it: `location.reload` cannot be spied on in every DOM. */
+/**
+ * The two ways out of a chunk that did not arrive, behind one object so a test
+ * can replace them: `window.location` cannot be spied on in every DOM.
+ */
 export const pageReloader = {
+  /** Fetch this same address again — the screen's own Reload button. */
   reload(): void {
     window.location.reload();
+  },
+  /** Leave the running app and load the target from the new `index.html`. */
+  assign(url: string): void {
+    window.location.assign(url);
   },
 };
 

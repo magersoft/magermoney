@@ -38,10 +38,13 @@ async function mountShell(at = '/') {
   return shell;
 }
 
-/** The labels of the links that claim to be the current page, across both navigations. */
-const current = (shell: Awaited<ReturnType<typeof mountShell>>) => [
-  ...new Set(shell.findAll('a[aria-current="page"]').map((a) => a.text())),
-];
+/**
+ * The labels of the links that claim to be the current page. Not deduplicated:
+ * exactly one tab per navigation has to be lit, so the same label twice is the
+ * assertion — once would mean the desktop bar and the phone tab bar disagree.
+ */
+const current = (shell: Awaited<ReturnType<typeof mountShell>>) =>
+  shell.findAll('a[aria-current="page"]').map((a) => a.text());
 
 describe('AppShell', () => {
   it('offers four tabs in both navigations, and rates is no longer one of them', async () => {
@@ -60,16 +63,16 @@ describe('AppShell', () => {
     ]);
   });
 
-  it('marks home only on home itself', async () => {
-    expect(current(await mountShell('/'))).toEqual(['Home']);
-    expect(current(await mountShell('/plan'))).toEqual(['Plan']);
+  it('marks home only on home itself, in both navigations', async () => {
+    expect(current(await mountShell('/'))).toEqual(['Home', 'Home']);
+    expect(current(await mountShell('/plan'))).toEqual(['Plan', 'Plan']);
   });
 
   it('keeps a tab lit on the screens that belong to it', async () => {
-    expect(current(await mountShell('/accounts/abc'))).toEqual(['Accounts']);
-    expect(current(await mountShell('/transfers'))).toEqual(['Accounts']);
-    expect(current(await mountShell('/plan/income/abc'))).toEqual(['Plan']);
-    expect(current(await mountShell('/settings/rates'))).toEqual(['Settings']);
+    expect(current(await mountShell('/accounts/abc'))).toEqual(['Accounts', 'Accounts']);
+    expect(current(await mountShell('/transfers'))).toEqual(['Accounts', 'Accounts']);
+    expect(current(await mountShell('/plan/income/abc'))).toEqual(['Plan', 'Plan']);
+    expect(current(await mountShell('/settings/rates'))).toEqual(['Settings', 'Settings']);
   });
 
   it('makes the skip link target focusable, so the skip actually moves focus', async () => {
