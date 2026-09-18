@@ -44,6 +44,19 @@ export const scaleIn = {
 } as const;
 
 /**
+ * Something appearing in place inside something that is already moving: a field
+ * a form grows, a line that answers what was just typed. Opacity only — a
+ * second movement inside a sliding sheet reads as the form jumping — at the
+ * same 150ms linear the other presets fade with.
+ */
+export const fade = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.15, ease: 'linear' },
+} as const;
+
+/**
  * Rows of a list entering together. Index `i` is the row's position.
  * The delay stops growing after `STAGGER_CAP` rows, so a 40-account list does
  * not end with a row arriving two seconds late.
@@ -57,7 +70,8 @@ export const listStagger = (i: number) => ({
 });
 
 /** The shape every preset satisfies; `listStagger` returns one of these. */
-export type MotionPreset = typeof fadeUp | typeof scaleIn | ReturnType<typeof listStagger>;
+export type MotionPreset =
+  typeof fadeUp | typeof scaleIn | typeof fade | ReturnType<typeof listStagger>;
 
 /**
  * Strips the movement out of a preset when the user asked for reduced motion,

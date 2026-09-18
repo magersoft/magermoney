@@ -32,7 +32,7 @@ describe('BalanceTimeline', () => {
     expect(mountTimeline(2, ['1.5', '1']).text()).toContain('+0.50');
   });
 
-  it('says which entries an inflow wrote, and offers no edit for them', () => {
+  it('says which entries an inflow wrote', () => {
     const w = mount(BalanceTimeline, {
       props: {
         entries: [
@@ -45,8 +45,7 @@ describe('BalanceTimeline', () => {
       },
       global: { plugins: [createI18n({ legacy: false, locale: 'ru', messages: { ru } })] },
     });
-    const row = w.get('[data-testid="balance-entry-9"]');
-    expect(row.text()).toContain('поступление');
-    expect(row.attributes('disabled')).toBeDefined();
+    // Which of them may be edited is the detail page's rule, asserted there.
+    expect(w.get('[data-testid="balance-entry-9"]').text()).toContain('поступление');
   });
 });

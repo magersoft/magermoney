@@ -12,7 +12,13 @@ vi.mock('@magermoney/ui', async (importOriginal) => {
 
 const USD_ACC = '33333333-3333-4333-8333-333333333333';
 const EUR_ACC = '44444444-4444-4444-8444-444444444444';
+const GBP_ACC = '55555555-5555-4555-8555-555555555555';
 const body = () => new DOMWrapper(document.body);
+const patchBody = (calls: [string, RequestInit | undefined][]) =>
+  JSON.parse(
+    calls.find(([p, i]) => p === `/inflows/${inflowDto.id}` && i?.method === 'PATCH')?.[1]
+      ?.body as string,
+  ) as Record<string, unknown>;
 const postBodies = (calls: [string, RequestInit | undefined][], path: string) =>
   calls
     .filter(([p, i]) => p === path && i?.method === 'POST')
@@ -37,7 +43,8 @@ function api(
     if (path.startsWith('/inflows') && init?.method === 'PATCH') return json(inflowDto);
     if (path.startsWith('/inflows') && init?.method === 'DELETE')
       return new Response(null, { status: 204 });
-    if (path === '/accounts') return json([acc(USD_ACC, 'USD'), acc(EUR_ACC, 'EUR')]);
+    if (path === '/accounts')
+      return json([acc(USD_ACC, 'USD'), acc(EUR_ACC, 'EUR'), acc(GBP_ACC, 'GBP')]);
     return undefined;
   });
 }
@@ -152,6 +159,80 @@ describe('InflowSheet', () => {
     );
     expect(toast).toHaveBeenCalledWith(expect.stringContaining('самое свежее'));
     expect(wrapper.emitted('update:open')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('drops a credited amount typed for another account, and waits for the new one', async () => {
+    const calls: [string, RequestInit | undefined][] = [];
+    const { wrapper } = await mountAt(InflowSheet, '/', api(calls), {
+      props: { open: true, sourceId: SOURCE_ID },
+    });
+    await flushPromises();
+    await body().get('[data-testid="inflow-amount"]').setValue('116');
+    await body().get('[data-testid="inflow-account"]').setValue(EUR_ACC);
+    await body().get('[data-testid="inflow-credited"]').setValue('98');
+    expect((body().get('[data-testid="inflow-credited"]').element as HTMLInputElement).value).toBe(
+      '98',
+    );
+
+    await body().get('[data-testid="inflow-account"]').setValue(GBP_ACC);
+    await flushPromises();
+    // 98 was typed in euros; nothing of it may travel as pounds.
+    expect((body().get('[data-testid="inflow-credited"]').element as HTMLInputElement).value).toBe(
+      '',
+    );
+    expect(body().get('[data-testid="inflow-save"]').attributes('disabled')).toBeDefined();
+    wrapper.unmount();
+  });
+
+  it('will not record an amount that is zero however it is written', async () => {
+    const calls: [string, RequestInit | undefined][] = [];
+    const { wrapper } = await mountAt(InflowSheet, '/', api(calls), {
+      props: { open: true, sourceId: SOURCE_ID },
+    });
+    await flushPromises();
+    await body().get('[data-testid="inflow-amount"]').setValue('0.00');
+    expect(body().get('[data-testid="inflow-save"]').attributes('disabled')).toBeDefined();
+    wrapper.unmount();
+  });
+
+  it("sends the account and the credited amount together when a credited inflow's amount changes", async () => {
+    const calls: [string, RequestInit | undefined][] = [];
+    const credited = { ...inflowDto, accountId: EUR_ACC, creditedAmount: '98' };
+    const { wrapper } = await mountAt(InflowSheet, '/', api(calls, [sourceDto]), {
+      props: { open: true, inflow: credited },
+    });
+    await flushPromises();
+    // The prefilled credited amount survives the account list arriving.
+    expect((body().get('[data-testid="inflow-credited"]').element as HTMLInputElement).value).toBe(
+      '98',
+    );
+    await body().get('[data-testid="inflow-amount"]').setValue('600');
+    await body().get('[data-testid="inflow-credited"]').setValue('510');
+    await body().get('form').trigger('submit');
+    await flushPromises();
+    // The API recomputes the account's entry from both, and refuses one without the other.
+    expect(patchBody(calls)).toMatchObject({
+      amount: '600',
+      accountId: EUR_ACC,
+      creditedAmount: '510',
+    });
+    wrapper.unmount();
+  });
+
+  it('un-credits an inflow by sending a null account, and no credited amount with it', async () => {
+    const calls: [string, RequestInit | undefined][] = [];
+    const credited = { ...inflowDto, accountId: EUR_ACC, creditedAmount: '98' };
+    const { wrapper } = await mountAt(InflowSheet, '/', api(calls, [sourceDto]), {
+      props: { open: true, inflow: credited },
+    });
+    await flushPromises();
+    await body().get('[data-testid="inflow-account"]').setValue('');
+    await body().get('form').trigger('submit');
+    await flushPromises();
+    const patched = patchBody(calls);
+    expect(patched).toMatchObject({ accountId: null });
+    expect(patched).not.toHaveProperty('creditedAmount');
     wrapper.unmount();
   });
 });

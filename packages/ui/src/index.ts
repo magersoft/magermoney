@@ -65,6 +65,7 @@ export type { CurrencyIconInput, ResolvedIcon } from './components/currency-icon
 export {
   fadeUp,
   scaleIn,
+  fade,
   listStagger,
   withMotionPreference,
   EASE_OUT_QUART,

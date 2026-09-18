@@ -74,6 +74,8 @@ export async function mountAt<C extends Component>(
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: blank },
+      { path: '/accounts', component: blank },
+      { path: '/accounts/:id', component: blank },
       { path: '/plan', component: blank },
       { path: '/plan/income/new', component: blank },
       { path: '/plan/income/:id', component: blank },

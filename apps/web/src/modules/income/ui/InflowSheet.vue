@@ -5,13 +5,14 @@
  * app never converts a balance by itself (ADR 0002). The day's rate is a hint,
  * the realised rate is derived once both numbers are in.
  */
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Motion } from 'motion-v';
 import type { InflowDto } from '@magermoney/contracts';
-import { Money, deriveInflowCredit, type Currency } from '@magermoney/domain';
+import { Decimal, Money, deriveInflowCredit, type Currency } from '@magermoney/domain';
 import {
   Button,
+  fade,
   Input,
   MoneyInput,
   Sheet,
@@ -38,18 +39,6 @@ const emit = defineEmits<{ 'update:open': [open: boolean] }>();
 
 const NEW_SOURCE = '__new__';
 const NO_ACCOUNT = '';
-/**
- * The credited field appears in place when the account's currency differs. It
- * fades rather than slides: the sheet under it is already moving, and a second
- * movement inside it reads as the form jumping. Same 150ms linear fade the
- * `packages/ui` presets use when something leaves.
- */
-const CREDITED_FADE = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { duration: 0.15, ease: 'linear' },
-} as const;
-
 const { t, locale } = useI18n();
 const uiLocale = computed(() => locale.value as DateLocale);
 const { toast } = useToast();
@@ -87,7 +76,15 @@ const activeAccounts = computed(() =>
 );
 const chosenSource = computed(() => sources.value.find((s) => s.id === source.value));
 
+/**
+ * True for the tick in which `reset()` fills the fields, so the guard below
+ * does not mistake a prefill for the person changing their mind.
+ */
+let priming = false;
+
 function reset() {
+  priming = true;
+  void nextTick(() => (priming = false));
   const i = props.inflow;
   source.value = i?.incomeSourceId ?? props.sourceId ?? currentSources.value[0]?.id ?? NEW_SOURCE;
   newName.value = '';
@@ -99,7 +96,7 @@ function reset() {
     : (chosenSource.value?.defaultAccountId ?? NO_ACCOUNT);
   credited.value = i?.creditedAmount ?? '';
   usdRate.value = i?.realisedRateToUsd ?? '';
-  more.value = Boolean(i?.realisedRateToUsd);
+  more.value = Boolean(i?.realisedRateToUsd || i?.note);
   note.value = i?.note ?? '';
 }
 watch(
@@ -124,6 +121,16 @@ const currencyCode = computed(() =>
   isNew.value ? newCurrency.value : (props.inflow?.currency ?? chosenSource.value?.currency ?? ''),
 );
 const account = computed(() => accounts.value.find((a) => a.id === accountId.value));
+/**
+ * A credited amount is typed in one account's currency, for one source's
+ * currency. Changing either would otherwise send a number typed for euros as
+ * pounds, so the field is emptied and Save waits for it to be typed again.
+ */
+watch([accountId, currencyCode], () => {
+  if (priming) return;
+  credited.value = '';
+});
+
 const cross = computed(() =>
   Boolean(account.value && account.value.currency !== currencyCode.value),
 );
@@ -157,7 +164,7 @@ const busy = computed(() => creating.value || updating.value || creatingSource.v
 const canSubmit = computed(
   () =>
     amount.value !== '' &&
-    amount.value !== '0' &&
+    new Decimal(amount.value).gt(0) &&
     (isNew.value ? newName.value.trim() !== '' : source.value !== '') &&
     (!cross.value || credited.value !== ''),
 );
@@ -318,7 +325,7 @@ async function del() {
           </select>
         </label>
 
-        <Motion v-if="cross" tag="label" class="block" v-bind="CREDITED_FADE">
+        <Motion v-if="cross" tag="label" class="block" v-bind="fade">
           <span class="text-xs font-medium text-muted-foreground"
             >{{ t('inflows.credited') }} · {{ account?.currency }}</span
           >

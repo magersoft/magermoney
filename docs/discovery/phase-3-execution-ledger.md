@@ -59,6 +59,7 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 22: the "credited" block fades in with an inline 150ms linear opacity transition rather than a `packages/ui` preset — `fadeUp`/`scaleIn` both move, and a second movement inside a sheet that is already sliding reads as the form jumping. The values are the ones the presets use for their own fades. Cost if wrong: one more place to change if the fade duration is ever retuned.
 - Task 22: `inflows.hint` reads "По курсу дня ≈ {amount}" (capitalised), not the brief's lowercase "по курсу дня", so it matches the sibling `transfers.hint` the person sees in the transfer sheet. Cost if wrong: none.
 - Task 22: the "More" disclosure keeps its fields in the DOM with `v-show` instead of `v-if`, so the button's `aria-controls` always points at an element that exists. Cost if wrong: two fields are parsed but hidden while the disclosure is closed.
+- Task 22 (fix round 1): a credited amount is cleared whenever the chosen account or the source's currency changes, and Save waits for it to be typed again — the brief's form kept the value across an account change, so a number typed for euros could be submitted as pounds. A declared balance must never carry a number typed for another currency. Cost if wrong: one number retyped after a change of mind.
 
 ## Deferred minors
 
@@ -104,6 +105,12 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - The delete dialog's Cancel and confirm buttons keep the shadcn defaults and have no `pointer-coarse:min-h-11`, unlike every other control on these screens.
 - Test gaps: the exact `activeTo` value sent by "End today", the error toasts of `end`/`del`/`submit`, the loading skeletons, and that `source-end` is hidden on an already-ended source.
 - The inflows list on the source page is rendered in the order the API returns it (newest first); nothing on the client asserts or enforces that order.
+
+### Task 22
+
+- Offline, "New source…" shows the generic retry copy (`inflows.failed`) instead of the offline copy: only the inflow itself is parked, and the sheet cannot tell a dead connection from a refused write.
+- No sheet-level test for `create() → 'parked'` closing the sheet and toasting `offline.saved`; the parked path is covered at the mutation level only.
+- The lazily imported `InflowSheet` in `QuickActions.vue` has no error fallback: a failed chunk leaves the quick action doing nothing, unlike the routed screens, which have `routeComponent`.
 
 ## Plan errata
 
