@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { DOMWrapper, flushPromises } from '@vue/test-utils';
 import IncomeSourcePage from '../src/modules/income/ui/IncomeSourcePage.vue';
 import { inflowDto, sourceDto } from './fixtures/income.js';
-import { apiOf, json, mountAt } from './fixtures/income-mount.js';
+import { apiOf, json, mountAt, type Fetch } from './fixtures/income-mount.js';
 
 vi.mock('@magermoney/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@magermoney/ui')>();
@@ -74,6 +74,39 @@ describe('IncomeSourcePage', () => {
     await flushPromises();
     expect(deleted).toBe(true);
     expect(router.currentRoute.value.fullPath).toBe('/plan?tab=income');
+    wrapper.unmount();
+  });
+
+  it('says so when the source is not there, instead of a blank screen', async () => {
+    const { wrapper } = await mountAt(
+      IncomeSourcePage,
+      '/plan/income/99999999-9999-4999-8999-999999999999',
+      apiOf((p) => (p === '/income-sources' ? json([sourceDto]) : undefined)),
+    );
+    await flushPromises();
+    expect(wrapper.text()).toContain('Источник не найден');
+    expect(wrapper.get('[data-testid="source-back"]').attributes('href')).toBe('/plan?tab=income');
+    wrapper.unmount();
+  });
+
+  it('disables the ending and the delete confirmation while the write is in flight', async () => {
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const base = apiOf((p) => (p === '/income-sources' ? json([sourceDto]) : undefined));
+    const slow: Fetch = async (p, init) => {
+      if (init?.method === 'PATCH') await gate;
+      return base(p, init);
+    };
+    const { wrapper } = await mountAt(IncomeSourcePage, `/plan/income/${sourceDto.id}`, slow);
+    await flushPromises();
+    await wrapper.get('[data-testid="source-end"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="source-end"]').attributes('disabled')).toBeDefined();
+    release();
+    await flushPromises();
+    expect(wrapper.get('[data-testid="source-end"]').attributes('disabled')).toBeUndefined();
     wrapper.unmount();
   });
 });

@@ -85,6 +85,16 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - The e2e smoke test is still titled "sign in, see home, switch currency" but no longer visits home; Task 27 restores the home leg and the title with it.
 - `SettingsPage.test.ts` asserts the link by finding the `RouterLinkStub` whose `to` is `/settings/rates`; a failure reads as `undefined`, and naming the cause (assert the row exists, then its target) would say what broke.
 
+### Task 21
+
+- The "is this source ended" predicate is spelled twice — `activeTo === null || activeTo >= today` in `IncomeSegment.vue` and `isCurrent` in `IncomeSourcePage.vue`; it belongs next to `payDaysLabel` in `domain/labels.ts`.
+- The amount lockup (a padded figure plus its code in mono small-caps) is hand-rolled in four places now; a small `AmountLockup` in `packages/ui` would make the signature device one object.
+- `InflowRow` prints `inflow.amount` as the API sends it while `IncomeSourceRow` pads to the currency's scale, so a ledger can show `500` above `765.00`.
+- The day grid is labelled twice: a `<legend>` on the fieldset and `aria-label` on `DayOfMonthPicker`; a screen reader reads the group name twice.
+- The delete dialog's Cancel and confirm buttons keep the shadcn defaults and have no `pointer-coarse:min-h-11`, unlike every other control on these screens.
+- Test gaps: the exact `activeTo` value sent by "End today", the error toasts of `end`/`del`/`submit`, the loading skeletons, and that `source-end` is hidden on an already-ended source.
+- The inflows list on the source page is rendered in the order the API returns it (newest first); nothing on the client asserts or enforces that order.
+
 ## Plan errata
 
 (defects found in the plan's code or expected values, with the correction)

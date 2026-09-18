@@ -41,6 +41,7 @@
       "cancel": "Cancel",
       "inflows": "Inflows",
       "noInflows": "No inflows yet.",
+      "notFound": "This source is gone. It was probably deleted.",
       "failed": "That didn't work. Try again."
     },
     "inflow": {

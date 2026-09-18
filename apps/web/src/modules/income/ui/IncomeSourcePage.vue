@@ -39,12 +39,12 @@ const { t, locale } = useI18n();
 const { toast } = useToast();
 const id = computed(() => String(route.params.id));
 const dto = useIncomeSource(id);
-const { isLoading } = useIncomeSources();
+const { isLoading, isError } = useIncomeSources();
 const registry = useCurrencyRegistry();
 const { accounts } = useAccounts();
 const { dtos: inflows, isLoading: inflowsLoading } = useInflows(() => ({ sourceId: id.value }));
-const { update } = useUpdateIncomeSource();
-const { remove } = useDeleteIncomeSource();
+const { update, isPending: ending } = useUpdateIncomeSource();
+const { remove, isPending: removing } = useDeleteIncomeSource();
 
 const uiLocale = computed(() => locale.value as DateLocale);
 const source = computed(() => (dto.value ? toIncomeSource(dto.value, registry.value) : undefined));
@@ -130,6 +130,7 @@ async function del() {
         v-if="isCurrent"
         variant="outline"
         class="min-h-9 pointer-coarse:min-h-11"
+        :disabled="ending"
         data-testid="source-end"
         @click="end"
       >
@@ -166,7 +167,7 @@ async function del() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{{ t('income.source.cancel') }}</AlertDialogCancel>
-          <AlertDialogAction data-testid="source-delete-confirm" @click="del">
+          <AlertDialogAction :disabled="removing" data-testid="source-delete-confirm" @click="del">
             {{ t('income.source.delete') }}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -176,5 +177,16 @@ async function del() {
   <div v-else-if="isLoading" class="space-y-4">
     <Skeleton class="h-8 w-40" />
     <Skeleton class="h-12 w-64" />
+  </div>
+  <!-- The list answered and this id is not in it: a stale link, or the source was just deleted. -->
+  <div v-else class="mt-10 text-center">
+    <p class="text-sm text-muted-foreground">
+      {{ isError ? t('income.source.failed') : t('income.source.notFound') }}
+    </p>
+    <Button as-child variant="outline" class="mt-4 min-h-9 pointer-coarse:min-h-11">
+      <RouterLink :to="{ path: '/plan', query: { tab: 'income' } }" data-testid="source-back">
+        {{ t('income.title') }}
+      </RouterLink>
+    </Button>
   </div>
 </template>
