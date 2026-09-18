@@ -10,6 +10,7 @@ import { MemoryIncomeSourceRepository } from '../../src/modules/income-sources/i
 import { MemoryInflowRepository } from '../../src/modules/inflows/infrastructure/memory-inflow-repository.js';
 import { MemoryExpenseCategoryRepository } from '../../src/modules/expenses/infrastructure/memory-expense-category-repository.js';
 import { MemoryExpenseRepository } from '../../src/modules/expenses/infrastructure/memory-expense-repository.js';
+import { MemoryBudgetRepository } from '../../src/modules/budgets/infrastructure/memory-budget-repository.js';
 
 export function memoryRepos() {
   const balances = new MemoryBalanceRepository();
@@ -19,7 +20,16 @@ export function memoryRepos() {
   const inflows = new MemoryInflowRepository(incomeSources, accounts);
   const expenses = new MemoryExpenseRepository();
   const expenseCategories = new MemoryExpenseCategoryRepository(expenses);
-  return { accounts, balances, transfers, incomeSources, inflows, expenseCategories, expenses };
+  return {
+    accounts,
+    balances,
+    transfers,
+    incomeSources,
+    inflows,
+    expenseCategories,
+    expenses,
+    budgets: new MemoryBudgetRepository(),
+  };
 }
 
 export function testDeps(over: Partial<AppDeps> = {}): AppDeps {

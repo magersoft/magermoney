@@ -17,6 +17,8 @@ import type { InflowRepository } from './modules/inflows/application/inflow-repo
 import { expenseRoutes } from './modules/expenses/http/routes.js';
 import type { ExpenseCategoryRepository } from './modules/expenses/application/category-repository.js';
 import type { ExpenseRepository } from './modules/expenses/application/expense-repository.js';
+import { budgetRoutes } from './modules/budgets/http/routes.js';
+import type { BudgetRepository } from './modules/budgets/application/budget-repository.js';
 import type { RateRepository } from './modules/rates/application/rate-repository.js';
 import type { RateProvider } from './modules/rates/application/rate-provider.js';
 import { jobRoutes } from './jobs/fetch-rates.js';
@@ -33,6 +35,7 @@ export interface Repos {
   inflows: InflowRepository;
   expenseCategories: ExpenseCategoryRepository;
   expenses: ExpenseRepository;
+  budgets: BudgetRepository;
 }
 
 export type AppEnv = { Variables: { userId: string; requestId: string } };
@@ -115,6 +118,7 @@ export function createApp(deps: AppDeps) {
   app.route('/', incomeSourceRoutes(deps));
   app.route('/', inflowRoutes(deps));
   app.route('/', expenseRoutes(deps));
+  app.route('/', budgetRoutes(deps));
   app.route('/', jobRoutes(deps));
 
   mountOpenApi(app, deps.exposeDocs ?? true);

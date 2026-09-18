@@ -53,6 +53,7 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 8's file list did not mention `apps/api/test/integration/pg-balance-concurrency.test.ts`, which builds a `Repos` object literal by hand; extending `Repos` with `incomeSources` broke its typecheck. Fixed by adding `incomeSources: repos.incomeSources` to that literal.
 - Same for Task 9: extending `Repos` with `inflows` broke that same hand-built literal in `pg-balance-concurrency.test.ts`. Fixed by adding `inflows: repos.inflows`.
 - Same for Task 11: extending `Repos` with `expenseCategories` and `expenses` broke that same hand-built literal in `pg-balance-concurrency.test.ts`. Fixed by adding both to it.
+- Same for Task 12: extending `Repos` with `budgets` broke that same hand-built literal in `pg-balance-concurrency.test.ts`. Fixed by adding `budgets: repos.budgets`.
 - 400 `active_period_invalid`, `negative_amount`, `category_required`, `category_ambiguous` added to the expenses API beyond spec §4, so table checks never surface as 500; over HTTP the Task 6 contracts answer `VALIDATION` first for anything wrong within one payload, and these codes appear only when the merged row of a PATCH is wrong (or for callers that bypass zod).
 
 ## Not run
