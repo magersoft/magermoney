@@ -37,9 +37,22 @@ export * from './components/ui/badge';
 export * from './components/ui/separator';
 export * from './components/ui/dropdown-menu';
 export * from './components/ui/alert-dialog';
+export * from './components/ui/switch';
 
 export { default as MoneyInput } from './components/money-input/MoneyInput.vue';
 export { parseAmountInput, formatAmountInput } from './components/money-input/parse';
+
+export { default as PercentInput } from './components/percent-input/PercentInput.vue';
+export { percentToFraction, fractionToPercent } from './components/percent-input/percent';
+
+export { default as SegmentedControl } from './components/segmented-control/SegmentedControl.vue';
+export type { SegmentedOption } from './components/segmented-control/types';
+
+export { default as DayOfMonthPicker } from './components/day-of-month-picker/DayOfMonthPicker.vue';
+export { default as ProgressRule } from './components/progress-rule/ProgressRule.vue';
+
+export { default as RouteLoading } from './components/async-fallback/RouteLoading.vue';
+export { default as RouteError } from './components/async-fallback/RouteError.vue';
 
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
