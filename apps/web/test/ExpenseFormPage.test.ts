@@ -109,6 +109,29 @@ describe('ExpenseFormPage', () => {
     expect(posts[1]).not.toHaveProperty('categoryName');
   });
 
+  it('holds Save until there is an amount above zero', async () => {
+    const fetch = vi.fn(async (path: string) => base(path) ?? json([]));
+    const { w } = await mountForm('/plan/expenses/new', fetch);
+    const submit = () => w.get('[data-testid="expense-submit"]');
+    await w.get('[data-testid="expense-name"]').setValue('Gym');
+    await w.get('[data-testid="expense-category"]').setValue('Health');
+    expect(submit().attributes('disabled')).toBeDefined();
+    await w.get('[data-testid="expense-amount"]').setValue('0');
+    expect(submit().attributes('disabled')).toBeDefined();
+    await w.get('[data-testid="expense-amount"]').setValue('30');
+    expect(submit().attributes('disabled')).toBeUndefined();
+  });
+
+  it('says so when the expense being edited is not there', async () => {
+    const fetch = vi.fn(async (path: string) => base(path) ?? json([]));
+    const { w } = await mountForm(
+      '/plan/expenses/99999999-9999-4999-8999-999999999999/edit',
+      fetch,
+    );
+    expect(w.find('[data-testid="expense-form"]').exists()).toBe(false);
+    expect(w.get('[data-testid="expense-back"]').text()).toContain('Расходы');
+  });
+
   it('ends an expense today with a PATCH of activeTo', async () => {
     const patches: unknown[] = [];
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {

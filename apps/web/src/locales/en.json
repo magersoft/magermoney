@@ -87,6 +87,10 @@
       "title": "No expenses yet",
       "body": "Rent, phone, subscriptions — anything that recurs."
     },
+    "error": {
+      "title": "Could not load expenses",
+      "retry": "Try again"
+    },
     "period": {
       "monthly": "Monthly",
       "yearly": "Yearly"
@@ -113,7 +117,8 @@
       "deleteTitle": "Delete this expense?",
       "deleteBody": "It leaves the plan. If it simply stopped, end it instead.",
       "cancel": "Cancel",
-      "saveFailed": "Could not save"
+      "saveFailed": "Could not save",
+      "notFound": "This expense is gone. It was probably deleted."
     }
   },
   "theme": {

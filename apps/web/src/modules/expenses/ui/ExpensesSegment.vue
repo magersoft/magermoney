@@ -4,7 +4,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Motion } from 'motion-v';
 import type { Expense } from '@magermoney/domain';
-import { Button, Skeleton, listStagger } from '@magermoney/ui';
+import { Button, RouteError, Skeleton, listStagger } from '@magermoney/ui';
 import { useCurrencyRegistry } from '@/modules/currencies';
 import { MoneyText, todayIso, useDisplayCurrency, useRates } from '@/modules/rates';
 import { groupExpenses } from '../application/expense-groups';
@@ -12,7 +12,7 @@ import { useExpenseCategories } from '../application/use-expense-categories';
 import { useExpenses } from '../application/use-expenses';
 
 const { t } = useI18n();
-const { dtos, isLoading } = useExpenses();
+const { dtos, isLoading, isError, refetch } = useExpenses();
 const { categories } = useExpenseCategories();
 const rates = useRates();
 const registry = useCurrencyRegistry();
@@ -29,8 +29,10 @@ const model = computed(() =>
     todayIso(),
   ),
 );
+/* A failed list also answers with no rows, and "no expenses yet" would be a lie
+ * about the plan rather than about the request. */
 const isEmpty = computed(
-  () => !isLoading.value && model.value !== undefined && dtos.value.length === 0,
+  () => !isLoading.value && !isError.value && model.value !== undefined && dtos.value.length === 0,
 );
 const unconvertibleNames = computed(() => model.value?.unconvertible.map((e) => e.name).join(', '));
 /** Only rendered while open: a collapsed list must not answer a row query. */
@@ -43,7 +45,15 @@ const own = (e: Expense) => `${e.amount.round().toString()} ${e.amount.currency.
     <h2 class="sr-only">
       {{ t('expenses.title') }}
     </h2>
-    <Skeleton v-if="!model" class="h-24 w-full" />
+    <div v-if="isError" data-testid="expenses-error">
+      <RouteError
+        :title="t('expenses.error.title')"
+        :action-label="t('expenses.error.retry')"
+        @retry="refetch"
+      />
+    </div>
+
+    <Skeleton v-else-if="!model" class="h-24 w-full" />
 
     <div v-else-if="isEmpty" class="mt-10 text-center" data-testid="expenses-empty">
       <p class="text-lg font-semibold">

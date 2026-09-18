@@ -1,6 +1,5 @@
 import type { ExpenseCategoryDto, ExpenseDto } from '@magermoney/contracts';
 import {
-  isActiveOn,
   Money,
   monthlyAmount,
   type CurrencyRegistry,
@@ -49,13 +48,16 @@ export function groupExpenses(
   if (!table || currency.isErr()) return undefined;
   const zero = Money.zero(currency.value);
   const all = dtos.map((d) => toExpense(d, registry));
-  const active = all.filter((e) => isActiveOn(e, today));
+  /* An expense that starts next month is already part of the plan — the same
+   * reading the Income segment gives a source that has not begun paying yet.
+   * "Ended" is the only thing that takes a row out of the list. */
+  const current = all.filter((e) => e.activeTo === null || e.activeTo >= today);
   const byCategory = new Map<string, ExpenseGroup>();
   let planned = zero;
   let essential = zero;
   const unconvertible: Expense[] = [];
 
-  for (const expense of [...active].sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const expense of [...current].sort((a, b) => a.name.localeCompare(b.name))) {
     const category = categories.find((c) => c.id === expense.categoryId) ?? UNKNOWN;
     const group = byCategory.get(category.id) ?? { category, rows: [], total: zero };
     const monthly = monthlyAmount(expense);

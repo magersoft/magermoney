@@ -67,6 +67,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 23: the ended-expenses `<ul>` is always rendered and hidden with `[hidden]` (its `<li>`s come from a computed that is empty while collapsed), so the toggle's `aria-controls="ended-expenses"` always points at an element that exists — the Task 21 income segment solved the same problem the other way, by dropping `aria-controls` while collapsed, and the brief's own segment test requires the attribute before expanding. Cost if wrong: an empty `<ul>` in the DOM.
 - Task 23: expense row name and amount are set at 16px (`text-base`) rather than the brief markup's `text-[15px]`, which is off the type scale `docs/design/direction.md` fixes (12/13/14/16/20/24/32/44). Cost if wrong: rows are 1px looser than the brief imagined.
 - Task 23: `expenses.ended.show` keeps the brief's "Завершённые ({n})" although the income segment next to it says "Завершённые · {n}"; the brief's copy is verbatim requirement, and the two strings will be seen on the same screen. Cost if wrong: one inconsistent separator between two tabs of the Plan screen.
+- Task 23 (fix round 1): an expense whose `activeFrom` is still ahead is listed as current, not dropped. The brief's `groupExpenses` split the list with `isActiveOn`, so an expense starting next month appeared in neither the current nor the ended list; the current list is now `activeTo === null || activeTo >= today` and ended is its complement, the same reading `IncomeSegment.vue` gives a source that has not begun paying. Its `monthlyAmount` counts toward the planned and essential totals. Cost if wrong: a planned expense shows in the list, and in the month total, up to a month early.
+- Task 23 (fix round 1): `useExpenses` gained `isError` and `refetch`, and the segment renders `RouteError` inside `data-testid="expenses-error"` before it considers the empty state — a failed `/expenses` answers with no rows, and "Пока ни одного расхода" would have been a lie about the plan rather than about the request. Cost if wrong: none; the interface is additive.
 
 ## Deferred minors
 
@@ -118,6 +120,14 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Offline, "New source…" shows the generic retry copy (`inflows.failed`) instead of the offline copy: only the inflow itself is parked, and the sheet cannot tell a dead connection from a refused write.
 - No sheet-level test for `create() → 'parked'` closing the sheet and toasting `offline.saved`; the parked path is covered at the mutation level only.
 - The lazily imported `InflowSheet` in `QuickActions.vue` has no error fallback: a failed chunk leaves the quick action doing nothing, unlike the routed screens, which have `routeComponent`.
+
+### Task 23
+
+- `form.currency` starts hardcoded at `'EUR'` rather than the profile's default currency — the same shortcut `IncomeSourceFormPage.vue` takes with `'USD'`; both should read the profile.
+- Three of the Task 23 rulings are untested: the add button in the non-empty state, the conversion line being dropped when the currencies match, and the ended list staying in the DOM while collapsed.
+- The payload rule "a billing month only survives on a yearly expense" has no test; the contract refuses the bad combination, so only the client-side clearing is uncovered.
+- `expenses.ended.show` says "Завершённые ({n})" while the income segment beside it says "Завершённые · {n}"; Task 25 reconciles the two on the Plan screen.
+- `isEmpty` still tests `model.value !== undefined`, which is dead now that the template checks `isError` and `!model` ahead of it.
 
 ## Plan errata
 

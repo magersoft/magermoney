@@ -8,7 +8,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import type { ExpenseInput } from '@magermoney/contracts';
-import { EXPENSE_PERIODS, type ExpensePeriod } from '@magermoney/domain';
+import { Decimal, EXPENSE_PERIODS, type ExpensePeriod } from '@magermoney/domain';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,7 @@ import {
   DayOfMonthPicker,
   Input,
   MoneyInput,
+  Skeleton,
   Switch,
   useToast,
 } from '@magermoney/ui';
@@ -42,7 +43,7 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const { toast } = useToast();
 const currencies = useCurrencies();
-const { dtos } = useExpenses();
+const { dtos, isLoading, isError } = useExpenses();
 const { categories } = useExpenseCategories();
 const { create, isPending: creating } = useCreateExpense();
 const { update, isPending: updating } = useUpdateExpense();
@@ -87,6 +88,9 @@ watch(
 
 const scale = computed(() => currencies.value.find((c) => c.code === form.currency)?.scale ?? 2);
 const busy = computed(() => creating.value || updating.value);
+/** MoneyInput only ever emits a valid decimal string or leaves the last good one. */
+const hasAmount = computed(() => form.amount !== '' && new Decimal(form.amount).greaterThan(0));
+const found = computed(() => editingId.value === null || existing.value !== undefined);
 const uiLocale = computed(() => locale.value as DateLocale);
 const months = computed(() =>
   Array.from({ length: 12 }, (_, i) => ({
@@ -146,7 +150,7 @@ async function del() {
 </script>
 
 <template>
-  <form class="space-y-5 pb-8" data-testid="expense-form" @submit.prevent="submit">
+  <form v-if="found" class="space-y-5 pb-8" data-testid="expense-form" @submit.prevent="submit">
     <h1 class="text-2xl font-semibold tracking-[-0.01em]">
       {{ editingId ? t('expenses.form.editTitle') : t('expenses.form.createTitle') }}
     </h1>
@@ -272,7 +276,7 @@ async function del() {
       type="submit"
       size="lg"
       class="w-full"
-      :disabled="busy || form.name.trim() === '' || form.category.trim() === ''"
+      :disabled="busy || !hasAmount || form.name.trim() === '' || form.category.trim() === ''"
       data-testid="expense-submit"
     >
       {{ editingId ? t('expenses.form.save') : t('expenses.form.create') }}
@@ -316,4 +320,19 @@ async function del() {
       </AlertDialogContent>
     </AlertDialog>
   </form>
+  <div v-else-if="isLoading" class="space-y-4">
+    <Skeleton class="h-8 w-40" />
+    <Skeleton class="h-12 w-64" />
+  </div>
+  <!-- The list answered and this id is not in it: a stale link, or it was just deleted. -->
+  <div v-else class="mt-10 text-center">
+    <p class="text-sm text-muted-foreground">
+      {{ isError ? t('expenses.error.title') : t('expenses.form.notFound') }}
+    </p>
+    <Button as-child variant="outline" class="mt-4 min-h-9 pointer-coarse:min-h-11">
+      <RouterLink :to="{ path: '/plan', query: { tab: 'expenses' } }" data-testid="expense-back">
+        {{ t('expenses.title') }}
+      </RouterLink>
+    </Button>
+  </div>
 </template>

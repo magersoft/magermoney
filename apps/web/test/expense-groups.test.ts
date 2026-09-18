@@ -57,6 +57,20 @@ describe('groupExpenses', () => {
     expect(g.ended.map((e) => e.id)).toEqual(['c']);
   });
 
+  it('lists an expense that starts next month: it is already part of the plan', () => {
+    const g = groupExpenses(
+      [exp({ id: 'f', name: 'Future rent', activeFrom: '2026-12-01' })],
+      cats,
+      table,
+      reg,
+      'USD',
+      '2026-09-17',
+    )!;
+    expect(g.groups[0]?.rows.map((r) => r.expense.id)).toEqual(['f']);
+    expect(g.ended).toEqual([]);
+    expect(g.planned.round().toString()).toBe('1200');
+  });
+
   it('lists what it cannot convert instead of dropping it', () => {
     const g = groupExpenses(
       [exp({ id: 'x', currency: 'BTC', amount: '1' })],

@@ -42,7 +42,7 @@ const json = (body: unknown) =>
     headers: { 'content-type': 'application/json' },
   });
 
-function mountSegment(expenses: unknown[]) {
+function mountSegment(expenses: unknown[], expensesStatus = 200) {
   resetDisplayCurrency();
   const fetch = vi.fn(async (path: string) => {
     if (path === '/me') return json(profile);
@@ -50,7 +50,10 @@ function mountSegment(expenses: unknown[]) {
     if (path.startsWith('/rates')) return json(rates);
     if (path === '/expense-categories')
       return json([{ id: CAT, name: 'Housing', icon: null, sortOrder: 0 }]);
-    return json(expenses);
+    return new Response(JSON.stringify(expenses), {
+      status: expensesStatus,
+      headers: { 'content-type': 'application/json' },
+    });
   });
   const router = createRouter({
     history: createMemoryHistory(),
@@ -97,6 +100,13 @@ describe('ExpensesSegment', () => {
     expect(toggle.attributes('aria-expanded')).toBe('false');
     await toggle.trigger('click');
     expect(w.find(`[data-testid="expense-row-${C}"]`).exists()).toBe(true);
+  });
+
+  it('says the list did not load instead of showing an empty plan', async () => {
+    const w = mountSegment([], 500);
+    await flushPromises();
+    expect(w.find('[data-testid="expenses-empty"]').exists()).toBe(false);
+    expect(w.get('[data-testid="expenses-error"]').text()).toContain('расходы');
   });
 
   it('offers to add the first expense when there are none', async () => {

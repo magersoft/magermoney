@@ -14,6 +14,8 @@ export function useExpenses(): {
   expenses: ComputedRef<Expense[]>;
   dtos: ComputedRef<ExpenseDto[]>;
   isLoading: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  refetch: () => void;
 } {
   const api = expensesApi(useApi());
   const registry = useCurrencyRegistry();
@@ -23,5 +25,7 @@ export function useExpenses(): {
     dtos,
     expenses: computed(() => dtos.value.map((d) => toExpense(d, registry.value))),
     isLoading: computed(() => query.isLoading.value),
+    isError: computed(() => query.isError.value),
+    refetch: () => void query.refetch(),
   };
 }
