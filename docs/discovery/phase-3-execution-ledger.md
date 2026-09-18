@@ -35,6 +35,7 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 18: the shadcn-vue CLI's collateral edits were reverted, keeping only the two generated `switch` files — `bunx shadcn-vue@latest add switch` also prepended a Geist Google-Fonts `@import` and a duplicate `@layer base` to `packages/ui/src/styles/index.css` (the direction says fonts are loaded by the app, and the base layer already exists), and bumped `@vueuse/core` `^14.4.0` → `^15.0.0` and `@lucide/vue` `^1.45.0` → `^1.47.0` in `packages/ui/package.json` + `bun.lock`. A primitive should not carry a font or a dependency major. Cost if wrong: the next `shadcn-vue add` in this package re-applies the same edits and has to be reverted again.
 - Task 18: `ProgressRule` settles its fill with `transform: scaleX()` + `duration-base ease-out-quart motion-reduce:transition-none` instead of the brief's `transition-[width] duration-300 ease-out` — the `/animate` skill's hard rules are transform/opacity only and "extend the codebase's tokens, don't fork them", and an animated `width` relayouts every frame. The rendered result is the same rule filling in; `aria-valuenow` is unchanged. Cost if wrong: on a 2px hairline the `rounded-full` cap is scaled horizontally, which is invisible at that height.
 - Task 18: a `SegmentedControl` segment truncates its label (`min-w-0 truncate`) rather than letting the row grow — the Russian labels of the Plan screen are longer than the English ones and three of them must fit a 360px phone. Cost if wrong: a very long label reads as an ellipsis; the caller shortens the word.
+- Task 18: `ProgressRule` draws its fill in ink (`bg-foreground`) and takes no colour prop, although `docs/design/direction.md` lists "goal progress" among the changes that may take colour — the phase 3 screens draw several rules at once (the inflows-vs-plan rows) and spend colour on the month-plan remainder figure instead, so a neutral rule keeps those screens calm. A later phase that needs a tinted rule (goals) adds a `tone` / `fillClass` prop then. Cost if wrong: one prop added later.
 
 ## Deferred minors
 
@@ -57,6 +58,11 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - `renderInflows` prints "1 inflows" for a single-inflow source; the plural is not chosen.
 - Income source names are matched case-sensitively (`sourceIds` keyed by the raw name) while expense categories are matched case-insensitively; the two could agree.
 - The phase 2 `--force` path still prints account names in its `removed: …` / `kept (still referenced): …` lines, unlike the phase 3 kinds, which print counts only.
+
+### Task 18
+
+- `motion-reduce:transition-none` on the `ProgressRule` fill is redundant with the global reduced-motion catch-all in `styles/index.css`, which already zeroes `--mm-duration-*`.
+- `SegmentedControl` moves keyboard focus by walking `parentElement.children` instead of template refs, which assumes the segments are the group's only children.
 
 ## Plan errata
 
