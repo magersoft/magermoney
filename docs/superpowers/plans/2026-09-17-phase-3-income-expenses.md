@@ -8484,8 +8484,8 @@ import { mapInflows } from '../../scripts/import/inflows-mapper.js';
 const CSV = [
   'Дата,Откуда,USD/RUB,RUB,USD,,,,Acme Salary,Side Gig',
   '25.01.2025,Acme Salary,"101,50 ₽","152 250,00 ₽","$1 514,93",,,USD,"$9 000,00","$4 000,00"',
-  '04.02.2025,Side Gig,"80,00 ₽","160 000,00 ₽","$2 000,00",,,EUR,"€8 300,00","€3 700,00"',
-  '10.02.2025,Acme Salary,"92,50 ₽","152 250,00 ₽","$1 645,95",,,,,',
+  '07.03.2025,Side Gig,"80,00 ₽","160 000,00 ₽","$2 000,00",,,EUR,"€8 300,00","€3 700,00"',
+  '21.03.2025,Acme Salary,"92,50 ₽","152 250,00 ₽","$1 645,95",,,,,',
   '12.01.2025,Refund,"101,00 ₽","5 000,00 ₽","$49,50",,,,,',
   '20.03.2025,Refund,"90,00 ₽","1 800,00 ₽","$20,00",,,,,',
   '21.03.2025,Refund,"90,00 ₽","2 700,00 ₽","$30,00",,,,,',
@@ -8522,14 +8522,14 @@ describe('mapInflows', () => {
         source: 'Side Gig',
         amount: '2000',
         currency: 'USD',
-        receivedOn: '2025-02-04',
+        receivedOn: '2025-03-07',
         realisedRateToUsd: null,
       },
       {
         source: 'Acme Salary',
         amount: '152250',
         currency: 'RUB',
-        receivedOn: '2025-02-10',
+        receivedOn: '2025-03-21',
         realisedRateToUsd: '0.01081081081',
       },
     ]);
@@ -8549,7 +8549,7 @@ describe('mapInflows', () => {
       },
     ]);
     expect(spans.get('Refund')).toEqual({ first: '2025-01-12', last: '2025-03-22' });
-    expect(spans.get('Acme Salary')).toEqual({ first: '2025-01-25', last: '2025-02-10' });
+    expect(spans.get('Acme Salary')).toEqual({ first: '2025-01-25', last: '2025-03-21' });
     expect(inflows.filter((i) => i.source === 'Refund').map((i) => i.amount)).toEqual([
       '5000',
       '1800',
@@ -8560,7 +8560,7 @@ describe('mapInflows', () => {
   it('stops on a tie unless --currency-of or a RUB/USD fallback settles it', () => {
     const tie = [
       'Дата,Откуда,USD/RUB,RUB,USD',
-      '04.06.2025,Bonus Co,"80,00 ₽","160 000,00 ₽","$2 000,00"',
+      '07.07.2025,Bonus Co,"80,00 ₽","160 000,00 ₽","$2 000,00"',
     ].join('\n');
     const stopped = mapInflows(parseCsv(tie), opts())._unsafeUnwrapErr().message;
     expect(stopped).toMatch(/Income source "Bonus Co" is in EUR/);
@@ -11908,18 +11908,16 @@ describe('income queries', () => {
       return json(stored);
     });
     await flushPromises();
-    await p
-      .create()
-      .create({
-        name: 'Other',
-        grossAmount: '0',
-        currency: 'USD',
-        taxRate: '0',
-        commissionRate: '0',
-        payDays: [],
-        isPrimary: false,
-        activeFrom: '2026-09-17',
-      });
+    await p.create().create({
+      name: 'Other',
+      grossAmount: '0',
+      currency: 'USD',
+      taxRate: '0',
+      commissionRate: '0',
+      payDays: [],
+      isPrimary: false,
+      activeFrom: '2026-09-17',
+    });
     await flushPromises();
     expect(p.sources().dtos.value.map((s) => s.name)).toEqual(['Salary', 'Other']);
     await p.remove().remove(second.id);
@@ -13741,14 +13739,12 @@ describe('useCreateInflow', () => {
     });
     await flushPromises();
     block = new Promise<Response>(() => undefined);
-    void p
-      .creator()
-      .create({
-        incomeSourceId: SOURCE_ID,
-        amount: '500',
-        accountId: ACCOUNT_ID,
-        creditedAmount: '430',
-      });
+    void p.creator().create({
+      incomeSourceId: SOURCE_ID,
+      amount: '500',
+      accountId: ACCOUNT_ID,
+      creditedAmount: '430',
+    });
     await flushPromises();
     expect(p.accounts().accounts.value[0]?.balance).toBe('530');
     post.resolve(json({ ...inflowDto, accountId: ACCOUNT_ID, creditedAmount: '430' }, 201));

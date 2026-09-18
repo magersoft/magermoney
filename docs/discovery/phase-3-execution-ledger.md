@@ -64,6 +64,7 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 
 ## Known follow-ups after the final review
 
+- The plan commit b23a89d carried three real inflow dates in the Task 15 fixture (replaced in this commit); squash-merge the PR so main does not carry them.
 - Spends and month close, Snapshots, Goals, Assets, the yearly-history import: phases 4–5.
 - Offline parking covers record-balance, create-transfer and create-inflow only; edits and deletes still wait for the network (carried from phase 2).
 - Idempotency keys for replayed writes (carried from phase 2): a lost response can make a replayed inflow appear twice.
