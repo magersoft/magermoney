@@ -12,7 +12,17 @@
     "title": "Home"
   },
   "plan": {
-    "title": "Plan"
+    "title": "Plan",
+    "tabs": {
+      "income": "Income",
+      "expenses": "Expenses",
+      "budgets": "Budgets"
+    },
+    "add": {
+      "income": "Add income source",
+      "expenses": "Add expense",
+      "budgets": "Add budget"
+    }
   },
   "income": {
     "title": "Income",
@@ -80,7 +90,7 @@
     "essentialTotal": "of which essential",
     "unconvertible": "No rate for: {names}. Left out of the total.",
     "ended": {
-      "show": "Ended ({n})",
+      "show": "Ended · {n}",
       "hide": "Hide ended"
     },
     "empty": {
@@ -128,7 +138,7 @@
     "total": "Limits per month",
     "unconvertible": "No rate for: {names}. Left out of the total.",
     "ended": {
-      "show": "Ended ({n})",
+      "show": "Ended · {n}",
       "hide": "Hide ended"
     },
     "empty": {

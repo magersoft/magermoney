@@ -75,6 +75,8 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-17-phase-3-income-expense
 - Task 24: the Budgets segment keeps an "Добавить бюджет" button in the non-empty state as well, like Income and Expenses; without it a person with one budget has no way to add a second. Cost if wrong: one extra button on the Plan screen.
 - Task 24: `apps/web/test/fixtures/income-mount.ts` is reused for the budgets component tests and gained three route names (`plan`, `budget-new`, `budget-edit`) instead of being renamed to something neutral — it already serves the accounts and quick-action tests under that name, and renaming it would touch eight unrelated test files outside this task. Cost if wrong: a fixture whose name undersells what it covers.
 - Task 24: both lists of the segment give their rows the same `focus-visible` outline; `ExpensesSegment.vue`'s ended rows still rely on the browser default. Cost if wrong: the two tabs' ended lists focus slightly differently until Expenses is brought in line.
+- Task 25: `ExpensesSegment.vue`'s ended-row links get the same `outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring` classes the budgets rows already carry (Task 24's ruling above), closing the gap now that all three segments share one screen. Cost if wrong: none; the class is additive.
+- Task 25: `expenses.ended.show` and `budgets.ended.show` are changed from "Завершённые ({n})" / "Ended ({n})" to the income form "Завершённые · {n}" / "Ended · {n}" in both locales, so the three tabs of the Plan screen read the same toggle copy; no test asserted the old parenthesised form. Cost if wrong: a one-line copy revert in two files.
 
 ## Deferred minors
 

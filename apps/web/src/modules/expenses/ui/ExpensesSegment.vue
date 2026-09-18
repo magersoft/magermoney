@@ -171,7 +171,7 @@ const own = (e: Expense) => `${e.amount.round().toString()} ${e.amount.currency.
             <RouterLink
               :to="{ name: 'expense-edit', params: { id: e.id } }"
               :data-testid="`expense-row-${e.id}`"
-              class="flex min-h-11 items-center justify-between gap-3 py-2 text-sm text-muted-foreground"
+              class="flex min-h-11 items-center justify-between gap-3 py-2 text-sm text-muted-foreground outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
             >
               <span class="truncate">{{ e.name }}</span>
               <span class="font-mono tabular-nums">{{ own(e) }}</span>
