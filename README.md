@@ -102,13 +102,24 @@ CI on every pull request runs lint, typecheck, unit tests and build, then integr
 
 ## Import from the spreadsheet
 
-Export the "Счета" sheet and the "Курсы пересчёта" block (History by years) as CSV into `imports/` (git-ignored), then:
+Export the sheets as CSV into `imports/` (git-ignored): "Счета" and the "Курсы пересчёта" block (History by years), the income sources sheet, "Поступления" and the expenses sheet. Then:
 
     cd apps/api
     bun run import -- --user you@example.com --accounts ../../imports/accounts.csv --rates ../../imports/rates.csv --dry-run
-    bun run import -- --user you@example.com --accounts ../../imports/accounts.csv --rates ../../imports/rates.csv
+    bun run import -- --user you@example.com \
+      --income-sources ../../imports/income-sources.csv --inflows ../../imports/inflows.csv \
+      --expenses ../../imports/expenses.csv --as-budget "Groceries" --dry-run
 
-Every row becomes an Account with one Balance entry dated now (or `--recorded-at <ISO>`). A second run refuses unless `--force`, which replaces the accounts that have no transfers. Against production use `bun --env-file=.env.prod.local scripts/import-sheet.ts …`.
+Drop `--dry-run` to write. Only the kinds whose files are passed are touched; `--only accounts,rates,income,expenses,inflows` narrows that further.
+
+- **Accounts, rates.** Every row becomes an Account with one Balance entry dated now (or `--recorded-at <ISO>`); yearly rates become manual rates dated January 1.
+- **Native currency.** The income and expenses sheets show each amount in USD, EUR and RUB. The import takes the one that is a whole number; when none or several are, it takes `--fallback-currency` (default `EUR`) and marks the row `ambiguous` in the dry run. Fix such rows with `--currency-of "<name as in the sheet>=<CODE>"` (repeatable).
+- **Income sources.** Only the first (monthly) table is read. Pay days and the primary mark are not in the sheet; set them in the app.
+- **Inflows.** Stored in the source's currency (RUB with the day's realised rate, or USD) and never credited to an Account. A source that appears only in "Поступления" is created with a zero expected amount and an active period spanning its inflows. Without `--income-sources`, every source must already exist by name.
+- **Expenses.** Only the first block up to "Итого". "Подписка …" rows go to the "Подписки" category, the rest to "Прочее"; `(yearly)` rows become yearly with the amount rebuilt as monthly × 12 (`approx`). `--as-budget "<name>"` (repeatable) imports a row as a Budget. Essential marks and billing days are set in the app.
+- **Second run.** Each kind refuses when the user already has rows of it, unless `--force`, which replaces accounts without transfers or inflows, uncredited inflows, sources without remaining inflows, and all expenses, budgets and empty categories. A source kept because an inflow of it was credited to an Account is reused by name and its gross amount, tax and commission are refreshed from the sheet; a different currency stops the run. Everything runs in one transaction, and a dry run lists every problem of every sheet at once.
+
+Against production use `bun --env-file=.env.prod.local scripts/import-sheet.ts …`.
 
 ## Working on the code
 

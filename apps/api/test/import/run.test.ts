@@ -7,7 +7,14 @@ describe('import CLI', () => {
       user: 'a@b.c',
       accounts: 'x.csv',
       rates: undefined,
+      incomeSources: undefined,
+      expenses: undefined,
+      inflows: undefined,
       recordedAt: undefined,
+      currencyOf: [],
+      fallbackCurrency: 'EUR',
+      asBudget: [],
+      only: undefined,
       dryRun: true,
       force: false,
     });
@@ -65,7 +72,7 @@ describe('import CLI', () => {
       [{ base: 'RUB', date: '2015-01-01', value: '0.01' }],
     );
     expect(text).toContain('Alfa');
-    expect(text).toContain('1 accounts, 1 rates');
+    expect(text).toContain('1 accounts, 1 rates, 0 income sources');
   });
   it('renders totals alone, without the table', () => {
     const totals = renderTotals(
@@ -89,7 +96,7 @@ describe('import CLI', () => {
       ],
       [{ base: 'RUB', date: '2015-01-01', value: '0.01' }],
     );
-    expect(totals).toBe('1 accounts, 1 rates');
+    expect(totals).toBe('1 accounts, 1 rates, 0 income sources, 0 inflows, 0 expenses, 0 budgets');
     expect(totals).not.toContain('Alfa');
     expect(totals).not.toContain('1.5');
   });

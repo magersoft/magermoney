@@ -9177,7 +9177,7 @@ const INCOME = [
 const INFLOWS = [
   'Дата,Откуда,USD/RUB,RUB,USD',
   '25.01.2025,Acme Salary,"100,00 ₽","150 000,00 ₽","$1 500,00"',
-  '10.02.2025,Acme Salary,"92,50 ₽","152 250,00 ₽","$1 645,95"',
+  '21.03.2025,Acme Salary,"92,50 ₽","152 250,00 ₽","$1 645,95"',
   '12.01.2025,Refund,"101,00 ₽","5 000,00 ₽","$49,50"',
 ].join('\n');
 const EXPENSES = [
@@ -9330,7 +9330,7 @@ describe('rendering', () => {
     const text = renderDryRun(new Set(['income', 'inflows', 'expenses'] as const), [], [], plan);
     expect(text).toContain('# Income sources');
     expect(text).toContain('# Inflows');
-    expect(text).toMatch(/Acme Salary\s+2 inflows\s+2025-01-25…2025-02-10\s+302250 RUB/);
+    expect(text).toMatch(/Acme Salary\s+2 inflows\s+2025-01-25…2025-03-21\s+302250 RUB/);
     expect(text).toContain('# Expenses and budgets');
     expect(text).toMatch(/IDE\s+Подписки\s+EUR\s+60\.12\s+yearly\s+ambiguous approx/);
     expect(text).toMatch(/Groceries\s+budget/);

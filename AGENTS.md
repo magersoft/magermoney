@@ -39,4 +39,4 @@ Personal multi-currency finance tracker. Read `CONTEXT.md` (vocabulary) before n
 
 ## Scripts
 
-- `apps/api/scripts/import-sheet.ts` — local-only CLI that imports the owner's spreadsheet export into `accounts`/`balance_entries`/`rates`. Never reads real data from the repo (`imports/` is git-ignored); run from `apps/api` as `bun run import -- --user <email> [...]`.
+- `apps/api/scripts/import-sheet.ts` — local-only CLI that imports the owner's spreadsheet exports into `accounts`/`balance_entries`/`rates` (phase 2) and `income_sources`/`inflows`/`expense_categories`/`expenses`/`budgets` (phase 3). Pure mappers live in `scripts/import/` (`block.ts` finds a table inside a sheet, `native-currency.ts` guesses which of the USD/EUR/RUB columns was typed); `run.ts` plans without the database (`planPhase3`) and writes in one transaction. Never reads real data from the repo (`imports/` is git-ignored; tests use synthetic CSVs only); run from `apps/api` as `bun run import -- --user <email> [...] --dry-run`.
