@@ -86,11 +86,12 @@ Table balance_entries [note: 'phase 2. Append-only journal. Current balance = la
   recorded_at timestamptz [not null]
   origin balance_entry_origin [not null]
   transfer_id uuid [ref: > transfers.id]
-  inflow_id uuid [ref: > inflows.id, note: 'phase 3: added by a later migration']
+  inflow_id uuid [ref: > inflows.id, note: 'phase 3. set exactly when origin = inflow; cascades with the inflow']
   note text
   Indexes {
     (account_id, recorded_at, created_at) [note: 'latest = order by recorded_at desc, created_at desc']
     (transfer_id) [note: 'partial, where transfer_id is not null']
+    (inflow_id) [note: 'partial, where inflow_id is not null']
   }
 }
 
@@ -116,29 +117,35 @@ Table income_sources [note: 'phase 3. Net is derived, never stored. Active perio
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
   name text [not null]
-  gross_amount numeric [not null]
+  gross_amount numeric [not null, note: 'monthly; check >= 0']
   currency text [not null, ref: > currencies.code]
-  tax_rate numeric [not null, default: 0, note: '0..1']
-  commission_rate numeric [not null, default: 0, note: '0..1']
-  pay_days int[] [not null, note: 'days of month, e.g. {10,25}']
-  is_primary bool [not null, default: false]
+  tax_rate numeric [not null, default: 0, note: '0 <= x < 1']
+  commission_rate numeric [not null, default: 0, note: '0 <= x < 1']
+  pay_days int[] [not null, default: '{}', note: 'days of month 1..31, e.g. {10,25}; empty = irregular source']
+  is_primary bool [not null, default: false, note: 'partial unique index: one primary per user']
   active_from date [not null]
-  active_to date
-  default_account_id uuid [ref: > accounts.id, note: 'where inflows usually land']
+  active_to date [note: 'check: >= active_from']
+  default_account_id uuid [ref: > accounts.id, note: 'where inflows usually land; on delete set null']
+  Indexes {
+    (user_id, active_from)
+  }
 }
 
-Table inflows [note: 'phase 3 (and import in phase 5). Actual dated receipts. Legacy monthly rows come from the yearly history sheet.'] {
+Table inflows [note: 'phase 3 (history import in phase 5). Actual dated receipts. check: account_id and credited_amount are set together.'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
-  income_source_id uuid [not null, ref: > income_sources.id]
-  amount numeric [not null]
+  income_source_id uuid [not null, ref: > income_sources.id, note: 'on delete restrict']
+  amount numeric [not null, note: 'check > 0']
   currency text [not null, ref: > currencies.code]
   received_on date [not null]
   realised_rate_to_usd numeric [note: 'rate actually obtained that day; null → use rates table']
-  account_id uuid [ref: > accounts.id, note: 'set when credited to an account']
+  account_id uuid [ref: > accounts.id, note: 'set when credited to an account; on delete restrict']
+  credited_amount numeric [note: 'what landed on the account, in the account currency; realised rate = credited / amount']
   note text
   Indexes {
-    (user_id, received_on)
+    (user_id, received_on, id) [note: 'order by received_on desc, id desc']
+    (income_source_id)
+    (account_id) [note: 'partial, where account_id is not null']
   }
 }
 
@@ -148,21 +155,27 @@ Table expense_categories [note: 'phase 3. Housing, subscriptions, car, health, t
   name text [not null]
   icon text
   sort_order int [not null, default: 0]
+  Indexes {
+    (user_id, name) [unique, note: 'on lower(name)']
+  }
 }
 
 Table expenses [note: 'phase 3. Fixed obligations only. Yearly normalised to monthly for totals.'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
-  category_id uuid [not null, ref: > expense_categories.id]
+  category_id uuid [not null, ref: > expense_categories.id, note: 'on delete restrict']
   name text [not null]
-  amount numeric [not null]
+  amount numeric [not null, note: 'check >= 0']
   currency text [not null, ref: > currencies.code]
   period expense_period [not null]
-  billing_day int [note: 'day of month, or day of year for yearly']
-  billing_month int [note: 'yearly only']
+  billing_day int [note: 'day of month 1..31, clamped to the month length; null = no fixed date']
+  billing_month int [note: '1..12, yearly only (check)']
   is_essential bool [not null, default: false]
   active_from date [not null]
   active_to date
+  Indexes {
+    (user_id, category_id)
+  }
 }
 
 Table budgets [note: 'phase 3. Variable category with a monthly limit.'] {
@@ -170,10 +183,13 @@ Table budgets [note: 'phase 3. Variable category with a monthly limit.'] {
   user_id uuid [not null, ref: > profiles.id]
   name text [not null]
   icon text
-  monthly_limit numeric [not null]
+  monthly_limit numeric [not null, note: 'check >= 0']
   currency text [not null, ref: > currencies.code]
   active_from date [not null]
   active_to date
+  Indexes {
+    (user_id, active_from)
+  }
 }
 
 // ---------- phase 4: where it is going ----------
