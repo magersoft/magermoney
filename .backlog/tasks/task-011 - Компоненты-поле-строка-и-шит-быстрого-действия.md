@@ -1,9 +1,11 @@
 ---
 id: TASK-011
 title: 'Компоненты: поле-строка и шит быстрого действия'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:12'
+updated_date: '2026-09-19 12:41'
 labels:
   - design
   - ui
@@ -38,3 +40,14 @@ ordinal: 9000
 - [ ] #9 Тесты покрывают открытие и закрытие, возврат фокуса, смену типа операции, смену валюты, быстрые суммы
 - [ ] #10 bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Тесты сначала: `packages/ui/test/quick-action.test.ts` — поле-строка (метка связана, ошибка объявлена, открывает выбор), шит (открытие, Esc, клик вне, кнопка, возврат фокуса, смена типа и валюты, быстрые суммы, safe-area и sticky-футер).
+2. `motion/presets.ts`: добавить пресет `sheetUp` — шит приезжает снизу, уходит быстрее, чем приходит; `prefers-reduced-motion` уже обнуляет токены длительности, а motion-v получает `MotionConfig` в приложении.
+3. `components/field-row/FieldRow.vue`: кнопка со своей иконкой, меткой, значением и шевроном; `aria-labelledby` связывает метку со значением, ошибка идёт через `aria-invalid` + `aria-describedby`.
+4. `components/quick-action/QuickAmountGrid.vue`: сетка быстрых сумм через AmountLockup, отдаёт точную десятичную строку.
+5. `components/quick-action/QuickActionSheet.vue` на примитивах reka (Dialog) с motion-v: крупное поле суммы + селектор валюты рядом, быстрые суммы, сегмент типа операции, слот для полей-строк, липкий футер с кнопкой над safe-area.
+6. Экспорт из `packages/ui/src/index.ts`; test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
