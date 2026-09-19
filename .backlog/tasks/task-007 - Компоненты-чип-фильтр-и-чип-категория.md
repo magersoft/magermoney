@@ -35,3 +35,15 @@ ordinal: 5000
 - [ ] #6 Тесты покрывают снятие чипа, снятие всех, переключение выбора категории
 - [ ] #7 bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. packages/ui/src/components/chip/types.ts: FilterChipItem { id, label, removeLabel } и CategoryChipItem { id, label, emoji? } — плоские значения, без домена, как у AccountCardItem.
+2. FilterChip.vue: пилюля на surface-sunken, метка ink 14/500, внутри — кнопка снятия. Видимый крестик 24px, цель нажатия 44px за счёт псевдоэлемента (after:-inset-2.5), а не размера пилюли: строка фильтров должна остаться компактной. aria-label кнопки задаёт экран (removeLabel), копия живёт в apps/web/src/locales.
+3. FilterChipRow.vue: ul с flex-wrap по умолчанию и вариантом scroll (layout='scroll') для узких мест; снятие всех — тихая кнопка-текст в конце того же потока, показывается только когда есть что снимать и экран передал clearLabel. Пустой список не рендерит ничего.
+4. CategoryChip.vue: button type=button с aria-pressed — клавиатура работает нативно. Невыбранный — surface-sunken + ink, выбранный — accent-fill + accent-fg (заливка бренда, а не текстовый токен). Эмодзи aria-hidden: название и есть имя чипа.
+5. tokens-contrast.test.ts: добавить AA чернил и muted на surface-sunken в обеих темах — невыбранный чип; выбранный держит уже существующая проверка accent-fg на accent-fill.
+6. test/chip.test.ts: снятие чипа (emit с id), снятие всех, отсутствие строки и кнопки, когда нечего снимать, переключение выбора категории, aria-pressed, aria-label крестика, перенос/скролл раскладки.
+7. Экспорт из packages/ui/src/index.ts, проверка в браузере на временной странице в обеих темах и на 320px, затем bun run test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
