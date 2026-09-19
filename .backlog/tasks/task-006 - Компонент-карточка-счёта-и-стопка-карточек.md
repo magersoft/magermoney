@@ -1,11 +1,11 @@
 ---
 id: TASK-006
 title: 'Компонент: карточка счёта и стопка карточек'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-19 11:11'
-updated_date: '2026-09-19 11:54'
+updated_date: '2026-09-19 11:55'
 labels:
   - design
   - ui
@@ -64,3 +64,9 @@ ordinal: 4000
 
 Проверено в браузере на временной странице (обе темы, 320px и шире): полоса с плиткой добавления, стопка, кольцо фокуса по Tab не срезано, переполнения на узком экране нет. Аудит поймал реальную ошибку: карточка отдавала href только при as='a', то есть с RouterLink вела в никуда — теперь адрес отдаётся как href или to по тому, чем карточка рендерится.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Карточка счёта и обе её раскладки собраны в packages/ui/src/components/account-card: AccountCard (reka-ui Primitive, по умолчанию ссылка), AccountCardStrip (горизонтальный скролл со снапом и плиткой добавления) и AccountCardStack (стопка внахлёст). Цвет заливки даёт currency-tint.ts — валюта выбирает тон, тема фиксирует светлоту и цветность; счёт в неосновной валюте помечен кодом в mono-капсе. Проверено: 96 тестов packages/ui, включая обход всего круга тонов на AA и охват sRGB в tokens-contrast.test.ts, плюс ручная проверка в браузере в обеих темах и на 320px. bun run test, lint, typecheck — зелёные.
+<!-- SECTION:FINAL_SUMMARY:END -->
