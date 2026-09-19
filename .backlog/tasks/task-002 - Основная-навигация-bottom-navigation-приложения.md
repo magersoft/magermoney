@@ -1,11 +1,11 @@
 ---
 id: TASK-002
 title: Основная навигация bottom-navigation приложения
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-19 10:33'
-updated_date: '2026-09-19 13:37'
+updated_date: '2026-09-19 13:38'
 labels:
   - design
   - web
@@ -95,3 +95,9 @@ ordinal: 750
 - Замеры `getComputedStyle`/`getBoundingClientRect`: (+) 56×56 и выступает на 12px над пилюлей, вкладка 44px, радиус пилюли 999px, тень на месте, `padding-bottom` навигации разбирается из env(safe-area-inset-bottom), `padding-bottom` main 112px, при `prefers-reduced-motion: reduce` `transition-property` у (+) становится none.
 - Десктоп (1440px) в Chrome: пилюли нет, верхняя навигация и плавающий FAB как раньше.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Нижняя навигация стала плавающей пилюлей с четырьмя вкладками и центральной (+): новый компонент BottomNav.vue, общий модуль shared/layout/nav.ts (NAV + isCurrent) для обоих навигаторов, QuickActions без собственного триггера (один экземпляр, v-model:open) и с десктопным FAB только на ≥md. Проверено: bun run test (189 тестов, включая новый bottom-nav.test.ts и обновлённые shell/quick-actions), lint, typecheck; Playwright на 390×844 — обе темы, открытие меню по (+) на /plan, кольцо фокуса, последняя строка экрана над пилюлей; замеры DOM — (+) 56px и выступает на 12px, вкладка 44px, радиус 999px, safe-area и prefers-reduced-motion учтены.
+<!-- SECTION:FINAL_SUMMARY:END -->
