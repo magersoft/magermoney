@@ -1,7 +1,7 @@
 ---
 id: TASK-004
 title: 'Фундамент: перенести токены, типографику и форму на палитру Moni'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-19 11:11'
@@ -67,3 +67,9 @@ ordinal: 2000
 
 Проверка: bun run test (115 файлов, все зелёные), bun run lint, bun run typecheck, bun run build — успешно. Тест парности тем проверен мутацией: удаление одной строки из ветки data-theme='dark' роняет его.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Приложение переведено на палитру Moni на уровне токенов: светло-голубое полотно, белые карточки, синий акцент с раздельными токенами заливки и текста (accent/accent-fill, positive/positive-fill), бежевый surface-sunken и surface-raised в обеих темах, токен тени карточки (none в тёмной). Радиусы 12/20/28/999, типографическая шкала 11–40 с парами интерлиньяжа токенами --text-*, заголовки и метки весом 500. Проверено новым тестом packages/ui/test/tokens-contrast.test.ts (18 кейсов: контраст каждого текстового токена на своих поверхностях, line-strong >=3, парность тёмных веток — последнее проверено мутацией файла) и прогонами bun run test / lint / typecheck / build.
+<!-- SECTION:FINAL_SUMMARY:END -->
