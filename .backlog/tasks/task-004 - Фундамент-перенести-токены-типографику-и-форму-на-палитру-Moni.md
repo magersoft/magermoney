@@ -49,3 +49,21 @@ ordinal: 2000
 4. Типографика: шкала 11/12/14/16/22/28/34/40 с парами интерлиньяжа и трекингом токенами --text-*; заголовки и метки по умолчанию весом 500 в base-слое index.css.
 5. Обновить маппинг shadcn в index.css (accent-fill/positive-fill, sunken, тень, радиус) и прогнать test, lint, typecheck.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Палитра переписана по таблицам direction.md; у акцента и плюса теперь по два токена (accent/accent-fill, positive/positive-fill), добавлены surface-sunken и surface-raised в обеих темах и --mm-shadow-card (в тёмной теме none — подъём несёт светлота поверхности).
+
+Два отклонения от таблиц, обе внесены обратно в direction.md:
+1. --mm-dark-line-strong поднят с oklch(0.520 0.015 265) до oklch(0.595 0.015 265). По доке он давал 3.1 на полотне, но AC#6 считает тёмную тему от surface-raised, где он давал 2.29 — граница поля в шите не читалась бы.
+2. В таблицы дописаны строки, которых там не было, но которые нужны токенам: light surface-raised, dark surface-sunken, dark accent-fg и dark positive-fill.
+
+Радиусы задаются в @theme (--radius-lg 12px / xl 20px / 2xl 28px / full 999px); проверено в собранном CSS: .rounded-full{border-radius:var(--radius-full)}. Шкала 11/12/14/16/22/28/34/40 заведена как --text-2xs…--text-3xl с парами интерлиньяжа и трекингом -0.01em от 28px; вес 500 для заголовков и меток — правилом base-слоя в index.css (в собранном CSS: h1,h2,...,label{font-weight:500}).
+
+Маппинг shadcn: --primary теперь accent-fill (заливка) при --primary-foreground accent-fg, --secondary — surface-sunken (бежевые чипы), чарты перешли на *-fill. Осознанно не трогал правило direction.md «в светлой теме первичная кнопка тёмная» — это решение слоя компонентов (TASK-005+), на уровне токенов кнопка остаётся брендово-синей в обеих темах.
+
+Для теста контраста packages/ui получил @types/node и "types": ["node"] в tsconfig — тест читает tokens.css с диска (vitest отдаёт пустую строку на css?raw, поэтому node:fs).
+
+Проверка: bun run test (115 файлов, все зелёные), bun run lint, bun run typecheck, bun run build — успешно. Тест парности тем проверен мутацией: удаление одной строки из ветки data-theme='dark' роняет его.
+<!-- SECTION:NOTES:END -->
