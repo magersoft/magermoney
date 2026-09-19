@@ -1,9 +1,11 @@
 ---
 id: TASK-007
 title: 'Компоненты: чип-фильтр и чип-категория'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:11'
+updated_date: '2026-09-19 12:06'
 labels:
   - design
   - ui
