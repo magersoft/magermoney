@@ -183,6 +183,53 @@ describe('the currency tint', () => {
   });
 });
 
+describe('the donut segment palette', () => {
+  /*
+   * The one chart in the app, and the same proof the card tint gets: a segment
+   * picks a hue and nothing else, so walking the wheel at the theme's fixed
+   * lightness and chroma covers every category anybody will ever add.
+   *
+   * An arc is a graphic that carries meaning, so the bar is 1.4.11's 3:1 — and
+   * it has to clear it on every surface a chart can be laid on, the sunken one
+   * included, because that is where the legend's dot sits.
+   */
+  it.each([
+    ['light', ['mm-light-surface', 'mm-light-bg', 'mm-light-surface-sunken']],
+    ['dark', ['mm-dark-surface', 'mm-dark-bg', 'mm-dark-surface-sunken', 'mm-dark-surface-raised']],
+  ] as const)('separates an arc from every %s surface at 3:1', (theme, surfaces) => {
+    const lightness = scalar(`mm-${theme}-segment-l`);
+    const chroma = scalar(`mm-${theme}-segment-c`);
+    const worst = surfaces
+      .flatMap((surface) =>
+        Array.from({ length: 360 }, (_, hue) => ({
+          hue,
+          surface,
+          ratio: Math.round(contrast(token(surface), [lightness, chroma, hue]) * 10) / 10,
+        })),
+      )
+      .reduce((a, b) => (b.ratio < a.ratio ? b : a));
+    expect(worst.ratio).toBeGreaterThanOrEqual(3);
+  });
+
+  it.each(['light', 'dark'])('stays inside sRGB on every hue, in %s', (theme) => {
+    const lightness = scalar(`mm-${theme}-segment-l`);
+    const chroma = scalar(`mm-${theme}-segment-c`);
+    const outside = Array.from({ length: 360 }, (_, hue) => hue).filter((hue) =>
+      linearRgb([lightness, chroma, hue]).some((channel) => channel < -0.001 || channel > 1.001),
+    );
+    expect(outside).toEqual([]);
+  });
+
+  /*
+   * A segment is never labelled in its own colour: the legend sets the category
+   * and its amount in ink on the sunken chip, which is what keeps the labels at
+   * AA whatever hue the arc beside them turned out to be.
+   */
+  it.each(['light', 'dark'])('labels a segment in ink, which clears AA in %s', (theme) => {
+    expect(ratio(`mm-${theme}-ink`, `mm-${theme}-surface-sunken`)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 /** The `--mm-*` assignments inside one rule, as `name -> value` pairs. */
 const assignmentsIn = (selector: string) => {
   const block = css.slice(css.indexOf(selector) + selector.length);

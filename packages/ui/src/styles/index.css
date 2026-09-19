@@ -102,6 +102,20 @@
 }
 
 /*
+ * The donut's arcs and the dots that label them, on the same terms: the chart
+ * hands in a hue through `--mm-segment-hue` (see `components/donut/segments.ts`)
+ * and the theme owns the rest, so one arc separates from its surface at 3:1 in
+ * both themes without the chart knowing which theme it is in.
+ */
+@utility stroke-segment {
+  stroke: oklch(var(--mm-segment-l) var(--mm-segment-c) var(--mm-segment-hue, 0));
+}
+
+@utility bg-segment {
+  background-color: oklch(var(--mm-segment-l) var(--mm-segment-c) var(--mm-segment-hue, 0));
+}
+
+/*
  * Every shadcn variable resolves to a token, so the generated components follow
  * the palette in both themes without being edited. `--mm-*` flips with the
  * theme; these mappings never need to.

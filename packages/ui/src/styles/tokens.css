@@ -114,6 +114,17 @@
    */
   --mm-light-tint-l: 0.86;
   --mm-light-tint-c: 0.06;
+  /*
+   * The donut's arcs. Same shape as the card tint and for the same reason — a
+   * category picks a hue, the theme fixes the rest — but the numbers are the
+   * opposite end of the scale: a tint sits under ink, an arc sits on a surface
+   * and has to be told apart from it. The bar is WCAG 1.4.11's 3:1, held on
+   * every hue and on every surface a chart can land on, and the chroma is again
+   * capped by the sRGB cone rather than by taste, so no two categories collapse
+   * onto the same colour after gamut mapping.
+   */
+  --mm-light-segment-l: 0.56;
+  --mm-light-segment-c: 0.09;
   /* The card is lifted, not outlined: one soft diffuse shadow, nothing deeper. */
   --mm-light-shadow-card:
     0 1px 2px oklch(0.254 0.026 284 / 0.05), 0 8px 24px oklch(0.254 0.026 284 / 0.06);
@@ -150,6 +161,9 @@
   /* Tinted the way the dark surfaces are: lighter than the canvas, never black. */
   --mm-dark-tint-l: 0.36;
   --mm-dark-tint-c: 0.055;
+  /* An arc is lighter than every dark surface, where light is darker than every light one. */
+  --mm-dark-segment-l: 0.74;
+  --mm-dark-segment-c: 0.115;
   --mm-dark-shadow-card: none;
 
   /* Light is the default. */
@@ -173,6 +187,8 @@
   --mm-warning: var(--mm-light-warning);
   --mm-tint-l: var(--mm-light-tint-l);
   --mm-tint-c: var(--mm-light-tint-c);
+  --mm-segment-l: var(--mm-light-segment-l);
+  --mm-segment-c: var(--mm-light-segment-c);
   --mm-shadow-card: var(--mm-light-shadow-card);
 
   --mm-duration-fast: 150ms;
@@ -204,6 +220,8 @@
     --mm-warning: var(--mm-dark-warning);
     --mm-tint-l: var(--mm-dark-tint-l);
     --mm-tint-c: var(--mm-dark-tint-c);
+    --mm-segment-l: var(--mm-dark-segment-l);
+    --mm-segment-c: var(--mm-dark-segment-c);
     --mm-shadow-card: var(--mm-dark-shadow-card);
   }
 }
@@ -231,6 +249,8 @@
   --mm-warning: var(--mm-dark-warning);
   --mm-tint-l: var(--mm-dark-tint-l);
   --mm-tint-c: var(--mm-dark-tint-c);
+  --mm-segment-l: var(--mm-dark-segment-l);
+  --mm-segment-c: var(--mm-dark-segment-c);
   --mm-shadow-card: var(--mm-dark-shadow-card);
 }
 

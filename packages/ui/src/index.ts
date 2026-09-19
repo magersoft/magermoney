@@ -99,6 +99,28 @@ export { default as StatTile } from './components/stat-tile/StatTile.vue';
 export { formatDelta, deltaTone, deltaDirection } from './components/stat-tile/delta';
 export type { DeltaTone } from './components/stat-tile/delta';
 
+/*
+ * The donut: the only chart in the app, in its two roles — a period split by
+ * category, and a budget against its limit. The legend is exported beside it
+ * because a screen can lay it out itself, never because the ring can do without
+ * one.
+ */
+export { default as DonutChart } from './components/donut/DonutChart.vue';
+export { default as DonutLegend } from './components/donut/DonutLegend.vue';
+export {
+  layoutDonut,
+  segmentHue,
+  segmentStyle,
+  progressPercent,
+  DONUT_CIRCUMFERENCE,
+  DONUT_GAP,
+  DONUT_MIN_ARC,
+  DONUT_RADIUS,
+  DONUT_STROKE,
+} from './components/donut/segments';
+export type { DonutArc } from './components/donut/segments';
+export type { DonutSegment } from './components/donut/types';
+
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
   resolveCurrencyIcon,
