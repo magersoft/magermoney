@@ -1,10 +1,11 @@
 ---
 id: TASK-003
 title: Исследования обновления дизайна приложения
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 10:48'
-updated_date: '2026-09-19 11:00'
+updated_date: '2026-09-19 11:01'
 labels:
   - design
   - research
