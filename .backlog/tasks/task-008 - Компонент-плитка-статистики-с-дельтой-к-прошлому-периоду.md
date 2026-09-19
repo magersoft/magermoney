@@ -1,7 +1,7 @@
 ---
 id: TASK-008
 title: 'Компонент: плитка статистики с дельтой к прошлому периоду'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-19 11:12'
@@ -62,3 +62,9 @@ ordinal: 6000
 
 Проверка: bun run test (134 теста в ui, 616 в монорепо), lint, typecheck — зелёные. Детектор impeccable по StatTile.vue и delta.ts — пусто.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Добавлена плитка статистики `StatTile` в `packages/ui`: кружок иконки (слот), метка, сумма через AmountLockup в чернилах и бейдж изменения к прошлому периоду. Бейдж — единственное цветное место плитки; направление несут знак в тексте и стрелка, а не цвет. Для красного бейджа палитра получила пару `--mm-negative-fill` / `--mm-negative-fg`, зелёный — `--mm-positive-fg`; заливки одинаковы в обеих темах и несут свой тёмный текст. Проверено: 18 тестов `test/stat-tile.test.ts` (рост, падение, ноль, отсутствие дельты, знак и стрелка, ссылка и фокус, токены заливок), расширенный `tokens-contrast.test.ts` меряет AA обеих заливок в обеих темах; bun run test, lint и typecheck зелёные.
+<!-- SECTION:FINAL_SUMMARY:END -->
