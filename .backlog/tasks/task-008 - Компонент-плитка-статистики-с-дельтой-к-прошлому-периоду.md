@@ -1,9 +1,11 @@
 ---
 id: TASK-008
 title: 'Компонент: плитка статистики с дельтой к прошлому периоду'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:12'
+updated_date: '2026-09-19 12:18'
 labels:
   - design
   - ui
@@ -35,3 +37,13 @@ ordinal: 6000
 - [ ] #7 Тесты покрывают рост, падение, нулевую и отсутствующую дельту
 - [ ] #8 bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Токены: добавить `--mm-positive-fg`, `--mm-negative-fill`, `--mm-negative-fg` в обе палитры (заливка одинакова в обеих темах, значит и её текст тоже — тёмные чернила), прокинуть в обе тёмные ветки и в `@theme inline`.
+2. Тесты сначала: расширить `tokens-contrast.test.ts` (ink на обеих заливках >= 4.5 в обеих темах, заливки не годятся как текст) и написать `stat-tile.test.ts` на рост/падение/ноль/отсутствие дельты, знак и стрелку, ссылку и фокус.
+3. `packages/ui/src/components/stat-tile/StatTile.vue`: кружок с иконкой (слот, нейтральная заливка — цвет по direction.md принадлежит только изменению), метка, сумма через AmountLockup (чернила), бейдж дельты, шеврон у ссылки.
+4. Тон бейджа: знак дельты + проп `upIsGood` (для расходов рост — это плохо); ноль — нейтральный бейдж без стрелки, отсутствие дельты — бейджа нет вовсе.
+5. Экспорт из `packages/ui/src/index.ts` + типы; прогнать test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
