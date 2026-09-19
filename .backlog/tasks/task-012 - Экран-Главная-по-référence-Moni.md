@@ -1,10 +1,11 @@
 ---
 id: TASK-012
 title: 'Экран: Главная по референсу Moni'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:13'
-updated_date: '2026-09-19 11:13'
+updated_date: '2026-09-19 12:53'
 labels:
   - design
   - web
