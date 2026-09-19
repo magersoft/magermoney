@@ -27,6 +27,8 @@ const props = withDefaults(
     scale?: number;
     locale?: AmountLocale;
     showCode?: boolean;
+    /** A group of changes subtotals to a change: signed, and coloured like one. */
+    variant?: 'balance' | 'change';
     /** The accessible name of the list, when the title is not next to it. */
     ariaLabel?: string;
     class?: HTMLAttributes['class'];
@@ -38,6 +40,7 @@ const props = withDefaults(
     scale: 2,
     locale: 'en',
     showCode: false,
+    variant: 'balance',
     ariaLabel: undefined,
     class: '',
   },
@@ -63,6 +66,7 @@ const props = withDefaults(
           :scale="props.scale"
           :locale="props.locale"
           :show-code="props.showCode"
+          :variant="props.variant"
           class="text-sm"
         />
       </span>

@@ -191,6 +191,17 @@ describe('RowGroup', () => {
     w.unmount();
   });
 
+  /*
+   * A day of movements adds up to a change, not to a balance, and a subtotal
+   * that printed «500» over rows reading «+700» and «−200» would be the one
+   * figure on the screen without a direction.
+   */
+  it('subtotals a group of changes as a change, plus sign and all', () => {
+    const w = mountGroup({ amount: '500', variant: 'change' });
+    expect(w.get('[data-slot="row-group-subtotal"]').text()).toContain('+');
+    w.unmount();
+  });
+
   it('is a plain card when the screen has no group to name', () => {
     const w = mount(RowGroup, { slots: { default: '<li data-test="row">one</li>' } });
     expect(w.find('[data-slot="row-group-header"]').exists()).toBe(false);
