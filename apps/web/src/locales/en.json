@@ -66,6 +66,7 @@
   },
   "plan": {
     "title": "Plan",
+    "sections": "Plan sections",
     "tabs": {
       "income": "Income",
       "expenses": "Expenses",
@@ -87,6 +88,13 @@
     "gross": "Before tax: {amount}",
     "period": "Since {from}",
     "periodEnded": "{from} to {to}",
+    "netTotal": "Net per month",
+    "rateDate": "Rates for {date}",
+    "unconvertible": "No rate for: {names}. Left out of the total.",
+    "groups": {
+      "scheduled": "On a schedule",
+      "irregular": "No schedule"
+    },
     "ended": {
       "show": "Ended · {n}",
       "hide": "Hide ended"
@@ -137,11 +145,33 @@
     "title": "Expenses",
     "add": "Add expense",
     "perMonth": "/ mo",
-    "yearly": "{amount} / yr · ≈ {monthly} / mo",
+    "yearly": "{amount} a year",
     "essential": "essential",
     "planned": "Per month",
     "essentialTotal": "of which essential",
     "unconvertible": "No rate for: {names}. Left out of the total.",
+    "byCategory": "Expenses by category",
+    "filters": "Active filters",
+    "essentialOf": "Essential: {amount}",
+    "emptyMonth": "Nothing is charged this month",
+    "emptyMonthBody": "Nothing is charged this month.",
+    "emptyCategory": "Nothing in this category this month.",
+    "resetFilters": "Clear filters",
+    "rateDate": "Rates for {date}",
+    "startsOn": "Starts {date}",
+    "endedOn": "Ended {date}",
+    "month": {
+      "prev": "Previous month",
+      "next": "Next month",
+      "remove": "Clear filter: {period}"
+    },
+    "category": {
+      "remove": "Clear filter: {name}"
+    },
+    "upcoming": {
+      "show": "Starting later · {n}",
+      "hide": "Hide the later ones"
+    },
     "ended": {
       "show": "Ended · {n}",
       "hide": "Hide ended"
@@ -190,6 +220,14 @@
     "perMonth": "/ mo",
     "total": "Limits per month",
     "unconvertible": "No rate for: {names}. Left out of the total.",
+    "monthly": "This month's budget",
+    "categories": "Budget categories",
+    "spentOf": "{spent} spent of {limit}",
+    "spendNote": "The real figure arrives when you close the month. Until then it is all zero.",
+    "noLimits": "No limits yet",
+    "over": "Over the limit",
+    "rateDate": "Rates for {date}",
+    "endedOn": "Ended {date}",
     "ended": {
       "show": "Ended · {n}",
       "hide": "Hide ended"

@@ -49,6 +49,10 @@ export { percentToFraction, fractionToPercent } from './components/percent-input
 export { default as SegmentedControl } from './components/segmented-control/SegmentedControl.vue';
 export type { SegmentedOption } from './components/segmented-control/types';
 
+/* Tabs, not a segmented control: each one opens a panel, and names it. */
+export { default as TabBar } from './components/tab-bar/TabBar.vue';
+export type { TabItem } from './components/tab-bar/types';
+
 export { default as DayOfMonthPicker } from './components/day-of-month-picker/DayOfMonthPicker.vue';
 export { default as ProgressRule } from './components/progress-rule/ProgressRule.vue';
 

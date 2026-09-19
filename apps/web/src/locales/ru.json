@@ -66,6 +66,7 @@
   },
   "plan": {
     "title": "План",
+    "sections": "Разделы плана",
     "tabs": {
       "income": "Доходы",
       "expenses": "Расходы",
@@ -87,6 +88,13 @@
     "gross": "До налогов: {amount}",
     "period": "С {from}",
     "periodEnded": "С {from} по {to}",
+    "netTotal": "На руки в месяц",
+    "rateDate": "Курсы на {date}",
+    "unconvertible": "Нет курса для: {names}. Они не вошли в итог.",
+    "groups": {
+      "scheduled": "По расписанию",
+      "irregular": "Без расписания"
+    },
     "ended": {
       "show": "Завершённые · {n}",
       "hide": "Скрыть завершённые"
@@ -137,11 +145,33 @@
     "title": "Расходы",
     "add": "Добавить расход",
     "perMonth": "/ мес",
-    "yearly": "{amount} / год · ≈ {monthly} / мес",
+    "yearly": "{amount} в год",
     "essential": "обязательный",
     "planned": "Всего в месяц",
     "essentialTotal": "из них обязательные",
     "unconvertible": "Нет курса для: {names}. Они не вошли в итог.",
+    "byCategory": "Расходы по категориям",
+    "filters": "Активные фильтры",
+    "essentialOf": "Обязательные: {amount}",
+    "emptyMonth": "В этом месяце ничего не списывается",
+    "emptyMonthBody": "В этом месяце ничего не списывается.",
+    "emptyCategory": "В этой категории в этом месяце ничего нет.",
+    "resetFilters": "Снять фильтры",
+    "rateDate": "Курсы на {date}",
+    "startsOn": "Начнётся {date}",
+    "endedOn": "Закончился {date}",
+    "month": {
+      "prev": "Предыдущий месяц",
+      "next": "Следующий месяц",
+      "remove": "Снять фильтр: {period}"
+    },
+    "category": {
+      "remove": "Снять фильтр: {name}"
+    },
+    "upcoming": {
+      "show": "Начнутся позже · {n}",
+      "hide": "Скрыть будущие"
+    },
     "ended": {
       "show": "Завершённые · {n}",
       "hide": "Скрыть завершённые"
@@ -190,6 +220,14 @@
     "perMonth": "/ мес",
     "total": "Всего лимитов в месяц",
     "unconvertible": "Нет курса для: {names}. Они не вошли в итог.",
+    "monthly": "Бюджет месяца",
+    "categories": "Категории бюджета",
+    "spentOf": "Потрачено {spent} из {limit}",
+    "spendNote": "Факт появится, когда закроете месяц. Пока везде ноль.",
+    "noLimits": "Лимитов пока нет",
+    "over": "Лимит превышен",
+    "rateDate": "Курсы на {date}",
+    "endedOn": "Закончился {date}",
     "ended": {
       "show": "Завершённые · {n}",
       "hide": "Скрыть завершённые"

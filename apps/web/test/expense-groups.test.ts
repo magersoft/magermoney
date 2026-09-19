@@ -57,7 +57,7 @@ describe('groupExpenses', () => {
     expect(g.ended.map((e) => e.id)).toEqual(['c']);
   });
 
-  it('lists an expense that starts next month: it is already part of the plan', () => {
+  it('holds an expense that starts later apart from the month being read', () => {
     const g = groupExpenses(
       [exp({ id: 'f', name: 'Future rent', activeFrom: '2026-12-01' })],
       cats,
@@ -66,9 +66,37 @@ describe('groupExpenses', () => {
       'USD',
       '2026-09-17',
     )!;
-    expect(g.groups[0]?.rows.map((r) => r.expense.id)).toEqual(['f']);
+    expect(g.groups).toEqual([]);
+    expect(g.upcoming.map((e) => e.id)).toEqual(['f']);
     expect(g.ended).toEqual([]);
-    expect(g.planned.round().toString()).toBe('1200');
+    expect(g.planned.toString()).toBe('0');
+  });
+
+  it('reads the month it is given: the same plan pages back and forward', () => {
+    const dtos = [
+      exp({ id: 'now', name: 'Rent' }),
+      exp({ id: 'later', name: 'Future rent', activeFrom: '2026-12-01' }),
+      exp({ id: 'gone', name: 'Old gym', amount: '50', activeTo: '2026-06-30' }),
+    ];
+    const december = groupExpenses(dtos, cats, table, reg, 'USD', '2026-09-17', '2026-12-01')!;
+    expect(december.groups[0]?.rows.map((r) => r.expense.id)).toEqual(['later', 'now']);
+    expect(december.upcoming).toEqual([]);
+    expect(december.planned.round().toString()).toBe('2400');
+
+    const june = groupExpenses(dtos, cats, table, reg, 'USD', '2026-09-17', '2026-06-15')!;
+    expect(june.groups[0]?.rows.map((r) => r.expense.id)).toEqual(['gone', 'now']);
+    expect(june.ended).toEqual([]);
+    expect(june.upcoming.map((e) => e.id)).toEqual(['later']);
+  });
+
+  it('counts an expense in the month it ends in, and not in the one after', () => {
+    const dtos = [exp({ id: 'gone', name: 'Gym', amount: '50', activeTo: '2026-06-30' })];
+    expect(
+      groupExpenses(dtos, cats, table, reg, 'USD', '2026-09-17', '2026-06-01')!.groups,
+    ).toHaveLength(1);
+    const july = groupExpenses(dtos, cats, table, reg, 'USD', '2026-09-17', '2026-07-01')!;
+    expect(july.groups).toEqual([]);
+    expect(july.ended.map((e) => e.id)).toEqual(['gone']);
   });
 
   it('lists what it cannot convert instead of dropping it', () => {

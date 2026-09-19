@@ -45,7 +45,16 @@ describe('BudgetsSegment', () => {
     const total = wrapper.get('[data-testid="budgets-total"]').text();
     expect(total).toContain('1');
     expect(total).toContain('300');
-    expect(wrapper.get(`[data-testid="budget-row-${A}"]`).text()).toContain('1000 EUR');
+    const row = wrapper.get(`[data-testid="budget-row-${A}"]`);
+    /* Its own currency, because it is not the one the screen counts in. */
+    expect(row.text()).toContain('EUR');
+    expect(row.text()).toContain('1');
+    expect(row.text()).toContain('000');
+    expect(row.attributes('href')).toBe(`/plan/budgets/${A}/edit`);
+    /* The bar is there and empty: no Spend exists to fill it before phase 5. */
+    expect(row.get('[data-slot="category-row-fill"]').attributes('style')).toContain('scaleX(0)');
+    expect(wrapper.get('[data-testid="budgets-spend-note"]').text()).toContain('закроете месяц');
+    expect(wrapper.get('[data-testid="budgets-rate-note"]').text()).toContain('Курсы на');
 
     const toggle = wrapper.get('[data-testid="budgets-ended-toggle"]');
     expect(toggle.attributes('aria-expanded')).toBe('false');

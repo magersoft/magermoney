@@ -36,6 +36,15 @@ async function mountAt(path: string) {
 }
 
 describe('PlanPage', () => {
+  it('names the open panel with the tab that opened it', async () => {
+    const { w } = await mountAt('/plan?tab=budgets');
+    const tabs = w.findAll('[data-testid="plan-tabs"] [role="tab"]');
+    expect(tabs.map((t) => t.attributes('aria-selected'))).toEqual(['false', 'false', 'true']);
+    const panel = w.get('[role="tabpanel"]');
+    expect(panel.attributes('aria-labelledby')).toBe('tab-budgets');
+    expect(tabs[2]?.attributes('aria-controls')).toBe(panel.attributes('id'));
+  });
+
   it('opens on income by default and on the segment named in the query', async () => {
     expect((await mountAt('/plan')).w.find('[data-testid="seg-income"]').exists()).toBe(true);
     expect(
