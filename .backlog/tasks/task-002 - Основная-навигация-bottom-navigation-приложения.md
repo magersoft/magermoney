@@ -4,12 +4,17 @@ title: Основная навигация bottom-navigation приложени�
 status: To Do
 assignee: []
 created_date: '2026-09-19 10:33'
-updated_date: '2026-09-19 10:39'
+updated_date: '2026-09-19 11:14'
 labels:
   - design
   - web
   - ui
-dependencies: []
+dependencies:
+  - TASK-004
+  - TASK-011
+documentation:
+  - docs/design/moni-review.md
+  - docs/design/direction.md
 type: enhancement
 ordinal: 750
 ---
@@ -52,6 +57,8 @@ ordinal: 750
 - [ ] #8 Учтены safe-area, светлая и тёмная темы, prefers-reduced-motion, фокус с клавиатуры
 - [ ] #9 Компонентный тест на порядок вкладок, активное состояние и открытие меню по (+); строки в en.json и ru.json
 - [ ] #10 bun run test, lint, typecheck проходят
+- [ ] #11 Панель — плавающая пилюля, как на слайдах 10 и 14 референса: скруглена до 999px, не прилегает к краям экрана, первичная кнопка тёмная в светлой теме и синяя в тёмной
+- [ ] #12 Шит, который открывает (+), — тот же компонент быстрого действия, что и у форм (TASK-011), а не отдельная разметка
 <!-- AC:END -->
 
 ## Implementation Plan
