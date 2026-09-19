@@ -25,7 +25,11 @@ const token = (name: string): Oklch => {
   return [Number(match[1]), Number(match[2]), Number(match[3])];
 };
 
-/** oklch -> linear-light sRGB (Ottosson's matrices), the space WCAG measures in. */
+/**
+ * oklch -> linear-light sRGB (Ottosson's matrices), the space WCAG measures in.
+ * Unclamped: a channel outside 0..1 is a colour sRGB cannot show, which is a
+ * thing the tint has to be checked for, not a rounding error to hide.
+ */
 const linearRgb = ([l, c, hDeg]: Oklch): [number, number, number] => {
   const h = (hDeg * Math.PI) / 180;
   const a = c * Math.cos(h);
@@ -33,17 +37,17 @@ const linearRgb = ([l, c, hDeg]: Oklch): [number, number, number] => {
   const long = (l + 0.3963377774 * a + 0.2158037573 * b) ** 3;
   const medium = (l - 0.1055613458 * a - 0.0638541728 * b) ** 3;
   const short = (l - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
   return [
-    clamp(4.0767416621 * long - 3.3077115913 * medium + 0.2309699292 * short),
-    clamp(-1.2684380046 * long + 2.6097574011 * medium - 0.3413193965 * short),
-    clamp(-0.0041960863 * long - 0.7034186147 * medium + 1.707614701 * short),
+    4.0767416621 * long - 3.3077115913 * medium + 0.2309699292 * short,
+    -1.2684380046 * long + 2.6097574011 * medium - 0.3413193965 * short,
+    -0.0041960863 * long - 0.7034186147 * medium + 1.707614701 * short,
   ];
 };
 
 const luminance = (colour: Oklch) => {
+  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
   const [r, g, b] = linearRgb(colour);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return 0.2126 * clamp(r) + 0.7152 * clamp(g) + 0.0722 * clamp(b);
 };
 
 const contrast = (a: Oklch, b: Oklch) => {
@@ -103,6 +107,48 @@ describe('palette contrast', () => {
     expect(token('mm-light-positive')).not.toEqual(token('mm-light-positive-fill'));
     expect(ratio('mm-light-accent-fill', 'mm-light-bg')).toBeLessThan(4.5);
     expect(ratio('mm-light-positive-fill', 'mm-light-bg')).toBeLessThan(4.5);
+  });
+});
+
+/** A token declared as a bare number — the tint's lightness and chroma. */
+const scalar = (name: string): number => {
+  const match = css.match(new RegExp(`--${name}:\\s*([\\d.]+);`));
+  if (!match) throw new Error(`--${name} is not declared as a number in tokens.css`);
+  return Number(match[1]);
+};
+
+describe('the currency tint', () => {
+  /*
+   * An account card is filled by its currency, and the currency only picks a
+   * hue. That is what makes this provable rather than spot-checked: walk the
+   * whole wheel at the theme's fixed lightness and chroma, and no currency —
+   * including one nobody has added yet — can produce a card ink fails on.
+   */
+  it.each(['light', 'dark'])('carries ink at AA on every hue, in %s', (theme) => {
+    const lightness = scalar(`mm-${theme}-tint-l`);
+    const chroma = scalar(`mm-${theme}-tint-c`);
+    const ink = token(`mm-${theme}-ink`);
+    const wheel = Array.from({ length: 360 }, (_, hue) => ({
+      hue,
+      ratio: Math.round(contrast(ink, [lightness, chroma, hue]) * 10) / 10,
+    }));
+    // Reported as the worst hue, so a failure says which currency colour broke.
+    const worst = wheel.reduce((a, b) => (b.ratio < a.ratio ? b : a));
+    expect(worst.ratio).toBeGreaterThanOrEqual(4.5);
+  });
+
+  /*
+   * The sRGB cone narrows towards white, so a chroma chosen by eye is easily
+   * one the browser has to map back — and mapping pulls far-apart hues onto the
+   * same colour, which is how "one currency, one colour" would fail silently.
+   */
+  it.each(['light', 'dark'])('stays inside sRGB on every hue, in %s', (theme) => {
+    const lightness = scalar(`mm-${theme}-tint-l`);
+    const chroma = scalar(`mm-${theme}-tint-c`);
+    const outside = Array.from({ length: 360 }, (_, hue) => hue).filter((hue) =>
+      linearRgb([lightness, chroma, hue]).some((channel) => channel < -0.001 || channel > 1.001),
+    );
+    expect(outside).toEqual([]);
   });
 });
 

@@ -84,6 +84,17 @@
 }
 
 /*
+ * The account card's fill. The currency hands in a hue through `--mm-card-hue`
+ * (see `components/account-card/currency-tint.ts`); lightness and chroma belong
+ * to the theme, so one card retints with the theme and ink stays above AA on
+ * every hue the wheel can hand out. The card always supplies the hue; the
+ * fallback only keeps the declaration valid if one ever renders without it.
+ */
+@utility bg-currency-tint {
+  background-color: oklch(var(--mm-tint-l) var(--mm-tint-c) var(--mm-card-hue, 0));
+}
+
+/*
  * Every shadcn variable resolves to a token, so the generated components follow
  * the palette in both themes without being edited. `--mm-*` flips with the
  * theme; these mappings never need to.

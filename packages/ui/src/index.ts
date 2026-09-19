@@ -67,6 +67,20 @@ export type {
   AmountLockupParts,
 } from './components/amount-lockup/format-amount';
 
+/*
+ * The account card and its two layouts. The card is built once here because the
+ * home strip and the accounts stack are the same object seen twice.
+ */
+export { default as AccountCard } from './components/account-card/AccountCard.vue';
+export { default as AccountCardStrip } from './components/account-card/AccountCardStrip.vue';
+export { default as AccountCardStack } from './components/account-card/AccountCardStack.vue';
+export {
+  currencyHue,
+  currencyTintStyle,
+  CURRENCY_TINT_ORDER,
+} from './components/account-card/currency-tint';
+export type { AccountCardItem } from './components/account-card/types';
+
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
   resolveCurrencyIcon,
