@@ -1,0 +1,100 @@
+import { describe, expect, it, vi } from 'vitest';
+import { flushPromises, mount } from '@vue/test-utils';
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
+import { createI18n } from 'vue-i18n';
+import { createRouter, createMemoryHistory } from 'vue-router';
+import ru from '../src/locales/ru.json';
+import { API_KEY } from '../src/shared/api/use-api.js';
+import AccountFormPage from '../src/modules/accounts/ui/AccountFormPage.vue';
+
+const currencies = [
+  { code: 'USD', kind: 'fiat', scale: 2, symbol: null, nameRu: null, nameEn: null, icon: null },
+  { code: 'EUR', kind: 'fiat', scale: 2, symbol: null, nameRu: null, nameEn: null, icon: null },
+];
+const created = {
+  id: '11111111-1111-4111-8111-111111111111',
+  name: 'Карман',
+  bank: 'Bank',
+  country: 'RU',
+  currency: 'EUR',
+  kind: 'cash',
+  cardType: null,
+  isSpending: true,
+  cardLast4: null,
+  cardNetwork: null,
+  cardTier: null,
+  cardExpires: null,
+  note: null,
+  sortOrder: 0,
+  archivedAt: null,
+  balance: null,
+  balanceRecordedAt: null,
+};
+const json = (body: unknown) =>
+  new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { 'content-type': 'application/json' },
+  });
+
+function mountForm() {
+  const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+    if (path === '/currencies') return json(currencies);
+    if (path === '/accounts' && init?.method === 'POST') return json(created);
+    return json([]);
+  });
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/accounts/new', component: AccountFormPage },
+      { path: '/accounts/:id', component: { template: '<div />' } },
+    ],
+  });
+  const w = mount(AccountFormPage, {
+    global: {
+      plugins: [
+        [
+          VueQueryPlugin,
+          { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) },
+        ],
+        createI18n({ legacy: false, locale: 'ru', messages: { ru } }),
+        router,
+      ],
+      provide: { [API_KEY as unknown as string]: { fetch } },
+      stubs: { Motion: { template: '<div><slot /></div>' } },
+    },
+  });
+  return { w, fetch };
+}
+
+describe('AccountFormPage', () => {
+  it('asks every question as a row rather than a bordered field', async () => {
+    const { w } = mountForm();
+    await flushPromises();
+
+    const rows = w.findAll('[data-slot="form-field-row"]');
+    expect(rows.length).toBeGreaterThan(5);
+    // The row is the label of the control inside it, so nothing needs an id.
+    expect(w.get('[data-testid="form-name"]').element.closest('label')).not.toBeNull();
+  });
+
+  it('creates the account from what the rows hold', async () => {
+    const { w, fetch } = mountForm();
+    await flushPromises();
+
+    await w.get('[data-testid="form-name"]').setValue('Карман');
+    await w.get('[data-testid="form-bank"]').setValue('Bank');
+    await w.get('[data-testid="form-country"]').setValue('ru');
+    await w.get('[data-testid="form-currency"]').setValue('EUR');
+    await w.get('[data-testid="account-form"]').trigger('submit');
+    await flushPromises();
+
+    const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(post).toBeDefined();
+    expect(JSON.parse(String(post?.[1]?.body))).toMatchObject({
+      name: 'Карман',
+      bank: 'Bank',
+      country: 'RU',
+      currency: 'EUR',
+    });
+  });
+});

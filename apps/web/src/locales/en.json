@@ -230,9 +230,16 @@
   "accounts": {
     "title": "Accounts",
     "total": "Total money",
-    "payday": "Available until payday",
     "rateDate": "Rates for {date}",
     "unconvertible": "No rate: {codes}. These accounts are left out of the total.",
+    "count": "{n} account | {n} accounts",
+    "filter": {
+      "label": "Currency",
+      "all": "All currencies",
+      "chip": "Currency: {code}",
+      "remove": "Remove filter: {code}",
+      "empty": "No accounts in {code}"
+    },
     "empty": {
       "title": "No accounts yet",
       "body": "Add your first account: bank, currency, and current balance.",
@@ -291,6 +298,7 @@
       "currencyLocked": "Currency cannot change once there are balances",
       "kind": "Type",
       "spending": "Spending: counted as available until payday",
+      "cardSection": "Card",
       "cardType": "Card type",
       "cardNetwork": "Network",
       "cardTier": "Tier",
