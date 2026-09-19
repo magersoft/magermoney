@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-19 11:11'
-updated_date: '2026-09-19 11:30'
+updated_date: '2026-09-19 11:31'
 labels:
   - design
   - ui
@@ -39,3 +39,14 @@ Amount lockup — подпись приложения, единственный 
 - [ ] #8 Тесты покрывают: валюту с символом, без символа, режим с кодом, ноль, отрицательное, крупное значение с разделителями
 - [ ] #9 bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Pure formatter packages/ui/src/components/amount-lockup/format-amount.ts: resolveCurrencySymbol(code, locale) via Intl narrowSymbol (symbol === code or RangeError => no symbol), formatAmountLockup(amount, opts) => { sign, lead: {kind: 'symbol'|'code'}, integer, fraction, code } built from Intl formatToParts, never arithmetic.
+2. Failing tests first (packages/ui/test/amount-lockup.test.ts): symbol currency, USDT/BTC without symbol, trailing-code mode, zero, negative, large value with separators, ru/en separators, mount assertions for 0.6em fraction, tabular digits and the accessible plain string.
+3. AmountLockup.vue: inline-flex baseline row, size inherited from the caller (font-size outside), fraction and mono code at 0.6em so the proportion holds at every step, sr-only plain amount plus aria-hidden visual parts, weight 600, data-amount for tabular-nums.
+4. variant 'balance' (ink, minus sign U+2212) vs 'change' (explicit +/- and positive/negative token colour) — balances stay ink per direction.md.
+5. Export the component, the formatter and its types from packages/ui/src/index.ts; extend the exports test.
+6. bun run test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
