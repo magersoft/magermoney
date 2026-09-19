@@ -1,9 +1,11 @@
 ---
 id: TASK-010
 title: 'Компоненты: строка операции и строка категории с полосой лимита'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:12'
+updated_date: '2026-09-19 12:36'
 labels:
   - design
   - ui
@@ -36,3 +38,14 @@ ordinal: 8000
 - [ ] #8 Тесты покрывают обе строки, превышение лимита, группу с подытогом, длинное название
 - [ ] #9 bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Тесты сначала: `packages/ui/test/row.test.ts` — обе строки, превышение лимита, группа с подытогом, длинное название, ссылка и шеврон.
+2. `components/row/TransactionRow.vue`: иконка в плашке (слот), название и категория в две строки, сумма через AmountLockup справа, время под суммой. `Primitive` с `as`, как у StatTile, чтобы экран отдал `router-link`.
+3. `components/row/CategoryRow.vue`: эмодзи, название, пара потрачено/лимит, собственная полоса. Превышение — `data-over`, красная полоса плюс слова и иконка. Валюта бюджета показывается кодом через `showCode`, когда отличается от базовой.
+4. `components/row/RowGroup.vue` + `RowGroupHeader.vue`: заголовок группы с подытогом справа, ряды лежат в карточке, без разделительных линий.
+5. Сумма в строке — чернила (правило direction.md), знак несёт само число; `variant` прокинут для случаев, где строка действительно про изменение.
+6. Экспорт из `packages/ui/src/index.ts`; test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
