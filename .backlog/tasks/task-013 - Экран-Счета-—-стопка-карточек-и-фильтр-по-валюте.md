@@ -1,9 +1,11 @@
 ---
 id: TASK-013
 title: 'Экран: Счета — стопка карточек и фильтр по валюте'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:13'
+updated_date: '2026-09-19 13:40'
 labels:
   - design
   - web
