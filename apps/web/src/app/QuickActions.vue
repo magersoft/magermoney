@@ -1,11 +1,22 @@
 <script setup lang="ts">
-/** The "+" on the accounts tab: record a balance (pick the account first) or make a transfer. */
+/** The "+" on Home and Accounts: record a balance (pick the account first), make a transfer, or record an inflow. */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { Button, Sheet, SheetContent, SheetHeader, SheetTitle } from '@magermoney/ui';
 import { RecordBalanceSheet, useAccounts } from '@/modules/accounts';
 import { TransferSheet } from '@/modules/transfers';
+import { routeComponent } from '@/shared/layout/route-fallback';
+
+/**
+ * Lazy, unlike its two neighbours: the income barrel is otherwise reached only
+ * through routed screens, and a static import here would put the whole module
+ * into the entry chunk for a sheet most sessions never open.
+ *
+ * Wrapped like a routed screen: a chunk that a deploy took away must leave a
+ * sentence and a Reload button behind, not a button that answers with nothing.
+ */
+const InflowSheet = routeComponent(() => import('@/modules/income').then((m) => m.InflowSheet));
 
 const { t } = useI18n();
 const route = useRoute();
@@ -14,18 +25,28 @@ const menu = ref(false);
 const pick = ref(false);
 const record = ref(false);
 const transfer = ref(false);
+const inflow = ref(false);
+/** Mounted on first use, so the chunk is not fetched until someone asks for it. */
+const inflowWanted = ref(false);
 const chosen = ref('');
 const active = computed(() => accounts.value.filter((a) => a.archivedAt === null));
-const onHome = computed(() => route.path === '/');
+/** The "+" belongs to the two screens about money on hand: the dashboard and the accounts list. */
+const FAB_PATHS = ['/', '/accounts'];
+const showFab = computed(() => FAB_PATHS.includes(route.path));
 function choose(id: string) {
   chosen.value = id;
   pick.value = false;
   record.value = true;
 }
+function openInflow() {
+  menu.value = false;
+  inflowWanted.value = true;
+  inflow.value = true;
+}
 </script>
 
 <template>
-  <template v-if="onHome && accounts.length > 0">
+  <template v-if="showFab">
     <Button
       size="icon-lg"
       class="size-14 rounded-full shadow-lg"
@@ -41,29 +62,40 @@ function choose(id: string) {
           <SheetTitle>{{ t('quick.open') }}</SheetTitle>
         </SheetHeader>
         <div class="mt-4 grid gap-2">
+          <template v-if="active.length > 0">
+            <Button
+              size="lg"
+              variant="outline"
+              class="min-h-9 pointer-coarse:min-h-11"
+              data-testid="quick-record"
+              @click="
+                menu = false;
+                pick = true;
+              "
+            >
+              {{ t('quick.record') }}
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              class="min-h-9 pointer-coarse:min-h-11"
+              data-testid="quick-transfer"
+              @click="
+                menu = false;
+                transfer = true;
+              "
+            >
+              {{ t('quick.transfer') }}
+            </Button>
+          </template>
           <Button
             size="lg"
             variant="outline"
             class="min-h-9 pointer-coarse:min-h-11"
-            data-testid="quick-record"
-            @click="
-              menu = false;
-              pick = true;
-            "
+            data-testid="quick-inflow"
+            @click="openInflow"
           >
-            {{ t('quick.record') }}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            class="min-h-9 pointer-coarse:min-h-11"
-            data-testid="quick-transfer"
-            @click="
-              menu = false;
-              transfer = true;
-            "
-          >
-            {{ t('quick.transfer') }}
+            {{ t('quick.inflow') }}
           </Button>
         </div>
       </SheetContent>
@@ -95,5 +127,6 @@ function choose(id: string) {
     </Sheet>
     <RecordBalanceSheet v-if="chosen" v-model:open="record" :account-id="chosen" />
     <TransferSheet v-model:open="transfer" />
+    <InflowSheet v-if="inflowWanted" v-model:open="inflow" />
   </template>
 </template>

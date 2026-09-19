@@ -3,6 +3,7 @@ import {
   RateMissingError,
   UnknownCurrencyError,
   CurrencyMismatchError,
+  InflowError,
   InvalidAmountError,
   InsufficientFundsError,
   TransferError,
@@ -57,6 +58,9 @@ export function toHttpError(e: AppError): {
     return { status: 401, body: { code: e.code, message: e.message } };
   if (e instanceof ValidationError)
     return { status: 400, body: { code: e.code, message: e.message } };
+  // The reason is what the form needs to react to, so it travels as the code.
+  if (e instanceof InflowError)
+    return { status: 400, body: { code: e.reason, message: e.message } };
   if (e instanceof RateMissingError)
     return { status: 422, body: { code: e.code, message: e.message } };
   if (

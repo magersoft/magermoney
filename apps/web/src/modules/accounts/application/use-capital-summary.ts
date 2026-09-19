@@ -57,9 +57,11 @@ export function summarise(
 export function useCapitalSummary(): {
   summary: ComputedRef<CapitalSummary | undefined>;
   isLoading: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  refetch: () => void;
   rateDate: ComputedRef<string>;
 } {
-  const { accounts, isLoading } = useAccounts();
+  const { accounts, isLoading, isError, refetch } = useAccounts();
   const rates = useRates();
   const registry = useCurrencyRegistry();
   const { current } = useDisplayCurrency();
@@ -68,6 +70,11 @@ export function useCapitalSummary(): {
       summarise(accounts.value, rates.table.value, registry.value, current.value),
     ),
     isLoading: computed(() => isLoading.value || rates.isLoading.value),
+    isError: computed(() => isError.value || rates.isError.value),
+    refetch: () => {
+      refetch();
+      rates.refetch();
+    },
     rateDate: rates.date,
   };
 }

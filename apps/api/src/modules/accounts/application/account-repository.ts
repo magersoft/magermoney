@@ -41,7 +41,10 @@ export interface AccountRepository {
   create(userId: string, data: NewAccount, opening?: OpeningBalance): Promise<AccountRow>;
   update(userId: string, id: string, patch: AccountPatch): Promise<AccountRow | null>;
   setArchived(userId: string, id: string, archivedAt: string | null): Promise<AccountRow | null>;
-  delete(userId: string, id: string): Promise<'deleted' | 'not_found' | 'has_transfers'>;
+  delete(
+    userId: string,
+    id: string,
+  ): Promise<'deleted' | 'not_found' | 'has_transfers' | 'has_inflows'>;
   /** Assigns sort_order 0..n-1 in the given order. False if any id is not the user's. */
   reorder(userId: string, ids: string[]): Promise<boolean>;
   countEntries(userId: string, id: string): Promise<number>;

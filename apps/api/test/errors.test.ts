@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  InflowError,
   InsufficientFundsError,
   RateMissingError,
   TransferError,
@@ -34,5 +35,12 @@ describe('toHttpError', () => {
     });
     expect(toHttpError(new TransferError('negative_fee')).status).toBe(400);
     expect(toHttpError(new InsufficientFundsError('USD', '1')).status).toBe(400);
+  });
+
+  it('maps an inflow error to 400 with its reason as the code', () => {
+    expect(toHttpError(new InflowError('credited_amount_required'))).toMatchObject({
+      status: 400,
+      body: { code: 'credited_amount_required' },
+    });
   });
 });

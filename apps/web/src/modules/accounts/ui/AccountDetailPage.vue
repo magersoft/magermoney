@@ -85,7 +85,7 @@ async function del() {
   if (!account.value) return;
   try {
     await remove(account.value.id);
-    await router.replace('/');
+    await router.replace('/accounts');
   } catch (e) {
     toast(t(errorKeyFor(e, 'accounts.form.saveFailed')));
   }

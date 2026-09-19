@@ -15,3 +15,16 @@ export const CurrencyCodeSchema = z
   .openapi({ example: 'EUR' });
 export const ErrorDtoSchema = z.object({ code: z.string(), message: z.string() }).openapi('Error');
 export type ErrorDto = z.infer<typeof ErrorDtoSchema>;
+
+/** Amounts that may be zero but never negative: a gross amount, an expense, a budget limit. */
+export const NonNegativeDecimalString = DecimalString.refine((v) => !v.startsWith('-'), {
+  message: 'must not be negative',
+});
+/** Amounts that must be greater than zero: an inflow, a realised rate. */
+export const PositiveDecimalString = DecimalString.refine((v) => /^(?!-)(?=.*[1-9])/.test(v), {
+  message: 'must be greater than zero',
+});
+/** A share such as a tax or commission rate: 0 ≤ value < 1, as a decimal string. */
+export const FractionString = DecimalString.refine((v) => /^0(\.\d+)?$/.test(v), {
+  message: 'must be at least 0 and less than 1',
+}).openapi({ example: '0.15' });

@@ -98,6 +98,10 @@ export class PgAccountRepository implements AccountRepository {
       { n: number }[]
     >`select count(*)::int as n from transfers where user_id = ${userId} and (from_account_id = ${id} or to_account_id = ${id})`;
     if (t!.n > 0) return 'has_transfers' as const;
+    const [i] = await this.sql<
+      { n: number }[]
+    >`select count(*)::int as n from inflows where user_id = ${userId} and account_id = ${id}`;
+    if (i!.n > 0) return 'has_inflows' as const;
     const res = await this.sql`delete from accounts where user_id = ${userId} and id = ${id}`;
     return res.count > 0 ? ('deleted' as const) : ('not_found' as const);
   }

@@ -52,3 +52,11 @@ export class InsufficientFundsError extends DomainError {
     super(`Insufficient funds on ${account}: short by ${shortBy}`);
   }
 }
+export type InflowErrorReason =
+  'non_positive_amount' | 'credited_amount_required' | 'credited_mismatch';
+export class InflowError extends DomainError {
+  readonly code = 'INFLOW_INVALID';
+  constructor(readonly reason: InflowErrorReason) {
+    super(`Inflow invalid: ${reason}`);
+  }
+}

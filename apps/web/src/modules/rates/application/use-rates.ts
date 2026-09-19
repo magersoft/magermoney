@@ -15,6 +15,8 @@ import { todayIso } from '../domain';
 export function useRates(date?: string): {
   table: ComputedRef<RateTable | undefined>;
   isLoading: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  refetch: () => void;
   date: ComputedRef<string>;
   /** The rows behind the table, unmodelled — a screen that needs to know which
    * base carries a manual override reads this instead of fetching `/rates` a
@@ -34,6 +36,8 @@ export function useRates(date?: string): {
   return {
     table,
     isLoading: computed(() => query.isLoading.value),
+    isError: computed(() => query.isError.value),
+    refetch: () => void query.refetch(),
     date: computed(() => table.value?.date ?? date ?? todayIso()),
     rows: computed(() => query.data.value ?? []),
   };

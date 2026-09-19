@@ -167,6 +167,22 @@ async function signOut(): Promise<void> {
         </div>
 
         <div class="border-t border-border pt-6 md:pt-5">
+          <RouterLink
+            to="/settings/rates"
+            data-testid="settings-rates"
+            class="flex min-h-11 items-center justify-between gap-4 rounded-lg outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <span>
+              <span class="block text-sm font-medium">{{ t('settings.rates.label') }}</span>
+              <span class="mt-1 block text-sm leading-relaxed text-muted-foreground">{{
+                t('settings.rates.hint')
+              }}</span>
+            </span>
+            <span class="text-muted-foreground" aria-hidden="true">→</span>
+          </RouterLink>
+        </div>
+
+        <div class="border-t border-border pt-6 md:pt-5">
           <Button variant="outline" type="button" class="h-11" @click="signOut">
             {{ t('settings.signOut') }}
           </Button>

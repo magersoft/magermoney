@@ -22,16 +22,16 @@ The vocabulary (Account, Balance entry, Transfer, Goal, Snapshot, Saved, Revalua
 
 ## Repository layout
 
-| Path                  | What it is                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web`            | Vue 3 PWA (Vite, TanStack Query). Modules in `src/modules/<name>/{domain,application,infrastructure,ui}`, one public `index.ts` each. |
-| `apps/api`            | Hono API on Vercel Functions. Zod validation, OpenAPI at `/openapi.json` and Swagger UI at `/docs`. JWT verified via Supabase JWKS.   |
-| `packages/domain`     | Pure model: `Money`, `Currency`, `Rate`, read models. No framework imports, 100 % test coverage (Vitest + fast-check).                |
-| `packages/contracts`  | Zod schemas for DTOs and routes, shared by the API and the web client.                                                                |
-| `packages/ui`         | Design system: shadcn-vue, Tailwind v4, motion-v, currency icon subset.                                                               |
-| `packages/config`     | Shared TypeScript and tooling config.                                                                                                 |
-| `supabase/migrations` | Hand-written SQL migrations with RLS. No ORM.                                                                                         |
-| `docs/`               | ADRs, DB schema (`db/schema.dbml`), visual direction, discovery log.                                                                  |
+| Path                  | What it is                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/web`            | Vue 3 PWA (Vite, TanStack Query). Modules in `src/modules/<name>/{domain,application,infrastructure,ui}`, one public `index.ts` each.                  |
+| `apps/api`            | Hono API on Vercel Functions. Zod validation, OpenAPI at `/openapi.json` and Swagger UI at `/docs`. JWT verified via Supabase JWKS.                    |
+| `packages/domain`     | Pure model: `Money`, `Currency`, `Rate`, calendar and pay schedule, plan read models. No framework imports, 100 % test coverage (Vitest + fast-check). |
+| `packages/contracts`  | Zod schemas for DTOs and routes, shared by the API and the web client.                                                                                 |
+| `packages/ui`         | Design system: shadcn-vue, Tailwind v4, motion-v, currency icon subset.                                                                                |
+| `packages/config`     | Shared TypeScript and tooling config.                                                                                                                  |
+| `supabase/migrations` | Hand-written SQL migrations with RLS. No ORM.                                                                                                          |
+| `docs/`               | ADRs, DB schema (`db/schema.dbml`), visual direction, discovery log.                                                                                   |
 
 Package boundaries are enforced by `eslint-plugin-boundaries` and `bun run lint:boundaries-check`.
 
@@ -102,13 +102,24 @@ CI on every pull request runs lint, typecheck, unit tests and build, then integr
 
 ## Import from the spreadsheet
 
-Export the "Счета" sheet and the "Курсы пересчёта" block (History by years) as CSV into `imports/` (git-ignored), then:
+Export the sheets as CSV into `imports/` (git-ignored): "Счета" and the "Курсы пересчёта" block (History by years), the income sources sheet, "Поступления" and the expenses sheet. Then:
 
     cd apps/api
     bun run import -- --user you@example.com --accounts ../../imports/accounts.csv --rates ../../imports/rates.csv --dry-run
-    bun run import -- --user you@example.com --accounts ../../imports/accounts.csv --rates ../../imports/rates.csv
+    bun run import -- --user you@example.com \
+      --income-sources ../../imports/income-sources.csv --inflows ../../imports/inflows.csv \
+      --expenses ../../imports/expenses.csv --as-budget "Groceries" --dry-run
 
-Every row becomes an Account with one Balance entry dated now (or `--recorded-at <ISO>`). A second run refuses unless `--force`, which replaces the accounts that have no transfers. Against production use `bun --env-file=.env.prod.local scripts/import-sheet.ts …`.
+Drop `--dry-run` to write. Only the kinds whose files are passed are touched; `--only accounts,rates,income,expenses,inflows` narrows that further.
+
+- **Accounts, rates.** Every row becomes an Account with one Balance entry dated now (or `--recorded-at <ISO>`); yearly rates become manual rates dated January 1.
+- **Native currency.** The income and expenses sheets show each amount in USD, EUR and RUB. The import takes the one that is a whole number; when none or several are, it takes `--fallback-currency` (default `EUR`) and marks the row `ambiguous` in the dry run. Fix such rows with `--currency-of "<name as in the sheet>=<CODE>"` (repeatable).
+- **Income sources.** Only the first (monthly) table is read. Pay days and the primary mark are not in the sheet; set them in the app.
+- **Inflows.** Stored in the source's currency (RUB with the day's realised rate, or USD) and never credited to an Account. A source that appears only in "Поступления" is created with a zero expected amount and an active period spanning its inflows. Without `--income-sources`, every source must already exist by name.
+- **Expenses.** Only the first block up to "Итого". "Подписка …" rows go to the "Подписки" category, the rest to "Прочее"; `(yearly)` rows become yearly with the amount rebuilt as monthly × 12 (`approx`). `--as-budget "<name>"` (repeatable) imports a row as a Budget. Essential marks and billing days are set in the app.
+- **Second run.** Each kind refuses when the user already has rows of it, unless `--force`. Forcing replaces accounts without transfers or inflows, uncredited inflows, and sources left without any inflow. Forcing the expenses kind deletes **every** expense and **every** budget you have, and then every expense category left without an expense — after such a run that is all of them, including categories you created in the app, together with their sort order; only what the sheet holds comes back. A source kept because an inflow of it was credited to an Account is reused by name and its gross amount, tax and commission are refreshed from the sheet; a different currency stops the run. A forced inflows import is refused outright while any inflow is still credited to an Account, because the deletion spares credited inflows and the sheet would insert them a second time — un-credit or delete them in the app, or run without `--inflows`. Everything runs in one transaction, and a dry run lists every problem of every sheet at once.
+
+Against production use `bun --env-file=.env.prod.local scripts/import-sheet.ts …`.
 
 ## Working on the code
 

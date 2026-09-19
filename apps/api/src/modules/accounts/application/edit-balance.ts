@@ -13,7 +13,7 @@ export async function assertEditable(
   entry: BalanceEntryRow,
 ): Promise<Result<void, ConflictError>> {
   if (entry.origin !== 'manual')
-    return err(new ConflictError('entry_not_manual', 'Change the transfer instead'));
+    return err(new ConflictError('entry_not_manual', 'Change the transfer or the inflow instead'));
   const latest = await repos.balances.latest(userId, entry.accountId);
   if (latest?.id !== entry.id)
     return err(

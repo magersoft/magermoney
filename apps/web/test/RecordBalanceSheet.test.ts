@@ -45,6 +45,7 @@ const entry = {
   recordedAt: '2026-09-11T00:00:00.000Z',
   origin: 'manual' as const,
   transferId: null,
+  inflowId: null,
   note: null,
 };
 const json = (body: unknown, status = 200) =>
@@ -97,6 +98,7 @@ describe('RecordBalanceSheet', () => {
             recordedAt: '2026-09-11T00:00:00.000Z',
             origin: 'manual',
             transferId: null,
+            inflowId: null,
             note: null,
           },
           201,
@@ -162,6 +164,7 @@ describe('RecordBalanceSheet', () => {
             recordedAt: '2026-09-11T00:00:00.000Z',
             origin: 'manual',
             transferId: null,
+            inflowId: null,
             note: null,
           },
           201,

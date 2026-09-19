@@ -3,9 +3,211 @@
     "name": "Magermoney"
   },
   "nav": {
+    "home": "Home",
     "accounts": "Accounts",
-    "rates": "Rates",
+    "plan": "Plan",
     "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Home",
+    "capital": {
+      "total": "Total money",
+      "rateDate": "at the rates of {date}",
+      "open": "Open accounts"
+    },
+    "unconvertible": "No rate for: {codes}. Left out of the total.",
+    "payday": {
+      "available": "Available until payday",
+      "today": "Payday today",
+      "days": "{n} day to payday | {n} days to payday",
+      "perDay": "per day",
+      "setup": "Mark a primary source and its pay days to see the countdown"
+    },
+    "plan": {
+      "title": "Month plan",
+      "netIncome": "Net income",
+      "outgo": "Planned outgo",
+      "essential": "of which essential",
+      "remainder": "Remainder",
+      "empty": "Add income and expenses to see the month plan",
+      "emptyCta": "Open the plan"
+    },
+    "inflows": {
+      "title": "Inflows this month",
+      "of": "of",
+      "record": "Record inflow",
+      "empty": "No income sources yet",
+      "emptyCta": "Add a source"
+    },
+    "upcoming": {
+      "title": "Next 30 days",
+      "payout": "payout",
+      "expense": "charge",
+      "undated": "{n} more without a date",
+      "empty": "Set pay days and billing days to see what is coming",
+      "emptyCta": "To expenses"
+    },
+    "error": {
+      "title": "Could not load the home screen",
+      "retry": "Try again"
+    }
+  },
+  "plan": {
+    "title": "Plan",
+    "tabs": {
+      "income": "Income",
+      "expenses": "Expenses",
+      "budgets": "Budgets"
+    },
+    "add": {
+      "income": "Add income source",
+      "expenses": "Add expense",
+      "budgets": "Add budget"
+    }
+  },
+  "income": {
+    "title": "Income",
+    "add": "Add a source",
+    "primary": "Primary",
+    "irregular": "Irregular",
+    "payDays": "Paid on: {days}",
+    "perMonth": "net per month",
+    "gross": "Before tax: {amount}",
+    "period": "Since {from}",
+    "periodEnded": "{from} to {to}",
+    "ended": {
+      "show": "Ended · {n}",
+      "hide": "Hide ended"
+    },
+    "empty": {
+      "title": "No income sources yet",
+      "body": "Add a salary or any other income. The month plan and the days to payday are worked out from it."
+    },
+    "source": {
+      "edit": "Edit",
+      "end": "End today",
+      "delete": "Delete",
+      "deleteTitle": "Delete this source?",
+      "deleteBody": "Only a source with no inflows can be deleted. If money has already come in, end it instead.",
+      "cancel": "Cancel",
+      "inflows": "Inflows",
+      "noInflows": "No inflows yet.",
+      "notFound": "This source is gone. It was probably deleted.",
+      "failed": "That didn't work. Try again."
+    },
+    "inflow": {
+      "credited": "to {account}",
+      "creditedAmount": "credited {amount}"
+    },
+    "form": {
+      "createTitle": "New source",
+      "editTitle": "Income source",
+      "name": "Name",
+      "gross": "Monthly amount before tax",
+      "currency": "Currency",
+      "tax": "Tax",
+      "commission": "Commission",
+      "net": "Net per month",
+      "payDays": "Pay days",
+      "payDaysHint": "The amount is split evenly between the days. With no days the source counts as irregular.",
+      "primary": "Primary source",
+      "primaryHint": "Days to payday are counted from it.",
+      "activeFrom": "Active from",
+      "activeTo": "Until (optional)",
+      "defaultAccount": "Where it usually lands",
+      "noAccount": "None",
+      "create": "Create",
+      "save": "Save",
+      "saveFailed": "Couldn't save. Try again."
+    }
+  },
+  "expenses": {
+    "title": "Expenses",
+    "add": "Add expense",
+    "perMonth": "/ mo",
+    "yearly": "{amount} / yr · ≈ {monthly} / mo",
+    "essential": "essential",
+    "planned": "Per month",
+    "essentialTotal": "of which essential",
+    "unconvertible": "No rate for: {names}. Left out of the total.",
+    "ended": {
+      "show": "Ended · {n}",
+      "hide": "Hide ended"
+    },
+    "empty": {
+      "title": "No expenses yet",
+      "body": "Rent, phone, subscriptions — anything that recurs."
+    },
+    "error": {
+      "title": "Could not load expenses",
+      "retry": "Try again"
+    },
+    "period": {
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "form": {
+      "createTitle": "New expense",
+      "editTitle": "Expense",
+      "name": "Name",
+      "amount": "Amount",
+      "currency": "Currency",
+      "period": "How often",
+      "billingDay": "Billing day",
+      "billingMonth": "Billing month",
+      "noMonth": "Not set",
+      "category": "Category",
+      "categoryHint": "Pick one or type a new one",
+      "essential": "Essential",
+      "activeFrom": "Active from",
+      "activeTo": "Until (optional)",
+      "create": "Create",
+      "save": "Save",
+      "endToday": "End today",
+      "delete": "Delete",
+      "deleteTitle": "Delete this expense?",
+      "deleteBody": "It leaves the plan. If it simply stopped, end it instead.",
+      "cancel": "Cancel",
+      "saveFailed": "Could not save",
+      "notFound": "This expense is gone. It was probably deleted."
+    }
+  },
+  "budgets": {
+    "title": "Budgets",
+    "add": "Add budget",
+    "perMonth": "/ mo",
+    "total": "Limits per month",
+    "unconvertible": "No rate for: {names}. Left out of the total.",
+    "ended": {
+      "show": "Ended · {n}",
+      "hide": "Hide ended"
+    },
+    "empty": {
+      "title": "No budgets yet",
+      "body": "Groceries, restaurants, taxis — spending with a ceiling rather than a fixed price."
+    },
+    "error": {
+      "title": "Could not load budgets",
+      "retry": "Try again"
+    },
+    "form": {
+      "createTitle": "New budget",
+      "editTitle": "Budget",
+      "name": "Name",
+      "limit": "Monthly limit",
+      "currency": "Currency",
+      "activeFrom": "Active from",
+      "activeTo": "Until (optional)",
+      "create": "Create",
+      "save": "Save",
+      "endToday": "End today",
+      "delete": "Delete",
+      "deleteTitle": "Delete this budget?",
+      "deleteBody": "It leaves the month plan.",
+      "cancel": "Cancel",
+      "saveFailed": "Could not save",
+      "notFound": "This budget is gone. It was probably deleted."
+    }
   },
   "theme": {
     "label": "Switch theme (now {theme})",
@@ -64,6 +266,7 @@
       "noHistory": "No balances yet",
       "sinceLast": "since last",
       "byTransfer": "transfer",
+      "byInflow": "inflow",
       "recordedAt": "Date"
     },
     "form": {
@@ -120,6 +323,10 @@
       "defaultOf": "Make {code} the main currency",
       "remove": "Remove {code}"
     },
+    "rates": {
+      "label": "Exchange rates",
+      "hint": "Today's rates, and your own rate for any date."
+    },
     "signOut": "Sign out",
     "saveFailed": "That did not save. Try again."
   },
@@ -148,7 +355,8 @@
     "primaryNav": "Main navigation",
     "skipToContent": "Skip to content",
     "displayCurrency": "Display currency",
-    "showIn": "Show amounts in {code}"
+    "showIn": "Show amounts in {code}",
+    "openRates": "Exchange rates"
   },
   "money": {
     "noRate": "No rate for {code} on {date}"
@@ -190,11 +398,36 @@
     "option": "{name} · {balance} {currency}",
     "row": "{from} → {to}"
   },
+  "inflows": {
+    "title": "Inflow",
+    "editTitle": "Edit inflow",
+    "source": "From",
+    "newSource": "New source…",
+    "newName": "Source name",
+    "newCurrency": "Source currency",
+    "amount": "Amount received",
+    "date": "When",
+    "account": "Credit to account",
+    "noAccount": "Don't credit",
+    "credited": "Amount that reached the account",
+    "hint": "At today's rate ≈ {amount}",
+    "rate": "Rate: 1 {from} = {rate} {to}",
+    "more": "More",
+    "usdRate": "Rate to the dollar that day",
+    "usdRateHint": "Dollars per 1 {code}. Leave empty to use the rates table.",
+    "note": "Note",
+    "save": "Record",
+    "update": "Save",
+    "delete": "Delete",
+    "record": "Record an inflow",
+    "failed": "Couldn't record that. Try again."
+  },
   "quick": {
     "open": "Add",
     "record": "Update balance",
     "transfer": "Transfer",
-    "pickAccount": "Which account?"
+    "pickAccount": "Which account?",
+    "inflow": "Inflow"
   },
   "errors": {
     "recordedInFuture": "That date is in the future. Pick today or earlier.",
@@ -208,9 +441,30 @@
     "accountHasTransfers": "This account has transfers. You can only archive it.",
     "accountsImmutable": "A transfer keeps its accounts. Delete it and make a new one.",
     "amountReceivedRequired": "Say how much arrived on the other account.",
-    "transferInvalid": "That transfer will not work. Check the accounts and the amounts."
+    "transferInvalid": "That transfer will not work. Check the accounts and the amounts.",
+    "receivedInFuture": "That date is in the future. Use today or earlier.",
+    "creditNotLatest": "This account already has a later balance. Record the inflow without an account and update the balance by hand.",
+    "inflowNotLatest": "The account's balance has changed since this inflow. Only the most recent one can be edited.",
+    "creditedAmountRequired": "The currencies differ. Enter how much reached the account.",
+    "creditedMismatch": "Same currency, so the account received the same amount. Remove the second number.",
+    "nonPositiveAmount": "The amount has to be more than zero.",
+    "creditedWithoutAccount": "There's a credited amount but no account. Pick an account or clear the amount.",
+    "activePeriodInvalid": "The end date is before the start date.",
+    "payDaysInvalid": "Pay days are numbers from 1 to 31, each once.",
+    "rateOutOfRange": "Tax and commission go from 0 to 99.99%.",
+    "sourceHasInflows": "This source already has inflows. You can end it, but not delete it or change its currency.",
+    "defaultAccountNotFound": "The default account wasn't found. Pick another one.",
+    "accountHasInflows": "Inflows were credited to this account. It can only be archived.",
+    "billingMonthRequiresYearly": "Only a yearly expense has a billing month",
+    "categoryNameTaken": "That category already exists",
+    "categoryHasExpenses": "The category still has expenses"
   },
   "offline": {
     "saved": "Saved on this device. It will be sent when you are back online."
+  },
+  "route": {
+    "loading": "Loading the screen",
+    "failed": "This screen did not load. An update has most likely shipped.",
+    "reload": "Reload"
   }
 }

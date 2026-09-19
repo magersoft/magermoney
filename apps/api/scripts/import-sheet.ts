@@ -1,9 +1,12 @@
 /**
- * Imports the owner's "Счета" sheet (and the yearly rates block) from CSV files
- * that never enter the repository. Reads DATABASE_URL from the environment;
- * point it at local Supabase or, with `.env.prod.local`, at production.
+ * Imports the owner's spreadsheet from CSV files that never enter the
+ * repository: the "Счета" sheet and the yearly rates block (phase 2), the
+ * income sources, "Поступления" and expenses sheets (phase 3). Reads
+ * DATABASE_URL from the environment; point it at local Supabase or, with
+ * `.env.prod.local`, at production.
  *
- *   bun run import -- --user me@example.com --accounts imports/accounts.csv --rates imports/rates.csv --dry-run
+ *   bun run import -- --user me@example.com --income-sources imports/income-sources.csv \
+ *     --inflows imports/inflows.csv --expenses imports/expenses.csv --as-budget "Groceries" --dry-run
  */
 import { createDb } from '../src/shared/db/client.js';
 import { parseArgs, runImport } from './import/run.js';

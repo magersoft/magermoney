@@ -51,6 +51,9 @@ const rows = computed(() =>
         <Badge v-if="e.origin === 'transfer'" variant="secondary">
           {{ t('accounts.detail.byTransfer') }}
         </Badge>
+        <Badge v-else-if="e.origin === 'inflow'" variant="secondary">
+          {{ t('accounts.detail.byInflow') }}
+        </Badge>
         <span class="text-right">
           <span class="block font-mono text-[15px] tabular-nums"
             >{{ e.amount }} {{ currency }}</span

@@ -22,3 +22,8 @@ export const toLocalInput = (iso: string): string => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 export const fromLocalInput = (local: string): string => new Date(local).toISOString();
+/** A calendar date (`YYYY-MM-DD`), as opposed to an instant: formatted at local noon so no zone can move it to the day before. */
+export const formatDay = (isoDate: string, locale: DateLocale): string =>
+  new Intl.DateTimeFormat(intl(locale), dateOptions(locale)).format(
+    new Date(`${isoDate}T12:00:00`),
+  );
