@@ -81,6 +81,16 @@ export {
 } from './components/account-card/currency-tint';
 export type { AccountCardItem } from './components/account-card/types';
 
+/*
+ * The chips. The filter row states what a screen of numbers is filtered by and
+ * lets a filter be dropped where it is read; the category chip is the palette
+ * a budget or an expense picks from.
+ */
+export { default as FilterChip } from './components/chip/FilterChip.vue';
+export { default as FilterChipRow } from './components/chip/FilterChipRow.vue';
+export { default as CategoryChip } from './components/chip/CategoryChip.vue';
+export type { FilterChipItem, CategoryChipItem } from './components/chip/types';
+
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
   resolveCurrencyIcon,

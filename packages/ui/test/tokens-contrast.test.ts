@@ -99,6 +99,19 @@ describe('palette contrast', () => {
   });
 
   /*
+   * A chip is the one place the beige sunken surface carries type, and it is
+   * darker than the card: on it the secondary roles fall to about 4.0, so the
+   * rule a chip follows is that its words are ink and nothing else. The × is an
+   * icon, not text, and takes the 3:1 that WCAG 1.4.11 asks of a control.
+   * Selected, the chip is the brand fill and carries its own foreground, which
+   * the test above measures.
+   */
+  it.each(['light', 'dark'])('an unselected chip carries ink at AA, in %s', (theme) => {
+    expect(ratio(`mm-${theme}-ink`, `mm-${theme}-surface-sunken`)).toBeGreaterThanOrEqual(4.5);
+    expect(ratio(`mm-${theme}-muted`, `mm-${theme}-surface-sunken`)).toBeGreaterThanOrEqual(3);
+  });
+
+  /*
    * The brand blue and green are the reason the fill and the text roles are
    * separate tokens: as text they miss AA, which is what this pins down.
    */
