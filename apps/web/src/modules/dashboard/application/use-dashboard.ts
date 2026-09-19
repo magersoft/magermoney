@@ -1,5 +1,5 @@
 import { computed, type ComputedRef } from 'vue';
-import { firstOfMonth, lastOfMonth } from '@magermoney/domain';
+import { addDays, firstOfMonth, lastOfMonth } from '@magermoney/domain';
 import { useCapitalSummary } from '@/modules/accounts';
 import { useBudgets } from '@/modules/budgets';
 import { useCurrencyRegistry } from '@/modules/currencies';
@@ -24,7 +24,11 @@ export function useDashboard(): {
   const sources = useIncomeSources();
   const expenses = useExpenses();
   const budgets = useBudgets();
-  const inflows = useInflows(() => ({ from: firstOfMonth(today), to: lastOfMonth(today) }));
+  /* Two months in one window: the income tile is this month against the last. */
+  const inflows = useInflows(() => ({
+    from: firstOfMonth(addDays(firstOfMonth(today), -1)),
+    to: lastOfMonth(today),
+  }));
   const rates = useRates();
   const registry = useCurrencyRegistry();
   const { current } = useDisplayCurrency();

@@ -75,12 +75,19 @@ export function segmentStyle(hue: number): Record<string, string> {
  * Lays the ring out. Slices that cannot be drawn — zero, negative, not a number
  * — are dropped rather than hidden at width zero, so a period that added up to
  * nothing comes back empty and the chart can say so in words.
+ *
+ * `whole` is what the slices are measured against. A breakdown has none and is
+ * measured against itself; a budget is measured against its limit, and without
+ * that the single slice of a budget would fill the ring however little of the
+ * limit it is — a picture saying the opposite of the number beside it.
  */
-export function layoutDonut(segments: readonly DonutSegment[]): DonutArc[] {
+export function layoutDonut(segments: readonly DonutSegment[], whole?: number): DonutArc[] {
   const drawable = segments.filter(
     (segment) => Number.isFinite(segment.value) && segment.value > 0,
   );
-  const total = drawable.reduce((sum, segment) => sum + segment.value, 0);
+  const sum = drawable.reduce((total, segment) => total + segment.value, 0);
+  /* Past the whole the ring can only fill: it has nowhere further to go. */
+  const total = whole !== undefined && Number.isFinite(whole) ? Math.max(whole, sum) : sum;
   if (total <= 0) return [];
 
   /* One slice has no neighbour to part from, so it closes into a full ring. */

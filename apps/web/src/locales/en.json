@@ -10,6 +10,29 @@
   },
   "dashboard": {
     "title": "Home",
+    "greeting": {
+      "named": "Hi, {name}",
+      "plain": "Hi"
+    },
+    "accounts": {
+      "title": "Accounts",
+      "all": "All",
+      "add": "New account",
+      "empty": "No accounts yet"
+    },
+    "stats": {
+      "title": "This month",
+      "income": "Received",
+      "outgo": "Planned",
+      "vsLastMonth": "vs last month"
+    },
+    "budget": {
+      "label": "Month plan",
+      "remainder": "left",
+      "caption": "Planned {outgo} of {income}",
+      "over": "The plan spends more than it earns",
+      "noIncome": "Add an income source to see what is left"
+    },
     "capital": {
       "total": "Total money",
       "rateDate": "at the rates of {date}",
@@ -25,19 +48,8 @@
     },
     "plan": {
       "title": "Month plan",
-      "netIncome": "Net income",
-      "outgo": "Planned outgo",
-      "essential": "of which essential",
-      "remainder": "Remainder",
       "empty": "Add income and expenses to see the month plan",
       "emptyCta": "Open the plan"
-    },
-    "inflows": {
-      "title": "Inflows this month",
-      "of": "of",
-      "record": "Record inflow",
-      "empty": "No income sources yet",
-      "emptyCta": "Add a source"
     },
     "upcoming": {
       "title": "Next 30 days",

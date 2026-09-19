@@ -97,7 +97,10 @@ const emit = defineEmits<{
 
 const progress = computed(() => props.mode === 'progress');
 
-/* A budget is one slice against its own track, so it lays out like any other. */
+/*
+ * A budget is one slice against its own track, so it lays out like any other —
+ * except that the track, not the slice, is the whole it is measured against.
+ */
 const arcs = computed(() =>
   progress.value
     ? layoutDonut(
@@ -111,6 +114,7 @@ const arcs = computed(() =>
               },
             ]
           : [],
+        props.max,
       )
     : layoutDonut(props.segments),
 );

@@ -7,8 +7,13 @@
  *
  * Snap points land a card against the gutter, and the gutter is padding on the
  * scroller itself, so the first and last card can still reach the edge.
+ *
+ * `scroll-px-4` is what makes that gutter survive the snapping: a snap point is
+ * measured against the scrollport's own edge unless scroll-padding moves it, so
+ * a mandatory strip would otherwise pull its first card hard against the screen
+ * edge at rest and leave every card out of line with the blocks below it.
  */
-import type { Component, HTMLAttributes } from 'vue';
+import { computed, type Component, type HTMLAttributes } from 'vue';
 import { PlusIcon } from '@lucide/vue';
 import { cn } from '../../lib/utils';
 import type { AmountLocale } from '../amount-lockup/format-amount';
@@ -36,6 +41,17 @@ const props = withDefaults(
     class: '',
   },
 );
+
+/*
+ * One destination, spelled the way the element it renders as expects it — the
+ * card's rule, and here for a sharper reason: handing a router link an explicit
+ * `href="undefined"` overrides the one it resolves itself, and an anchor with no
+ * href cannot be focused at all.
+ */
+const addAttrs = computed(() => {
+  if (!props.addHref) return {};
+  return props.as === 'a' ? { href: props.addHref } : { to: props.addHref };
+});
 </script>
 
 <template>
@@ -43,7 +59,7 @@ const props = withDefaults(
     data-slot="account-card-strip"
     :class="
       cn(
-        'flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth',
+        'flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth scroll-px-4',
         // Room for the lift on hover and for the focus ring, which sits outside.
         '-mx-4 px-4 py-2',
         props.class,
@@ -68,8 +84,7 @@ const props = withDefaults(
       <component
         :is="props.as"
         data-slot="add-account-tile"
-        :href="props.as === 'a' ? props.addHref : undefined"
-        :to="props.as === 'a' ? undefined : props.addHref"
+        v-bind="addAttrs"
         class="border-line-strong text-ink duration-fast ease-out-quart outline-offset-2 flex h-full min-h-28 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none"
       >
         <PlusIcon aria-hidden="true" class="size-5" />

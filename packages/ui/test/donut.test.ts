@@ -58,6 +58,25 @@ describe('layoutDonut', () => {
   });
 
   /*
+   * A breakdown is measured against itself; a budget is measured against its
+   * limit. Without a denominator of its own the one segment of a budget would
+   * always be the whole ring, and a month that spent a third of what it earns
+   * would be drawn as a month that spent all of it.
+   */
+  it('measures the slices against a given whole when there is one', () => {
+    const [spent] = layoutDonut([{ id: 'p', label: 'План', value: 25, amount: '25.00' }], 100);
+    expect(spent!.share).toBeCloseTo(0.25, 5);
+    expect(spent!.percent).toBe(25);
+    expect(spent!.dash).toBeCloseTo(DONUT_CIRCUMFERENCE * 0.25, 5);
+  });
+
+  it('fills the ring but never overruns it when the whole has been passed', () => {
+    const [over] = layoutDonut([{ id: 'p', label: 'План', value: 150, amount: '150.00' }], 100);
+    expect(over!.dash).toBeCloseTo(DONUT_CIRCUMFERENCE, 5);
+    expect(over!.percent).toBe(100);
+  });
+
+  /*
    * A category worth 0.3 % of the month still happened. Rounded to nothing it
    * would disappear from a chart that claims to show the breakdown, so it keeps
    * a tick — and the legend beside it keeps the number that says how small.
@@ -176,7 +195,12 @@ describe('DonutChart, as progress', () => {
 
   it('draws a single arc against a track and states how far it got', () => {
     const w = mountProgress();
-    expect(w.findAll('[data-slot="donut-arc"]')).toHaveLength(1);
+    const arcs = w.findAll('[data-slot="donut-arc"]');
+    expect(arcs).toHaveLength(1);
+    // 1550 of 3900 is a little under half the ring, and the drawing has to say
+    // the same thing the number does.
+    const [drawn] = arcs[0]!.attributes('stroke-dasharray')!.split(' ').map(Number);
+    expect(drawn! / DONUT_CIRCUMFERENCE).toBeCloseTo(0.397, 2);
     const chart = w.get('[data-slot="donut-chart"]');
     expect(chart.attributes('role')).toBe('progressbar');
     expect(chart.attributes('aria-valuenow')).toBe('40');

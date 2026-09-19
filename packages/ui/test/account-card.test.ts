@@ -134,7 +134,11 @@ describe('AccountCardStrip', () => {
   it('lays the cards out in a row that scrolls, one card per account', () => {
     const w = mount(AccountCardStrip, { props });
     expect(w.findAll('[data-slot="account-card"]')).toHaveLength(2);
-    expect(w.get('[data-slot="account-card-strip"]').classes()).toContain('overflow-x-auto');
+    const strip = w.get('[data-slot="account-card-strip"]');
+    expect(strip.classes()).toContain('overflow-x-auto');
+    /* Without scroll-padding a mandatory strip snaps its first card past the
+       gutter, and the row ends up out of line with everything under it. */
+    expect(strip.classes()).toContain('scroll-px-4');
     w.unmount();
   });
 
@@ -146,6 +150,21 @@ describe('AccountCardStrip', () => {
     expect(items).toHaveLength(3);
     expect(items.at(-1)!.get('a').attributes('href')).toBe('/accounts/new');
     expect(items.at(-1)!.text()).toContain('Добавить счёт');
+    w.unmount();
+  });
+
+  it('hands the tile its destination the way the element it renders as expects it', () => {
+    /* A link shaped like a router's: it takes `to`, and an `href` it did not ask
+       for would leave the anchor with none — and an anchor with no href cannot
+       be focused. */
+    const RouterLinkish = {
+      props: { to: { type: String, default: '' } },
+      template: '<a :href="to"><slot /></a>',
+    };
+    const w = mount(AccountCardStrip, {
+      props: { ...props, as: RouterLinkish, addHref: '/accounts/new', addLabel: 'Добавить счёт' },
+    });
+    expect(w.get('[data-slot="add-account-tile"]').attributes('href')).toBe('/accounts/new');
     w.unmount();
   });
 
