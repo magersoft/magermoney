@@ -1,9 +1,11 @@
 ---
 id: TASK-016
 title: 'Экраны: формы расхода, дохода и перевода как шит быстрого действия'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:14'
+updated_date: '2026-09-19 19:31'
 labels:
   - design
   - web
