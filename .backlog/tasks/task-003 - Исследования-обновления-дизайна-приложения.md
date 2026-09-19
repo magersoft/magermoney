@@ -4,7 +4,7 @@ title: Исследования обновления дизайна прилож
 status: To Do
 assignee: []
 created_date: '2026-09-19 10:48'
-updated_date: '2026-09-19 10:57'
+updated_date: '2026-09-19 11:00'
 labels:
   - design
   - research
@@ -37,7 +37,7 @@ ordinal: 500
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Скриншоты референса лежат в docs/design/reference/moni/, папка в .gitignore
+- [x] #1 Скриншоты референса лежат в docs/design/reference/moni/, папка в .gitignore
 - [ ] #2 docs/design/moni-review.md разбирает референс по экранам: что берём, что нет, почему
 - [ ] #3 Каждый экран референса сопоставлен с экраном приложения; экраны без аналога помечены как наследующие новые компоненты
 - [ ] #4 docs/design/direction.md обновлён под итог; светлая и тёмная темы, ≥44px и контраст AA сохранены
