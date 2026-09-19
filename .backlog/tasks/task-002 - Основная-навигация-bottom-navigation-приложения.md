@@ -11,7 +11,7 @@ labels:
   - ui
 dependencies: []
 type: enhancement
-ordinal: 2000
+ordinal: 750
 ---
 
 ## Description
