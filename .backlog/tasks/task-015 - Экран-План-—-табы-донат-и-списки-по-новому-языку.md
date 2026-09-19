@@ -1,9 +1,11 @@
 ---
 id: TASK-015
 title: 'Экран: План — табы, донат и списки по новому языку'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:14'
+updated_date: '2026-09-19 16:49'
 labels:
   - design
   - web
@@ -43,3 +45,15 @@ ordinal: 13000
 - [ ] #10 Проверено в обеих темах и на мобильной ширине; цели нажатия >=44px
 - [ ] #11 Тесты экрана обновлены; bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. packages/ui: добавить TabBar (role=tablist/tab, стрелки, Home/End) + тест + экспорт — таба как паттерн у нас ещё нет.
+2. PlanPage: TabBar + tabpanel, таб живёт в query (как сейчас), + ведёт на форму активного таба.
+3. income/application/income-groups.ts (чистая функция + тест): регулярные / нерегулярные источники, подытог на руки в валюте показа, несконвертируемые отдельно. IncomeSegment на RowGroup + TransactionRow, пустое состояние с действием.
+4. expenses/application/expense-groups.ts: параметр месяца (isActiveWithin) + сегменты доната по категориям; тесты. ExpensesSegment: донат с легендой и стрелками месяца, FilterChipRow (месяц и выбранная категория), группы RowGroup с подытогом, сноска о курсе.
+5. budgets: BudgetsSegment на CategoryRow с полосой, потрачено = 0 до фазы 5 (решение владельца) + пометка об этом; подытог с пересчётом и сноской о курсе; валюта бюджета видна, если не базовая.
+6. Новые строки локалей через humanize-text; проверить обе темы и мобильную ширину; цели >=44px.
+7. Обновить тесты экранов/сегментов; bun run test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
