@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-19 11:13'
-updated_date: '2026-09-19 12:53'
+updated_date: '2026-09-19 12:54'
 labels:
   - design
   - web
@@ -44,3 +44,15 @@ ordinal: 10000
 - [ ] #9 Проверено в обеих темах, на ширине iPhone SE и на десктопе; цели нажатия >=44px
 - [ ] #10 Тесты экрана обновлены; bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Данные (TDD, build-dashboard.test.ts): расширить buildDashboard статистикой месяца — поступило (фактические Inflow текущего месяца) и плановые траты, у каждой дельта к прошлому месяцу (monthPlan на последний день прошлого месяца, inflowsVsPlan на прошлый месяц). useDashboard тянет Inflow за два месяца одним запросом.
+2. Решения владельца: старые блоки — оставляем строку «доступно до зарплаты» (в блок общего баланса) и «Ближайшие 30 дней» (низ экрана); таблицу «План месяца» и список поступлений по источникам убираем (они целиком на экране План). Вторая плитка — «Плановые траты». Донат — mode=progress: плановые траты из чистого дохода, в разрыве остаток.
+3. UI (/frontend-design перед разметкой): HomeHeader (аватар + приветствие + CurrencySwitch справа), TotalBalanceBlock (amount lockup + сноска о курсе и дате + строка до зарплаты), AccountsStripBlock (AccountCardStrip + плитка добавления), MonthStatsBlock (две StatTile), MonthBudgetBlock (DonutChart progress). UpcomingBlock перерисовывается под новый язык. CapitalBlock / UntilPaydayBlock / MonthPlanBlock / MonthInflowsBlock удаляются.
+4. Пустые состояния: нет счетов — только плитка добавления и строка-приглашение; нет источников/расходов — плитки ведут в План; нет плана — вместо доната действие.
+5. Шелл: на Главной прячем CurrencySwitch в верхней панели, чтобы переключатель не дублировался.
+6. Копия: новые строки в en.json/ru.json, прогнать через /humanize-text.
+7. Тесты: обновить DashboardPage.test.ts и build-dashboard.test.ts; /impeccable по экрану; bun run test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
