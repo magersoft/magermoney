@@ -1,9 +1,11 @@
 ---
 id: TASK-004
 title: 'Фундамент: перенести токены, типографику и форму на палитру Moni'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:11'
+updated_date: '2026-09-19 11:20'
 labels:
   - design
   - ui
