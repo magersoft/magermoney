@@ -181,6 +181,23 @@ describe('the currency tint', () => {
     );
     expect(outside).toEqual([]);
   });
+
+  /*
+   * In light the card is lifted off the canvas by its shadow. In dark there is
+   * no shadow — one on a dark canvas reads as dirt — so the fill is the only
+   * thing that says where a card ends, and a stack of them has to be a stack
+   * rather than one dark block. 2:1 against the canvas is what that takes.
+   */
+  it('stands off the dark canvas on every hue', () => {
+    const lightness = scalar('mm-dark-tint-l');
+    const chroma = scalar('mm-dark-tint-c');
+    const canvas = token('mm-dark-bg');
+    const worst = Array.from({ length: 360 }, (_, hue) => ({
+      hue,
+      ratio: Math.round(contrast(canvas, [lightness, chroma, hue]) * 10) / 10,
+    })).reduce((a, b) => (b.ratio < a.ratio ? b : a));
+    expect(worst.ratio).toBeGreaterThanOrEqual(2);
+  });
 });
 
 describe('the donut segment palette', () => {
