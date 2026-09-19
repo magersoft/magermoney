@@ -1,9 +1,11 @@
 ---
 id: TASK-019
 title: 'Флаг счёта берётся из страны счёта, а не из валюты'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 13:12'
+updated_date: '2026-09-19 14:14'
 labels:
   - ui
   - accounts
@@ -25,3 +27,14 @@ ordinal: 17000
 - [ ] #4 Значок с учётом страны используется на карточке счёта, в списке счетов, на странице счёта и в полосе счетов на главной
 - [ ] #5 Тесты resolve-icon покрывают приоритет страны над валютой и запасной путь
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Красный тест: resolve-icon — страна важнее FIAT_FLAG (EUR+PT -> pt), без страны остаётся флаг валюты.
+2. resolveCurrencyIcon: сначала country, потом FIAT_FLAG.
+3. Разделить набор иконок: subset.json остаётся глазным (флаги валют + крипта, входной чанк), новый сгенерированный country-flags.json со всеми флагами стран грузится по требованию через loadCountryFlags().
+4. CurrencyIcon получает проп country, дозагружает коллекцию стран на mount и до её регистрации показывает флаг валюты (иначе Iconify полез бы в сеть).
+5. Протянуть country: AccountCardItem -> AccountCard, AccountRow, полоса на главной, заголовок страницы счёта.
+6. Тесты: приоритет и запасной путь, реестр иконок покрывает флаги стран, проброс country в карточке и строке.
+<!-- SECTION:PLAN:END -->
