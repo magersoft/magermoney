@@ -1,10 +1,11 @@
 ---
 id: TASK-002
 title: Основная навигация bottom-navigation приложения
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 10:33'
-updated_date: '2026-09-19 13:08'
+updated_date: '2026-09-19 13:25'
 labels:
   - design
   - web
@@ -67,11 +68,12 @@ ordinal: 750
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. `/frontend-design`: форма пилюли и кнопки (+) в рамках docs/design/direction.md и слайдов 10/14; высота, вынос (+) над пилюлей, тень, состояния.
-2. Иконки: Lucide-компоненты из `@lucide/vue` (Home, Wallet, Plan, Settings, Plus — по месту); зависимость в apps/web или реэкспорт из @magermoney/ui. `icons:build` не нужен.
-3. Тест-первым: BottomNav (порядок, aria-current на вложенных маршрутах, клик по (+) открывает меню).
-4. Вынести NAV/isCurrent в общий модуль (shared/layout), создать BottomNav.vue; верхняя навигация в AppShell берёт тот же NAV.
-5. QuickActions: один экземпляр, два триггера — (+) из пилюли и десктопный FAB (≥md, прежний FAB_PATHS); меню и шиты не менять.
-6. AppShell: убрать нижний tab bar и мобильный FAB, подключить BottomNav, пересчитать pb у main; локали en/ru.
-7. `/animate` для нажатия (+), `/impeccable`, затем test/lint/typecheck и ручная проверка на ширине iPhone SE, в обеих темах и на ≥md.
+1. /frontend-design: форма плавающей пилюли и выступающей (+) по слайдам 10/14 и direction.md (высота 64, радиус 999, shadow-card, первичная кнопка: ink в светлой, синяя в тёмной).
+2. Добавить @lucide/vue в зависимости apps/web; иконки Home/Wallet/Calendar/Settings/Plus.
+3. Вынести NAV и isCurrent в shared/layout/nav.ts (общий модуль для верхней и нижней навигации).
+4. Тест-первым: apps/web/test/bottom-nav.test.ts — порядок вкладок с (+) по центру, aria-current на вложенных маршрутах, клик по (+) поднимает событие; обновить shell.test.ts и quick-actions.test.ts.
+5. BottomNav.vue: пилюля md:hidden, четыре вкладки с иконкой и подписью, круглая (+) ≥44px, safe-area, aria-current, фокус.
+6. QuickActions: один экземпляр, v-model:open для меню; собственный FAB остаётся только на ≥md с прежним FAB_PATHS.
+7. AppShell: подключить BottomNav, убрать старый таб-бар, пересчитать pb у main; App.vue связывает (+) с QuickActions.
+8. /animate на нажатие (+), /impeccable аудит, bun run test/lint/typecheck.
 <!-- SECTION:PLAN:END -->
