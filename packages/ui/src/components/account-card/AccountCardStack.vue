@@ -40,16 +40,20 @@ const props = withDefaults(
       class="relative hover:z-10 focus-within:z-10"
     >
       <!--
-        A ring in the canvas colour cuts one card off the next. The shadow
-        cannot do it here — it is `none` in dark — and two cards in the same
-        currency share a fill, so lightness cannot do it either.
+        Three things say where one card ends, because two cards in the same
+        currency share a fill and no single one of them is enough: a ring in
+        the canvas colour cuts the cards apart, `shadow-stack` is the shadow
+        the covering card casts upwards onto the one it covers — the only
+        shadow the dark theme keeps, because it falls on a card rather than on
+        the canvas — and the card's own hairline edge draws the seam where the
+        shadow is too soft to.
       -->
       <AccountCard
         :account="account"
         :base-code="props.baseCode"
         :locale="props.locale"
         :as="props.as"
-        class="ring-background w-full ring-2"
+        class="ring-background shadow-stack w-full ring-2"
       />
     </li>
   </ul>

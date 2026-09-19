@@ -51,6 +51,13 @@
 
   /* `shadow-card` lifts a card in light; in dark the token is `none`. */
   --shadow-card: var(--mm-shadow-card);
+  /*
+   * `shadow-stack` is the one a card casts on the card it covers, and the one
+   * shadow the dark theme keeps; `border-card-edge` is the hairline that draws
+   * the same seam in dark and is transparent in light.
+   */
+  --shadow-stack: var(--mm-shadow-stack);
+  --color-card-edge: var(--mm-card-edge);
 
   --transition-duration-fast: var(--mm-duration-fast);
   --transition-duration-base: var(--mm-duration-base);

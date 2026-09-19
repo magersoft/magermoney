@@ -128,6 +128,20 @@
   /* The card is lifted, not outlined: one soft diffuse shadow, nothing deeper. */
   --mm-light-shadow-card:
     0 1px 2px oklch(0.254 0.026 284 / 0.05), 0 8px 24px oklch(0.254 0.026 284 / 0.06);
+  /*
+   * A card dealt onto another one. The offsets point up because that is the
+   * direction the overlap goes: a card in the stack covers the bottom of the
+   * one before it, so the shadow it casts falls upwards, onto that card.
+   *
+   * It is a separate token from `shadow-card` because it survives the dark
+   * theme. A shadow on the canvas reads as dirt and is dropped there; a shadow
+   * between two cards that touch is the only thing saying they are two.
+   */
+  --mm-light-shadow-stack:
+    0 -1px 2px oklch(0.254 0.026 284 / 0.06), 0 -10px 22px oklch(0.254 0.026 284 / 0.1),
+    0 8px 24px oklch(0.254 0.026 284 / 0.06);
+  /* No edge: in light the shadow already says where the card ends. */
+  --mm-light-card-edge: transparent;
 
   /*
    * Dark surfaces separate by lightness, not by borders, so the shadow is
@@ -161,9 +175,9 @@
   /*
    * Tinted the way the dark surfaces are: lighter than the canvas, never black.
    *
-   * Lighter than the first pass, and for two reasons at once. A stack of cards
-   * gets no shadow in dark, so the fill alone has to say where one card ends
-   * and the next begins — 2:1 against the canvas, held on every hue. And the
+   * Lighter than the first pass, and for two reasons at once. A card carries
+   * no shadow against the dark canvas, so the fill has to stand off it on its
+   * own — 2:1, held on every hue. And the
    * sRGB cone is narrow down here: at L 0.36 the wheel runs out of gamut by
    * chroma 0.06, which is too little colour to tell two currencies apart. Every
    * step up in lightness buys chroma, so the fill is as light as the dark theme
@@ -175,6 +189,20 @@
   --mm-dark-segment-l: 0.74;
   --mm-dark-segment-c: 0.115;
   --mm-dark-shadow-card: none;
+  /*
+   * The one shadow the dark theme keeps. It never falls on the canvas — only on
+   * the card underneath, where two cards touch — so it darkens a lit surface
+   * instead of dirtying an unlit one, and it is close to black because that is
+   * what registers against a fill this light.
+   */
+  --mm-dark-shadow-stack:
+    0 -1px 2px oklch(0.12 0.02 285 / 0.55), 0 -12px 26px oklch(0.1 0.02 285 / 0.6);
+  /*
+   * And the edge the shadow cannot draw. Ink at a tenth of its strength: light
+   * enough to catch the top of every card against the one it covers, too faint
+   * to read as an outline around a card standing on its own.
+   */
+  --mm-dark-card-edge: oklch(0.96 0.004 265 / 0.16);
 
   /* Light is the default. */
   --mm-bg: var(--mm-light-bg);
@@ -200,6 +228,8 @@
   --mm-segment-l: var(--mm-light-segment-l);
   --mm-segment-c: var(--mm-light-segment-c);
   --mm-shadow-card: var(--mm-light-shadow-card);
+  --mm-shadow-stack: var(--mm-light-shadow-stack);
+  --mm-card-edge: var(--mm-light-card-edge);
 
   --mm-duration-fast: 150ms;
   --mm-duration-base: 240ms;
@@ -233,6 +263,8 @@
     --mm-segment-l: var(--mm-dark-segment-l);
     --mm-segment-c: var(--mm-dark-segment-c);
     --mm-shadow-card: var(--mm-dark-shadow-card);
+    --mm-shadow-stack: var(--mm-dark-shadow-stack);
+    --mm-card-edge: var(--mm-dark-card-edge);
   }
 }
 
@@ -262,6 +294,8 @@
   --mm-segment-l: var(--mm-dark-segment-l);
   --mm-segment-c: var(--mm-dark-segment-c);
   --mm-shadow-card: var(--mm-dark-shadow-card);
+  --mm-shadow-stack: var(--mm-dark-shadow-stack);
+  --mm-card-edge: var(--mm-dark-card-edge);
 }
 
 :root[data-theme='light'] {

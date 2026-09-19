@@ -215,6 +215,23 @@ describe('AccountCardStack', () => {
     w.unmount();
   });
 
+  /*
+   * Two cards in the same currency are the same colour, so the seam between
+   * them is drawn rather than implied: the canvas-coloured ring, the shadow the
+   * covering card casts upwards, and the card's own hairline edge. The last two
+   * are what carry the dark theme, where the fill has no shadow under it.
+   */
+  it('separates one card from the next with a ring, a shadow and an edge', () => {
+    const w = mount(AccountCardStack, { props: { accounts } });
+    const classes = w.findAll('[data-slot="account-card"]').map((c) => c.classes().join(' '));
+    expect(classes.every((c) => c.includes('ring-background'))).toBe(true);
+    expect(classes.every((c) => c.includes('shadow-stack'))).toBe(true);
+    expect(classes.every((c) => c.includes('border-card-edge'))).toBe(true);
+    // The stack's shadow replaces the card's own; two box-shadows cannot both win.
+    expect(classes.some((c) => c.includes('shadow-card'))).toBe(false);
+    w.unmount();
+  });
+
   it('passes the base currency down, so a foreign account is marked in the stack too', () => {
     const w = mount(AccountCardStack, { props: { accounts, baseCode: 'USD' } });
     expect(w.findAll('[data-slot="account-card-foreign"]').map((m) => m.text())).toEqual([

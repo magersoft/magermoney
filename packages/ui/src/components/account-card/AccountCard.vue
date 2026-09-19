@@ -73,6 +73,13 @@ const linkAttrs = computed(() => {
     :class="
       cn(
         'bg-currency-tint text-ink shadow-card relative flex flex-col gap-2 rounded-xl p-4',
+        /*
+         * The edge the dark theme needs and the light one does not: with no
+         * shadow on a dark canvas, a hairline of ink is what catches the top of
+         * a card against whatever it is lying on. In light the token is
+         * transparent and this draws nothing.
+         */
+        'border-card-edge border',
         'duration-fast ease-out-quart outline-offset-2 transition-transform',
         'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
         'focus-visible:outline-ring focus-visible:outline-2 motion-reduce:transition-none',
