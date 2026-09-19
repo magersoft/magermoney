@@ -100,6 +100,14 @@ export { formatDelta, deltaTone, deltaDirection } from './components/stat-tile/d
 export type { DeltaTone } from './components/stat-tile/delta';
 
 /*
+ * The two most repeated rows in the app, and the card that groups them. Every
+ * list of movements is made of the first; every budget screen, of the second.
+ */
+export { default as TransactionRow } from './components/row/TransactionRow.vue';
+export { default as CategoryRow } from './components/row/CategoryRow.vue';
+export { default as RowGroup } from './components/row/RowGroup.vue';
+
+/*
  * The donut: the only chart in the app, in its two roles — a period split by
  * category, and a budget against its limit. The legend is exported beside it
  * because a screen can lay it out itself, never because the ring can do without
