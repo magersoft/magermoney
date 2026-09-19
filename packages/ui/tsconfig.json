@@ -3,7 +3,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "noEmit": true,
-    "types": [],
+    // `node` alone: the contrast guard reads tokens.css off disk. No DOM lib
+    // beyond the default, so nothing else can lean on ambient globals.
+    "types": ["node"],
     "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] },
     // reka-ui and vue-sonner declare optional props without `| undefined`, so the

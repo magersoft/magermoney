@@ -1,109 +1,175 @@
 # Magermoney — visual direction
 
+Переписан по итогам разбора референса The Moni — см. [`moni-review.md`](./moni-review.md),
+где записано, что именно взято с каждого экрана и почему. Этот документ — итог; при расхождении
+прав он.
+
 ## The read
 
-Magermoney replaces a spreadsheet its owner has kept by hand since 2015. That is the subject: a
-personal ledger, ten years deep, in a dozen currencies at once. The interface is scanned, not read —
-someone opens it to answer "how much, in what, and is it more than last month". So the design takes
-its cues from the ledger and the exchange board rather than from fintech marketing: warm paper
-neutrals, one ink-coloured accent, amounts set as the largest thing on screen with their currency
-code tagged beside them in small mono caps.
+Magermoney заменяет таблицу, которую владелец ведёт руками с 2015 года: личная книга учёта, десять
+лет глубиной, в дюжине валют сразу. Экран сканируют, а не читают — его открывают, чтобы ответить
+«сколько, в чём и больше ли, чем в прошлом месяце».
 
-Two conventions come straight from double-entry bookkeeping and do real work here:
-**in the black, in the red** — a balance is ink, never green; only _changes_ (deltas, goal progress,
-month-over-month) are allowed colour. And **the ledger rule** — rows are separated by hairlines, not
-by cards-inside-cards. Both keep a many-currency screen calm when fifteen numbers are visible at once.
+Раньше направление отвечало на это языком бухгалтерской книги: тёплая бумага, чернильный акцент,
+строки, разделённые хайрлайнами. Теперь — языком современного финансового приложения: **светло-голубое
+полотно, на котором лежат белые карточки**. Разделяет не линия, а край карточки и воздух вокруг неё.
+Это переносится с референса целиком и осознанно: при пятнадцати числах на экране карточка группирует
+лучше, чем хайрлайн, а поднятая белая поверхность сама показывает, где кончается один счёт и
+начинается другой.
+
+Одно соглашение из двойной записи остаётся и делает здесь настоящую работу: **в плюсе и в минусе** —
+баланс набран чернилами, никогда не зелёным; цвет разрешён только _изменениям_ (дельта, прогресс
+цели, месяц к месяцу). Без этого правила мультивалютный экран превращается в светофор.
 
 ## Dials
 
-| Dial         | Setting                                | Why                                                                     |
-| ------------ | -------------------------------------- | ----------------------------------------------------------------------- |
-| Temperature  | Warm neutrals, cool accent             | Paper and ink. Also keeps us off the slate-blue default.                |
-| Contrast     | High on amounts, low on chrome         | Amounts are the content; labels, rules and chrome recede.               |
-| Density      | Dense data, comfortable controls       | 52px data rows; 44px minimum tap target on iPhone.                      |
-| Radius       | Two tiers: soft containers, sharp data | Containers 14–20px, controls 8px, rows 0. Not one radius on everything. |
-| Colour count | 1 accent + 3 semantics                 | Accent never means positive/negative; those are their own hues.         |
-| Motion       | Settle, never bounce                   | Short distances, ease-out, no springs, no count-ups.                    |
+| Dial        | Setting                                       | Why                                                            |
+| ----------- | --------------------------------------------- | -------------------------------------------------------------- |
+| Temperature | Холодные нейтрали, синий акцент               | Полотно `#F6F8FC`, карточки белые. Тёплой бумаги больше нет.   |
+| Contrast    | Высокий на суммах, низкий на обвязке          | Суммы — содержание; метки, края и обвязка отступают.           |
+| Density     | Плотные данные, просторные контролы           | Строка данных 56px; минимум 44px на касание.                   |
+| Radius      | Крупный: карточки 20, контролы 12, пилюли 999 | Мягкость Moni. Прямых углов в интерфейсе больше нет.           |
+| Colour      | 1 акцент + 3 семантики + бежевый              | Акцент никогда не значит «плюс» или «минус» — у них свои тона. |
+| Elevation   | Тень вместо рамки                             | Карточка поднята мягкой рассеянной тенью, а не обведена.       |
+| Motion      | Settle, never bounce                          | Короткие дистанции, ease-out, без пружин и без счётчиков.      |
 
 ## Signature
 
-The **amount lockup**: a large tabular-figure amount with its currency code set beside it in mono
-small-caps at ~0.6× size and +0.08em tracking, baseline-aligned. It is the one repeated device the
-app is recognised by, and it is the same lockup at every scale — dashboard hero, row, chip.
+**Amount lockup**: крупная сумма с табличными цифрами, символ валюты перед числом, дробная часть
+0.6× от целой части и выровнена по базовой линии. Это единственный повторяющийся приём, по которому
+приложение узнают, и он одинаков на любом масштабе — герой главной, строка списка, чип.
+
+Двенадцать валют ломают приём в двух местах, и правило разрешает оба:
+
+- у валюты нет однозначного символа (USDT, BTC) — его место занимает код в mono-капсе;
+- на экране встретились две валюты с одинаковым глифом — обе получают код в mono-капсе после числа.
+
+```
+$ 8,254.32        ₽ 1,240,500.00        USDT 3,094.32        $ 55.00 USD / $ 12.00 CAD
+  ↑ целые 32px, дробные 20px               ↑ mono-капс            ↑ код, когда глиф неоднозначен
+```
 
 ## Type
 
-| Role                           | Family              | Notes                                                                                                                                                                    |
-| ------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Interface, amounts             | **Instrument Sans** | Google Fonts. A contemporary grotesque with a slightly narrow set — legible at 13px, characterful at 32px. Amounts use `font-variant-numeric: tabular-nums lining-nums`. |
-| Codes, data labels, timestamps | **IBM Plex Mono**   | Google Fonts. Humanist mono, warm; used only at small sizes, uppercase, tracked out.                                                                                     |
+Шрифты остаются нашими: Switzer из референса не берём, потому что mono-начертание для кодов валют и
+меток — не украшение, а способ не перепутать RUB с RSD в столбце.
 
-Fonts are loaded by the consuming app (`apps/web`), not by `packages/ui`; the tokens declare full
-fallback stacks so the package is usable without them.
+| Роль                            | Семейство           | Заметки                                                                 |
+| ------------------------------- | ------------------- | ----------------------------------------------------------------------- |
+| Интерфейс, суммы                | **Instrument Sans** | Google Fonts. Суммы — `font-variant-numeric: tabular-nums lining-nums`. |
+| Коды валют, метки данных, время | **IBM Plex Mono**   | Google Fonts. Только мелкие кегли, капс, с разрядкой.                   |
 
-**Scale** (1.2 minor third, 16px base): 12 / 13 / 14 / 16 / 20 / 24 / 32 / 44.
-Weights: 400 body, 500 labels, 600 amounts and headings. Nothing heavier — bold weights on a
-number-dense screen read as alarm.
-Line heights: 1.5 body, 1.25 headings, 1.1 amounts. Tracking: −0.01em at 24px and up, +0.08em on
-mono labels.
+Шрифты грузит приложение (`apps/web`), не `packages/ui`; токены объявляют полные fallback-стеки,
+чтобы пакет был пригоден без них.
+
+**Шкала** перенесена с референса — она плотнее прежней: 11 / 12 / 14 / 16 / 22 / 28 / 34 / 40.
+Интерлиньяж задан парами, а не множителем: 40/46, 34/38, 28/34, 22/24, 16/22, 14/20, 12/16, 11/14.
+Веса: 400 для длинного текста, **500 для заголовков и меток** (Moni набирает Medium, не Regular),
+600 для сумм. Тяжелее — нет: жирное начертание на экране, полном чисел, читается как тревога.
+Трекинг: −0.01em от 28px и выше, +0.08em на mono-метках.
 
 ## Tokens
 
-Neutral axis is hue 80 (warm) at chroma <= 0.012; the accent is hue 272 (ink blue-violet) — fountain
-pen ink, the mark of a hand-kept ledger. Raw tokens are namespaced `--mm-*` so they never collide
-with the shadcn variable contract, which `src/styles/index.css` maps onto them.
+Палитра перенесена с референса (слайд 07) и пересчитана в oklch. Сырые токены живут под
+`--mm-*`, чтобы не сталкиваться с контрактом shadcn, который `src/styles/index.css` на них
+отображает.
 
-| Token                 | Light                   | Dark                   | Contrast on bg      |
-| --------------------- | ----------------------- | ---------------------- | ------------------- |
-| `--mm-bg`             | `oklch(0.981 0.005 85)` | `oklch(0.18 0.008 80)` | —                   |
-| `--mm-surface`        | `oklch(0.995 0.002 85)` | `oklch(0.22 0.008 80)` | —                   |
-| `--mm-surface-raised` | `oklch(1 0 0)`          | `oklch(0.26 0.009 80)` | —                   |
-| `--mm-ink`            | `oklch(0.23 0.012 80)`  | `oklch(0.96 0.004 85)` | 16.0 / 16.8         |
-| `--mm-muted`          | `oklch(0.52 0.012 80)`  | `oklch(0.68 0.01 80)`  | 5.2 / 6.5           |
-| `--mm-line`           | `oklch(0.9 0.008 80)`   | `oklch(0.31 0.008 80)` | hairline, non-text  |
-| `--mm-line-strong`    | `oklch(0.65 0.01 80)`   | `oklch(0.49 0.01 80)`  | 3.0 / 3.0           |
-| `--mm-accent`         | `oklch(0.52 0.19 272)`  | `oklch(0.68 0.16 272)` | 5.5 / 6.3           |
-| `--mm-accent-fg`      | `oklch(0.99 0 0)`       | `oklch(0.17 0.02 272)` | 5.7 / 6.5 on accent |
-| `--mm-positive`       | `oklch(0.52 0.13 155)`  | `oklch(0.72 0.14 155)` | 4.9 / 8.0           |
-| `--mm-negative`       | `oklch(0.53 0.19 25)`   | `oklch(0.7 0.17 25)`   | 5.5 / 6.5           |
-| `--mm-warning`        | `oklch(0.555 0.14 75)`  | `oklch(0.8 0.13 75)`   | 4.6 / 9.9           |
+Брендовые значения Moni: Black `#21212F`, Accent Blue `#3872E1`, Accent Green `#00DDB0`,
+Beige `#ECE9EA`, Light Blue `#F6F8FC`, White.
 
-Every foreground token clears WCAG AA on its own theme's background. `--mm-line` is the row hairline
-and is deliberately quiet; anything the user has to find — a field boundary, a focus ring — uses
-`--mm-line-strong` or the accent, which clear the 3:1 non-text minimum.
+Два из них нельзя использовать как текст напрямую: синий даёт на полотне 4.24, зелёный — 1.65.
+Поэтому у акцента и у «плюса» **две роли и два токена**: заливка — брендовый цвет, текст и иконка —
+затемнённый тон того же тона. Так подпись референса сохраняется, а AA не нарушается.
 
-Radius is two-tier on top of Tailwind's own scale, which already lands controls where we want them:
-controls keep `--radius-lg` at 0.5rem / 8px (every shadcn control is `rounded-lg`), containers are
-redefined — `--radius-xl 0.875rem` / 14px for cards, `--radius-2xl 1.25rem` / 20px for sheets and
-toasts. Data rows stay square. The scale stays monotonic; nothing below `xl` is overridden.
-Spacing: 4px base step, gutters 16px on iPhone / 24px on web. Coarse pointers get a 44px minimum on
-every control, whatever size variant the screen chose.
+### Light
+
+| Токен                 | Значение                 | Контраст на `bg` / на белой карточке   |
+| --------------------- | ------------------------ | -------------------------------------- |
+| `--mm-bg`             | `oklch(0.979 0.006 265)` | полотно `#F6F8FC`                      |
+| `--mm-surface`        | `oklch(1 0 0)`           | карточка                               |
+| `--mm-surface-raised` | `oklch(1 0 0)`           | шит, всплывающее: в светлой тоже белые |
+| `--mm-surface-sunken` | `oklch(0.937 0.003 355)` | бежевый `#ECE9EA`: чипы, неактивное    |
+| `--mm-ink`            | `oklch(0.254 0.026 284)` | 14.9 / 15.9                            |
+| `--mm-muted`          | `oklch(0.550 0.020 265)` | 4.6 / 4.9                              |
+| `--mm-line`           | `oklch(0.915 0.008 265)` | не текст; край, а не разделитель       |
+| `--mm-line-strong`    | `oklch(0.645 0.015 265)` | 3.1 — граница поля, кольцо фокуса      |
+| `--mm-accent`         | `oklch(0.560 0.180 262)` | 4.5 / 4.8 — акцентный текст и иконка   |
+| `--mm-accent-fill`    | `oklch(0.574 0.180 262)` | брендовый `#3872E1`                    |
+| `--mm-accent-fg`      | `oklch(1 0 0)`           | 4.5 на `accent-fill`                   |
+| `--mm-positive`       | `oklch(0.540 0.104 171)` | 4.5 / 4.8                              |
+| `--mm-positive-fill`  | `oklch(0.799 0.156 171)` | брендовый `#00DDB0`; ink на нём 9.1    |
+| `--mm-negative`       | `oklch(0.576 0.190 25)`  | 4.5                                    |
+| `--mm-warning`        | `oklch(0.558 0.116 75)`  | 4.5                                    |
+
+### Dark
+
+Полотно `#1C1C26`, как у референса. Поверхности различаются светлотой, а не рамками, и первичная
+кнопка в тёмной теме — синяя (в светлой она тёмная). Акцент и семантика считаются от **самой светлой
+поверхности**, на которой могут оказаться (`surface-raised`), а не от полотна: у референса на этом
+месте AA не выдерживается, у нас — выдерживается.
+
+| Токен                 | Значение                 | Контраст на `surface-raised` / на `bg`  |
+| --------------------- | ------------------------ | --------------------------------------- |
+| `--mm-bg`             | `oklch(0.231 0.019 285)` | полотно `#1C1C26`                       |
+| `--mm-surface`        | `oklch(0.275 0.018 285)` | карточка                                |
+| `--mm-surface-raised` | `oklch(0.322 0.018 285)` | шит, всплывающее                        |
+| `--mm-surface-sunken` | `oklch(0.252 0.018 285)` | чипы, неактивное: утоплено под карточку |
+| `--mm-ink`            | `oklch(0.960 0.004 265)` | 13.2 / 15.0                             |
+| `--mm-muted`          | `oklch(0.700 0.015 265)` | 5.6 / 6.3                               |
+| `--mm-line`           | `oklch(0.360 0.015 285)` | не текст                                |
+| `--mm-line-strong`    | `oklch(0.595 0.015 265)` | 3.1 на `surface-raised`, 4.2 на полотне |
+| `--mm-accent`         | `oklch(0.694 0.160 262)` | 4.6 / 6.1                               |
+| `--mm-accent-fill`    | `oklch(0.574 0.180 262)` | брендовый; белый на нём 4.5             |
+| `--mm-accent-fg`      | `oklch(1 0 0)`           | 4.5 на `accent-fill`                    |
+| `--mm-positive`       | `oklch(0.676 0.116 171)` | 4.6 / 6.1                               |
+| `--mm-positive-fill`  | `oklch(0.799 0.156 171)` | брендовый `#00DDB0`; ink на нём 9.1     |
+| `--mm-negative`       | `oklch(0.710 0.170 25)`  | 4.6 / 6.1                               |
+| `--mm-warning`        | `oklch(0.696 0.130 75)`  | 4.6 / 6.1                               |
+
+Обе темы остаются неприкосновенными: палитры объявлены один раз, а тему выбирают
+`prefers-color-scheme` и явный `data-theme` — значение не может разойтись между ветками.
+
+Каждый текстовый токен проходит AA на своей теме. `--mm-line` — край карточки и потому намеренно
+тихий; всё, что пользователь должен найти — граница поля, кольцо фокуса — берёт `--mm-line-strong`
+или акцент, которые проходят минимум 3:1 для нетекстовых элементов.
+
+### Форма и глубина
+
+Радиусы выросли: прежняя двухуровневая схема «мягкие контейнеры, острые данные» отменена вместе с
+хайрлайнами. Контролы `--radius-lg` 0.75rem / 12px, карточки `--radius-xl` 1.25rem / 20px, шиты и
+тосты `--radius-2xl` 1.75rem / 28px, пилюли и чипы — 999px. Прямых углов в интерфейсе нет.
+
+Карточка поднята, а не обведена: мягкая рассеянная тень вместо рамки. В тёмной теме тень не видна,
+и подъём несёт светлота поверхности.
+
+Spacing: шаг 4px, поля 16px на iPhone / 24px на вебе. Грубым указателям — минимум 44px на каждый
+контрол, какой бы размерный вариант ни выбрал экран.
 
 ## Motion
 
-Calm means _settle_, not spring. Entry moves 8px and fades; exits fade only, faster than entries,
-because leaving should never hold the user up.
+Calm означает _settle_, не spring. Вход смещается на 8px и проявляется; выход только гаснет и
+быстрее входа, потому что уход никогда не должен задерживать.
 
-- Durations: `--duration-fast 150ms` (state, hover, press), `--duration-base 240ms` (enter, sheets),
-  `--duration-slow 400ms` (route and modal transitions only).
-- Curve: `--ease-out-quart cubic-bezier(0.25, 1, 0.5, 1)` for everything entering; linear for opacity-only.
-- Animate `opacity` and `transform` only. Never `height`, `top`, `box-shadow`.
-- Lists stagger 40ms per item, capped at 8 items — beyond that the tail feels broken, not lively.
-- A changing amount cross-fades and slides 4px. It never counts up: counting is slower to read and
-  the number is the point.
-- `prefers-reduced-motion: reduce` zeroes every duration token; animations still run, instantly, so
-  nothing depends on an animation callback to become visible.
+- Длительности: `--duration-fast 150ms` (состояние, наведение, нажатие), `--duration-base 240ms`
+  (вход, шиты), `--duration-slow 400ms` (только переходы маршрутов и модалок).
+- Кривая: `--ease-out-quart cubic-bezier(0.25, 1, 0.5, 1)` на всё входящее; linear — для чистой
+  прозрачности.
+- Анимируем только `opacity` и `transform`. Никогда `height`, `top`, `box-shadow`.
+- Списки — стаггер 40ms на элемент, максимум 8; дальше хвост читается как поломка, а не как жизнь.
+- Меняющаяся сумма перекрёстно гаснет и сдвигается на 4px. Она никогда не отсчитывается: счётчик
+  читается медленнее, а число — это и есть суть.
+- `prefers-reduced-motion: reduce` обнуляет все токены длительности; анимации по-прежнему
+  выполняются, мгновенно, поэтому ничто не зависит от коллбэка анимации, чтобы стать видимым.
 
 ## Do / don't
 
-- **Do** give every amount tabular figures and right-align them in any column.
-- **Do** distinguish positive / negative / warning from the accent — a green button must never mean
-  "primary action".
-- **Do** keep the accent for one thing per screen: the primary action or the active state.
-- **Don't** colour a balance. Ink for balances; colour only for change.
-- **Don't** drift into cream-and-serif: the light background is near-white (L 0.98), the display face
-  is a grotesque, and there is no terracotta anywhere.
-- **Don't** use gradients for surfaces, shadows deeper than a 1px hairline plus a soft ambient, or a
-  second accent hue.
-- **Don't** round data rows or table cells; the hairline is the separator.
-- **Don't** animate on scroll in product screens. Motion responds to input, not to reading.
+- **Do** давать каждой сумме табличные цифры и прижимать вправо в любой колонке.
+- **Do** отличать плюс / минус / предупреждение от акцента — синяя кнопка не значит «доход».
+- **Do** держать акцент для одного на экране: первичное действие или активное состояние.
+- **Do** ставить сноску о курсе и дате под каждым сведённым итогом. Без неё цифра врёт.
+- **Don't** красить баланс. Чернила для балансов; цвет только для изменения.
+- **Don't** использовать брендовый синий или зелёный как цвет текста — для этого есть `--mm-accent`
+  и `--mm-positive`.
+- **Don't** обводить карточку рамкой, если её уже поднимает тень или светлота.
+- **Don't** класть градиенты на поверхности, тени глубже мягкой рассеянной, второй акцентный тон.
+- **Don't** анимировать по скроллу в продуктовых экранах. Движение отвечает на ввод, не на чтение.
