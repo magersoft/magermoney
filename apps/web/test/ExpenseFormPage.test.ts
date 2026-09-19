@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { flushPromises, mount } from '@vue/test-utils';
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
@@ -31,6 +31,12 @@ const dto = {
 };
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+
+/** The sheet is portalled to the body, so that is where the form is read from. */
+const sheet = () => new DOMWrapper(document.body);
+const field = (testid: string) => sheet().get(`[data-testid="${testid}"] input`);
+const amount = () => sheet().get('[data-slot="quick-action-amount"] input');
+const confirm = () => sheet().get('[data-slot="quick-action-confirm"]');
 
 async function mountForm(
   path: string,
@@ -107,9 +113,11 @@ describe('ExpenseFormPage', () => {
       return base(path) ?? json([]);
     });
     const { w } = await mountForm('/plan/expenses/new', fetch);
-    expect((w.get('[data-testid="expense-currency"]').element as HTMLSelectElement).value).toBe(
-      'RUB',
-    );
+    /* The currency stands beside the amount now, which is the first field. */
+    expect(
+      (sheet().get('[data-slot="quick-action-currency"]').element as HTMLSelectElement).value,
+    ).toBe('RUB');
+    w.unmount();
   });
 
   it('sends categoryName for a category typed in, and categoryId for a known one', async () => {
@@ -124,37 +132,67 @@ describe('ExpenseFormPage', () => {
       return json([]);
     });
     const { w, router } = await mountForm('/plan/expenses/new', fetch);
-    await w.get('[data-testid="expense-name"]').setValue('Gym');
-    await w.get('[data-testid="expense-amount"]').setValue('30');
-    await w.get('[data-testid="expense-category"]').setValue('Health');
-    await w.get('[data-testid="expense-form"]').trigger('submit');
+    await field('expense-name').setValue('Gym');
+    await amount().setValue('30');
+    await field('expense-category').setValue('Health');
+    await confirm().trigger('click');
     await flushPromises();
     expect(posts[0]).toMatchObject({ name: 'Gym', amount: '30', categoryName: 'Health' });
     expect(posts[0]).not.toHaveProperty('categoryId');
     expect(router.currentRoute.value.fullPath).toBe('/plan?tab=expenses');
+    w.unmount();
 
     await router.push('/plan/expenses/new');
     const second = await mountForm('/plan/expenses/new', fetch);
-    await second.w.get('[data-testid="expense-name"]').setValue('Rent');
-    await second.w.get('[data-testid="expense-amount"]').setValue('1400');
-    await second.w.get('[data-testid="expense-category"]').setValue('housing');
-    await second.w.get('[data-testid="expense-form"]').trigger('submit');
+    await field('expense-name').setValue('Rent');
+    await amount().setValue('1400');
+    await field('expense-category').setValue('housing');
+    await confirm().trigger('click');
     await flushPromises();
     expect(posts[1]).toMatchObject({ categoryId: CAT });
     expect(posts[1]).not.toHaveProperty('categoryName');
+    second.w.unmount();
   });
 
-  it('holds Save until there is an amount above zero', async () => {
+  /*
+   * A disabled button says «no» without saying why. The sheet takes the press
+   * and answers on the field that is wrong, which is also what a screen reader
+   * is given.
+   */
+  it('answers a missing amount on the field instead of sending anything', async () => {
+    const posts: unknown[] = [];
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      const b = base(path);
+      if (b) return b;
+      if (init?.method === 'POST') posts.push(JSON.parse(String(init.body)));
+      return json([]);
+    });
+    const { w } = await mountForm('/plan/expenses/new', fetch);
+    await field('expense-name').setValue('Gym');
+    await field('expense-category').setValue('Health');
+    await confirm().trigger('click');
+    await flushPromises();
+    expect(posts).toHaveLength(0);
+    expect(sheet().get('[data-testid="expense-amount-error"]').text()).toContain('сумму');
+
+    await amount().setValue('30');
+    await confirm().trigger('click');
+    await flushPromises();
+    expect(posts).toHaveLength(1);
+    w.unmount();
+  });
+
+  it('names the field that was left empty, and announces it', async () => {
     const fetch = vi.fn(async (path: string) => base(path) ?? json([]));
     const { w } = await mountForm('/plan/expenses/new', fetch);
-    const submit = () => w.get('[data-testid="expense-submit"]');
-    await w.get('[data-testid="expense-name"]').setValue('Gym');
-    await w.get('[data-testid="expense-category"]').setValue('Health');
-    expect(submit().attributes('disabled')).toBeDefined();
-    await w.get('[data-testid="expense-amount"]').setValue('0');
-    expect(submit().attributes('disabled')).toBeDefined();
-    await w.get('[data-testid="expense-amount"]').setValue('30');
-    expect(submit().attributes('disabled')).toBeUndefined();
+    await amount().setValue('30');
+    await confirm().trigger('click');
+    await flushPromises();
+    const name = field('expense-name');
+    expect(name.attributes('aria-invalid')).toBe('true');
+    const errorId = name.attributes('aria-describedby')!;
+    expect(document.getElementById(errorId)?.textContent).toContain('название');
+    w.unmount();
   });
 
   it('says so when the expense being edited is not there', async () => {
@@ -163,8 +201,9 @@ describe('ExpenseFormPage', () => {
       '/plan/expenses/99999999-9999-4999-8999-999999999999/edit',
       fetch,
     );
-    expect(w.find('[data-testid="expense-form"]').exists()).toBe(false);
+    expect(sheet().find('[data-testid="expense-form"]').exists()).toBe(false);
     expect(w.get('[data-testid="expense-back"]').text()).toContain('Расходы');
+    w.unmount();
   });
 
   it('ends an expense today with a PATCH of activeTo', async () => {
@@ -179,9 +218,10 @@ describe('ExpenseFormPage', () => {
       return json([dto]);
     });
     const { w } = await mountForm(`/plan/expenses/${ID}/edit`, fetch);
-    expect((w.get('[data-testid="expense-name"]').element as HTMLInputElement).value).toBe('Rent');
-    await w.get('[data-testid="expense-end"]').trigger('click');
+    expect((field('expense-name').element as HTMLInputElement).value).toBe('Rent');
+    await sheet().get('[data-testid="expense-end"]').trigger('click');
     await flushPromises();
     expect(patches[0]).toEqual({ activeTo: new Date().toISOString().slice(0, 10) });
+    w.unmount();
   });
 });

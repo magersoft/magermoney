@@ -110,6 +110,9 @@ export type { DeltaTone } from './components/stat-tile/delta';
  * to write an expense down.
  */
 export { default as FieldRow } from './components/field-row/FieldRow.vue';
+export { default as InputRow } from './components/field-row/InputRow.vue';
+export { default as SelectRow } from './components/field-row/SelectRow.vue';
+export type { SelectRowOption } from './components/field-row/SelectRow.vue';
 export { default as QuickAmountGrid } from './components/quick-action/QuickAmountGrid.vue';
 export { default as QuickActionSheet } from './components/quick-action/QuickActionSheet.vue';
 

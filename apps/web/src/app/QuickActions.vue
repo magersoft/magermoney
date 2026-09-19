@@ -1,24 +1,29 @@
 <script setup lang="ts">
 /**
- * What the "+" offers: record a balance (pick the account first), make a
- * transfer, or record an inflow.
+ * What the "+" opens. It used to be a menu of three buttons, which put a tap in
+ * front of every operation; it is now the sheet itself (reference slide 13),
+ * with the kind of operation as a segment inside it. Writing an expense down is
+ * one tap from anywhere.
  *
- * It holds the sheets, never the trigger that is part of the navigation — the
- * pill's "+" writes to `open`, and the menu is therefore reachable from every
- * screen the navigation is on. The floating button below is the wide window's
- * own trigger, where there is no pill, and it keeps to the two screens about
- * money on hand.
+ * The two things that are not operations on the plan — recording what actually
+ * arrived, and writing down a balance — stay one tap away as the sheet's
+ * secondary actions, below the fields they are not part of.
+ *
+ * It holds the sheets, never the trigger that is part of the navigation: the
+ * pill's "+" writes to `open`, so the sheet is reachable from every screen the
+ * navigation is on. The floating button below is the wide window's own trigger,
+ * where there is no pill, and it keeps to the two screens about money on hand.
  */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { Button, Sheet, SheetContent, SheetHeader, SheetTitle } from '@magermoney/ui';
 import { RecordBalanceSheet, useAccounts } from '@/modules/accounts';
-import { TransferSheet } from '@/modules/transfers';
+import { OperationSheet } from '@/modules/plan';
 import { routeComponent } from '@/shared/layout/route-fallback';
 
 /**
- * Lazy, unlike its two neighbours: the income barrel is otherwise reached only
+ * Lazy, unlike its neighbours: the income barrel is otherwise reached only
  * through routed screens, and a static import here would put the whole module
  * into the entry chunk for a sheet most sessions never open.
  *
@@ -30,11 +35,10 @@ const InflowSheet = routeComponent(() => import('@/modules/income').then((m) => 
 const { t } = useI18n();
 const route = useRoute();
 const { accounts } = useAccounts();
-/** The menu's open state belongs to whoever put the trigger on screen. */
+/** The sheet's open state belongs to whoever put the trigger on screen. */
 const menu = defineModel<boolean>('open', { default: false });
 const pick = ref(false);
 const record = ref(false);
-const transfer = ref(false);
 const inflow = ref(false);
 /** Mounted on first use, so the chunk is not fetched until someone asks for it. */
 const inflowWanted = ref(false);
@@ -66,50 +70,27 @@ function openInflow() {
   >
     +
   </Button>
-  <Sheet v-model:open="menu">
-    <SheetContent side="bottom" class="rounded-t-2xl pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <SheetHeader>
-        <SheetTitle>{{ t('quick.open') }}</SheetTitle>
-      </SheetHeader>
-      <div class="mt-4 grid gap-2">
-        <template v-if="active.length > 0">
-          <Button
-            size="lg"
-            variant="outline"
-            class="min-h-9 pointer-coarse:min-h-11"
-            data-testid="quick-record"
-            @click="
-              menu = false;
-              pick = true;
-            "
-          >
-            {{ t('quick.record') }}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            class="min-h-9 pointer-coarse:min-h-11"
-            data-testid="quick-transfer"
-            @click="
-              menu = false;
-              transfer = true;
-            "
-          >
-            {{ t('quick.transfer') }}
-          </Button>
-        </template>
-        <Button
-          size="lg"
-          variant="outline"
-          class="min-h-9 pointer-coarse:min-h-11"
-          data-testid="quick-inflow"
-          @click="openInflow"
-        >
-          {{ t('quick.inflow') }}
-        </Button>
-      </div>
-    </SheetContent>
-  </Sheet>
+
+  <OperationSheet v-model:open="menu">
+    <template #secondary>
+      <Button variant="outline" class="min-h-11" data-testid="quick-inflow" @click="openInflow">
+        {{ t('quick.inflow') }}
+      </Button>
+      <Button
+        v-if="active.length > 0"
+        variant="outline"
+        class="min-h-11"
+        data-testid="quick-record"
+        @click="
+          menu = false;
+          pick = true;
+        "
+      >
+        {{ t('quick.record') }}
+      </Button>
+    </template>
+  </OperationSheet>
+
   <Sheet v-model:open="pick">
     <SheetContent
       side="bottom"
@@ -118,16 +99,16 @@ function openInflow() {
       <SheetHeader>
         <SheetTitle>{{ t('quick.pickAccount') }}</SheetTitle>
       </SheetHeader>
-      <ul class="mt-2 divide-y divide-border/60">
+      <ul class="divide-border/60 mt-2 divide-y">
         <li v-for="a in active" :key="a.id">
           <button
             type="button"
-            class="flex min-h-9 w-full items-center justify-between py-2 text-left text-sm pointer-coarse:min-h-11"
+            class="flex min-h-11 w-full items-center justify-between py-2 text-left text-sm"
             :data-testid="`pick-${a.id}`"
             @click="choose(a.id)"
           >
             <span>{{ a.name }}</span
-            ><span class="font-mono text-muted-foreground"
+            ><span class="text-muted-foreground font-mono"
               >{{ a.balance ?? '—' }} {{ a.currency }}</span
             >
           </button>
@@ -135,7 +116,7 @@ function openInflow() {
       </ul>
     </SheetContent>
   </Sheet>
+
   <RecordBalanceSheet v-if="chosen" v-model:open="record" :account-id="chosen" />
-  <TransferSheet v-model:open="transfer" />
   <InflowSheet v-if="inflowWanted" v-model:open="inflow" />
 </template>

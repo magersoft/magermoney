@@ -138,6 +138,8 @@
       "noAccount": "None",
       "create": "Create",
       "save": "Save",
+      "cancel": "Cancel",
+      "nameRequired": "Give it a name",
       "saveFailed": "Couldn't save. Try again."
     }
   },
@@ -211,6 +213,9 @@
       "deleteBody": "It leaves the plan. If it simply stopped, end it instead.",
       "cancel": "Cancel",
       "saveFailed": "Could not save",
+      "nameRequired": "Give it a name",
+      "categoryRequired": "Pick a category or type a new one",
+      "amountRequired": "Enter an amount above zero",
       "notFound": "This expense is gone. It was probably deleted."
     }
   },
@@ -480,6 +485,12 @@
     "note": "Note",
     "save": "Transfer",
     "update": "Save",
+    "cancel": "Cancel",
+    "pick": "Pick an account",
+    "sentCurrency": "Account currency",
+    "fromRequired": "Pick where it comes from",
+    "toRequired": "Pick where it goes",
+    "sameAccount": "The accounts have to differ",
     "delete": "Delete transfer",
     "empty": "No transfers yet",
     "failed": "That did not transfer. Try again.",
@@ -512,6 +523,12 @@
   },
   "quick": {
     "open": "Add",
+    "type": "What this is",
+    "types": {
+      "transfer": "Transfer",
+      "expense": "Expense",
+      "income": "Income"
+    },
     "record": "Update balance",
     "transfer": "Transfer",
     "pickAccount": "Which account?",

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { flushPromises } from '@vue/test-utils';
+import { DOMWrapper, flushPromises } from '@vue/test-utils';
 import { resetDisplayCurrency } from '../src/modules/rates/application/use-display-currency.js';
 import IncomeSourceFormPage from '../src/modules/income/ui/IncomeSourceFormPage.vue';
 import { sourceDto } from './fixtures/income.js';
@@ -9,6 +9,12 @@ vi.mock('@magermoney/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@magermoney/ui')>();
   return { ...actual, useToast: () => ({ toast: vi.fn() }) };
 });
+
+/** The sheet is portalled to the body, so that is where the form is read from. */
+const sheet = () => new DOMWrapper(document.body);
+const field = (testid: string) => sheet().get(`[data-testid="${testid}"] input`);
+const amount = () => sheet().get('[data-slot="quick-action-amount"] input');
+const confirm = () => sheet().get('[data-slot="quick-action-confirm"]');
 
 describe('IncomeSourceFormPage', () => {
   // The display currency is one instance for the whole app; each mount gets its own.
@@ -33,7 +39,7 @@ describe('IncomeSourceFormPage', () => {
     );
     await flushPromises();
     expect(
-      (wrapper.get('[data-testid="source-currency"]').element as HTMLSelectElement).value,
+      (sheet().get('[data-slot="quick-action-currency"]').element as HTMLSelectElement).value,
     ).toBe('RUB');
     wrapper.unmount();
   });
@@ -50,15 +56,15 @@ describe('IncomeSourceFormPage', () => {
       }),
     );
     await flushPromises();
-    await wrapper.get('[data-testid="source-name"]').setValue('Salary');
-    await wrapper.get('[data-testid="source-gross"]').setValue('1000');
-    await wrapper.get('[data-testid="source-tax"] input').setValue('15');
-    await wrapper.get('[data-testid="source-commission"] input').setValue('10');
-    await wrapper.get('[data-testid="day-25"]').trigger('click');
-    await wrapper.get('[data-testid="day-10"]').trigger('click');
+    await field('source-name').setValue('Salary');
+    await amount().setValue('1000');
+    await sheet().get('[data-testid="source-tax"] input').setValue('15');
+    await sheet().get('[data-testid="source-commission"] input').setValue('10');
+    await sheet().get('[data-testid="day-25"]').trigger('click');
+    await sheet().get('[data-testid="day-10"]').trigger('click');
     // 1000 × 0.85 × 0.9
-    expect(wrapper.get('[data-testid="source-net"]').text()).toContain('765.00');
-    await wrapper.get('form').trigger('submit');
+    expect(sheet().get('[data-testid="source-net"]').text()).toContain('765.00');
+    await confirm().trigger('click');
     await flushPromises();
     expect(body).toMatchObject({
       name: 'Salary',
@@ -90,11 +96,9 @@ describe('IncomeSourceFormPage', () => {
       }),
     );
     await flushPromises();
-    expect((wrapper.get('[data-testid="source-name"]').element as HTMLInputElement).value).toBe(
-      'Salary',
-    );
-    expect(wrapper.get('[data-testid="day-10"]').attributes('aria-pressed')).toBe('true');
-    await wrapper.get('form').trigger('submit');
+    expect((field('source-name').element as HTMLInputElement).value).toBe('Salary');
+    expect(sheet().get('[data-testid="day-10"]').attributes('aria-pressed')).toBe('true');
+    await confirm().trigger('click');
     await flushPromises();
     expect(method).toBe(`PATCH /income-sources/${sourceDto.id}`);
     wrapper.unmount();

@@ -88,6 +88,13 @@ const emit = defineEmits<{
   confirm: [];
 }>();
 
+/*
+ * The sheet's root is reka's renderless `DialogRoot`, so anything a screen puts
+ * on this component — an id, a test hook — would be dropped there. It belongs
+ * on the panel people actually see, which is where `$attrs` goes instead.
+ */
+defineOptions({ inheritAttrs: false });
+
 const pickCurrency = (event: Event) =>
   emit('update:code', (event.target as HTMLSelectElement).value);
 </script>
@@ -123,6 +130,7 @@ const pickCurrency = (event: Event) =>
           inside what is left of the screen.
         -->
         <DialogContent
+          v-bind="$attrs"
           data-slot="quick-action-sheet"
           :aria-describedby="props.description ? undefined : ''"
           :class="
@@ -157,7 +165,7 @@ const pickCurrency = (event: Event) =>
             which is the one place this ledger cannot follow the reference.
           -->
           <div class="flex items-end gap-2">
-            <label class="flex min-w-0 flex-1 flex-col gap-1">
+            <label data-slot="quick-action-amount" class="flex min-w-0 flex-1 flex-col gap-1">
               <span class="text-muted-foreground text-xs font-medium">{{ props.amountLabel }}</span>
               <MoneyInput
                 :model-value="props.amount"
@@ -204,6 +212,19 @@ const pickCurrency = (event: Event) =>
           <slot />
 
           <!--
+            What else this sheet can raise, when the screen has more to offer
+            than the one operation being written: quiet, and below the fields
+            it is not part of.
+          -->
+          <div
+            v-if="$slots.secondary"
+            data-slot="quick-action-secondary"
+            class="flex flex-col gap-2"
+          >
+            <slot name="secondary" />
+          </div>
+
+          <!--
             The button the sheet exists for cannot be the thing the keyboard
             covers, so it stays on the bottom edge instead of scrolling away
             with the fields, and it clears the home indicator.
@@ -212,7 +233,14 @@ const pickCurrency = (event: Event) =>
             data-slot="quick-action-footer"
             class="bg-surface-raised sticky bottom-0 -mx-4 mt-auto px-4 pt-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
           >
-            <Button class="w-full" :disabled="props.confirmDisabled" @click="emit('confirm')">
+            <!-- The button the sheet exists for is a 48px target, never the 32px default. -->
+            <Button
+              data-slot="quick-action-confirm"
+              size="lg"
+              class="min-h-12 w-full"
+              :disabled="props.confirmDisabled"
+              @click="emit('confirm')"
+            >
               {{ props.confirmLabel }}
             </Button>
           </div>
