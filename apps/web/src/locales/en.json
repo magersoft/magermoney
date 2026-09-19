@@ -233,6 +233,51 @@
     "over": "Over the limit",
     "rateDate": "Rates for {date}",
     "endedOn": "Ended {date}",
+    "palette": {
+      "groceries": "Groceries",
+      "dining": "Restaurants",
+      "transport": "Taxi",
+      "health": "Health",
+      "fun": "Fun",
+      "clothes": "Clothes",
+      "home": "Home",
+      "gifts": "Gifts"
+    },
+    "wizard": {
+      "stepOf": "Step {step} of {total}",
+      "next": "Next",
+      "back": "Back",
+      "add": "Add",
+      "own": "Your own",
+      "ownHint": "A nanny, say",
+      "open": "no end date",
+      "create": "Create {n} budget | Create {n} budgets",
+      "leaveTitle": "Leave the wizard?",
+      "leaveBody": "The categories and limits you picked will not be kept.",
+      "leave": "Leave",
+      "stay": "Stay",
+      "period": {
+        "title": "Starting when",
+        "body": "The budgets count from this date. An end date is optional."
+      },
+      "currency": {
+        "title": "In which currency",
+        "body": "Every limit in this pass will be in it."
+      },
+      "categories": {
+        "title": "What you spend on",
+        "body": "Pick the categories. Each one becomes its own budget."
+      },
+      "limits": {
+        "title": "How much a month",
+        "body": "A ceiling for each category."
+      },
+      "confirm": {
+        "title": "Does this look right?",
+        "body": "Check it over and create them.",
+        "period": "From {from} · {to}"
+      }
+    },
     "ended": {
       "show": "Ended · {n}",
       "hide": "Hide ended"
