@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-19 11:13'
-updated_date: '2026-09-19 13:40'
+updated_date: '2026-09-19 13:43'
 labels:
   - design
   - web
@@ -40,3 +40,15 @@ ordinal: 11000
 - [ ] #8 Проверено в обеих темах и на мобильной ширине
 - [ ] #9 Тесты экрана обновлены; bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Экран Счета: заголовок с общим балансом (AmountLockup), сноска о курсе и дате, строка «сколько счетов» вместо блока «до зарплаты» (она теперь на главной, слайд 12 Moni даёт под балансом счётчик карт).
+2. Фильтр по валюте: select с кодами валют, встречающимися у счетов, плюс «Все валюты»; активный фильтр дублируется FilterChipRow со снятием; пустая выборка — текст со сбросом фильтра.
+3. Стопка: AccountCardStack поверх плоского списка счетов из summary.groups, as=RouterLink, href=/accounts/:id. ProviderGroup со экрана уходит и удаляется (других потребителей нет), AccountRow остаётся под архив.
+4. Пустое состояние без счетов — заголовок, пояснение и кнопка на /accounts/new.
+5. Форма счёта: поля переезжают на язык строк — локальные InputRow и SelectRow в accounts/ui, визуально повторяющие FieldRow (bg-surface, min-h-14, метка над значением); группировка в карточки, кнопка Button size=lg снизу. FieldRow сам по себе не подходит: он умеет только открыть пикер, а имя, банк и заметка — ввод текста.
+6. Строки локалей: accounts.filter.*, accounts.count, accounts.emptyFilter.* в en.json и ru.json, прогнать через humanize-text.
+7. Тесты: AccountsPage.test.ts переписать под стопку и фильтр, добавить AccountFormPage.test.ts; прогнать test, lint, typecheck; проверить обе темы и мобильную ширину.
+<!-- SECTION:PLAN:END -->
