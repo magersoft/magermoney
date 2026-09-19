@@ -16,31 +16,37 @@ describe('QuickActions', () => {
       QuickActions,
       '/',
       apiOf(() => undefined),
+      { props: { open: true } },
     );
     await flushPromises();
-    await wrapper.get('[data-testid="fab"]').trigger('click');
     const body = new DOMWrapper(document.body);
     expect(body.find('[data-testid="quick-inflow"]').exists()).toBe(true);
     expect(body.find('[data-testid="quick-record"]').exists()).toBe(false);
     wrapper.unmount();
   });
 
-  it('keeps all three actions on home when accounts exist, and hides the button elsewhere', async () => {
+  /**
+   * The menu is now opened from the navigation pill's "+", which is on every
+   * screen — so the actions have to be there on every screen too. The floating
+   * button is the wide window's trigger only, and it keeps its two screens.
+   */
+  it('keeps all three actions wherever the menu is opened from, and the floating button to its two screens', async () => {
     const fetch = apiOf((p) =>
       p === '/accounts' ? json([acc('33333333-3333-4333-8333-333333333333', 'USD')]) : undefined,
     );
-    const home = await mountAt(QuickActions, '/', fetch);
+    const plan = await mountAt(QuickActions, '/plan', fetch, { props: { open: true } });
     await flushPromises();
-    await home.wrapper.get('[data-testid="fab"]').trigger('click');
     const body = new DOMWrapper(document.body);
     for (const id of ['quick-record', 'quick-transfer', 'quick-inflow'])
       expect(body.find(`[data-testid="${id}"]`).exists()).toBe(true);
-    home.wrapper.unmount();
-
-    const plan = await mountAt(QuickActions, '/plan', fetch);
-    await flushPromises();
     expect(plan.wrapper.find('[data-testid="fab"]').exists()).toBe(false);
     plan.wrapper.unmount();
+
+    const home = await mountAt(QuickActions, '/', fetch);
+    await flushPromises();
+    await home.wrapper.get('[data-testid="fab"]').trigger('click');
+    expect(new DOMWrapper(document.body).find('[data-testid="quick-record"]').exists()).toBe(true);
+    home.wrapper.unmount();
   });
 
   it('offers a reload instead of nothing when the inflow sheet chunk is gone', async () => {
@@ -50,9 +56,9 @@ describe('QuickActions', () => {
       QuickActions,
       '/',
       apiOf(() => undefined),
+      { props: { open: true } },
     );
     await flushPromises();
-    await wrapper.get('[data-testid="fab"]').trigger('click');
     await new DOMWrapper(document.body).get('[data-testid="quick-inflow"]').trigger('click');
     await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toContain('Обновить страницу');

@@ -13,6 +13,7 @@
     "lint": "eslint src test"
   },
   "dependencies": {
+    "@lucide/vue": "^1.45.0",
     "@magermoney/contracts": "workspace:*",
     "@magermoney/domain": "workspace:*",
     "@magermoney/ui": "workspace:*",

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 /**
- * The app shell: a top bar the whole app is hung from, and a tab bar that
- * replaces it as navigation on a phone. It renders chrome only — screens fill
- * the default slot, the currency switch fills its named slot (Task 16).
+ * The app shell: a top bar the whole app is hung from, and — on a phone — the
+ * floating pill that replaces it as navigation. It renders chrome only: screens
+ * fill the default slot, the currency switch and the desktop "+" fill the named
+ * ones.
  *
- * Four tabs: Home · Accounts · Plan · Settings; Goals joins in phase 4.
+ * Four sections: Home · Accounts · Plan · Settings; Goals joins in phase 4. The
+ * list itself lives in `nav.ts`, because both navigations read it.
  *
  * Chrome recedes and amounts carry the contrast (docs/design/direction.md), so
- * the bars are hairline-separated surfaces, labels sit at 12–13px, and the
+ * the top bar is a hairline-separated surface, labels sit at 11–13px, and the
  * accent marks exactly one thing: where you are.
  */
 import { computed } from 'vue';
@@ -15,31 +17,15 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { Button } from '@magermoney/ui';
 import { THEMES, type Theme } from '@/shared/theme';
+import { isCurrent, NAV } from '@/shared/layout/nav';
+import BottomNav from '@/shared/layout/BottomNav.vue';
 
 const { theme } = defineProps<{ theme: Theme }>();
-const emit = defineEmits<{ 'update:theme': [theme: Theme] }>();
+const emit = defineEmits<{ 'update:theme': [theme: Theme]; quick: [] }>();
 
 const { t } = useI18n();
 
 const route = useRoute();
-
-/**
- * `owns` is the set of path prefixes a tab stays lit for. vue-router's own
- * `isActive` only follows nested records, and these routes are flat, so an
- * account's page would otherwise light nothing. Home owns nothing but itself —
- * every path starts with "/".
- */
-const NAV = [
-  { to: '/', label: 'nav.home', owns: [] },
-  { to: '/accounts', label: 'nav.accounts', owns: ['/accounts', '/transfers'] },
-  { to: '/plan', label: 'nav.plan', owns: ['/plan'] },
-  { to: '/settings', label: 'nav.settings', owns: ['/settings'] },
-] as const;
-
-const isCurrent = (item: (typeof NAV)[number]): boolean =>
-  item.owns.length === 0
-    ? route.path === '/'
-    : item.owns.some((p) => route.path === p || route.path.startsWith(`${p}/`));
 
 const themeLabel = computed(() => t('theme.label', { theme: t(`theme.${theme}`) }));
 
@@ -84,10 +70,12 @@ function cycleTheme(): void {
           >
             <a
               :href="href"
-              :aria-current="isCurrent(item) ? 'page' : undefined"
+              :aria-current="isCurrent(item, route.path) ? 'page' : undefined"
               class="text-sm outline-offset-4 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring"
               :class="
-                isCurrent(item) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                isCurrent(item, route.path)
+                  ? 'text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               "
               @click="navigate"
             >
@@ -136,40 +124,24 @@ function cycleTheme(): void {
       </div>
     </header>
 
-    <main id="main" tabindex="-1" class="mx-auto w-full max-w-3xl px-4 pb-24 pt-6 md:px-6 md:pb-12">
+    <!--
+      The pill is 64px tall, the "+" rises 20px out of it and it floats 12px
+      clear of the safe area: 7rem of padding is what keeps the last row of a
+      screen readable instead of tucked under the navigation.
+    -->
+    <main
+      id="main"
+      tabindex="-1"
+      class="mx-auto w-full max-w-3xl px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+7rem)] md:px-6 md:pb-12"
+    >
       <slot />
     </main>
 
-    <div
-      class="fixed bottom-[calc(env(safe-area-inset-bottom)+4.25rem)] right-4 z-20 md:bottom-8 md:right-[max(1rem,calc(50%-24rem))]"
-    >
+    <!-- The phone reaches the quick actions through the pill's "+"; this is the wide window's. -->
+    <div class="fixed right-[max(1rem,calc(50%-24rem))] bottom-8 z-20 hidden md:block">
       <slot name="fab" />
     </div>
 
-    <nav
-      class="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface md:hidden"
-      style="padding-bottom: env(safe-area-inset-bottom)"
-      :aria-label="t('a11y.primaryNav')"
-    >
-      <div class="mx-auto flex max-w-3xl">
-        <RouterLink
-          v-for="item in NAV"
-          :key="item.to"
-          v-slot="{ href, navigate }"
-          :to="item.to"
-          custom
-        >
-          <a
-            :href="href"
-            :aria-current="isCurrent(item) ? 'page' : undefined"
-            class="flex min-h-11 flex-1 items-center justify-center py-3 text-[13px] -outline-offset-2 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring"
-            :class="isCurrent(item) ? 'text-primary' : 'text-muted-foreground'"
-            @click="navigate"
-          >
-            {{ t(item.label) }}
-          </a>
-        </RouterLink>
-      </div>
-    </nav>
+    <BottomNav @quick="emit('quick')" />
   </div>
 </template>
