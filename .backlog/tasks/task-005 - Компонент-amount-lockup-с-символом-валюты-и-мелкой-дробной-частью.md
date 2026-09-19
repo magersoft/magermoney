@@ -1,9 +1,11 @@
 ---
 id: TASK-005
 title: 'Компонент: amount lockup с символом валюты и мелкой дробной частью'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:11'
+updated_date: '2026-09-19 11:30'
 labels:
   - design
   - ui
