@@ -1,9 +1,11 @@
 ---
 id: TASK-020
 title: 'Форма счёта: выбор страны с поиском и флагами'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 13:12'
+updated_date: '2026-09-19 14:14'
 labels:
   - ui
   - accounts
