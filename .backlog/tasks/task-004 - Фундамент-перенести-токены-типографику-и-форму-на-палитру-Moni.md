@@ -39,3 +39,13 @@ ordinal: 2000
 - [ ] #7 Обе темы переключаются как раньше: prefers-color-scheme и data-theme, без расхождения значений между ветками
 - [ ] #8 bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Написать тест контраста (packages/ui/test/tokens-contrast.test.ts): парсит tokens.css, конвертирует oklch -> linear sRGB -> relative luminance, проверяет каждый текстовый токен >=4.5 на своих поверхностях и line-strong >=3 (тёмная тема считает от surface-raised), плюс accent-fg на accent-fill и ink на positive-fill. Тест падает на текущей палитре.
+2. Переписать палитру в tokens.css по таблицам direction.md: light/dark ветки, accent/accent-fill, positive/positive-fill, surface-sunken и surface-raised в обеих темах.
+3. Радиусы: --radius-lg 12px, --radius-xl 20px, --radius-2xl 28px, --radius-full 999px; токен тени карточки --mm-shadow-card, в тёмной теме none.
+4. Типографика: шкала 11/12/14/16/22/28/34/40 с парами интерлиньяжа и трекингом токенами --text-*; заголовки и метки по умолчанию весом 500 в base-слое index.css.
+5. Обновить маппинг shadcn в index.css (accent-fill/positive-fill, sunken, тень, радиус) и прогнать test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
