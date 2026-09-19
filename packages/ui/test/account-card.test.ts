@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import AccountCard from '../src/components/account-card/AccountCard.vue';
 import AccountCardStrip from '../src/components/account-card/AccountCardStrip.vue';
 import AccountCardStack from '../src/components/account-card/AccountCardStack.vue';
@@ -78,6 +79,23 @@ describe('AccountCard', () => {
     expect(w.get('[data-slot="amount-lockup"]').text()).toContain('1,200');
     expect(w.find('[role="img"]').attributes('aria-label')).toBe('USD');
     w.unmount();
+  });
+
+  /*
+   * The card is where the country first has to survive the trip: it is handed
+   * an account, not an icon, so the mark can only be Portuguese if the card
+   * passes the country down.
+   */
+  it('marks the card with the country the account is held in', async () => {
+    const pt = mount(AccountCard, { props: { account: account({ code: 'EUR', country: 'PT' }) } });
+    const eu = mount(AccountCard, { props: { account: account({ code: 'EUR' }) } });
+    const mark = (w: typeof pt) => w.find('svg').element.innerHTML.replace(/SVG[A-Za-z0-9]+/g, '');
+    await ui.loadCountryFlags();
+    await nextTick();
+
+    expect(mark(pt)).not.toBe(mark(eu));
+    pt.unmount();
+    eu.unmount();
   });
 
   it('takes its fill from the currency, not from the caller', () => {

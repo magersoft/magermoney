@@ -36,10 +36,11 @@ const json = (body: unknown) =>
     headers: { 'content-type': 'application/json' },
   });
 
-function mountForm() {
+async function mountForm(editing?: typeof created) {
   const fetch = vi.fn(async (path: string, init?: RequestInit) => {
     if (path === '/currencies') return json(currencies);
     if (path === '/accounts' && init?.method === 'POST') return json(created);
+    if (path === '/accounts' && editing) return json([editing]);
     return json([]);
   });
   const router = createRouter({
@@ -47,8 +48,10 @@ function mountForm() {
     routes: [
       { path: '/accounts/new', component: AccountFormPage },
       { path: '/accounts/:id', component: { template: '<div />' } },
+      { path: '/accounts/:id/edit', component: AccountFormPage },
     ],
   });
+  await router.push(editing ? `/accounts/${editing.id}/edit` : '/accounts/new');
   const w = mount(AccountFormPage, {
     global: {
       plugins: [
@@ -62,13 +65,31 @@ function mountForm() {
       provide: { [API_KEY as unknown as string]: { fetch } },
       stubs: { Motion: { template: '<div><slot /></div>' } },
     },
+    /* The combobox list is portalled, so it has to have a document to go to. */
+    attachTo: document.body,
   });
   return { w, fetch };
 }
 
+/** Opens the country row, types, and takes the country by its code. */
+async function pickCountry(
+  w: Awaited<ReturnType<typeof mountForm>>['w'],
+  query: string,
+  code: string,
+) {
+  await w.get('[data-testid="country-trigger"]').trigger('click');
+  await flushPromises();
+  const search = document.querySelector<HTMLInputElement>('[data-slot="combobox-input"]')!;
+  search.value = query;
+  search.dispatchEvent(new Event('input'));
+  await flushPromises();
+  document.querySelector<HTMLElement>(`[data-testid="country-option-${code}"]`)!.click();
+  await flushPromises();
+}
+
 describe('AccountFormPage', () => {
   it('asks every question as a row rather than a bordered field', async () => {
-    const { w } = mountForm();
+    const { w } = await mountForm();
     await flushPromises();
 
     const rows = w.findAll('[data-slot="form-field-row"]');
@@ -78,12 +99,12 @@ describe('AccountFormPage', () => {
   });
 
   it('creates the account from what the rows hold', async () => {
-    const { w, fetch } = mountForm();
+    const { w, fetch } = await mountForm();
     await flushPromises();
 
     await w.get('[data-testid="form-name"]').setValue('Карман');
     await w.get('[data-testid="form-bank"]').setValue('Bank');
-    await w.get('[data-testid="form-country"]').setValue('ru');
+    await pickCountry(w, 'Росс', 'RU');
     await w.get('[data-testid="form-currency"]').setValue('EUR');
     await w.get('[data-testid="account-form"]').trigger('submit');
     await flushPromises();
@@ -96,5 +117,30 @@ describe('AccountFormPage', () => {
       country: 'RU',
       currency: 'EUR',
     });
+  });
+
+  /*
+   * A combobox is not an input with `required`, so nothing but the form stops a
+   * save with no country — and the API would only answer with a 422 anyway.
+   */
+  it('will not save an account with nowhere to be held', async () => {
+    const { w, fetch } = await mountForm();
+    await flushPromises();
+
+    await w.get('[data-testid="form-name"]').setValue('Карман');
+    await w.get('[data-testid="form-bank"]').setValue('Bank');
+    await w.get('[data-testid="account-form"]').trigger('submit');
+    await flushPromises();
+
+    expect(fetch.mock.calls.find(([, init]) => init?.method === 'POST')).toBeUndefined();
+    expect(w.get('[data-testid="country-trigger"]').attributes('aria-invalid')).toBe('true');
+    expect(w.text()).toContain(ru.accounts.form.countryRequired);
+  });
+
+  it('opens on the country the account is already held in', async () => {
+    const { w } = await mountForm({ ...created, country: 'PT' });
+    await flushPromises();
+
+    expect(w.get('[data-testid="country-value"]').text()).toBe(ru.country.PT);
   });
 });

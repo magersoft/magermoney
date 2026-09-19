@@ -32,6 +32,7 @@ const accounts = computed<AccountCardItem[]>(() =>
       amount: a.balance.toString(),
       code: a.balance.currency.code,
       kind: a.balance.currency.kind,
+      country: a.country,
       scale: a.balance.currency.scale,
     })),
 );

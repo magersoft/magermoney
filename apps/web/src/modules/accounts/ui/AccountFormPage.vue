@@ -10,13 +10,14 @@
  * that is all a select has to be — the row carries the label and the height,
  * and the platform carries the keyboard, the wheel and the screen reader.
  */
-import { computed, reactive, useId, watch } from 'vue';
+import { computed, reactive, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
-import { Button, MoneyInput, Switch, useToast } from '@magermoney/ui';
+import { Button, CountrySelect, MoneyInput, Switch, useToast } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import { useCountryOptions } from '@/shared/countries/options';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
 import { useAccount } from '../application/use-accounts';
@@ -28,6 +29,7 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const { toast } = useToast();
 const currencies = useCurrencies();
+const countries = useCountryOptions();
 const editingId = computed(() => (route.params.id ? String(route.params.id) : null));
 const existing = useAccount(() => editingId.value ?? '');
 const { create, isPending: creating } = useCreateAccount();
@@ -37,7 +39,7 @@ const spendingLabelId = `${useId()}-spending`;
 const form = reactive({
   name: '',
   bank: '',
-  country: '',
+  country: null as string | null,
   currency: 'USD',
   kind: 'bank_account' as (typeof ACCOUNT_KINDS)[number],
   isSpending: false,
@@ -88,11 +90,25 @@ const uiLocale = computed(() => locale.value as DateLocale);
 const CONTROL =
   'w-full min-w-0 bg-transparent text-sm font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted-foreground';
 
+/*
+ * The country is the one answer the browser cannot police for us: a combobox is
+ * not an input with `required`, so the form says what is missing itself. It
+ * only says it once asked to save — a field cannot be wrong before it is due.
+ */
+const countryMissing = ref(false);
+const countryError = computed(() =>
+  countryMissing.value && !form.country ? t('accounts.form.countryRequired') : undefined,
+);
+watch(
+  () => form.country,
+  (country) => country && (countryMissing.value = false),
+);
+
 function payload() {
   const base = {
     name: form.name,
     bank: form.bank,
-    country: form.country.toUpperCase(),
+    country: (form.country ?? '').toUpperCase(),
     currency: form.currency,
     kind: form.kind,
     isSpending: form.isSpending,
@@ -110,6 +126,10 @@ function payload() {
   return { ...base, ...card };
 }
 async function submit() {
+  if (!form.country) {
+    countryMissing.value = true;
+    return;
+  }
   try {
     if (editingId.value) {
       const full = payload();
@@ -146,16 +166,17 @@ async function submit() {
       <FormFieldRow :label="t('accounts.form.bank')">
         <input v-model="form.bank" required data-testid="form-bank" :class="CONTROL" />
       </FormFieldRow>
-      <FormFieldRow :label="t('accounts.form.country')">
-        <input
-          v-model="form.country"
-          required
-          maxlength="2"
-          pattern="[A-Za-z]{2}"
-          data-testid="form-country"
-          :class="[CONTROL, 'uppercase']"
-        />
-      </FormFieldRow>
+      <CountrySelect
+        v-model="form.country"
+        :options="countries"
+        :label="t('accounts.form.country')"
+        :placeholder="t('accounts.form.countryPlaceholder')"
+        :search-placeholder="t('accounts.form.countrySearch')"
+        :empty-label="t('accounts.form.countryEmpty')"
+        :clear-label="t('accounts.form.countryClear')"
+        :error="countryError"
+        data-testid="form-country"
+      />
       <FormFieldRow
         :label="t('accounts.form.currency')"
         :hint="currencyLocked ? t('accounts.form.currencyLocked') : undefined"

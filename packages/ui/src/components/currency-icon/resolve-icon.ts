@@ -55,7 +55,11 @@ export interface CurrencyIconInput {
   kind: 'fiat' | 'crypto';
   /** Explicit Iconify name; wins over everything. */
   icon?: string | null;
-  /** ISO 3166-1 alpha-2 country, for a fiat the table does not know. */
+  /**
+   * ISO 3166-1 alpha-2 country the account is held in. It outranks the currency
+   * table: a euro account in Lisbon is Portuguese, and the EU flag on it would
+   * say something the account does not.
+   */
   country?: string | null;
 }
 
@@ -66,7 +70,7 @@ export interface CurrencyIconInput {
 export function resolveCurrencyIcon(c: CurrencyIconInput): ResolvedIcon {
   if (c.icon) return { kind: 'iconify', name: c.icon };
   if (c.kind === 'fiat') {
-    const flag = FIAT_FLAG[c.code] ?? (c.country ? c.country.toLowerCase() : undefined);
+    const flag = (c.country ? c.country.toLowerCase() : undefined) ?? FIAT_FLAG[c.code];
     if (flag) return { kind: 'iconify', name: `circle-flags:${flag}` };
   }
   if (c.kind === 'crypto') {

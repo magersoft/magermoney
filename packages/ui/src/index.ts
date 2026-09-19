@@ -38,6 +38,7 @@ export * from './components/ui/separator';
 export * from './components/ui/dropdown-menu';
 export * from './components/ui/alert-dialog';
 export * from './components/ui/switch';
+export * from './components/ui/combobox';
 
 export { default as MoneyInput } from './components/money-input/MoneyInput.vue';
 export { parseAmountInput, formatAmountInput } from './components/money-input/parse';
@@ -145,6 +146,14 @@ export {
   CRYPTO_KNOWN,
 } from './components/currency-icon/resolve-icon';
 export type { CurrencyIconInput, ResolvedIcon } from './components/currency-icon/resolve-icon';
+export { COUNTRY_CODES } from './components/currency-icon/countries';
+export { loadCountryFlags, countryFlagsReady } from './icons/country-flags';
+
+/* Where an account is held: the flag, and the list of 257 places behind it. */
+export { default as CountrySelect } from './components/country-select/CountrySelect.vue';
+export { default as CountryFlag } from './components/country-select/CountryFlag.vue';
+export { filterCountries } from './components/country-select/filter';
+export type { CountryOption } from './components/country-select/filter';
 
 export {
   fadeUp,

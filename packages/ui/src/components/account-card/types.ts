@@ -16,6 +16,8 @@ export interface AccountCardItem {
   /** ISO code or crypto ticker. */
   code: string;
   kind: 'fiat' | 'crypto';
+  /** ISO 3166-1 alpha-2 country the account is held in. It decides the mark. */
+  country?: string | null;
   /** Fraction digits. Two unless the currency says otherwise. */
   scale?: number;
 }

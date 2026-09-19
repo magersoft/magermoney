@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { iconLoaded } from '@iconify/vue';
-import { CRYPTO_KNOWN, FIAT_FLAG, resolveCurrencyIcon } from '../src/index.js';
+import {
+  COUNTRY_CODES,
+  CRYPTO_KNOWN,
+  FIAT_FLAG,
+  loadCountryFlags,
+  resolveCurrencyIcon,
+} from '../src/index.js';
 
 /*
  * `src/index.ts` registers a subset of each Iconify collection rather than the
@@ -25,7 +31,24 @@ describe('registered icon subsets', () => {
     expect(missing).toEqual([]);
   });
 
-  it('does not register the rest of the collections', () => {
+  /*
+   * The country flags are the other half of the same promise, one chunk later:
+   * every country the picker can offer has to be a flag that is really there,
+   * or the form would list places whose mark falls back to a currency.
+   */
+  it('covers every offerable country once the flags are loaded', async () => {
     expect(iconLoaded('circle-flags:jm')).toBe(false);
+    await loadCountryFlags();
+
+    const missing = COUNTRY_CODES.filter(
+      (code) => !iconLoaded(`circle-flags:${code.toLowerCase()}`),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it('does not register the rest of the collection', async () => {
+    await loadCountryFlags();
+    /* A language, not a place: circle-flags carries both and we ship only places. */
+    expect(iconLoaded('circle-flags:eo')).toBe(false);
   });
 });

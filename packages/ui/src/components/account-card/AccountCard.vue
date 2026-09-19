@@ -90,11 +90,12 @@ const linkAttrs = computed(() => {
   >
     <span class="flex items-start justify-between gap-2">
       <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ props.account.name }}</span>
-      <!-- The mark is the currency; the code is announced by the foreign badge. -->
+      <!-- The mark is where the account is held; the code is announced by the foreign badge. -->
       <span aria-hidden="true" class="shrink-0">
         <CurrencyIcon
           :code="props.account.code"
           :kind="props.account.kind"
+          :country="props.account.country"
           :size="props.size === 'sm' ? 20 : 24"
         />
       </span>
