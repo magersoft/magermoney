@@ -36,10 +36,17 @@
   --color-surface-sunken: var(--mm-surface-sunken);
   --color-line-strong: var(--mm-line-strong);
   --color-positive: var(--mm-positive);
-  /* `*-fill` is the brand colour under a shape; the bare token is text. */
+  /*
+   * `*-fill` is the brand colour under a shape; the bare token is text. A fill
+   * is the same colour in both themes and carries its own `*-fg`, which is
+   * therefore dark in both — never `--color-ink`.
+   */
   --color-positive-fill: var(--mm-positive-fill);
+  --color-positive-fg: var(--mm-positive-fg);
   --color-accent-fill: var(--mm-accent-fill);
   --color-negative: var(--mm-negative);
+  --color-negative-fill: var(--mm-negative-fill);
+  --color-negative-fg: var(--mm-negative-fg);
   --color-warning: var(--mm-warning);
 
   /* `shadow-card` lifts a card in light; in dark the token is `none`. */

@@ -99,6 +99,22 @@ describe('palette contrast', () => {
   });
 
   /*
+   * The delta badge is the one place the palette is spent, and it is spent as a
+   * fill in both directions. A pastel fill has no dark counterpart — it is the
+   * same colour in both themes — so pairing it with `ink` would read at 1.6 in
+   * dark. That is what the `*-fg` roles exist for, and what this pins down.
+   */
+  it.each(['positive', 'negative'])('the %s badge fill clears AA in both themes', (role) => {
+    for (const theme of ['light', 'dark']) {
+      expect(ratio(`mm-${theme}-${role}-fg`, `mm-${theme}-${role}-fill`)).toBeGreaterThanOrEqual(
+        4.5,
+      );
+    }
+    // The same fill in both themes, so the badge cannot drift between them.
+    expect(token(`mm-light-${role}-fill`)).toEqual(token(`mm-dark-${role}-fill`));
+  });
+
+  /*
    * A chip is the one place the beige sunken surface carries type, and it is
    * darker than the card: on it the secondary roles fall to about 4.0, so the
    * rule a chip follows is that its words are ink and nothing else. The × is an
@@ -118,8 +134,10 @@ describe('palette contrast', () => {
   it('keeps the brand fills out of the text roles', () => {
     expect(token('mm-light-accent')).not.toEqual(token('mm-light-accent-fill'));
     expect(token('mm-light-positive')).not.toEqual(token('mm-light-positive-fill'));
+    expect(token('mm-light-negative')).not.toEqual(token('mm-light-negative-fill'));
     expect(ratio('mm-light-accent-fill', 'mm-light-bg')).toBeLessThan(4.5);
     expect(ratio('mm-light-positive-fill', 'mm-light-bg')).toBeLessThan(4.5);
+    expect(ratio('mm-light-negative-fill', 'mm-light-bg')).toBeLessThan(4.5);
   });
 });
 

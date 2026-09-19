@@ -91,7 +91,16 @@
   --mm-light-accent-fg: oklch(1 0 0);
   --mm-light-positive: oklch(0.54 0.104 171);
   --mm-light-positive-fill: oklch(0.799 0.156 171);
+  --mm-light-positive-fg: oklch(0.254 0.026 284);
   --mm-light-negative: oklch(0.576 0.19 25);
+  /*
+   * The delta badge is a filled pill in both directions, so the red needs the
+   * two roles the green already has. The fill is set at the green's lightness
+   * so a pair of badges reads as one object with two states, and the red that
+   * is text keeps its own darker tone.
+   */
+  --mm-light-negative-fill: oklch(0.8 0.1 25);
+  --mm-light-negative-fg: oklch(0.254 0.026 284);
   --mm-light-warning: oklch(0.558 0.116 75);
   /*
    * The account card's fill. The currency picks the hue and nothing else; the
@@ -127,8 +136,16 @@
   --mm-dark-accent-fill: oklch(0.574 0.18 262);
   --mm-dark-accent-fg: oklch(1 0 0);
   --mm-dark-positive: oklch(0.676 0.116 171);
+  /*
+   * The two badge fills are the same colour in both themes — a brand pastel
+   * does not have a dark counterpart — so their foreground is dark in both, and
+   * cannot be `--mm-dark-ink`.
+   */
   --mm-dark-positive-fill: oklch(0.799 0.156 171);
+  --mm-dark-positive-fg: oklch(0.254 0.026 284);
   --mm-dark-negative: oklch(0.71 0.17 25);
+  --mm-dark-negative-fill: oklch(0.8 0.1 25);
+  --mm-dark-negative-fg: oklch(0.254 0.026 284);
   --mm-dark-warning: oklch(0.696 0.13 75);
   /* Tinted the way the dark surfaces are: lighter than the canvas, never black. */
   --mm-dark-tint-l: 0.36;
@@ -149,7 +166,10 @@
   --mm-accent-fg: var(--mm-light-accent-fg);
   --mm-positive: var(--mm-light-positive);
   --mm-positive-fill: var(--mm-light-positive-fill);
+  --mm-positive-fg: var(--mm-light-positive-fg);
   --mm-negative: var(--mm-light-negative);
+  --mm-negative-fill: var(--mm-light-negative-fill);
+  --mm-negative-fg: var(--mm-light-negative-fg);
   --mm-warning: var(--mm-light-warning);
   --mm-tint-l: var(--mm-light-tint-l);
   --mm-tint-c: var(--mm-light-tint-c);
@@ -177,7 +197,10 @@
     --mm-accent-fg: var(--mm-dark-accent-fg);
     --mm-positive: var(--mm-dark-positive);
     --mm-positive-fill: var(--mm-dark-positive-fill);
+    --mm-positive-fg: var(--mm-dark-positive-fg);
     --mm-negative: var(--mm-dark-negative);
+    --mm-negative-fill: var(--mm-dark-negative-fill);
+    --mm-negative-fg: var(--mm-dark-negative-fg);
     --mm-warning: var(--mm-dark-warning);
     --mm-tint-l: var(--mm-dark-tint-l);
     --mm-tint-c: var(--mm-dark-tint-c);
@@ -201,7 +224,10 @@
   --mm-accent-fg: var(--mm-dark-accent-fg);
   --mm-positive: var(--mm-dark-positive);
   --mm-positive-fill: var(--mm-dark-positive-fill);
+  --mm-positive-fg: var(--mm-dark-positive-fg);
   --mm-negative: var(--mm-dark-negative);
+  --mm-negative-fill: var(--mm-dark-negative-fill);
+  --mm-negative-fg: var(--mm-dark-negative-fg);
   --mm-warning: var(--mm-dark-warning);
   --mm-tint-l: var(--mm-dark-tint-l);
   --mm-tint-c: var(--mm-dark-tint-c);

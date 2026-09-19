@@ -91,6 +91,14 @@ export { default as FilterChipRow } from './components/chip/FilterChipRow.vue';
 export { default as CategoryChip } from './components/chip/CategoryChip.vue';
 export type { FilterChipItem, CategoryChipItem } from './components/chip/types';
 
+/*
+ * The statistics tile: a month's income or spending with what it did against
+ * the month before. The badge is the only coloured thing on it.
+ */
+export { default as StatTile } from './components/stat-tile/StatTile.vue';
+export { formatDelta, deltaTone, deltaDirection } from './components/stat-tile/delta';
+export type { DeltaTone } from './components/stat-tile/delta';
+
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
   resolveCurrencyIcon,
