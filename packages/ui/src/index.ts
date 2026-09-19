@@ -54,6 +54,19 @@ export { default as ProgressRule } from './components/progress-rule/ProgressRule
 export { default as RouteLoading } from './components/async-fallback/RouteLoading.vue';
 export { default as RouteError } from './components/async-fallback/RouteError.vue';
 
+/* The signature lockup. Every amount on every screen is set through it. */
+export { default as AmountLockup } from './components/amount-lockup/AmountLockup.vue';
+export {
+  formatAmountLockup,
+  resolveCurrencySymbol,
+  plainAmount,
+} from './components/amount-lockup/format-amount';
+export type {
+  AmountLocale,
+  AmountLockupOptions,
+  AmountLockupParts,
+} from './components/amount-lockup/format-amount';
+
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
   resolveCurrencyIcon,
