@@ -1,9 +1,11 @@
 ---
 id: TASK-006
 title: 'Компонент: карточка счёта и стопка карточек'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 11:11'
+updated_date: '2026-09-19 11:38'
 labels:
   - design
   - ui
