@@ -77,3 +77,21 @@ ordinal: 750
 7. AppShell: подключить BottomNav, убрать старый таб-бар, пересчитать pb у main; App.vue связывает (+) с QuickActions.
 8. /animate на нажатие (+), /impeccable аудит, bun run test/lint/typecheck.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Реализация:
+- `shared/layout/nav.ts` — общий список разделов (ключ, путь, подпись, иконка Lucide, owns) и `isCurrent(item, path)`. Читают оба навигатора, поэтому раздел не может быть в одном и отсутствовать в другом.
+- `shared/layout/BottomNav.vue` — пилюля `md:hidden`: 64px высотой, radius 999px, `bg-surface-raised` + `shadow-card`, отступ 12px от safe-area. Четыре вкладки (иконка 20px над подписью 11px, цель 44px), (+) — диск 56px, поднят `-translate-y-4` (трансформом, а не отрицательным margin: ширина вкладок не едет, а нажатие масштабирует тот же диск). В светлой теме диск чернильный, в тёмной синий.
+- Активная вкладка красится `text-accent-foreground` (--mm-accent), а не брендовым `--primary`: direction.md запрещает брендовый синий как цвет текста. Верхняя навигация переведена на тот же токен, чтобы навигаторы не расходились.
+- `QuickActions` больше не владеет триггером: меню открывается через `v-model:open`, экземпляр один (в App.vue), шиты переживают переход между экранами. Свой FAB остался только на ≥md с прежним FAB_PATHS.
+- `@lucide/vue` добавлен в зависимости apps/web (был только у packages/ui). `subset.json` и `icons:build` не трогались — там только флаги и крипто-знаки.
+- Новых строк локализации не понадобилось: вкладки берут nav.*, (+) — quick.open ("Добавить" / "Add"), поэтому en.json и ru.json не менялись.
+
+Проверка:
+- `bun run test` 57 файлов / 189 тестов, `lint`, `typecheck`, `prettier --check` — зелёные.
+- Playwright на 390×844 против дев-сервера (сессия подделана, API отвечает ошибкой — проверялась обвязка, не данные): пилюля в светлой и тёмной темах; (+) на /plan открывает прежнее меню быстрых действий; кольцо фокуса на (+) с клавиатуры; последняя строка Настроек читается целиком над пилюлей.
+- Замеры `getComputedStyle`/`getBoundingClientRect`: (+) 56×56 и выступает на 12px над пилюлей, вкладка 44px, радиус пилюли 999px, тень на месте, `padding-bottom` навигации разбирается из env(safe-area-inset-bottom), `padding-bottom` main 112px, при `prefers-reduced-motion: reduce` `transition-property` у (+) становится none.
+- Десктоп (1440px) в Chrome: пилюли нет, верхняя навигация и плавающий FAB как раньше.
+<!-- SECTION:NOTES:END -->
