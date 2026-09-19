@@ -100,6 +100,15 @@ export { formatDelta, deltaTone, deltaDirection } from './components/stat-tile/d
 export type { DeltaTone } from './components/stat-tile/delta';
 
 /*
+ * The quick action: the field that is a row, the amounts worth one tap, and the
+ * sheet that puts the amount first — the reference's answer to how long it takes
+ * to write an expense down.
+ */
+export { default as FieldRow } from './components/field-row/FieldRow.vue';
+export { default as QuickAmountGrid } from './components/quick-action/QuickAmountGrid.vue';
+export { default as QuickActionSheet } from './components/quick-action/QuickActionSheet.vue';
+
+/*
  * The two most repeated rows in the app, and the card that groups them. Every
  * list of movements is made of the first; every budget screen, of the second.
  */
@@ -141,6 +150,7 @@ export {
   fadeUp,
   scaleIn,
   fade,
+  sheetUp,
   listStagger,
   withMotionPreference,
   EASE_OUT_QUART,
