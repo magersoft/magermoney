@@ -23,7 +23,7 @@ _Avoid_: Supported currencies
 ### Where the money is
 
 **Account**:
-A place that holds Money in exactly one currency: a bank account, a card, a deposit, a broker, a crypto wallet, or cash. Belongs to a bank (or wallet provider) and a country. May be flagged as a Spending account, and may be pinned to the Home screen. An Account holds one currency, so a wallet with several coins is several Accounts sharing a Provider.
+A place that holds Money in exactly one currency: a bank account, a card, a deposit, a broker, a crypto wallet, or cash. Belongs to a bank (or wallet provider) and a country. May be flagged as a Spending account, and may be pinned to the Home screen with the star on its own screen. An Account holds one currency, so a wallet with several coins is several Accounts sharing a Provider.
 
 **Provider**:
 The bank, broker, exchange or wallet an Account belongs to (the `bank` field). Accounts are shown grouped by Provider.
@@ -38,8 +38,8 @@ _Avoid_: Card, current account
 _Avoid_: Card (a card is a kind of Account), balance (that is the Account's amount)
 
 **Pinned account**:
-An Account the user chose to see on the Home screen. Only pinned Accounts are in the strip there; the rest are on the Accounts screen. Nothing is pinned by default, and nothing falls back to showing every Account.
-_Avoid_: Favourite, starred, primary (that is the Income source's word)
+An Account the user chose to see on the Home screen. Only pinned Accounts are in the strip there; the rest are on the Accounts screen. Nothing is pinned by default, and nothing falls back to showing every Account. Pinning is a star on the Account's own screen, next to its menu — never a field in the Account form.
+_Avoid_: Favourite, primary (that is the Income source's word). The star is the icon; «pinned» is still the word, in code and in prose.
 
 **Balance entry**:
 A dated statement "Account X held amount Y". An Account's current balance is its latest Balance entry; earlier entries are kept. Balances are declared, not computed from transactions. Only the newest entry of an Account may be edited or deleted; older ones are history. An entry made by a Transfer or an Inflow is changed only through that Transfer or Inflow.

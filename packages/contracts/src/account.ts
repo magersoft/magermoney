@@ -66,7 +66,12 @@ export const CreateAccountInputSchema = z
   .object({
     ...accountFields,
     isSpending: z.boolean().default(false),
-    isPinned: z.boolean().default(false),
+    /*
+     * Optional rather than defaulted, because nothing creating an account has
+     * an opinion about it: the Home screen is chosen with the star on the
+     * account's own screen, after it exists.
+     */
+    isPinned: z.boolean().optional(),
     openingBalance: OpeningBalanceSchema.optional(),
   })
   .refine(cardFieldsOnlyOnCards, CARD_MESSAGE)

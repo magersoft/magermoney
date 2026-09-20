@@ -19,8 +19,13 @@
  *
  * The account holds one currency, so no rate and no footnote: every figure on
  * this screen is already in the currency the account is kept in.
+ *
+ * Whether the account sits on the Home screen is answered here rather than in
+ * the form, next to the menu: it is a thing you change while looking at the
+ * account, not a setting you open an editor to reach.
  */
 import { computed, defineAsyncComponent, ref } from 'vue';
+import { StarIcon } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import type { BalanceEntryDto } from '@magermoney/contracts';
@@ -72,7 +77,11 @@ import {
 } from '../application/account-period';
 import { useAccount } from '../application/use-accounts';
 import { useAccountBalances } from '../application/use-account-balances';
-import { useArchiveAccount, useDeleteAccount } from '../application/use-account-mutations';
+import {
+  useArchiveAccount,
+  useDeleteAccount,
+  useUpdateAccount,
+} from '../application/use-account-mutations';
 import PeriodSheet from './PeriodSheet.vue';
 import RecordBalanceSheet from './RecordBalanceSheet.vue';
 
@@ -109,6 +118,7 @@ const currencyKind = computed(() => currency.value?.kind ?? 'fiat');
 const { entries, isLoading } = useAccountBalances(id);
 const { setArchived } = useArchiveAccount();
 const { remove } = useDeleteAccount();
+const { update, isPending: pinning } = useUpdateAccount();
 
 const balanceOpen = ref(false);
 const transferOpen = ref(false);
@@ -209,6 +219,14 @@ function openRecord(entry?: BalanceEntryDto) {
   editing.value = entry;
   balanceOpen.value = true;
 }
+async function togglePin() {
+  if (!account.value) return;
+  try {
+    await update(account.value.id, { isPinned: !account.value.isPinned });
+  } catch (e) {
+    toast(t(errorKeyFor(e, 'accounts.form.saveFailed')));
+  }
+}
 async function archive() {
   if (!account.value) return;
   try {
@@ -239,35 +257,70 @@ async function del() {
           {{ t(ACCOUNT_KIND_KEYS[account.kind]) }} · {{ account.bank }} · {{ account.country }}
         </p>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button
-            variant="ghost"
-            size="icon"
-            class="size-11"
-            :aria-label="t('accounts.detail.menu')"
-            data-testid="account-menu"
-          >
-            <span aria-hidden="true">⋯</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem @select="router.push(`/accounts/${account.id}/edit`)">
-            {{ t('accounts.detail.edit') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem @select="archive">
-            {{ account.archivedAt ? t('accounts.detail.unarchive') : t('accounts.detail.archive') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            @select="router.push({ path: '/transfers', query: { accountId: account.id } })"
-          >
-            {{ t('accounts.detail.transfers') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem class="text-destructive" @select="confirmDelete = true">
-            {{ t('accounts.detail.delete') }}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <!--
+        Both are furniture for the same title, so they sit as one group with no
+        gap between them: two 44px targets touching read as a toolbar, while the
+        row's `gap-3` keeps them off the name.
+      -->
+      <div class="flex shrink-0 items-center">
+        <!--
+          The star answers one question and answers it in place, so it is a
+          button of its own rather than a fifth line in the menu: a toggle
+          behind a menu cannot show its own state, and this one's whole job is
+          to. `aria-pressed` carries the state, the label names the action — the
+          way the rest of the screen's icon buttons are written.
+        -->
+        <Button
+          variant="ghost"
+          size="icon"
+          class="size-11"
+          :aria-pressed="account.isPinned"
+          :aria-label="account.isPinned ? t('accounts.detail.unpin') : t('accounts.detail.pin')"
+          :disabled="pinning"
+          data-testid="account-pin"
+          @click="togglePin"
+        >
+          <!--
+            Filled when it is on, hollow and quiet when it is not: the fill is
+            the state, and the outline never pretends to be a live one.
+          -->
+          <StarIcon
+            :size="20"
+            :class="account.isPinned ? 'fill-current' : 'text-muted-foreground'"
+          />
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="size-11"
+              :aria-label="t('accounts.detail.menu')"
+              data-testid="account-menu"
+            >
+              <span aria-hidden="true">⋯</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem @select="router.push(`/accounts/${account.id}/edit`)">
+              {{ t('accounts.detail.edit') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem @select="archive">
+              {{
+                account.archivedAt ? t('accounts.detail.unarchive') : t('accounts.detail.archive')
+              }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              @select="router.push({ path: '/transfers', query: { accountId: account.id } })"
+            >
+              {{ t('accounts.detail.transfers') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem class="text-destructive" @select="confirmDelete = true">
+              {{ t('accounts.detail.delete') }}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
 
     <!-- The same card the accounts stack deals, alone and at full size. -->

@@ -43,7 +43,6 @@ const form = reactive({
   currency: 'USD',
   kind: 'bank_account' as (typeof ACCOUNT_KINDS)[number],
   isSpending: false,
-  isPinned: false,
   cardType: 'debit' as (typeof CARD_TYPES)[number],
   cardNetwork: '',
   cardTier: '',
@@ -63,7 +62,6 @@ watch(
       currency: a.currency,
       kind: a.kind,
       isSpending: a.isSpending,
-      isPinned: a.isPinned,
       cardType: a.cardType ?? 'debit',
       cardNetwork: a.cardNetwork ?? '',
       cardTier: a.cardTier ?? '',
@@ -114,7 +112,6 @@ function payload() {
     currency: form.currency,
     kind: form.kind,
     isSpending: form.isSpending,
-    isPinned: form.isPinned,
     note: form.note.trim() || null,
   };
   const card = isCard.value
@@ -203,15 +200,15 @@ async function submit() {
         </select>
       </FormFieldRow>
 
+      <!--
+        Whether the account shows on Home is not here: it is the star on the
+        account's own screen. A switch buried in an editor would be a second
+        way to say the same thing, and the slower of the two.
+      -->
       <FormSwitchRow
         v-model="form.isSpending"
         :label="t('accounts.form.spending')"
         testid="form-spending"
-      />
-      <FormSwitchRow
-        v-model="form.isPinned"
-        :label="t('accounts.form.pinned')"
-        testid="form-pinned"
       />
     </div>
 

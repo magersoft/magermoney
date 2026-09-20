@@ -173,4 +173,40 @@ describe('AccountDetailPage', () => {
     expect(wrapper.get(`[data-testid="balance-entry-${OLDER}"]`).element.tagName).toBe('DIV');
     wrapper.unmount();
   });
+
+  /*
+   * The star is the whole way an account gets onto Home, so it has to be both
+   * the switch and the readout: one tap patches the account, and the button
+   * says which way it now stands.
+   */
+  it('puts the account on Home with the star, and says so afterwards', async () => {
+    const account = acc(ACCOUNT_ID, 'USD');
+    const fetch = vi.fn(
+      apiOf((path, init) => {
+        if (path === `/accounts/${ACCOUNT_ID}` && init?.method === 'PATCH') {
+          const patch = JSON.parse(String(init.body)) as { isPinned: boolean };
+          Object.assign(account, patch);
+          return json(account);
+        }
+        if (path === '/accounts') return json([account]);
+        if (path.startsWith(`/accounts/${ACCOUNT_ID}/balances`)) return json([]);
+        return undefined;
+      }),
+    );
+    const { wrapper } = await mountAt(AccountDetailPage, `/accounts/${ACCOUNT_ID}`, fetch);
+    await flushPromises();
+
+    const star = wrapper.get('[data-testid="account-pin"]');
+    expect(star.attributes('aria-pressed')).toBe('false');
+    expect(star.attributes('aria-label')).toBe('Показывать на главной');
+
+    await star.trigger('click');
+    await flushPromises();
+
+    const patch = fetch.mock.calls.find(([, init]) => init?.method === 'PATCH');
+    expect(JSON.parse(String(patch?.[1]?.body))).toEqual({ isPinned: true });
+    expect(star.attributes('aria-pressed')).toBe('true');
+    expect(star.attributes('aria-label')).toBe('Убрать с главной');
+    wrapper.unmount();
+  });
 });

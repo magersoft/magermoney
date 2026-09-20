@@ -23,7 +23,7 @@ export const toNewAccount = (input: Omit<CreateAccountInput, 'openingBalance'>):
   kind: input.kind,
   cardType: input.kind === 'card' ? (input.cardType ?? null) : null,
   isSpending: input.isSpending,
-  isPinned: input.isPinned,
+  isPinned: input.isPinned ?? false,
   cardLast4: input.kind === 'card' ? (input.cardLast4 ?? null) : null,
   cardNetwork: input.kind === 'card' ? (input.cardNetwork ?? null) : null,
   cardTier: input.kind === 'card' ? (input.cardTier ?? null) : null,

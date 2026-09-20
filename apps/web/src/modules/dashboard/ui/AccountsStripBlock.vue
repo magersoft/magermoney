@@ -8,10 +8,10 @@
  * Only the accounts the user pinned are here. Everything else lives on the
  * Accounts screen: a home that grew a card per account stopped being an
  * overview. Nothing pinned is not the same as nothing owned, so the two cases
- * say different things — with no accounts at all the strip is the add tile and
- * a line saying what it is for, and with accounts but no pin it says where the
- * switch is instead. Neither one silently falls back to showing everything:
- * that would undo the choice and make the switch look broken.
+ * say different things. With no accounts at all the strip is the add tile and
+ * a line saying what it is for; with accounts but no pin it points at the star
+ * on an account's own screen instead. Neither one silently falls back to
+ * showing everything: that would undo the choice and make the star look broken.
  */
 import { computed, markRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
