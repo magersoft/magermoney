@@ -67,4 +67,59 @@ describe('BottomNav', () => {
     await plus.trigger('click');
     expect(nav.emitted('quick')).toHaveLength(1);
   });
+
+  /*
+   * The pill is glass: content scrolls under it and shows through, so it reads
+   * as a layer over the screen rather than the point the screen is cut off at.
+   * The material itself is one utility from the design system — the panel's
+   * legibility is proved once there, against every backdrop the app can put
+   * behind it, and this bar is not allowed a second opinion about it.
+   */
+  it('cuts the pill from the glass the design system defines', async () => {
+    const nav = await mountNav();
+    const pill = nav.get('[data-testid="nav-pill"]');
+    expect(pill.classes()).toContain('glass-panel');
+    // Nothing here paints its own surface: no fill, no edge, no shadow of its own.
+    expect(pill.classes().filter((c) => /^(bg-|shadow-|border-|backdrop-)/.test(c))).toEqual([]);
+  });
+
+  /*
+   * Over glass the accent is read against whatever is scrolling past, so it
+   * cannot mark the current tab on its own. The capsule is opaque, which puts
+   * the one coloured thing in the bar back on a surface the palette proves.
+   */
+  it('marks the current tab with an opaque capsule rather than a tint alone', async () => {
+    const nav = await mountNav('/plan');
+    const current = nav.get('a[aria-current="page"]');
+    expect(current.classes()).toContain('bg-surface-raised');
+    expect(current.classes()).toContain('text-accent-foreground');
+    for (const tab of nav.findAll('a').filter((a) => a.attributes('aria-current') !== 'page')) {
+      expect(tab.classes()).not.toContain('bg-surface-raised');
+      expect(tab.classes()).toContain('text-ink');
+    }
+  });
+
+  /*
+   * The accent reads at 2:1 against the glass over a saturated card, which is
+   * under the 3:1 WCAG 1.4.11 asks of a focus indicator — so this is the one
+   * bar in the app that does not take `outline-ring`. `currentColor`, drawn
+   * inset, is whatever the control's own mark is set in, and that is by
+   * construction the colour already proven against the surface it sits on.
+   */
+  it('draws focus in the one colour proven against whatever the control sits on', async () => {
+    const nav = await mountNav('/plan');
+    for (const control of [...nav.findAll('a'), nav.get('[data-testid="quick-add"]')]) {
+      expect(control.classes()).toContain('focus-visible:outline-current');
+      expect(control.classes()).not.toContain('focus-visible:outline-ring');
+      // Inset, so the ring lands on that surface rather than beside it.
+      expect(control.classes()).toContain('-outline-offset-2');
+    }
+  });
+
+  /* The "+" is a disc, not a pane of glass: it stays solid and stays separate. */
+  it('leaves the "+" solid', async () => {
+    const plus = (await mountNav()).get('[data-testid="quick-add"]');
+    expect(plus.classes()).not.toContain('glass-panel');
+    expect(plus.classes()).toContain('bg-ink');
+  });
 });

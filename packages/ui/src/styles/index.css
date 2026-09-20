@@ -164,6 +164,49 @@
 }
 
 /*
+ * The glass the phone's navigation is cut from — and, later, the header.
+ *
+ * Four things make a pane read as a pane rather than as a lighter rectangle:
+ * a fill you can see through, a blur and a saturation lift that bend what is
+ * behind it, a lit edge, and a shadow it casts onto the content sliding
+ * underneath. All four arrive as tokens, so a screen asks for the material and
+ * never for its values — and the alpha, which is really a contrast decision,
+ * stays in one place where `test/glass-panel.test.ts` can hold it to AA
+ * against every backdrop the app can produce.
+ *
+ * Two different things can take the glass away, and they need the same answer
+ * for different reasons. A browser with no `backdrop-filter` would render the
+ * fill's alpha over unblurred content — translucent, but no longer a material.
+ * A reader who has asked for less transparency has a working blur and does not
+ * want it. Both land on the opaque token, so the bar stays legible either way.
+ *
+ * The filter is switched off as a neutral *value*, never `none`: `backdrop-filter`
+ * takes a list, and the keyword drops the whole list rather than the blur alone.
+ * The neutral value is written into the tokens rather than into a second
+ * `backdrop-filter` declaration, because a declaration would be minified —
+ * lightningcss rewrites `blur(0px) saturate(100%)` to `blur() saturate()`,
+ * which relies on the optional-argument form surviving every engine. A custom
+ * property is a token stream and is emitted exactly as written.
+ */
+@utility glass-panel {
+  background-color: var(--mm-glass-fill);
+  border: 1px solid var(--mm-glass-edge);
+  box-shadow: var(--mm-glass-shadow);
+  -webkit-backdrop-filter: blur(var(--mm-glass-blur)) saturate(var(--mm-glass-saturate));
+  backdrop-filter: blur(var(--mm-glass-blur)) saturate(var(--mm-glass-saturate));
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background-color: var(--mm-glass-opaque);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--mm-glass-opaque);
+    --mm-glass-blur: 0px;
+    --mm-glass-saturate: 100%;
+  }
+}
+
+/*
  * The donut's arcs and the dots that label them, on the same terms: the chart
  * hands in a hue through `--mm-segment-hue` (see `components/donut/segments.ts`)
  * and the theme owns the rest, so one arc separates from its surface at 3:1 in

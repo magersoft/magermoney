@@ -133,6 +133,33 @@
   --mm-light-card-edge: transparent;
 
   /*
+   * The glass the phone's navigation is cut from (reference slides 10 and 14).
+   *
+   * A translucent panel has no background of its own: its labels are read
+   * against the fill composited over whatever happens to be scrolling past.
+   * So the alpha is not a taste decision — it is the contrast decision, and it
+   * is made in `test/glass-panel.test.ts`, which composites this fill over the
+   * two extremes the app can put under the bar (the darkest and the lightest
+   * fill an account card can take, anywhere on the wheel).
+   *
+   * 0.62 is comfortably above the 0.50 that proof needs here, and comfortably
+   * below the ~0.97 the quieter text roles would need — which is the whole
+   * story of this material: glass can carry ink and nothing dimmer, so the
+   * tabs are ink and the current one is marked by an opaque capsule.
+   */
+  --mm-light-glass-fill: oklch(1 0 0 / 0.62);
+  --mm-light-glass-opaque: oklch(1 0 0);
+  /* The lit top edge that says the panel is a pane and not a hole. */
+  --mm-light-glass-edge: oklch(1 0 0 / 0.7);
+  /*
+   * Deeper than `shadow-card`: this one is cast onto moving content rather
+   * than onto the canvas, and it is the second thing (after the blur) saying
+   * the bar is above the screen instead of part of it.
+   */
+  --mm-light-glass-shadow:
+    0 1px 2px oklch(0.254 0.026 284 / 0.06), 0 12px 32px oklch(0.254 0.026 284 / 0.14);
+
+  /*
    * Dark surfaces separate by lightness, not by borders, so the shadow is
    * dropped entirely — a shadow on a dark canvas reads as dirt. Foregrounds are
    * measured from `surface-raised`, the lightest surface they can land on.
@@ -189,6 +216,24 @@
   --mm-dark-card-edge: oklch(0.96 0.004 265 / 0.16);
 
   /*
+   * The same pane, over a dark room. It needs more body than the light one —
+   * 0.72 against a proven floor of 0.65 — because the thing most likely to
+   * pass under it here is an account card, and a card is the same saturated
+   * colour in both themes while the panel behind it is not.
+   */
+  --mm-dark-glass-fill: oklch(0.322 0.018 285 / 0.72);
+  --mm-dark-glass-opaque: oklch(0.322 0.018 285);
+  --mm-dark-glass-edge: oklch(0.96 0.004 265 / 0.14);
+  /*
+   * The dark theme drops `shadow-card` because a shadow on an unlit canvas
+   * reads as dirt. This one is not on the canvas: it falls on the content
+   * sliding underneath, which is the one place a dark screen still has a
+   * behind and an in-front to separate.
+   */
+  --mm-dark-glass-shadow:
+    0 1px 2px oklch(0.12 0.02 285 / 0.4), 0 12px 32px oklch(0.1 0.02 285 / 0.55);
+
+  /*
    * The sheen on a card's surface (`card-gloss` in `index.css`). One set of
    * values, not two: a card's fill no longer changes with the theme, so the
    * light falling on it does not either.
@@ -202,6 +247,15 @@
   --mm-gloss-sweep: 0.06;
   --mm-gloss-bloom: 0.05;
   --mm-gloss-shade: 0.06;
+
+  /*
+   * How the pane bends what is behind it. One set of values, not two: the
+   * optics of a piece of glass do not change with the room's lighting, only
+   * the tint does. The saturation lift is what keeps a colourful card looking
+   * like a colour through the blur rather than like grey weather.
+   */
+  --mm-glass-blur: 20px;
+  --mm-glass-saturate: 180%;
 
   /* Light is the default. */
   --mm-bg: var(--mm-light-bg);
@@ -227,6 +281,10 @@
   --mm-shadow-card: var(--mm-light-shadow-card);
   --mm-shadow-stack: var(--mm-light-shadow-stack);
   --mm-card-edge: var(--mm-light-card-edge);
+  --mm-glass-fill: var(--mm-light-glass-fill);
+  --mm-glass-opaque: var(--mm-light-glass-opaque);
+  --mm-glass-edge: var(--mm-light-glass-edge);
+  --mm-glass-shadow: var(--mm-light-glass-shadow);
 
   --mm-duration-fast: 150ms;
   --mm-duration-base: 240ms;
@@ -260,6 +318,10 @@
     --mm-shadow-card: var(--mm-dark-shadow-card);
     --mm-shadow-stack: var(--mm-dark-shadow-stack);
     --mm-card-edge: var(--mm-dark-card-edge);
+    --mm-glass-fill: var(--mm-dark-glass-fill);
+    --mm-glass-opaque: var(--mm-dark-glass-opaque);
+    --mm-glass-edge: var(--mm-dark-glass-edge);
+    --mm-glass-shadow: var(--mm-dark-glass-shadow);
   }
 }
 
@@ -289,6 +351,10 @@
   --mm-shadow-card: var(--mm-dark-shadow-card);
   --mm-shadow-stack: var(--mm-dark-shadow-stack);
   --mm-card-edge: var(--mm-dark-card-edge);
+  --mm-glass-fill: var(--mm-dark-glass-fill);
+  --mm-glass-opaque: var(--mm-dark-glass-opaque);
+  --mm-glass-edge: var(--mm-dark-glass-edge);
+  --mm-glass-shadow: var(--mm-dark-glass-shadow);
 }
 
 :root[data-theme='light'] {
