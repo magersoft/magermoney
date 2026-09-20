@@ -38,7 +38,7 @@ _Avoid_: Card, current account
 _Avoid_: Card (a card is a kind of Account), balance (that is the Account's amount)
 
 **Pinned account**:
-An Account the user chose to see on the Home screen. Only pinned Accounts are in the strip there; the rest are on the Accounts screen. Nothing is pinned by default, and nothing falls back to showing every Account. Pinning is a star on the Account's own screen, next to its menu — never a field in the Account form.
+An Account the user chose to see on the Home screen. Once anything is pinned, the strip there is exactly the pinned Accounts and the rest are on the Accounts screen. Nothing is pinned by default: until the first star, the strip stands the first three Accounts in and says under itself that they are a stand-in. It never falls back to showing every Account. Pinning is a star on the Account's own screen, next to its menu — never a field in the Account form.
 _Avoid_: Favourite, primary (that is the Income source's word). The star is the icon; «pinned» is still the word, in code and in prose.
 
 **Balance entry**:

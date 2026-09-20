@@ -5,19 +5,24 @@
  * grouped and sorted them — the strip is the same order the Accounts screen
  * reads in, flattened.
  *
- * Only the accounts the user pinned are here. Everything else lives on the
- * Accounts screen: a home that grew a card per account stopped being an
- * overview. Nothing pinned is not the same as nothing owned, so the two cases
- * say different things. With no accounts at all the strip is the add tile and
- * a line saying what it is for; with accounts but no pin it points at the star
- * on an account's own screen instead. Neither one silently falls back to
- * showing everything: that would undo the choice and make the star look broken.
+ * Once the user has starred accounts, those are the strip and the rest live on
+ * the Accounts screen: a home that grew a card per account stopped being an
+ * overview. Until then the strip shows the first few instead of nothing —
+ * arriving at a blank row is a worse first impression than a pick the user did
+ * not make, and the line under it says the pick is theirs to change. The
+ * fallback is only ever a stand-in, so it ends the moment one star is on.
+ *
+ * With no accounts at all there is nothing to stand in for, and the strip is
+ * the add tile and a line saying what it is for.
  */
 import { computed, markRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 import { AccountCardStrip, type AccountCardItem, type AmountLocale } from '@magermoney/ui';
 import type { CapitalSummary } from '@/modules/accounts';
+
+/** How many accounts stand in while none is starred: a strip you take in at a glance. */
+const FALLBACK = 3;
 
 const { capital } = defineProps<{ capital: CapitalSummary; baseCode: string }>();
 
@@ -27,19 +32,20 @@ const amountLocale = computed(() => locale.value as AmountLocale);
 const link = markRaw(RouterLink);
 
 const all = computed(() => capital.groups.flatMap((g) => g.accounts));
+const pinned = computed(() => all.value.filter((a) => a.isPinned));
+/** The user's pick when there is one, the first few standing in when there is not. */
+const standingIn = computed(() => pinned.value.length === 0 && all.value.length > 0);
 const accounts = computed<AccountCardItem[]>(() =>
-  all.value
-    .filter((a) => a.isPinned)
-    .map((a) => ({
-      id: a.id,
-      name: a.name,
-      href: `/accounts/${a.id}`,
-      amount: a.balance.toString(),
-      code: a.balance.currency.code,
-      kind: a.balance.currency.kind,
-      country: a.country,
-      scale: a.balance.currency.scale,
-    })),
+  (standingIn.value ? all.value.slice(0, FALLBACK) : pinned.value).map((a) => ({
+    id: a.id,
+    name: a.name,
+    href: `/accounts/${a.id}`,
+    amount: a.balance.toString(),
+    code: a.balance.currency.code,
+    kind: a.balance.currency.kind,
+    country: a.country,
+    scale: a.balance.currency.scale,
+  })),
 );
 </script>
 
@@ -67,20 +73,7 @@ const accounts = computed<AccountCardItem[]>(() =>
       {{ t('dashboard.accounts.empty') }}
     </p>
 
-    <!--
-      Accounts, but none of them here. The add tile would be the wrong offer:
-      the account already exists, it is the switch that is off.
-    -->
-    <p
-      v-else-if="accounts.length === 0"
-      class="text-sm text-muted-foreground"
-      data-testid="dash-accounts-unpinned"
-    >
-      {{ t('dashboard.accounts.unpinned') }}
-    </p>
-
     <AccountCardStrip
-      v-if="accounts.length > 0 || all.length === 0"
       :accounts="accounts"
       :base-code="baseCode"
       :locale="amountLocale"
@@ -88,5 +81,13 @@ const accounts = computed<AccountCardItem[]>(() =>
       add-href="/accounts/new"
       :add-label="t('dashboard.accounts.add')"
     />
+
+    <!--
+      Under the cards rather than above them: the strip is the answer, and this
+      only says the answer is a stand-in. It goes the moment a star is on.
+    -->
+    <p v-if="standingIn" class="text-sm text-muted-foreground" data-testid="dash-accounts-unpinned">
+      {{ t('dashboard.accounts.unpinned') }}
+    </p>
   </section>
 </template>

@@ -232,20 +232,57 @@ describe('DashboardPage', () => {
     expect(strip.text()).not.toContain('Savings');
   });
 
-  it('asks for a pin rather than showing an empty rail when nothing is pinned', async () => {
+  /*
+   * A blank rail is a worse arrival than a pick nobody made, so the first few
+   * stand in — and the strip says so, rather than passing them off as chosen.
+   */
+  it('stands the first three accounts in while none is starred, and says they are a stand-in', async () => {
+    const more = ['Savings', 'Cash', 'Broker', 'Vault'].map((name, i) => ({
+      ...account,
+      id: `4444444${i}-4444-4444-8444-444444444444`,
+      name,
+      sortOrder: i + 1,
+      isPinned: false,
+    }));
     const w = mountPage({
       sources: [sourceDto],
       inflows: [inflowDto],
       expenses: [],
-      accounts: [{ ...account, isPinned: false }],
+      accounts: [{ ...account, isPinned: false }, ...more],
     });
     await flushPromises();
+    const strip = w.get('[data-slot="account-card-strip"]');
+    const names = strip.findAll('[data-slot="account-card"]').map((c) => c.text());
+    expect(names).toHaveLength(3);
+    expect(names[0]).toContain('Card');
+    expect(names[2]).toContain('Cash');
+    expect(strip.text()).not.toContain('Broker');
+    // Nothing is starred, so no card wears the mark a chosen one would.
+    expect(strip.find('[data-slot="account-card-pinned"]').exists()).toBe(false);
     expect(w.get('[data-testid="dash-accounts-unpinned"]').text()).toBe(
       ru.dashboard.accounts.unpinned,
     );
-    expect(w.find('[data-slot="account-card"]').exists()).toBe(false);
-    // The way out is the Accounts screen, where the pinning happens.
+    // The add tile is still the end of the rail, the way it is with a pick.
+    expect(strip.get('[data-slot="add-account-tile"]').attributes('href')).toBe('/accounts/new');
     expect(w.get('[data-testid="dash-accounts-all"]').attributes('href')).toBe('/accounts');
+  });
+
+  /* One star ends the stand-in outright: the rail is the pick, however short. */
+  it('drops the stand-in the moment a single account is starred', async () => {
+    const w = mountPage({
+      sources: [sourceDto],
+      inflows: [inflowDto],
+      expenses: [],
+      accounts: [
+        { ...account, isPinned: false, name: 'Savings' },
+        { ...account, id: '44444444-4444-4444-8444-444444444444', name: 'Cash', sortOrder: 1 },
+      ],
+    });
+    await flushPromises();
+    const strip = w.get('[data-slot="account-card-strip"]');
+    expect(strip.findAll('[data-slot="account-card"]')).toHaveLength(1);
+    expect(strip.text()).toContain('Cash');
+    expect(w.find('[data-testid="dash-accounts-unpinned"]').exists()).toBe(false);
   });
 
   it('sets what came in and what the month costs against the month before', async () => {
