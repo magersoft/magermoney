@@ -1,9 +1,11 @@
 ---
 id: TASK-018
 title: 'Избранные счета: показывать на главной только отмеченные'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-19 13:03'
+updated_date: '2026-09-20 07:54'
 labels: []
 dependencies:
   - TASK-012
