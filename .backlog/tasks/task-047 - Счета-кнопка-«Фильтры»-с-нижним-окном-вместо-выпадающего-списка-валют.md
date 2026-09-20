@@ -4,8 +4,14 @@ title: 'Счета: кнопка «Фильтры» с нижним окном �
 status: To Do
 assignee: []
 created_date: '2026-09-20 07:35'
+updated_date: '2026-09-20 17:15'
 labels: []
-dependencies: []
+dependencies:
+  - TASK-050
+references:
+  - packages/ui/src/components/currency-select/CurrencySelect.vue
+  - apps/web/src/modules/currencies/ui/AppCurrencySelect.vue
+  - packages/ui/src/components/country-select/CountrySelect.vue
 type: feature
 ordinal: 45000
 ---
@@ -27,3 +33,24 @@ ordinal: 45000
 - [ ] #7 Поля «тип карты» и «срок действия» скрыты или неактивны, пока данных для них нет в счетах, и это указано в задаче-зависимости
 - [ ] #8 Тесты покрывают применение, сброс и мультивыбор
 <!-- AC:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: claude
+created: 2026-09-20 17:15
+---
+Обновление контекста (20.09.2026): выпадающий список «Все валюты» на экране «Счета» — последний нативный `<select>` в приложении, остальные места уже переведены на общий компонент выбора валюты из TASK-050.
+
+Что есть готового к моменту старта задачи:
+
+- `packages/ui/src/components/currency-select/CurrencySelect.vue` — автокомплит с поиском по названию (ru/en), коду и символу, флагами, группами «фиат / крипта» и блоком «частые» сверху (`frequent`). Два варианта: `row` (поле формы) и `compact` (узкий триггер рядом с суммой). Есть `disabledCodes` + `disabledLabel`, `hint`, `error`. Ранжирование и группировка — чистые функции в `filter.ts`.
+- `apps/web/src/modules/currencies/ui/AppCurrencySelect.vue` — обёртка, которая подставляет подключённые валюты и все строки перевода. Для фильтра, скорее всего, нужен именно он, но со списком валют самих счетов, а не всех подключённых.
+- `packages/ui/src/components/country-select/CountrySelect.vue` — то же самое для страны (AC #3), уже с флагами и поиском.
+- `apps/web/test/fixtures/currency-picker.ts` — хелпер `pickCurrency(picker, code)` для тестов (AC #8).
+
+Чего не хватает под AC #3: оба компонента одиночного выбора — `v-model` это одна строка. Для мультивыбора и чипов нужно либо добавить в `CurrencySelect` режим `multiple` (reka-ui Combobox это умеет), либо собрать чипы вокруг него в самом окне фильтров. Решение стоит принять до начала работы: первый путь дороже, но избавляет от второго похожего контрола в дизайн-системе.
+
+Ещё одно: список валют для фильтра — это валюты счетов человека плюс «Все», а не каталог из 234 позиций; группы «фиат / крипта» на такой короткий список, скорее всего, лишние.
+---
+<!-- COMMENTS:END -->
