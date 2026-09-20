@@ -15,6 +15,18 @@ export const ManualRateInputSchema = z
   .object({ base: CurrencyCodeSchema, date: IsoDateSchema, value: DecimalString })
   .openapi('ManualRateInput');
 export type ManualRateInput = z.infer<typeof ManualRateInputSchema>;
+/**
+ * What a user-triggered refresh did. `refreshed: false` is a success: the rates
+ * on record were still fresh, so no provider was asked.
+ */
+export const RefreshRatesResultSchema = z
+  .object({
+    stored: z.number().int().min(0),
+    refreshed: z.boolean(),
+    refreshedAt: z.string().datetime(),
+  })
+  .openapi('RefreshRatesResult');
+export type RefreshRatesResult = z.infer<typeof RefreshRatesResultSchema>;
 export const DeleteManualRateQuerySchema = z.object({
   base: CurrencyCodeSchema,
   date: IsoDateSchema,

@@ -1,12 +1,21 @@
 import type { CurrencyDto } from '@magermoney/contracts';
-import { DEFAULT_CURRENCIES } from '@magermoney/domain';
+import { DEFAULT_CURRENCIES, SystemClock, type Clock } from '@magermoney/domain';
 import type { RateRepository, RateRow } from '../application/rate-repository.js';
 export class MemoryRateRepository implements RateRepository {
-  constructor(public rows: RateRow[] = []) {}
+  /** Mirrors the `refreshed_at` column: when a provider last wrote here. */
+  public lastApiRefresh: Date | null = null;
+  constructor(
+    public rows: RateRow[] = [],
+    private readonly clock: Clock = new SystemClock(),
+  ) {}
+  async lastApiRefreshAt() {
+    return this.lastApiRefresh;
+  }
   async latestOnOrBefore(date: string, userId: string) {
     return this.rows.filter((r) => r.date <= date && (r.userId === null || r.userId === userId));
   }
   async upsertMany(rows: Omit<RateRow, 'quote'>[]) {
+    if (rows.some((r) => r.source === 'api')) this.lastApiRefresh = this.clock.now();
     let n = 0;
     for (const r of rows) {
       const i = this.rows.findIndex(

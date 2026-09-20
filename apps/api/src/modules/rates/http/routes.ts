@@ -6,6 +6,7 @@ import {
   ManualRateInputSchema,
   RateDtoSchema,
   RatesQuerySchema,
+  RefreshRatesResultSchema,
 } from '@magermoney/contracts';
 import type { AppDeps, AppEnv } from '../../../app.js';
 import { requireUser } from '../../../shared/auth/middleware.js';
@@ -14,6 +15,7 @@ import { getRates } from '../application/get-rates.js';
 import { listCurrencies } from '../application/list-currencies.js';
 import { removeManualRate } from '../application/remove-manual-rate.js';
 import { setManualRate } from '../application/set-manual-rate.js';
+import { refreshRates } from '../application/refresh-rates.js';
 
 const errors = {
   401: { description: 'Unauthorized', content: { 'application/json': { schema: ErrorDtoSchema } } },
@@ -28,6 +30,35 @@ export function ratesRoutes(deps: AppDeps) {
   r.use('/currencies', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
   r.use('/rates', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
   r.use('/rates/manual', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
+  r.use('/rates/refresh', requireUser({ jwks: deps.jwks, secret: deps.jwtSecret }));
+
+  r.openapi(
+    createRoute({
+      method: 'post',
+      path: '/rates/refresh',
+      security: [{ bearer: [] }],
+      responses: {
+        200: {
+          description: 'Refreshed, or already fresh',
+          content: { 'application/json': { schema: RefreshRatesResultSchema } },
+        },
+        502: {
+          description: 'Provider failed',
+          content: { 'application/json': { schema: ErrorDtoSchema } },
+        },
+        ...errors,
+      },
+    }),
+    async (c) => {
+      const res = await refreshRates(deps.rates, deps.rateProviders, deps.registry, deps.clock)();
+      return res.match(
+        (v) => c.json(v, 200),
+        // The provider is the thing that failed, not the request: 502, and the
+        // client shows "could not reach the rates service", not a form error.
+        (e) => c.json({ code: e.code, message: e.message }, 502),
+      );
+    },
+  );
 
   r.openapi(
     createRoute({
