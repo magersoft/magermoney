@@ -220,19 +220,16 @@ describe('CurrenciesPage, the display switch', () => {
   it('counts what is in the switch out of the maximum', async () => {
     const w = mountPage(async () => json([]), [...CONNECTED, cur('COP')], ['USD', 'EUR']);
     await flushPromises();
-    expect(w.get('[data-testid="switch-count"]').text()).toBe('2 of 3');
+    expect(w.get('[data-testid="switch-count"]').text()).toBe('2 of 5');
     w.unmount();
   });
 
-  it('greys out the rest at three, and says what to do about it', async () => {
-    const w = mountPage(
-      async () => json([]),
-      [...CONNECTED, cur('COP'), cur('KPW')],
-      ['USD', 'EUR', 'COP'],
-    );
+  it('greys out the rest once the switch is full, and says what to do about it', async () => {
+    const full = ['USD', 'EUR', 'COP', 'GEL', 'KZT'];
+    const w = mountPage(async () => json([]), [...full.map((c) => cur(c)), cur('KPW')], full);
     await flushPromises();
 
-    expect(w.get('[data-testid="switch-count"]').text()).toBe('3 of 3');
+    expect(w.get('[data-testid="switch-count"]').text()).toBe('5 of 5');
     expect(w.get('[data-testid="switch-toggle-KPW"]').attributes('disabled')).toBeDefined();
     expect(w.text()).toContain('Take one off to add another.');
     w.unmount();
@@ -276,6 +273,15 @@ describe('CurrenciesPage, the display switch', () => {
     await w.get(`[data-testid="switch-drag-${first}"]`).trigger('keydown', { key: 'ArrowUp' });
     await flushPromises();
     expect(calls.length).toBe(before);
+    w.unmount();
+  });
+
+  it('says in words which currency the star means, on that row alone', async () => {
+    const w = mountPage(async () => json([]), CONNECTED, ['USD', 'EUR']);
+    await flushPromises();
+
+    expect(w.get('[data-testid="main-note-USD"]').text()).toBe('main currency');
+    expect(w.find('[data-testid="main-note-EUR"]').exists()).toBe(false);
     w.unmount();
   });
 

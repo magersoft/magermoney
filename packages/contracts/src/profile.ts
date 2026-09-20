@@ -4,11 +4,12 @@ import { CurrencyCodeSchema } from './common.js';
 /**
  * How many currencies the display switch can offer.
  *
- * Three is where the control stops fitting: on a 375px phone it shares the top
- * bar with the wordmark and the theme button, and it is also the point past
- * which "tap the one you want" becomes reading a list.
+ * Five fits because past two the switch stops showing codes and identifies the
+ * currencies by their marks, keeping the code only on the one that is on — so
+ * a segment costs the width of a flag. Past five, "tap the one you want" turns
+ * into reading a list, and the header is not where anyone wants to read one.
  */
-export const MAX_REPORTING_CURRENCIES = 3;
+export const MAX_REPORTING_CURRENCIES = 5;
 export const ProfileDtoSchema = z
   .object({
     id: z.uuid(),

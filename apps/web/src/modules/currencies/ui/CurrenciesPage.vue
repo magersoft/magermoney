@@ -19,6 +19,7 @@
  * amount from reading as a zero later (ADR 0006).
  */
 import { computed, ref } from 'vue';
+import { StarIcon } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { MAX_REPORTING_CURRENCIES } from '@magermoney/contracts';
 import { Button, CurrencyIcon, CurrencySelect, Skeleton, useToast } from '@magermoney/ui';
@@ -257,30 +258,47 @@ const {
             </button>
 
             <CurrencyIcon :code="c.code" :kind="c.kind" :size="24" />
-            <span class="min-w-0 flex-1 truncate text-sm">{{ c.name }}</span>
+            <span class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm">{{ c.name }}</span>
+              <!-- The star is the control; this is the word for what it did. -->
+              <span
+                v-if="c.code === switchList.defaultCurrency"
+                class="text-muted-foreground text-xs"
+                :data-testid="`main-note-${c.code}`"
+                >{{ t('currencies.main') }}</span
+              >
+            </span>
 
-            <!-- Which one every new form starts from. A radio, because it is one of these. -->
+            <!--
+              Which currency every new form starts from. Still a radio
+              underneath — it is one of these, and a screen reader should hear
+              that — wearing the star this app already uses for the account it
+              keeps on the Home screen. Filled is on; the outline never pretends
+              to be.
+            -->
             <label
-              class="flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 px-1 text-xs"
+              class="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md"
               :title="t('currencies.makeMain', { code: c.code })"
             >
               <input
                 type="radio"
                 name="main-currency"
-                class="accent-primary outline-ring size-4 outline-offset-2 focus-visible:outline-2"
+                class="peer sr-only"
                 :value="c.code"
                 :checked="c.code === switchList.defaultCurrency"
+                :aria-label="t('currencies.makeMain', { code: c.code })"
                 :data-testid="`switch-main-${c.code}`"
                 @change="applySwitch(makeMain(switchList, c.code))"
               />
-              <span
+              <StarIcon
+                :size="20"
+                class="outline-ring rounded-sm outline-offset-4 transition-colors peer-focus-visible:outline-2"
                 :class="
                   c.code === switchList.defaultCurrency
-                    ? 'text-foreground'
-                    : 'text-muted-foreground'
+                    ? 'text-primary fill-current'
+                    : 'text-muted-foreground/60'
                 "
-                >{{ t('currencies.main') }}</span
-              >
+              />
             </label>
 
             <label class="flex min-h-11 shrink-0 cursor-pointer items-center px-1">

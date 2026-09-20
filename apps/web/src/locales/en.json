@@ -540,7 +540,7 @@
     "switchCount": "{n} of {max}",
     "switchFull": "Take one off to add another.",
     "lastInSwitch": "Keep at least one.",
-    "main": "main",
+    "main": "main currency",
     "makeMain": "Make {code} the main currency",
     "reorder": "Reorder {code}",
     "reorderHint": "Drag the handle to change the order, or use the up and down arrow keys.",

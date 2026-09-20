@@ -62,12 +62,14 @@ describe('/me', () => {
     expect(res.status).toBe(400);
     expect((await res.json()).code).toBe('UNKNOWN_CURRENCY');
   });
-  it('refuses a fourth currency in the switch, and says which limit', async () => {
+  it('refuses one currency past the limit, and says which limit', async () => {
     const { app } = setup();
     const res = await app.request('/me', {
       method: 'PATCH',
       headers: await auth(),
-      body: JSON.stringify({ reportingCurrencies: ['USD', 'EUR', 'RUB', 'KZT'] }),
+      body: JSON.stringify({
+        reportingCurrencies: ['USD', 'EUR', 'RUB', 'KZT', 'GEL', 'COP'],
+      }),
     });
     expect(res.status).toBe(400);
     // The schema catches it first; either way the request does not land.

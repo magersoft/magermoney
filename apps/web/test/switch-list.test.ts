@@ -17,8 +17,8 @@ describe('addToSwitch', () => {
     expect(addToSwitch(list(['USD']), 'EUR')).toEqual(list(['USD', 'EUR']));
   });
 
-  it('refuses a fourth, rather than sending one the API will bounce', () => {
-    expect(addToSwitch(list(['USD', 'EUR', 'RUB']), 'KZT')).toBeNull();
+  it('refuses one past the limit, rather than sending one the API will bounce', () => {
+    expect(addToSwitch(list(['USD', 'EUR', 'RUB', 'KZT', 'GEL']), 'COP')).toBeNull();
   });
 
   it('refuses one that is already there', () => {
