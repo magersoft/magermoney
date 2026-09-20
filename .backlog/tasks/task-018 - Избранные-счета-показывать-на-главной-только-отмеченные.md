@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-19 13:03'
-updated_date: '2026-09-20 07:54'
+updated_date: '2026-09-20 07:55'
 labels: []
 dependencies:
   - TASK-012
@@ -34,3 +34,20 @@ ordinal: 16000
 - [ ] #8 Строки локализации добавлены в en.json и ru.json
 - [ ] #9 Тесты покрывают: контракты (значение по умолчанию и частичное обновление), обновление флага через API, фильтрацию полосы на главной и пустой случай
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Naming: the flag is a Pinned account — column is_pinned, field isPinned, mirroring is_spending end to end. New vocabulary entry in CONTEXT.md.
+
+Zero-pinned ruling: no soft fallback to all accounts. A fallback would silently undo the user's choice and make the flag look broken. With accounts but none pinned the strip shows a hint that says where to pin one and links to Accounts; with no accounts at all the existing 'no accounts yet' line stays.
+
+1. Migration supabase/migrations/20260920000012_accounts_is_pinned.sql: alter table accounts add column is_pinned boolean not null default false. Existing rows get false (nothing pinned until the user says so).
+2. packages/contracts/src/account.ts: isPinned in AccountDtoSchema and in accountFields (z.boolean()); create defaults it to false like isSpending; partial update leaves it absent. Test both in phase2.test.ts.
+3. packages/domain/src/account.ts: isPinned on Account (the strip reads the domain object through CapitalSummary).
+4. apps/api: AccountRow/NewAccount, toNewAccount, pg toColumns + SELECT, import mapper. Tests: PATCH toggles the flag and it comes back in the DTO.
+5. apps/web: mappers toAccount, AccountFormPage switch (label 'this account shows on Home'), AccountRow marks a pinned account in the Accounts list.
+6. apps/web dashboard AccountsStripBlock: filter the flattened capital groups by isPinned, keep the order; hint block for the none-pinned case.
+7. Locale strings in en.json and ru.json (form label, accounts list marker, dashboard hint), humanized.
+8. Tests: contracts, api accounts, web AccountFormPage/AccountsPage/DashboardPage (filtering + empty case). Run bun run test, lint, typecheck.
+<!-- SECTION:PLAN:END -->
