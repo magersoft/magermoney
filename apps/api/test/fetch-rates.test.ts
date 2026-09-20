@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ok, err } from 'neverthrow';
-import { CurrencyRegistry, FixedClock } from '@magermoney/domain';
+import { FixedClock } from '@magermoney/domain';
 import { fetchRates } from '../src/modules/rates/application/fetch-rates.js';
 import { ProviderError } from '../src/modules/rates/application/rate-provider.js';
 import { MemoryRateRepository } from '../src/modules/rates/infrastructure/memory-rate-repository.js';
@@ -10,6 +10,7 @@ import { testDeps } from './helpers/deps.js';
 const clock = new FixedClock(new Date('2026-09-11T06:15:00Z'));
 const fiat = {
   kind: 'fiat' as const,
+  source: 'open-er-api' as const,
   fetch: async () =>
     ok([
       { base: 'EUR', value: '1.16' },
@@ -18,13 +19,14 @@ const fiat = {
 };
 const broken = {
   kind: 'crypto' as const,
+  source: 'coingecko' as const,
   fetch: async () => err(new ProviderError('coingecko', 'boom')),
 };
 
 describe('fetchRates', () => {
   it("stores today's api rates for the requested kind only", async () => {
     const repo = new MemoryRateRepository();
-    const res = await fetchRates(repo, [fiat, broken], CurrencyRegistry.default(), clock)('fiat');
+    const res = await fetchRates(repo, [fiat, broken], clock)('fiat');
     expect(res._unsafeUnwrap()).toEqual({ stored: 2 });
     expect(repo.rows).toEqual([
       { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api', userId: null },
@@ -39,16 +41,9 @@ describe('fetchRates', () => {
     ]);
   });
   it('propagates provider failure', async () => {
-    expect(
-      (
-        await fetchRates(
-          new MemoryRateRepository(),
-          [broken],
-          CurrencyRegistry.default(),
-          clock,
-        )('crypto')
-      ).isErr(),
-    ).toBe(true);
+    expect((await fetchRates(new MemoryRateRepository(), [broken], clock)('crypto')).isErr()).toBe(
+      true,
+    );
   });
   it('GET /jobs/rates runs the job for Vercel Cron with the cron secret', async () => {
     const app = createApp(testDeps({ rateProviders: [fiat], clock }));

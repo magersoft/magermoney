@@ -11,7 +11,7 @@ import {
   type IncomeSource,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const c = (code: string) => reg.get(code)._unsafeUnwrap();
 
 const source = (over: Partial<IncomeSource> = {}): IncomeSource => ({

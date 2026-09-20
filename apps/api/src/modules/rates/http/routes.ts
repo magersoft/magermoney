@@ -50,7 +50,7 @@ export function ratesRoutes(deps: AppDeps) {
       },
     }),
     async (c) => {
-      const res = await refreshRates(deps.rates, deps.rateProviders, deps.registry, deps.clock)();
+      const res = await refreshRates(deps.rates, deps.rateProviders, deps.clock)();
       return res.match(
         (v) => c.json(v, 200),
         // The provider is the thing that failed, not the request: 502, and the

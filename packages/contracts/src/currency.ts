@@ -9,6 +9,12 @@ export const CurrencyDtoSchema = z
     nameRu: z.string().nullable(),
     nameEn: z.string().nullable(),
     icon: z.string().nullable(),
+    /**
+     * Which service quotes this currency, or `null` when none does. The screen
+     * says so and offers a manual rate rather than converting against a rate
+     * that is really a zero (ADR 0006).
+     */
+    rateSource: z.enum(['open-er-api', 'coingecko']).nullable(),
   })
   .openapi('Currency');
 export type CurrencyDto = z.infer<typeof CurrencyDtoSchema>;

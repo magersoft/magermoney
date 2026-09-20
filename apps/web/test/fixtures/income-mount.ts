@@ -17,6 +17,7 @@ export const cur = (code: string) => ({
   nameRu: null,
   nameEn: null,
   icon: null,
+  rateSource: 'open-er-api',
 });
 export const profile = {
   id: 'u',

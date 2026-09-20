@@ -1,10 +1,5 @@
 import { err, ok, type Result } from 'neverthrow';
-import {
-  Decimal,
-  UnknownCurrencyError,
-  type Clock,
-  type CurrencyRegistry,
-} from '@magermoney/domain';
+import { Decimal, UnknownCurrencyError, type Clock, type CurrencyLookup } from '@magermoney/domain';
 import type { IncomeSourceDto, IncomeSourceInput } from '@magermoney/contracts';
 import type { Repos } from '../../../app.js';
 import type { UnitOfWork } from '../../../shared/db/unit-of-work.js';
@@ -16,7 +11,7 @@ export interface IncomeSourceDeps {
   /** The primary flag moves between rows, so create and update run inside one transaction. */
   uow: UnitOfWork<Repos>;
   repos: Repos;
-  registry: CurrencyRegistry;
+  registry: CurrencyLookup;
   clock: Clock;
 }
 export type IncomeSourceFailure =
@@ -33,7 +28,7 @@ const isFraction = (raw: string) => {
  */
 export function validateSource(
   data: NewIncomeSource,
-  registry: CurrencyRegistry,
+  registry: CurrencyLookup,
 ): Result<NewIncomeSource, ValidationError | UnknownCurrencyError> {
   if (!registry.has(data.currency)) return err(new UnknownCurrencyError(data.currency));
   if (new Decimal(data.grossAmount).isNegative())

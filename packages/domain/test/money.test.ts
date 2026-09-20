@@ -6,7 +6,7 @@ import {
   Money,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const USD = reg.get('USD')._unsafeUnwrap();
 const EUR = reg.get('EUR')._unsafeUnwrap();
 const BTC = reg.get('BTC')._unsafeUnwrap();

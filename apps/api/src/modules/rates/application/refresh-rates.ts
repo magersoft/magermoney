@@ -1,5 +1,5 @@
 import { err, ok, type Result } from 'neverthrow';
-import type { Clock, CurrencyRegistry } from '@magermoney/domain';
+import type { Clock } from '@magermoney/domain';
 import type { RateRepository } from './rate-repository.js';
 import type { ProviderError, RateProvider } from './rate-provider.js';
 import { fetchRates } from './fetch-rates.js';
@@ -29,7 +29,6 @@ export const refreshRates =
   (
     repo: RateRepository,
     providers: RateProvider[],
-    registry: CurrencyRegistry,
     clock: Clock,
     intervalMs: number = REFRESH_INTERVAL_MS,
   ) =>
@@ -38,7 +37,7 @@ export const refreshRates =
     if (last && clock.now().getTime() - last.getTime() < intervalMs)
       return ok({ stored: 0, refreshed: false, refreshedAt: last.toISOString() });
 
-    const fetch = fetchRates(repo, providers, registry, clock);
+    const fetch = fetchRates(repo, providers, clock);
     let stored = 0;
     for (const kind of ['fiat', 'crypto'] as const) {
       const res = await fetch(kind);

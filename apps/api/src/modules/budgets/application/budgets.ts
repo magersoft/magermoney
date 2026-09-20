@@ -1,5 +1,5 @@
 import { err, ok, type Result } from 'neverthrow';
-import { UnknownCurrencyError, type Clock, type CurrencyRegistry } from '@magermoney/domain';
+import { UnknownCurrencyError, type Clock, type CurrencyLookup } from '@magermoney/domain';
 import type { BudgetDto, BudgetInput, UpdateBudgetInput } from '@magermoney/contracts';
 import type { Repos } from '../../../app.js';
 import { NotFoundError, ValidationError } from '../../../shared/errors/http.js';
@@ -8,7 +8,7 @@ import { toBudgetDto } from './dto.js';
 
 export interface BudgetDeps {
   repos: Pick<Repos, 'budgets'>;
-  registry: CurrencyRegistry;
+  registry: CurrencyLookup;
   clock: Clock;
 }
 export type BudgetFailure = NotFoundError | ValidationError | UnknownCurrencyError;

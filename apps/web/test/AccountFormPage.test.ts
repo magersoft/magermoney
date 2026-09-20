@@ -10,8 +10,26 @@ import AccountFormPage from '../src/modules/accounts/ui/AccountFormPage.vue';
 import AppShell from '../src/shared/layout/AppShell.vue';
 
 const currencies = [
-  { code: 'USD', kind: 'fiat', scale: 2, symbol: null, nameRu: null, nameEn: null, icon: null },
-  { code: 'EUR', kind: 'fiat', scale: 2, symbol: null, nameRu: null, nameEn: null, icon: null },
+  {
+    code: 'USD',
+    kind: 'fiat',
+    scale: 2,
+    symbol: null,
+    nameRu: null,
+    nameEn: null,
+    icon: null,
+    rateSource: 'open-er-api',
+  },
+  {
+    code: 'EUR',
+    kind: 'fiat',
+    scale: 2,
+    symbol: null,
+    nameRu: null,
+    nameEn: null,
+    icon: null,
+    rateSource: 'open-er-api',
+  },
 ];
 const created = {
   id: '11111111-1111-4111-8111-111111111111',

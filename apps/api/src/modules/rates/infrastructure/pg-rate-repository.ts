@@ -1,6 +1,7 @@
 import type { CurrencyDto } from '@magermoney/contracts';
 import type { Sql } from '../../../shared/db/client.js';
 import type { RateRepository, RateRow } from '../application/rate-repository.js';
+import type { QuotableCurrency, RateSource } from '../application/rate-provider.js';
 export class PgRateRepository implements RateRepository {
   constructor(private readonly sql: Sql) {}
   async latestOnOrBefore(date: string, userId: string): Promise<RateRow[]> {
@@ -22,9 +23,14 @@ export class PgRateRepository implements RateRepository {
     return row?.at ?? null;
   }
   async listCurrencies(): Promise<CurrencyDto[]> {
-    return this.sql<
-      CurrencyDto[]
-    >`select code, kind, scale, symbol, name_ru, name_en, icon from currencies order by kind, code`;
+    return this.sql<CurrencyDto[]>`
+      select code, kind, scale, symbol, name_ru, name_en, icon, rate_source
+      from currencies order by kind, code`;
+  }
+  async quotable(source: RateSource): Promise<QuotableCurrency[]> {
+    return this.sql<QuotableCurrency[]>`
+      select code, coingecko_id as provider_id from currencies
+      where rate_source = ${source} order by code`;
   }
   async deleteManual(userId: string, base: string, date: string) {
     const res = await this

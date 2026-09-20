@@ -12,7 +12,7 @@ import {
   type IncomeSource,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const USD = reg.get('USD')._unsafeUnwrap();
 const cents = fc
   .integer({ min: 0, max: 10_000_000_00 })

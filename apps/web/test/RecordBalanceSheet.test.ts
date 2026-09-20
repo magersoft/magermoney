@@ -88,6 +88,7 @@ describe('RecordBalanceSheet', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           },
         ]);
       if (init?.method === 'POST')
@@ -154,6 +155,7 @@ describe('RecordBalanceSheet', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           },
         ]);
       if (init?.method === 'POST')
@@ -215,6 +217,7 @@ describe('RecordBalanceSheet', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           },
         ]);
       if (init?.method === 'DELETE')
@@ -245,6 +248,7 @@ describe('RecordBalanceSheet', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           },
         ]);
       if (init?.method === 'DELETE') return errorJson('entry_not_latest', 'Not latest', 409);
@@ -274,6 +278,7 @@ describe('RecordBalanceSheet', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           },
         ]);
       if (init?.method === 'PATCH') return errorJson('recorded_before_previous', 'Too early', 400);
@@ -304,6 +309,7 @@ describe('RecordBalanceSheet', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           },
         ]);
       if (init?.method === 'DELETE')
@@ -335,6 +341,7 @@ describe('RecordBalanceSheet', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           },
         ]);
       // What `fetch` rejects with when the device is offline.

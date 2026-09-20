@@ -81,13 +81,13 @@ describe('balance writes under concurrency', () => {
     const editDeps = {
       uow: ((fn) => pgUnitOfWork(sql)((r) => fn(gatedUpdate(r, gate)))) as UnitOfWork<Repos>,
       repos: gatedUpdate(repos, gate),
-      registry: CurrencyRegistry.default(),
+      registry: CurrencyRegistry.sample(),
       clock: new SystemClock(),
     };
     const recordDeps = {
       uow: pgUnitOfWork(sql),
       repos,
-      registry: CurrencyRegistry.default(),
+      registry: CurrencyRegistry.sample(),
       clock: new SystemClock(),
     };
 

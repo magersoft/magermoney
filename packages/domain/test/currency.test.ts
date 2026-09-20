@@ -3,7 +3,7 @@ import { CurrencyRegistry, UnknownCurrencyError } from '../src/index.js';
 
 describe('CurrencyRegistry', () => {
   it('knows the default fiat and crypto currencies', () => {
-    const r = CurrencyRegistry.default();
+    const r = CurrencyRegistry.sample();
     expect(r.get('USD')._unsafeUnwrap()).toEqual({ code: 'USD', kind: 'fiat', scale: 2 });
     expect(r.get('BTC')._unsafeUnwrap()).toEqual({
       code: 'BTC',
@@ -15,7 +15,7 @@ describe('CurrencyRegistry', () => {
   });
 
   it('fails with UnknownCurrencyError for an unknown code', () => {
-    const err = CurrencyRegistry.default().get('XYZ')._unsafeUnwrapErr();
+    const err = CurrencyRegistry.sample().get('XYZ')._unsafeUnwrapErr();
     expect(err).toBeInstanceOf(UnknownCurrencyError);
     expect(err.code).toBe('UNKNOWN_CURRENCY');
     expect(err.message).toContain('XYZ');

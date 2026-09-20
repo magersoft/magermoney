@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { CurrencyRegistry, Money, applyTransfer, deriveTransfer } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const USD = reg.get('USD')._unsafeUnwrap();
 const EUR = reg.get('EUR')._unsafeUnwrap();
 const cents = fc

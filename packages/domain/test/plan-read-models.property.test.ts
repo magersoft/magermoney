@@ -11,7 +11,7 @@ import {
   type IncomeSource,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const table = new RateTable(
   '2026-09-17',
   [

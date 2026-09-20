@@ -30,8 +30,26 @@ const profile = {
   onboardingCompletedAt: null,
 };
 const currencies = [
-  { code: 'USD', kind: 'fiat', scale: 2, symbol: null, nameRu: null, nameEn: null, icon: null },
-  { code: 'EUR', kind: 'fiat', scale: 2, symbol: null, nameRu: null, nameEn: null, icon: null },
+  {
+    code: 'USD',
+    kind: 'fiat',
+    scale: 2,
+    symbol: null,
+    nameRu: null,
+    nameEn: null,
+    icon: null,
+    rateSource: 'open-er-api',
+  },
+  {
+    code: 'EUR',
+    kind: 'fiat',
+    scale: 2,
+    symbol: null,
+    nameRu: null,
+    nameEn: null,
+    icon: null,
+    rateSource: 'open-er-api',
+  },
 ];
 const rates = [{ base: 'EUR', quote: 'USD', value: '1.2', date: '2026-09-17', source: 'api' }];
 const account = {

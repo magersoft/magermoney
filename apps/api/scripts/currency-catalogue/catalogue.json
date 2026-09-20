@@ -1,0 +1,2342 @@
+[
+  {
+    "code": "AED",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Дирхам ОАЭ",
+    "nameEn": "United Arab Emirates Dirham",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "AFN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Афгани",
+    "nameEn": "Afghan Afghani",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ALL",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Албанский лек",
+    "nameEn": "Albanian Lek",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "AMD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Армянский драм",
+    "nameEn": "Armenian Dram",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ANG",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Нидерландский антильский гульден",
+    "nameEn": "Netherlands Antillean Guilder",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "AOA",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Ангольская кванза",
+    "nameEn": "Angolan Kwanza",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ARS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Аргентинский песо",
+    "nameEn": "Argentine Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "AUD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Австралийский доллар",
+    "nameEn": "Australian Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "AWG",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Арубанский флорин",
+    "nameEn": "Aruban Florin",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "AZN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Азербайджанский манат",
+    "nameEn": "Azerbaijani Manat",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BAM",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Конвертируемая марка Боснии и Герцеговины",
+    "nameEn": "Bosnia-Herzegovina Convertible Mark",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BBD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Барбадосский доллар",
+    "nameEn": "Barbadian Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BDT",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Бангладешская така",
+    "nameEn": "Bangladeshi Taka",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BGN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Болгарский лев",
+    "nameEn": "Bulgarian Lev",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BHD",
+    "kind": "fiat",
+    "scale": 3,
+    "symbol": null,
+    "nameRu": "Бахрейнский динар",
+    "nameEn": "Bahraini Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BIF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Бурундийский франк",
+    "nameEn": "Burundian Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BMD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Бермудский доллар",
+    "nameEn": "Bermudan Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BND",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Брунейский доллар",
+    "nameEn": "Brunei Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BOB",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Боливийский боливиано",
+    "nameEn": "Bolivian Boliviano",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BRL",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Бразильский реал",
+    "nameEn": "Brazilian Real",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BSD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Багамский доллар",
+    "nameEn": "Bahamian Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BTN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Бутанский нгултрум",
+    "nameEn": "Bhutanese Ngultrum",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BWP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Ботсванская пула",
+    "nameEn": "Botswanan Pula",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BYN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Белорусский рубль",
+    "nameEn": "Belarusian Ruble",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BZD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Белизский доллар",
+    "nameEn": "Belize Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CAD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Канадский доллар",
+    "nameEn": "Canadian Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CDF",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Конголезский франк",
+    "nameEn": "Congolese Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CHF",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Швейцарский франк",
+    "nameEn": "Swiss Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CLP",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Чилийский песо",
+    "nameEn": "Chilean Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CNY",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Китайский юань",
+    "nameEn": "Chinese Yuan",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "COP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Колумбийский песо",
+    "nameEn": "Colombian Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CRC",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Костариканский колон",
+    "nameEn": "Costa Rican Colón",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CUP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Кубинский песо",
+    "nameEn": "Cuban Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CVE",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Эскудо Кабо-Верде",
+    "nameEn": "Cape Verdean Escudo",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "CZK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Чешская крона",
+    "nameEn": "Czech Koruna",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "DJF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Франк Джибути",
+    "nameEn": "Djiboutian Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "DKK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Датская крона",
+    "nameEn": "Danish Krone",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "DOP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Доминиканский песо",
+    "nameEn": "Dominican Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "DZD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Алжирский динар",
+    "nameEn": "Algerian Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "EGP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Египетский фунт",
+    "nameEn": "Egyptian Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ERN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Эритрейская накфа",
+    "nameEn": "Eritrean Nakfa",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ETB",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Эфиопский быр",
+    "nameEn": "Ethiopian Birr",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "EUR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Евро",
+    "nameEn": "Euro",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "FJD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Доллар Фиджи",
+    "nameEn": "Fijian Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "FKP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Фунт Фолклендских островов",
+    "nameEn": "Falkland Islands Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GBP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Британский фунт стерлингов",
+    "nameEn": "British Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GEL",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Грузинский лари",
+    "nameEn": "Georgian Lari",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GHS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Ганский седи",
+    "nameEn": "Ghanaian Cedi",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GIP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Гибралтарский фунт",
+    "nameEn": "Gibraltar Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GMD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Гамбийский даласи",
+    "nameEn": "Gambian Dalasi",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GNF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Гвинейский франк",
+    "nameEn": "Guinean Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GTQ",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Гватемальский кетсаль",
+    "nameEn": "Guatemalan Quetzal",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "GYD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Гайанский доллар",
+    "nameEn": "Guyanese Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "HKD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Гонконгский доллар",
+    "nameEn": "Hong Kong Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "HNL",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Гондурасская лемпира",
+    "nameEn": "Honduran Lempira",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "HTG",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Гаитянский гурд",
+    "nameEn": "Haitian Gourde",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "HUF",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Венгерский форинт",
+    "nameEn": "Hungarian Forint",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "IDR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Индонезийская рупия",
+    "nameEn": "Indonesian Rupiah",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ILS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Новый израильский шекель",
+    "nameEn": "Israeli New Shekel",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "INR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Индийская рупия",
+    "nameEn": "Indian Rupee",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "IQD",
+    "kind": "fiat",
+    "scale": 3,
+    "symbol": null,
+    "nameRu": "Иракский динар",
+    "nameEn": "Iraqi Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "IRR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Иранский риал",
+    "nameEn": "Iranian Rial",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ISK",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Исландская крона",
+    "nameEn": "Icelandic Króna",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "JMD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Ямайский доллар",
+    "nameEn": "Jamaican Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "JOD",
+    "kind": "fiat",
+    "scale": 3,
+    "symbol": null,
+    "nameRu": "Иорданский динар",
+    "nameEn": "Jordanian Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "JPY",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Японская иена",
+    "nameEn": "Japanese Yen",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KES",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Кенийский шиллинг",
+    "nameEn": "Kenyan Shilling",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KGS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Киргизский сом",
+    "nameEn": "Kyrgyz Som",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KHR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Камбоджийский риель",
+    "nameEn": "Cambodian Riel",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KMF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Коморский франк",
+    "nameEn": "Comorian Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KPW",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Северокорейская вона",
+    "nameEn": "North Korean Won",
+    "rateSource": null,
+    "coingeckoId": null
+  },
+  {
+    "code": "KRW",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Южнокорейская вона",
+    "nameEn": "South Korean Won",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KWD",
+    "kind": "fiat",
+    "scale": 3,
+    "symbol": null,
+    "nameRu": "Кувейтский динар",
+    "nameEn": "Kuwaiti Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KYD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Доллар Островов Кайман",
+    "nameEn": "Cayman Islands Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "KZT",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Казахский тенге",
+    "nameEn": "Kazakhstani Tenge",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "LAK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Лаосский кип",
+    "nameEn": "Laotian Kip",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "LBP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Ливанский фунт",
+    "nameEn": "Lebanese Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "LKR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Шри-ланкийская рупия",
+    "nameEn": "Sri Lankan Rupee",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "LRD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Либерийский доллар",
+    "nameEn": "Liberian Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "LSL",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Лоти",
+    "nameEn": "Lesotho Loti",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "LYD",
+    "kind": "fiat",
+    "scale": 3,
+    "symbol": null,
+    "nameRu": "Ливийский динар",
+    "nameEn": "Libyan Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MAD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Марокканский дирхам",
+    "nameEn": "Moroccan Dirham",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MDL",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Молдавский лей",
+    "nameEn": "Moldovan Leu",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MGA",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Малагасийский ариари",
+    "nameEn": "Malagasy Ariary",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MKD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Македонский денар",
+    "nameEn": "Macedonian Denar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MMK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Мьянманский кьят",
+    "nameEn": "Myanmar Kyat",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MNT",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Монгольский тугрик",
+    "nameEn": "Mongolian Tugrik",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MOP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Патака Макао",
+    "nameEn": "Macanese Pataca",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MRU",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Мавританская угия",
+    "nameEn": "Mauritanian Ouguiya",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MUR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Маврикийская рупия",
+    "nameEn": "Mauritian Rupee",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MVR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Мальдивская руфия",
+    "nameEn": "Maldivian Rufiyaa",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MWK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Малавийская квача",
+    "nameEn": "Malawian Kwacha",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MXN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Мексиканский песо",
+    "nameEn": "Mexican Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MYR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Малайзийский ринггит",
+    "nameEn": "Malaysian Ringgit",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "MZN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Мозамбикский метикал",
+    "nameEn": "Mozambican Metical",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "NAD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Доллар Намибии",
+    "nameEn": "Namibian Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "NGN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Нигерийская найра",
+    "nameEn": "Nigerian Naira",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "NIO",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Никарагуанская кордоба",
+    "nameEn": "Nicaraguan Córdoba",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "NOK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Норвежская крона",
+    "nameEn": "Norwegian Krone",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "NPR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Непальская рупия",
+    "nameEn": "Nepalese Rupee",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "NZD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Новозеландский доллар",
+    "nameEn": "New Zealand Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "OMR",
+    "kind": "fiat",
+    "scale": 3,
+    "symbol": null,
+    "nameRu": "Оманский риал",
+    "nameEn": "Omani Rial",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "PAB",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Панамский бальбоа",
+    "nameEn": "Panamanian Balboa",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "PEN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Перуанский соль",
+    "nameEn": "Peruvian Sol",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "PGK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Кина Папуа – Новой Гвинеи",
+    "nameEn": "Papua New Guinean Kina",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "PHP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Филиппинский песо",
+    "nameEn": "Philippine Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "PKR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Пакистанская рупия",
+    "nameEn": "Pakistani Rupee",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "PLN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Польский злотый",
+    "nameEn": "Polish Zloty",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "PYG",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Парагвайский гуарани",
+    "nameEn": "Paraguayan Guarani",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "QAR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Катарский риал",
+    "nameEn": "Qatari Riyal",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "RON",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Румынский лей",
+    "nameEn": "Romanian Leu",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "RSD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Сербский динар",
+    "nameEn": "Serbian Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "RUB",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Российский рубль",
+    "nameEn": "Russian Ruble",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "RWF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Франк Руанды",
+    "nameEn": "Rwandan Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SAR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Саудовский риял",
+    "nameEn": "Saudi Riyal",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SBD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Доллар Соломоновых Островов",
+    "nameEn": "Solomon Islands Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SCR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Сейшельская рупия",
+    "nameEn": "Seychellois Rupee",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SDG",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Суданский фунт",
+    "nameEn": "Sudanese Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SEK",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Шведская крона",
+    "nameEn": "Swedish Krona",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SGD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Сингапурский доллар",
+    "nameEn": "Singapore Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SHP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Фунт острова Святой Елены",
+    "nameEn": "St. Helena Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SLE",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Леоне",
+    "nameEn": "Sierra Leonean Leone",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SOS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Сомалийский шиллинг",
+    "nameEn": "Somali Shilling",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SRD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Суринамский доллар",
+    "nameEn": "Surinamese Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SSP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Южносуданский фунт",
+    "nameEn": "South Sudanese Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "STN",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Добра Сан-Томе и Принсипи",
+    "nameEn": "São Tomé & Príncipe Dobra",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SVC",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Сальвадорский колон",
+    "nameEn": "Salvadoran Colón",
+    "rateSource": null,
+    "coingeckoId": null
+  },
+  {
+    "code": "SYP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Сирийский фунт",
+    "nameEn": "Syrian Pound",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "SZL",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Свазилендский лилангени",
+    "nameEn": "Swazi Lilangeni",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "THB",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Таиландский бат",
+    "nameEn": "Thai Baht",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TJS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Таджикский сомони",
+    "nameEn": "Tajikistani Somoni",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TMT",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Новый туркменский манат",
+    "nameEn": "Turkmenistani Manat",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TND",
+    "kind": "fiat",
+    "scale": 3,
+    "symbol": null,
+    "nameRu": "Тунисский динар",
+    "nameEn": "Tunisian Dinar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TOP",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Тонганская паанга",
+    "nameEn": "Tongan Paʻanga",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TRY",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Турецкая лира",
+    "nameEn": "Turkish Lira",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TTD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Доллар Тринидада и Тобаго",
+    "nameEn": "Trinidad & Tobago Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TWD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Новый тайваньский доллар",
+    "nameEn": "New Taiwan Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "TZS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Танзанийский шиллинг",
+    "nameEn": "Tanzanian Shilling",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "UAH",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Украинская гривна",
+    "nameEn": "Ukrainian Hryvnia",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "UGX",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Угандийский шиллинг",
+    "nameEn": "Ugandan Shilling",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "USD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Доллар США",
+    "nameEn": "US Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "UYU",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Уругвайский песо",
+    "nameEn": "Uruguayan Peso",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "UZS",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Узбекский сум",
+    "nameEn": "Uzbekistani Som",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "VED",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Bolívar Soberano",
+    "nameEn": "Bolívar Soberano",
+    "rateSource": null,
+    "coingeckoId": null
+  },
+  {
+    "code": "VES",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Венесуэльский боливар",
+    "nameEn": "Venezuelan Bolívar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "VND",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Вьетнамский донг",
+    "nameEn": "Vietnamese Dong",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "VUV",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Вату Вануату",
+    "nameEn": "Vanuatu Vatu",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "WST",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Самоанская тала",
+    "nameEn": "Samoan Tala",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "XAF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Франк КФА BEAC",
+    "nameEn": "Central African CFA Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "XCD",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Восточно-карибский доллар",
+    "nameEn": "East Caribbean Dollar",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "XCG",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Карибский гульден",
+    "nameEn": "Caribbean guilder",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "XOF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Франк КФА ВСЕАО",
+    "nameEn": "West African CFA Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "XPF",
+    "kind": "fiat",
+    "scale": 0,
+    "symbol": null,
+    "nameRu": "Французский тихоокеанский франк",
+    "nameEn": "CFP Franc",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "YER",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Йеменский риал",
+    "nameEn": "Yemeni Rial",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ZAR",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Южноафриканский рэнд",
+    "nameEn": "South African Rand",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ZMW",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Замбийская квача",
+    "nameEn": "Zambian Kwacha",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "ZWG",
+    "kind": "fiat",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Зимбабвийский золотой",
+    "nameEn": "Zimbabwean Gold",
+    "rateSource": "open-er-api",
+    "coingeckoId": null
+  },
+  {
+    "code": "BTC",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": "₿",
+    "nameRu": "Биткоин",
+    "nameEn": "Bitcoin",
+    "rateSource": "coingecko",
+    "coingeckoId": "bitcoin"
+  },
+  {
+    "code": "ETH",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": "Ξ",
+    "nameRu": "Эфириум",
+    "nameEn": "Ethereum",
+    "rateSource": "coingecko",
+    "coingeckoId": "ethereum"
+  },
+  {
+    "code": "USDT",
+    "kind": "crypto",
+    "scale": 2,
+    "symbol": "₮",
+    "nameRu": "Tether",
+    "nameEn": "Tether",
+    "rateSource": "coingecko",
+    "coingeckoId": "tether"
+  },
+  {
+    "code": "XRP",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "XRP",
+    "nameEn": "XRP",
+    "rateSource": "coingecko",
+    "coingeckoId": "ripple"
+  },
+  {
+    "code": "SOL",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Solana",
+    "nameEn": "Solana",
+    "rateSource": "coingecko",
+    "coingeckoId": "solana"
+  },
+  {
+    "code": "DOGE",
+    "kind": "crypto",
+    "scale": 4,
+    "symbol": null,
+    "nameRu": "Dogecoin",
+    "nameEn": "Dogecoin",
+    "rateSource": "coingecko",
+    "coingeckoId": "dogecoin"
+  },
+  {
+    "code": "PEPE",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Pepe",
+    "nameEn": "Pepe",
+    "rateSource": "coingecko",
+    "coingeckoId": "pepe"
+  },
+  {
+    "code": "AVAX",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Avalanche",
+    "nameEn": "Avalanche",
+    "rateSource": "coingecko",
+    "coingeckoId": "avalanche-2"
+  },
+  {
+    "code": "ATOM",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Cosmos",
+    "nameEn": "Cosmos",
+    "rateSource": "coingecko",
+    "coingeckoId": "cosmos"
+  },
+  {
+    "code": "TRX",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Tron",
+    "nameEn": "Tron",
+    "rateSource": "coingecko",
+    "coingeckoId": "tron"
+  },
+  {
+    "code": "USDC",
+    "kind": "crypto",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "USD Coin",
+    "nameEn": "USD Coin",
+    "rateSource": "coingecko",
+    "coingeckoId": "usd-coin"
+  },
+  {
+    "code": "DAI",
+    "kind": "crypto",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Dai",
+    "nameEn": "Dai",
+    "rateSource": "coingecko",
+    "coingeckoId": "dai"
+  },
+  {
+    "code": "USDE",
+    "kind": "crypto",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Ethena USDe",
+    "nameEn": "Ethena USDe",
+    "rateSource": "coingecko",
+    "coingeckoId": "ethena-usde"
+  },
+  {
+    "code": "PYUSD",
+    "kind": "crypto",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "PayPal USD",
+    "nameEn": "PayPal USD",
+    "rateSource": "coingecko",
+    "coingeckoId": "paypal-usd"
+  },
+  {
+    "code": "RLUSD",
+    "kind": "crypto",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "Ripple USD",
+    "nameEn": "Ripple USD",
+    "rateSource": "coingecko",
+    "coingeckoId": "ripple-usd"
+  },
+  {
+    "code": "USDD",
+    "kind": "crypto",
+    "scale": 2,
+    "symbol": null,
+    "nameRu": "USDD",
+    "nameEn": "USDD",
+    "rateSource": "coingecko",
+    "coingeckoId": "usdd"
+  },
+  {
+    "code": "BNB",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "BNB",
+    "nameEn": "BNB",
+    "rateSource": "coingecko",
+    "coingeckoId": "binancecoin"
+  },
+  {
+    "code": "ADA",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Cardano",
+    "nameEn": "Cardano",
+    "rateSource": "coingecko",
+    "coingeckoId": "cardano"
+  },
+  {
+    "code": "DOT",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Polkadot",
+    "nameEn": "Polkadot",
+    "rateSource": "coingecko",
+    "coingeckoId": "polkadot"
+  },
+  {
+    "code": "LINK",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Chainlink",
+    "nameEn": "Chainlink",
+    "rateSource": "coingecko",
+    "coingeckoId": "chainlink"
+  },
+  {
+    "code": "LTC",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Litecoin",
+    "nameEn": "Litecoin",
+    "rateSource": "coingecko",
+    "coingeckoId": "litecoin"
+  },
+  {
+    "code": "BCH",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Bitcoin Cash",
+    "nameEn": "Bitcoin Cash",
+    "rateSource": "coingecko",
+    "coingeckoId": "bitcoin-cash"
+  },
+  {
+    "code": "XLM",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Stellar",
+    "nameEn": "Stellar",
+    "rateSource": "coingecko",
+    "coingeckoId": "stellar"
+  },
+  {
+    "code": "XMR",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Monero",
+    "nameEn": "Monero",
+    "rateSource": "coingecko",
+    "coingeckoId": "monero"
+  },
+  {
+    "code": "ZEC",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Zcash",
+    "nameEn": "Zcash",
+    "rateSource": "coingecko",
+    "coingeckoId": "zcash"
+  },
+  {
+    "code": "ETC",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Ethereum Classic",
+    "nameEn": "Ethereum Classic",
+    "rateSource": "coingecko",
+    "coingeckoId": "ethereum-classic"
+  },
+  {
+    "code": "TON",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Toncoin",
+    "nameEn": "Toncoin",
+    "rateSource": "coingecko",
+    "coingeckoId": "the-open-network"
+  },
+  {
+    "code": "NEAR",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "NEAR Protocol",
+    "nameEn": "NEAR Protocol",
+    "rateSource": "coingecko",
+    "coingeckoId": "near"
+  },
+  {
+    "code": "SUI",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Sui",
+    "nameEn": "Sui",
+    "rateSource": "coingecko",
+    "coingeckoId": "sui"
+  },
+  {
+    "code": "APT",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Aptos",
+    "nameEn": "Aptos",
+    "rateSource": "coingecko",
+    "coingeckoId": "aptos"
+  },
+  {
+    "code": "HBAR",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Hedera",
+    "nameEn": "Hedera",
+    "rateSource": "coingecko",
+    "coingeckoId": "hedera-hashgraph"
+  },
+  {
+    "code": "ICP",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Internet Computer",
+    "nameEn": "Internet Computer",
+    "rateSource": "coingecko",
+    "coingeckoId": "internet-computer"
+  },
+  {
+    "code": "FIL",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Filecoin",
+    "nameEn": "Filecoin",
+    "rateSource": "coingecko",
+    "coingeckoId": "filecoin"
+  },
+  {
+    "code": "ALGO",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Algorand",
+    "nameEn": "Algorand",
+    "rateSource": "coingecko",
+    "coingeckoId": "algorand"
+  },
+  {
+    "code": "VET",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "VeChain",
+    "nameEn": "VeChain",
+    "rateSource": "coingecko",
+    "coingeckoId": "vechain"
+  },
+  {
+    "code": "XTZ",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Tezos",
+    "nameEn": "Tezos",
+    "rateSource": "coingecko",
+    "coingeckoId": "tezos"
+  },
+  {
+    "code": "IOTA",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "IOTA",
+    "nameEn": "IOTA",
+    "rateSource": "coingecko",
+    "coingeckoId": "iota"
+  },
+  {
+    "code": "DASH",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Dash",
+    "nameEn": "Dash",
+    "rateSource": "coingecko",
+    "coingeckoId": "dash"
+  },
+  {
+    "code": "EOS",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "EOS",
+    "nameEn": "EOS",
+    "rateSource": "coingecko",
+    "coingeckoId": "eos"
+  },
+  {
+    "code": "NEO",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Neo",
+    "nameEn": "Neo",
+    "rateSource": "coingecko",
+    "coingeckoId": "neo"
+  },
+  {
+    "code": "KAS",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Kaspa",
+    "nameEn": "Kaspa",
+    "rateSource": "coingecko",
+    "coingeckoId": "kaspa"
+  },
+  {
+    "code": "CRO",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Cronos",
+    "nameEn": "Cronos",
+    "rateSource": "coingecko",
+    "coingeckoId": "crypto-com-chain"
+  },
+  {
+    "code": "OKB",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "OKB",
+    "nameEn": "OKB",
+    "rateSource": "coingecko",
+    "coingeckoId": "okb"
+  },
+  {
+    "code": "LEO",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "LEO Token",
+    "nameEn": "LEO Token",
+    "rateSource": "coingecko",
+    "coingeckoId": "leo-token"
+  },
+  {
+    "code": "HYPE",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Hyperliquid",
+    "nameEn": "Hyperliquid",
+    "rateSource": "coingecko",
+    "coingeckoId": "hyperliquid"
+  },
+  {
+    "code": "TAO",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Bittensor",
+    "nameEn": "Bittensor",
+    "rateSource": "coingecko",
+    "coingeckoId": "bittensor"
+  },
+  {
+    "code": "UNI",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Uniswap",
+    "nameEn": "Uniswap",
+    "rateSource": "coingecko",
+    "coingeckoId": "uniswap"
+  },
+  {
+    "code": "AAVE",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Aave",
+    "nameEn": "Aave",
+    "rateSource": "coingecko",
+    "coingeckoId": "aave"
+  },
+  {
+    "code": "MKR",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Maker",
+    "nameEn": "Maker",
+    "rateSource": "coingecko",
+    "coingeckoId": "maker"
+  },
+  {
+    "code": "CRV",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Curve DAO",
+    "nameEn": "Curve DAO",
+    "rateSource": "coingecko",
+    "coingeckoId": "curve-dao-token"
+  },
+  {
+    "code": "LDO",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Lido DAO",
+    "nameEn": "Lido DAO",
+    "rateSource": "coingecko",
+    "coingeckoId": "lido-dao"
+  },
+  {
+    "code": "GRT",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "The Graph",
+    "nameEn": "The Graph",
+    "rateSource": "coingecko",
+    "coingeckoId": "the-graph"
+  },
+  {
+    "code": "INJ",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Injective",
+    "nameEn": "Injective",
+    "rateSource": "coingecko",
+    "coingeckoId": "injective-protocol"
+  },
+  {
+    "code": "RUNE",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "THORChain",
+    "nameEn": "THORChain",
+    "rateSource": "coingecko",
+    "coingeckoId": "thorchain"
+  },
+  {
+    "code": "ONDO",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Ondo",
+    "nameEn": "Ondo",
+    "rateSource": "coingecko",
+    "coingeckoId": "ondo-finance"
+  },
+  {
+    "code": "ENA",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Ethena",
+    "nameEn": "Ethena",
+    "rateSource": "coingecko",
+    "coingeckoId": "ethena"
+  },
+  {
+    "code": "ARB",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Arbitrum",
+    "nameEn": "Arbitrum",
+    "rateSource": "coingecko",
+    "coingeckoId": "arbitrum"
+  },
+  {
+    "code": "OP",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Optimism",
+    "nameEn": "Optimism",
+    "rateSource": "coingecko",
+    "coingeckoId": "optimism"
+  },
+  {
+    "code": "POL",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Polygon",
+    "nameEn": "Polygon",
+    "rateSource": "coingecko",
+    "coingeckoId": "polygon-ecosystem-token"
+  },
+  {
+    "code": "SEI",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Sei",
+    "nameEn": "Sei",
+    "rateSource": "coingecko",
+    "coingeckoId": "sei-network"
+  },
+  {
+    "code": "STX",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Stacks",
+    "nameEn": "Stacks",
+    "rateSource": "coingecko",
+    "coingeckoId": "stacks"
+  },
+  {
+    "code": "IMX",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Immutable",
+    "nameEn": "Immutable",
+    "rateSource": "coingecko",
+    "coingeckoId": "immutable-x"
+  },
+  {
+    "code": "RENDER",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Render",
+    "nameEn": "Render",
+    "rateSource": "coingecko",
+    "coingeckoId": "render-token"
+  },
+  {
+    "code": "JUP",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Jupiter",
+    "nameEn": "Jupiter",
+    "rateSource": "coingecko",
+    "coingeckoId": "jupiter-exchange-solana"
+  },
+  {
+    "code": "WLD",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Worldcoin",
+    "nameEn": "Worldcoin",
+    "rateSource": "coingecko",
+    "coingeckoId": "worldcoin-wld"
+  },
+  {
+    "code": "QNT",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Quant",
+    "nameEn": "Quant",
+    "rateSource": "coingecko",
+    "coingeckoId": "quant-network"
+  },
+  {
+    "code": "SHIB",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Shiba Inu",
+    "nameEn": "Shiba Inu",
+    "rateSource": "coingecko",
+    "coingeckoId": "shiba-inu"
+  },
+  {
+    "code": "BONK",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Bonk",
+    "nameEn": "Bonk",
+    "rateSource": "coingecko",
+    "coingeckoId": "bonk"
+  },
+  {
+    "code": "WIF",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "dogwifhat",
+    "nameEn": "dogwifhat",
+    "rateSource": "coingecko",
+    "coingeckoId": "dogwifcoin"
+  },
+  {
+    "code": "FLOKI",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Floki",
+    "nameEn": "Floki",
+    "rateSource": "coingecko",
+    "coingeckoId": "floki"
+  },
+  {
+    "code": "GALA",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Gala",
+    "nameEn": "Gala",
+    "rateSource": "coingecko",
+    "coingeckoId": "gala"
+  },
+  {
+    "code": "AXS",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Axie Infinity",
+    "nameEn": "Axie Infinity",
+    "rateSource": "coingecko",
+    "coingeckoId": "axie-infinity"
+  },
+  {
+    "code": "SAND",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "The Sandbox",
+    "nameEn": "The Sandbox",
+    "rateSource": "coingecko",
+    "coingeckoId": "the-sandbox"
+  },
+  {
+    "code": "MANA",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Decentraland",
+    "nameEn": "Decentraland",
+    "rateSource": "coingecko",
+    "coingeckoId": "decentraland"
+  },
+  {
+    "code": "CHZ",
+    "kind": "crypto",
+    "scale": 6,
+    "symbol": null,
+    "nameRu": "Chiliz",
+    "nameEn": "Chiliz",
+    "rateSource": "coingecko",
+    "coingeckoId": "chiliz"
+  },
+  {
+    "code": "PAXG",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "PAX Gold",
+    "nameEn": "PAX Gold",
+    "rateSource": "coingecko",
+    "coingeckoId": "pax-gold"
+  },
+  {
+    "code": "XAUT",
+    "kind": "crypto",
+    "scale": 8,
+    "symbol": null,
+    "nameRu": "Tether Gold",
+    "nameEn": "Tether Gold",
+    "rateSource": "coingecko",
+    "coingeckoId": "tether-gold"
+  }
+]

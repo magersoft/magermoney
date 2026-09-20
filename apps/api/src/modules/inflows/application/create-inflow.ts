@@ -5,7 +5,7 @@ import {
   type Clock,
   type Currency,
   type CurrencyMismatchError,
-  type CurrencyRegistry,
+  type CurrencyLookup,
   type InflowError,
   type UnknownCurrencyError,
 } from '@magermoney/domain';
@@ -40,7 +40,7 @@ export const creditedWithoutAccount = () =>
 export interface InflowDeps {
   uow: UnitOfWork<Repos>;
   repos: Repos;
-  registry: CurrencyRegistry;
+  registry: CurrencyLookup;
   clock: Clock;
 }
 

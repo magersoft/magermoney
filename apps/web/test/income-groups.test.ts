@@ -3,7 +3,7 @@ import { CurrencyRegistry, Decimal, RateTable } from '@magermoney/domain';
 import type { IncomeSourceDto } from '@magermoney/contracts';
 import { groupIncome } from '../src/modules/income/application/income-groups.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const table = new RateTable(
   '2026-09-17',
   [{ base: 'EUR', quote: 'USD', value: new Decimal('1.2'), date: '2026-09-17', source: 'api' }],

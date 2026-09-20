@@ -2,7 +2,7 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { requestId } from 'hono/request-id';
 import type { JWTVerifyGetKey } from 'jose';
-import type { Clock, CurrencyRegistry } from '@magermoney/domain';
+import type { Clock, CurrencyLookup } from '@magermoney/domain';
 import { mountOpenApi } from './shared/openapi.js';
 import { logger } from './shared/logger.js';
 import { profileRoutes } from './modules/profiles/http/routes.js';
@@ -52,7 +52,8 @@ export interface AppDeps {
   /** Also allow `https://*.vercel.app` preview deployments. */
   allowVercelPreviews?: boolean | undefined;
   profiles: ProfileRepository;
-  registry: CurrencyRegistry;
+  /** The currency catalogue. `ready` loads it when it is backed by the database. */
+  registry: CurrencyLookup & { ready?(): Promise<void> };
   rates: RateRepository;
   rateProviders: RateProvider[];
   repos: Repos;
@@ -89,6 +90,16 @@ export function createApp(deps: AppDeps) {
   });
   app.use('*', requestId());
   app.use('*', cors({ origin: originAllowList(deps), credentials: true }));
+  /*
+   * Every use case reads the currency catalogue synchronously, deep inside a
+   * `Result` chain, so it has to be in memory before any handler runs. One
+   * query per cold start; a registry built from a literal list has nothing to
+   * wait for and skips this.
+   */
+  app.use('*', async (c, next) => {
+    await deps.registry.ready?.();
+    await next();
+  });
   app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404));
   app.onError((e, c) => {
     logger.error({ err: e, requestId: c.get('requestId') }, 'unhandled');

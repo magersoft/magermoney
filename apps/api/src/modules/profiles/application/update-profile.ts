@@ -1,11 +1,11 @@
 import { err, ok, type Result } from 'neverthrow';
-import { type CurrencyRegistry, UnknownCurrencyError } from '@magermoney/domain';
+import { type CurrencyLookup, UnknownCurrencyError } from '@magermoney/domain';
 import type { UpdateProfileInput } from '@magermoney/contracts';
 import { NotFoundError, ValidationError } from '../../../shared/errors/http.js';
 import type { Profile, ProfilePatch, ProfileRepository } from './profile-repository.js';
 
 export const updateProfile =
-  (repo: ProfileRepository, registry: CurrencyRegistry) =>
+  (repo: ProfileRepository, registry: CurrencyLookup) =>
   async (
     userId: string,
     input: UpdateProfileInput,

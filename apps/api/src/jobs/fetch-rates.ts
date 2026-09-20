@@ -38,7 +38,7 @@ export function jobRoutes(deps: AppDeps) {
     if (header !== `Bearer ${deps.cronSecret}`)
       return c.json({ code: 'UNAUTHORIZED', message: 'Sign in required' }, 401);
     const { kind } = c.req.valid('query');
-    const res = await fetchRates(deps.rates, deps.rateProviders, deps.registry, deps.clock)(kind);
+    const res = await fetchRates(deps.rates, deps.rateProviders, deps.clock)(kind);
     return res.match(
       (v) => c.json(v, 200),
       (e) => c.json({ code: 'PROVIDER_FAILED', message: e.message }, 502),

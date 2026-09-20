@@ -41,7 +41,7 @@ export function testDeps(over: Partial<AppDeps> = {}): AppDeps {
     jwtSecret: 'test-secret-test-secret-test-secret-1234',
     cronSecret: 'cron',
     profiles: new MemoryProfileRepository([]),
-    registry: CurrencyRegistry.default(),
+    registry: CurrencyRegistry.sample(),
     rates: new MemoryRateRepository(),
     rateProviders: [],
     ...over,

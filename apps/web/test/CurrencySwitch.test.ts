@@ -26,6 +26,7 @@ const currency = (code: string): CurrencyDto => ({
   nameRu: null,
   nameEn: code,
   icon: null,
+  rateSource: 'open-er-api',
 });
 
 function mountSwitch(codes = ['USD', 'EUR']) {

@@ -9,7 +9,7 @@ import {
   CurrencyMismatchError,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const c = (code: string) => reg.get(code)._unsafeUnwrap();
 const m = (amount: string, code: string) => Money.of(amount, c(code));
 

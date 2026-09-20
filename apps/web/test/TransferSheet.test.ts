@@ -51,6 +51,7 @@ const cur = (code: string) => ({
   nameRu: null,
   nameEn: null,
   icon: null,
+  rateSource: 'open-er-api',
 });
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });

@@ -1,6 +1,7 @@
 import type { CurrencyDto } from '@magermoney/contracts';
-import { DEFAULT_CURRENCIES, SystemClock, type Clock } from '@magermoney/domain';
+import { SAMPLE_CURRENCIES, SystemClock, type Clock } from '@magermoney/domain';
 import type { RateRepository, RateRow } from '../application/rate-repository.js';
+import type { QuotableCurrency, RateSource } from '../application/rate-provider.js';
 export class MemoryRateRepository implements RateRepository {
   /** Mirrors the `refreshed_at` column: when a provider last wrote here. */
   public lastApiRefresh: Date | null = null;
@@ -30,16 +31,31 @@ export class MemoryRateRepository implements RateRepository {
     }
     return n;
   }
+  /**
+   * Stands in for `public.currencies`. Every sample currency is quotable, which
+   * is the interesting default for a rates test; a test about a currency with
+   * no source assigns its own list.
+   */
+  public currencies: CurrencyDto[] = SAMPLE_CURRENCIES.map((c) => ({
+    code: c.code,
+    kind: c.kind,
+    scale: c.scale,
+    symbol: c.symbol ?? null,
+    nameRu: null,
+    nameEn: null,
+    icon: null,
+    rateSource: c.kind === 'crypto' ? 'coingecko' : 'open-er-api',
+  }));
   async listCurrencies(): Promise<CurrencyDto[]> {
-    return DEFAULT_CURRENCIES.map((c) => ({
-      code: c.code,
-      kind: c.kind,
-      scale: c.scale,
-      symbol: c.symbol ?? null,
-      nameRu: null,
-      nameEn: null,
-      icon: null,
-    }));
+    return this.currencies;
+  }
+  async quotable(source: RateSource): Promise<QuotableCurrency[]> {
+    return this.currencies
+      .filter((c) => c.rateSource === source)
+      .map((c) => ({
+        code: c.code,
+        providerId: source === 'coingecko' ? c.code.toLowerCase() : null,
+      }));
   }
   async deleteManual(userId: string, base: string, date: string) {
     const before = this.rows.length;

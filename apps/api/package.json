@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test scripts vercel.ts",
     "build:vercel": "bun scripts/build-vercel.ts",
-    "import": "bun --env-file=.env.local scripts/import-sheet.ts"
+    "import": "bun --env-file=.env.local scripts/import-sheet.ts",
+    "catalogue:build": "bun scripts/currency-catalogue/generate.ts"
   },
   "dependencies": {
     "hono": "^4.13.7",

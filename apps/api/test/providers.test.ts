@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { OpenErApiProvider } from '../src/modules/rates/infrastructure/open-er-api-provider.js';
 import { CoinGeckoProvider } from '../src/modules/rates/infrastructure/coingecko-provider.js';
 
+/** open.er-api quotes by ISO code, so it never carries a provider id. */
+const codes = (...c: string[]) => c.map((code) => ({ code, providerId: null }));
+
 describe('providers', () => {
   it('open.er-api: inverts USD-based quotes into 1 base = x USD, exactly as strings', async () => {
     const fetcher = vi.fn(
@@ -11,7 +14,7 @@ describe('providers', () => {
         ),
     );
     const p = new OpenErApiProvider('https://x', fetcher);
-    const out = (await p.fetch(['EUR', 'UZS', 'XXX']))._unsafeUnwrap();
+    const out = (await p.fetch(codes('EUR', 'UZS', 'XXX')))._unsafeUnwrap();
     expect(out).toEqual([
       { base: 'EUR', value: '1.159999954' },
       { base: 'UZS', value: '0.0000847257301' },
@@ -22,7 +25,7 @@ describe('providers', () => {
       'https://x',
       async () => new Response('{"result":"error"}', { status: 500 }),
     );
-    expect((await p.fetch(['EUR'])).isErr()).toBe(true);
+    expect((await p.fetch(codes('EUR'))).isErr()).toBe(true);
   });
   it('coingecko: maps tickers to ids and back', async () => {
     const fetcher = vi.fn(async (url: string) => {
@@ -30,7 +33,14 @@ describe('providers', () => {
       return new Response(JSON.stringify({ bitcoin: { usd: 77389.36 }, tether: { usd: 1.0004 } }));
     });
     const p = new CoinGeckoProvider('https://cg', fetcher);
-    expect((await p.fetch(['BTC', 'USDT']))._unsafeUnwrap()).toEqual([
+    expect(
+      (
+        await p.fetch([
+          { code: 'BTC', providerId: 'bitcoin' },
+          { code: 'USDT', providerId: 'tether' },
+        ])
+      )._unsafeUnwrap(),
+    ).toEqual([
       { base: 'BTC', value: '77389.36' },
       { base: 'USDT', value: '1.0004' },
     ]);

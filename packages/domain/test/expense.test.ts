@@ -8,7 +8,7 @@ import {
   type Expense,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const EUR = reg.get('EUR')._unsafeUnwrap();
 
 const expense = (over: Partial<Expense> = {}): Expense => ({

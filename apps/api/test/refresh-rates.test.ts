@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ok, err } from 'neverthrow';
-import { CurrencyRegistry, FixedClock } from '@magermoney/domain';
+import { FixedClock } from '@magermoney/domain';
 import {
   refreshRates,
   REFRESH_INTERVAL_MS,
@@ -21,6 +21,7 @@ const fiat = () => {
   let calls = 0;
   return {
     kind: 'fiat' as const,
+    source: 'open-er-api' as const,
     fetch: async () => {
       calls++;
       return ok([
@@ -35,19 +36,19 @@ const fiat = () => {
 };
 const crypto = {
   kind: 'crypto' as const,
+  source: 'coingecko' as const,
   fetch: async () => ok([{ base: 'BTC', value: '64000' }]),
 };
 const broken = {
   kind: 'fiat' as const,
+  source: 'open-er-api' as const,
   fetch: async () => err(new ProviderError('open-er-api', 'boom')),
 };
-
-const registry = CurrencyRegistry.default();
 
 describe('refreshRates', () => {
   it('fetches every kind and reports what it stored', async () => {
     const repo = new MemoryRateRepository();
-    const res = await refreshRates(repo, [fiat(), crypto], registry, clock)();
+    const res = await refreshRates(repo, [fiat(), crypto], clock)();
     expect(res._unsafeUnwrap()).toEqual({
       stored: 3,
       refreshed: true,
@@ -59,10 +60,10 @@ describe('refreshRates', () => {
   it('answers that the rates are already fresh without calling a provider', async () => {
     const repo = new MemoryRateRepository([], clock);
     const provider = fiat();
-    await refreshRates(repo, [provider], registry, clock)();
+    await refreshRates(repo, [provider], clock)();
     expect(provider.calls).toBe(1);
 
-    const again = await refreshRates(repo, [provider], registry, clock)();
+    const again = await refreshRates(repo, [provider], clock)();
     expect(provider.calls).toBe(1);
     expect(again._unsafeUnwrap()).toEqual({
       stored: 0,
@@ -74,15 +75,15 @@ describe('refreshRates', () => {
   it('goes back to the providers once the interval has passed', async () => {
     const repo = new MemoryRateRepository([], clock);
     const provider = fiat();
-    await refreshRates(repo, [provider], registry, clock)();
+    await refreshRates(repo, [provider], clock)();
     const later = new FixedClock(new Date(now.getTime() + REFRESH_INTERVAL_MS + 1000));
-    const res = await refreshRates(repo, [provider], registry, later)();
+    const res = await refreshRates(repo, [provider], later)();
     expect(provider.calls).toBe(2);
     expect(res._unsafeUnwrap().refreshed).toBe(true);
   });
 
   it('propagates a provider failure', async () => {
-    const res = await refreshRates(new MemoryRateRepository(), [broken], registry, clock)();
+    const res = await refreshRates(new MemoryRateRepository(), [broken], clock)();
     expect(res.isErr()).toBe(true);
   });
 });

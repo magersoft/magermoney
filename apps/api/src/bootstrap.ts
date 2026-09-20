@@ -1,4 +1,4 @@
-import { CurrencyRegistry, SystemClock } from '@magermoney/domain';
+import { SystemClock } from '@magermoney/domain';
 import type { AppDeps } from './app.js';
 import { assertJwtConfigured, type Env } from './shared/env.js';
 import { createSupabaseJwks } from './shared/auth/jwt.js';
@@ -7,12 +7,14 @@ import { PgProfileRepository } from './modules/profiles/infrastructure/pg-profil
 import { PgRateRepository } from './modules/rates/infrastructure/pg-rate-repository.js';
 import { OpenErApiProvider } from './modules/rates/infrastructure/open-er-api-provider.js';
 import { CoinGeckoProvider } from './modules/rates/infrastructure/coingecko-provider.js';
+import { CatalogueRegistry } from './modules/rates/infrastructure/catalogue-registry.js';
 import { pgRepos, pgUnitOfWork } from './shared/db/pg-unit-of-work.js';
 
 /** Shared by the node server (`src/index.ts`) and the Vercel function (`src/vercel-entry.ts`, bundled to `api/index.js`). */
 export function depsFromEnv(env: Env): AppDeps {
   assertJwtConfigured(env);
   const sql = createDb(env.DATABASE_URL);
+  const rates = new PgRateRepository(sql);
   return {
     clock: new SystemClock(),
     jwtSecret: env.SUPABASE_JWT_SECRET,
@@ -22,8 +24,9 @@ export function depsFromEnv(env: Env): AppDeps {
     corsOrigins: env.CORS_ORIGINS,
     allowVercelPreviews: env.ALLOW_VERCEL_PREVIEWS,
     profiles: new PgProfileRepository(sql),
-    registry: CurrencyRegistry.default(),
-    rates: new PgRateRepository(sql),
+    /* The catalogue is the source of truth for currencies, not a list in the build (ADR 0006). */
+    registry: new CatalogueRegistry(rates),
+    rates,
     rateProviders: [
       new OpenErApiProvider(env.FIAT_RATES_URL),
       new CoinGeckoProvider(env.CRYPTO_RATES_URL),

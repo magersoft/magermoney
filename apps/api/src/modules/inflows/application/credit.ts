@@ -6,7 +6,7 @@ import {
   type Clock,
   type Currency,
   type CurrencyMismatchError,
-  type CurrencyRegistry,
+  type CurrencyLookup,
   type Decimal,
   type InflowError,
   type UnknownCurrencyError,
@@ -44,7 +44,7 @@ export const creditRecordedAt = (receivedOn: string, clock: Clock): string =>
 
 /** An account that does not carry this inflow yet. The row must come from `accounts.lock`. */
 export function freshTarget(
-  registry: CurrencyRegistry,
+  registry: CurrencyLookup,
   account: AccountRow,
 ): Result<CreditTarget, UnknownCurrencyError> {
   return registry.get(account.currency).map((currency) => ({
@@ -60,7 +60,7 @@ export function freshTarget(
  * the entry were gone: the balance minus what was credited, and the entry below it.
  */
 export async function revertedTarget(
-  registry: CurrencyRegistry,
+  registry: CurrencyLookup,
   repos: Pick<Repos, 'balances'>,
   userId: string,
   account: AccountRow,
@@ -149,7 +149,7 @@ export async function assertInflowLatest(
 /** credited / amount for a cross-currency credit, else null. */
 export function realisedRateOf(
   row: InflowRow,
-  registry: CurrencyRegistry,
+  registry: CurrencyLookup,
   accountCurrency: string | null,
 ): string | null {
   if (row.creditedAmount === null || accountCurrency === null || accountCurrency === row.currency)

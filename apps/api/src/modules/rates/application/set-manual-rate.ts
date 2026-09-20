@@ -1,9 +1,9 @@
 import { err, ok, type Result } from 'neverthrow';
-import { type CurrencyRegistry, UnknownCurrencyError } from '@magermoney/domain';
+import { type CurrencyLookup, UnknownCurrencyError } from '@magermoney/domain';
 import type { ManualRateInput, RateDto } from '@magermoney/contracts';
 import type { RateRepository } from './rate-repository.js';
 export const setManualRate =
-  (repo: RateRepository, registry: CurrencyRegistry) =>
+  (repo: RateRepository, registry: CurrencyLookup) =>
   async (
     userId: string,
     input: ManualRateInput,

@@ -5,7 +5,7 @@ import {
   Money,
   TransferError,
   type Clock,
-  type CurrencyRegistry,
+  type CurrencyLookup,
   type CurrencyMismatchError,
   type InsufficientFundsError,
   type UnknownCurrencyError,
@@ -21,7 +21,7 @@ import { toTransferDto } from './dto.js';
 export interface TransferDeps {
   uow: UnitOfWork<Repos>;
   repos: Repos;
-  registry: CurrencyRegistry;
+  registry: CurrencyLookup;
   clock: Clock;
 }
 export type TransferFailure =

@@ -1,28 +1,31 @@
 import Decimal from 'decimal.js';
 import { err, ok } from 'neverthrow';
-import { ProviderError, type Fetcher, type RateProvider } from '../application/rate-provider.js';
-export const COINGECKO_IDS: Record<string, string> = {
-  BTC: 'bitcoin',
-  ETH: 'ethereum',
-  USDT: 'tether',
-  XRP: 'ripple',
-  SOL: 'solana',
-  DOGE: 'dogecoin',
-  PEPE: 'pepe',
-  AVAX: 'avalanche-2',
-  ATOM: 'cosmos',
-  TRX: 'tron',
-};
+import {
+  ProviderError,
+  type Fetcher,
+  type QuotableCurrency,
+  type RateProvider,
+} from '../application/rate-provider.js';
+
+/**
+ * CoinGecko prices by its own id — `bitcoin`, not `BTC` — so the id travels
+ * with the currency from `currencies.coingecko_id` (ADR 0006). A coin the
+ * catalogue has no id for is simply not asked about: this provider holds no
+ * list of its own, so adding a coin is a migration rather than a release.
+ */
 export class CoinGeckoProvider implements RateProvider {
   readonly kind = 'crypto' as const;
+  readonly source = 'coingecko' as const;
   constructor(
     private readonly url: string,
     private readonly fetcher: Fetcher = fetch,
   ) {}
-  async fetch(codes: string[]) {
-    const known = codes.filter((c) => COINGECKO_IDS[c]);
+  async fetch(currencies: QuotableCurrency[]) {
+    const known = currencies.filter(
+      (c): c is { code: string; providerId: string } => c.providerId !== null,
+    );
     if (known.length === 0) return ok([]);
-    const ids = known.map((c) => COINGECKO_IDS[c]!).join(',');
+    const ids = known.map((c) => c.providerId).join(',');
     try {
       const res = await this.fetcher(
         `${this.url}?ids=${encodeURIComponent(ids)}&vs_currencies=usd&precision=full`,
@@ -31,9 +34,9 @@ export class CoinGeckoProvider implements RateProvider {
       const body = (await res.json()) as Record<string, { usd?: number }>;
       return ok(
         known.flatMap((c) => {
-          const v = body[COINGECKO_IDS[c]!]?.usd;
+          const v = body[c.providerId]?.usd;
           return typeof v === 'number' && v > 0
-            ? [{ base: c, value: new Decimal(v).toFixed() }]
+            ? [{ base: c.code, value: new Decimal(v).toFixed() }]
             : [];
         }),
       );

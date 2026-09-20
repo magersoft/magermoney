@@ -8,7 +8,7 @@ export const sql = createDb(process.env.DATABASE_URL!);
 export const deps = {
   uow: pgUnitOfWork(sql),
   repos: pgRepos(sql),
-  registry: CurrencyRegistry.default(),
+  registry: CurrencyRegistry.sample(),
   clock: new SystemClock(),
 };
 

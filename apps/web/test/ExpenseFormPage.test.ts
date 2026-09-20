@@ -76,7 +76,16 @@ async function mountForm(
 const base = (path: string) => {
   if (path === '/currencies')
     return json([
-      { code: 'EUR', kind: 'fiat', scale: 2, symbol: null, nameRu: null, nameEn: null, icon: null },
+      {
+        code: 'EUR',
+        kind: 'fiat',
+        scale: 2,
+        symbol: null,
+        nameRu: null,
+        nameEn: null,
+        icon: null,
+        rateSource: 'open-er-api',
+      },
     ]);
   if (path === '/expense-categories')
     return json([{ id: CAT, name: 'Housing', icon: null, sortOrder: 0 }]);
@@ -108,6 +117,7 @@ describe('ExpenseFormPage', () => {
             nameRu: null,
             nameEn: null,
             icon: null,
+            rateSource: 'open-er-api',
           })),
         );
       return base(path) ?? json([]);

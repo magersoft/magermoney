@@ -9,7 +9,7 @@ import {
   deriveInflowCredit,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const USD = reg.get('USD')._unsafeUnwrap();
 const EUR = reg.get('EUR')._unsafeUnwrap();
 const reason = (r: { isErr(): boolean; _unsafeUnwrapErr(): unknown }) =>

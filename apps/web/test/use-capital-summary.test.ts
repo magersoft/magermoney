@@ -3,7 +3,7 @@ import { CurrencyRegistry, Decimal, RateTable } from '@magermoney/domain';
 import type { AccountDto } from '@magermoney/contracts';
 import { summarise } from '../src/modules/accounts/application/use-capital-summary.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const table = new RateTable(
   '2026-09-11',
   [{ base: 'EUR', quote: 'USD', value: new Decimal('1.16'), date: '2026-09-11', source: 'api' }],

@@ -11,7 +11,7 @@ import {
   type Rate,
 } from '../src/index.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const c = (code: string) => reg.get(code)._unsafeUnwrap();
 const rate = (base: string, value: string): Rate => ({
   base,

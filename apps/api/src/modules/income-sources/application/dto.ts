@@ -1,12 +1,9 @@
-import { Decimal, Money, netMonthly, type CurrencyRegistry } from '@magermoney/domain';
+import { Decimal, Money, netMonthly, type CurrencyLookup } from '@magermoney/domain';
 import type { IncomeSourceDto } from '@magermoney/contracts';
 import type { IncomeSourceRow } from './income-source-repository.js';
 
 /** Net is derived on the way out and never stored. */
-export function toIncomeSourceDto(
-  row: IncomeSourceRow,
-  registry: CurrencyRegistry,
-): IncomeSourceDto {
+export function toIncomeSourceDto(row: IncomeSourceRow, registry: CurrencyLookup): IncomeSourceDto {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { userId: _u, ...rest } = row;
   const currency = registry

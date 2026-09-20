@@ -26,6 +26,7 @@ const currency = (code: string, kind: CurrencyDto['kind'] = 'fiat'): CurrencyDto
   nameRu: null,
   nameEn: code,
   icon: null,
+  rateSource: 'open-er-api',
 });
 
 const rates: RateDto[] = [

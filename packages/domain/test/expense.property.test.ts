@@ -9,7 +9,7 @@ import {
   type Expense,
 } from '../src/index.js';
 
-const EUR = CurrencyRegistry.default().get('EUR')._unsafeUnwrap();
+const EUR = CurrencyRegistry.sample().get('EUR')._unsafeUnwrap();
 
 describe('billing calendar properties', () => {
   it('twelve consecutive full months hold 12 charges of a monthly expense and 1 of a yearly one', () => {

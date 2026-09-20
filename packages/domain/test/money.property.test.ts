@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { CurrencyRegistry, Money } from '../src/index.js';
 
-const USD = CurrencyRegistry.default().get('USD')._unsafeUnwrap();
+const USD = CurrencyRegistry.sample().get('USD')._unsafeUnwrap();
 const amount = fc
   .tuple(fc.integer({ min: -1_000_000_000, max: 1_000_000_000 }), fc.integer({ min: 0, max: 999 }))
   .map(([int, frac]) => `${int}.${String(frac).padStart(3, '0')}`);

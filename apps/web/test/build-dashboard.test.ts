@@ -11,7 +11,7 @@ import {
 } from '@magermoney/domain';
 import { buildDashboard } from '../src/modules/dashboard/application/build-dashboard.js';
 
-const reg = CurrencyRegistry.default();
+const reg = CurrencyRegistry.sample();
 const USD = reg.get('USD')._unsafeUnwrap();
 const EUR = reg.get('EUR')._unsafeUnwrap();
 const table = new RateTable(
