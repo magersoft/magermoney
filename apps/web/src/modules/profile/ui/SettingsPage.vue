@@ -21,6 +21,7 @@ import {
 } from '@magermoney/ui';
 import { useSession } from '@/modules/auth';
 import { CurrencySwitch } from '@/modules/rates';
+import { usePageTitle } from '@/shared/layout/page-bar';
 import { THEMES, useTheme, type Theme } from '@/shared/theme';
 import { ApiError } from '@/shared/api/client';
 import { LOCALES, type Locale } from '../domain/profile';
@@ -47,6 +48,8 @@ watch(
 );
 
 const currencies = computed(() => profile.value?.reportingCurrencies ?? []);
+
+usePageTitle(() => t('settings.title'));
 
 async function save(input: Parameters<typeof update>[0]): Promise<void> {
   saving.value = true;
@@ -78,7 +81,8 @@ async function signOut(): Promise<void> {
 
 <template>
   <section class="pb-8">
-    <h1 class="text-2xl font-semibold tracking-[-0.01em]">
+    <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+    <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
       {{ t('settings.title') }}
     </h1>
 

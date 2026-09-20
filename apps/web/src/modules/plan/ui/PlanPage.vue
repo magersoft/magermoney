@@ -20,7 +20,7 @@ import { TabBar, fadeUp } from '@magermoney/ui';
 import { BudgetsSegment } from '@/modules/budgets';
 import { ExpensesSegment } from '@/modules/expenses';
 import { IncomeSegment } from '@/modules/income';
-import { usePageAction } from '@/shared/layout/page-bar';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 
 const TABS = ['income', 'expenses', 'budgets'] as const;
 type Tab = (typeof TABS)[number];
@@ -52,6 +52,8 @@ const tabs = computed(() => TABS.map((value) => ({ value, label: t(`plan.tabs.${
  * the whole phrase, because it lands on the button without the tab strip above
  * it.
  */
+usePageTitle(() => t('plan.title'));
+
 usePageAction(() => ({
   label: t('action.add'),
   ariaLabel: t(`plan.add.${tab.value}`),
@@ -63,7 +65,8 @@ usePageAction(() => ({
 <template>
   <section class="flex flex-col gap-4 pb-8">
     <header class="pt-1">
-      <h1 class="text-2xl font-semibold tracking-[-0.01em]">
+      <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+      <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
         {{ t('plan.title') }}
       </h1>
     </header>
