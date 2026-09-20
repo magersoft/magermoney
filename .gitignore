@@ -15,3 +15,14 @@ dev-dist/
 apps/api/api/
 imports/
 docs/design/reference/
+
+# The global gitignore excludes .claude/ everywhere; the shared Claude Code
+# configuration belongs to the repository, so re-include it and keep only the
+# per-developer local settings out.
+!.claude/
+!.claude/**
+.claude/settings.local.json
+.claude/*.local.json
+.claude/worktrees/
+.claude/shell-snapshots/
+.claude/todos/

@@ -10,11 +10,11 @@
  * that is all a select has to be — the row carries the label and the height,
  * and the platform carries the keyboard, the wheel and the screen reader.
  */
-import { computed, reactive, ref, useId, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
-import { Button, CountrySelect, MoneyInput, Switch, useToast } from '@magermoney/ui';
+import { Button, CountrySelect, MoneyInput, useToast } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import { useCountryOptions } from '@/shared/countries/options';
@@ -23,6 +23,7 @@ import { ACCOUNT_KIND_KEYS } from '../domain/labels';
 import { useAccount } from '../application/use-accounts';
 import { useCreateAccount, useUpdateAccount } from '../application/use-account-mutations';
 import FormFieldRow from './FormFieldRow.vue';
+import FormSwitchRow from './FormSwitchRow.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -34,7 +35,6 @@ const editingId = computed(() => (route.params.id ? String(route.params.id) : nu
 const existing = useAccount(() => editingId.value ?? '');
 const { create, isPending: creating } = useCreateAccount();
 const { update, isPending: updating } = useUpdateAccount();
-const spendingLabelId = `${useId()}-spending`;
 
 const form = reactive({
   name: '',
@@ -201,22 +201,15 @@ async function submit() {
       </FormFieldRow>
 
       <!--
-        A switch, not a row that opens something, so it is a div rather than a
-        label: a label wrapping a button can toggle it twice on one click.
+        Whether the account shows on Home is not here: it is the star on the
+        account's own screen. A switch buried in an editor would be a second
+        way to say the same thing, and the slower of the two.
       -->
-      <div
-        class="flex min-h-14 w-full items-center gap-3 rounded-lg bg-surface px-3 py-2 text-ink"
-        data-slot="form-field-row"
-      >
-        <span :id="spendingLabelId" class="min-w-0 flex-1 text-sm">
-          {{ t('accounts.form.spending') }}
-        </span>
-        <Switch
-          v-model="form.isSpending"
-          :aria-labelledby="spendingLabelId"
-          data-testid="form-spending"
-        />
-      </div>
+      <FormSwitchRow
+        v-model="form.isSpending"
+        :label="t('accounts.form.spending')"
+        testid="form-spending"
+      />
     </div>
 
     <fieldset v-if="isCard" class="flex flex-col gap-2">

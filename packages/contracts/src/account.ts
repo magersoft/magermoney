@@ -16,6 +16,7 @@ export const AccountDtoSchema = z
     kind: AccountKindSchema,
     cardType: CardTypeSchema.nullable(),
     isSpending: z.boolean(),
+    isPinned: z.boolean(),
     cardLast4: z.string().nullable(),
     cardNetwork: z.string().nullable(),
     cardTier: z.string().nullable(),
@@ -43,6 +44,7 @@ const accountFields = {
   kind: AccountKindSchema,
   cardType: CardTypeSchema.nullable().optional(),
   isSpending: z.boolean(),
+  isPinned: z.boolean(),
   cardLast4: z
     .string()
     .regex(/^\d{4}$/)
@@ -64,6 +66,12 @@ export const CreateAccountInputSchema = z
   .object({
     ...accountFields,
     isSpending: z.boolean().default(false),
+    /*
+     * Optional rather than defaulted, because nothing creating an account has
+     * an opinion about it: the Home screen is chosen with the star on the
+     * account's own screen, after it exists.
+     */
+    isPinned: z.boolean().optional(),
     openingBalance: OpeningBalanceSchema.optional(),
   })
   .refine(cardFieldsOnlyOnCards, CARD_MESSAGE)

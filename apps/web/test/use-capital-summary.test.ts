@@ -18,6 +18,7 @@ const base: AccountDto = {
   kind: 'cash',
   cardType: null,
   isSpending: true,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,

@@ -20,6 +20,7 @@ const created = {
   kind: 'cash',
   cardType: null,
   isSpending: true,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,
@@ -117,6 +118,27 @@ describe('AccountFormPage', () => {
       country: 'RU',
       currency: 'EUR',
     });
+  });
+
+  /*
+   * Whether the account is on Home is the star on its own screen, so the form
+   * must not carry an answer of its own: a stale `isPinned` in the PATCH would
+   * quietly undo whatever the star was last tapped to say.
+   */
+  it('leaves the home-screen answer to the star, and sends none of its own', async () => {
+    const { w, fetch } = await mountForm();
+    await flushPromises();
+
+    expect(w.find('[data-testid="form-pinned"]').exists()).toBe(false);
+
+    await w.get('[data-testid="form-name"]').setValue('Карман');
+    await w.get('[data-testid="form-bank"]').setValue('Bank');
+    await pickCountry(w, 'Росс', 'RU');
+    await w.get('[data-testid="account-form"]').trigger('submit');
+    await flushPromises();
+
+    const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(JSON.parse(String(post?.[1]?.body))).not.toHaveProperty('isPinned');
   });
 
   /*

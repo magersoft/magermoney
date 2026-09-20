@@ -18,7 +18,8 @@
       "title": "Accounts",
       "all": "All",
       "add": "New account",
-      "empty": "No accounts yet"
+      "empty": "No accounts yet",
+      "unpinned": "Showing the first three accounts. Pick your own with the star on an account."
     },
     "stats": {
       "title": "This month",
@@ -352,8 +353,11 @@
       "credit": "credit"
     },
     "spending": "Spending",
+    "pinned": "On Home",
     "detail": {
       "menu": "Account actions",
+      "pin": "Show on Home",
+      "unpin": "Hide from Home",
       "recordBalance": "Update balance",
       "transfer": "Transfer",
       "transfers": "Transfers",

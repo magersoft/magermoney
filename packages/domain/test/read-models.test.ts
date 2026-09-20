@@ -30,6 +30,7 @@ const acc = (over: Partial<Account> & { balance: Money }): Account => ({
   kind: 'bank_account',
   cardType: null,
   isSpending: false,
+  isPinned: false,
   sortOrder: 0,
   archived: false,
   ...over,

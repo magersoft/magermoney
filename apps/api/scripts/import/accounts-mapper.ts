@@ -126,6 +126,7 @@ export function mapAccounts(
         ? ((bin === 'CREDIT' ? 'credit' : bin === 'DEBIT' ? 'debit' : null) as CardType | null)
         : null,
       isSpending: false,
+      isPinned: false,
       cardLast4: isCard && /^\d{4}$/.test(last4) ? last4 : null,
       cardNetwork: isCard
         ? (NETWORKS[cell('Платежная система').toUpperCase()] ?? (cell('Платежная система') || null))

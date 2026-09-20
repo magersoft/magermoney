@@ -53,6 +53,19 @@ describe('account contracts', () => {
     const { isSpending, ...baseWithoutSpending } = base;
     expect(CreateAccountInputSchema.parse(baseWithoutSpending).isSpending).toBe(false);
   });
+  /*
+   * Creation has no opinion about Home — the star on the account's own screen
+   * does — so an omitted `isPinned` stays omitted rather than being answered
+   * with a `false` the caller never sent.
+   */
+  it('a creation leaves isPinned unanswered when it is not sent', () => {
+    expect(CreateAccountInputSchema.parse(base)).not.toHaveProperty('isPinned');
+    expect(CreateAccountInputSchema.parse({ ...base, isPinned: true }).isPinned).toBe(true);
+  });
+  it('a partial update carries isPinned only when it is sent', () => {
+    expect(UpdateAccountInputSchema.parse({ name: 'New' })).toEqual({ name: 'New' });
+    expect(UpdateAccountInputSchema.parse({ isPinned: true })).toEqual({ isPinned: true });
+  });
   it('coerces the list limit and caps it', () => {
     expect(CursorQuerySchema.parse({}).limit).toBe(50);
     expect(CursorQuerySchema.parse({ limit: '20' }).limit).toBe(20);

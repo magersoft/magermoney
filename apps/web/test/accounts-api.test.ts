@@ -10,6 +10,7 @@ const dto = {
   kind: 'bank_account',
   cardType: null,
   isSpending: true,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,
