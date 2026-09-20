@@ -18,7 +18,7 @@
  */
 import { computed, markRaw, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   AccountCardStack,
   AmountLockup,
@@ -30,10 +30,12 @@ import {
   type FilterChipItem,
 } from '@magermoney/ui';
 import { useDisplayCurrency } from '@/modules/rates';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useCapitalSummary } from '../application/use-capital-summary';
 import AccountRow from './AccountRow.vue';
 
 const { t, locale } = useI18n();
+const router = useRouter();
 const { summary, rateDate } = useCapitalSummary();
 const { current: baseCode } = useDisplayCurrency();
 const amountLocale = computed(() => locale.value as AmountLocale);
@@ -91,6 +93,25 @@ const isEmpty = computed(
   () =>
     summary.value !== undefined && active.value.length === 0 && summary.value.archived.length === 0,
 );
+
+/*
+ * Alone among the tabs, this screen never says its own name: it leads with the
+ * total, the way the reference does, and «Счета» would fight that. So the bar
+ * says it. The Plan and the settings screen carry a heading of their own and
+ * leave the bar's middle alone rather than saying it twice.
+ */
+usePageTitle(() => t('accounts.title'));
+
+/*
+ * The list's one action. The empty screen keeps its own button — there the
+ * invitation is the whole screen, and a word in the corner is not one.
+ */
+usePageAction(() => ({
+  label: t('action.add'),
+  ariaLabel: t('accounts.add'),
+  onSelect: () => void router.push('/accounts/new'),
+  testid: 'accounts-add-action',
+}));
 </script>
 
 <template>

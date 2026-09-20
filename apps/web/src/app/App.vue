@@ -8,16 +8,25 @@
  * the whole tree: motion-v then keeps the fades and drops the movement.
  */
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { MotionConfig } from 'motion-v';
 import { Toaster } from '@magermoney/ui';
 import AppShell from '@/shared/layout/AppShell.vue';
-import { CurrencySwitch, useDisplayCurrency } from '@/modules/rates';
+import { useDisplayCurrency } from '@/modules/rates';
+import { ProfileAvatar } from '@/modules/profile';
 import { useTheme } from '@/app/theme';
 import QuickActions from '@/app/QuickActions.vue';
 
-const { theme, set } = useTheme();
+/*
+ * Asked for its effect, not its value: `useTheme` is what applies the stored
+ * preference to the document, and the settings screen is the only place that
+ * changes it. Dropping this call would leave a reloaded app in whatever theme
+ * the CSS defaults to until someone opened Settings.
+ */
+useTheme();
 const route = useRoute();
+const { t } = useI18n();
 
 /*
  * The display currency is one object for the whole app, and it reads the profile
@@ -30,10 +39,15 @@ useDisplayCurrency();
 
 const bare = computed(() => Boolean(route.meta.public));
 /**
- * Home carries the currency switch in its own header (the reference's slide 10),
- * so the top bar hands it over rather than showing a second one.
+ * The person sits in the bar's left corner on the screens with no way back —
+ * the reference's home header, moved to where that corner is otherwise empty.
+ * Phone only: a wide window fills that corner with the wordmark and shows the
+ * settings tab in the bar anyway, so the shortcut would be a third way to the
+ * same screen. And not on the settings screen itself, at any width: a face
+ * that leads to the screen you are already reading is a button that does
+ * nothing.
  */
-const ownsCurrency = computed(() => route.name === 'home');
+const showAvatar = computed(() => route.name !== 'settings');
 /**
  * The quick actions are mounted once, here, and opened from two places: the
  * "+" in the phone's navigation pill and the floating button on a wide window.
@@ -51,9 +65,17 @@ const quickOpen = ref(false);
     >
       <RouterView />
     </main>
-    <AppShell v-else :theme="theme" @update:theme="set" @quick="quickOpen = true">
-      <template #currency>
-        <CurrencySwitch v-if="!ownsCurrency" />
+    <AppShell v-else @quick="quickOpen = true">
+      <template #lead>
+        <RouterLink
+          v-if="showAvatar"
+          to="/settings"
+          :aria-label="t('nav.settings')"
+          data-testid="nav-avatar"
+          class="-ms-1 grid size-11 shrink-0 place-items-center rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring md:hidden"
+        >
+          <ProfileAvatar class="size-9 text-sm" />
+        </RouterLink>
       </template>
       <template #fab>
         <QuickActions v-model:open="quickOpen" />

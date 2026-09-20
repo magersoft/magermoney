@@ -17,6 +17,7 @@ import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
 import { Button, CountrySelect, MoneyInput, useToast } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useCountryOptions } from '@/shared/countries/options';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
@@ -125,6 +126,39 @@ function payload() {
     : {};
   return { ...base, ...card };
 }
+/*
+ * What the browser's own `required` would refuse, asked a step earlier so the
+ * bar's button can show it. It is a floor, not the whole contract — the form
+ * still submits through `submit`, which is what actually reports a missing
+ * country and what the Enter key reaches.
+ */
+const complete = computed(
+  () => form.name.trim() !== '' && form.bank.trim() !== '' && Boolean(form.country),
+);
+
+const submitLabel = computed(() =>
+  editingId.value ? t('accounts.form.save') : t('accounts.form.create'),
+);
+const title = computed(() =>
+  editingId.value ? t('accounts.form.editTitle') : t('accounts.form.createTitle'),
+);
+
+usePageTitle(() => title.value);
+
+/*
+ * The same action, in the bar and at the foot of the form. A form you have
+ * scrolled to the bottom of should not make you go back up to save it, and one
+ * you have only glanced at should not make you scroll down — so both exist and
+ * both are the one `submit`.
+ */
+usePageAction(() => ({
+  label: submitLabel.value,
+  onSelect: () => void submit(),
+  disabled: !complete.value,
+  pending: busy.value,
+  testid: 'account-form-action',
+}));
+
 async function submit() {
   if (!form.country) {
     countryMissing.value = true;
@@ -155,8 +189,14 @@ async function submit() {
 
 <template>
   <form class="flex flex-col gap-6 pb-8" data-testid="account-form" @submit.prevent="submit">
-    <h1 class="text-2xl font-semibold tracking-[-0.01em]">
-      {{ editingId ? t('accounts.form.editTitle') : t('accounts.form.createTitle') }}
+    <!--
+      The bar says this on a phone, so the screen does not say it twice. A wide
+      window's bar carries the tab links instead, and the heading comes back —
+      it stays in the document either way, for whoever is listening rather than
+      looking.
+    -->
+    <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
+      {{ title }}
     </h1>
 
     <div class="flex flex-col gap-2">
@@ -271,7 +311,7 @@ async function submit() {
       :disabled="busy"
       data-testid="form-submit"
     >
-      {{ editingId ? t('accounts.form.save') : t('accounts.form.create') }}
+      {{ submitLabel }}
     </Button>
   </form>
 </template>

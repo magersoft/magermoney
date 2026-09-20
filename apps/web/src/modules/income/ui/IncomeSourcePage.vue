@@ -23,6 +23,7 @@ import { useAccounts } from '@/modules/accounts';
 import { useCurrencyRegistry } from '@/modules/currencies';
 import { MoneyText, todayIso } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { formatDay, type DateLocale } from '@/shared/dates/format';
 import { payDaysLabel } from '../domain/labels';
 import { toIncomeSource } from '../domain/mappers';
@@ -50,6 +51,24 @@ const { remove, isPending: removing } = useDeleteIncomeSource();
 
 const uiLocale = computed(() => locale.value as DateLocale);
 const source = computed(() => (dto.value ? toIncomeSource(dto.value, registry.value) : undefined));
+
+usePageTitle(() => dto.value?.name ?? null);
+/*
+ * Writing down money that arrived is what this screen is opened for, so it is
+ * the bar's action rather than the first of four buttons in a row. The three
+ * that are left are rarer or destructive, and they moved into the ⋯ menu —
+ * the same place the account screen keeps its own.
+ */
+usePageAction(() =>
+  dto.value
+    ? {
+        label: t('action.record'),
+        ariaLabel: t('inflows.record'),
+        onSelect: () => openSheet(),
+        testid: 'source-record-inflow',
+      }
+    : null,
+);
 const net = computed(() => (source.value ? netMonthly(source.value) : undefined));
 const netText = computed(() => net.value?.amount.toFixed(net.value.currency.scale) ?? '');
 const days = computed(() => payDaysLabel(dto.value?.payDays ?? []));
@@ -87,7 +106,11 @@ async function del() {
   <section v-if="dto && source && net" class="pb-8">
     <header>
       <div class="flex items-center gap-2">
-        <h1 class="truncate text-2xl font-semibold tracking-[-0.01em]" data-testid="source-title">
+        <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+        <h1
+          class="sr-only truncate text-2xl font-semibold tracking-[-0.01em] md:not-sr-only"
+          data-testid="source-title"
+        >
           {{ dto.name }}
         </h1>
         <Badge v-if="dto.isPrimary" variant="secondary">
@@ -125,14 +148,12 @@ async function del() {
       </p>
     </header>
 
+    <!--
+      What is left after the bar took "Record": rarer, and one of them
+      destructive, so they sit quietly under the figures rather than competing
+      with them.
+    -->
     <div class="mt-6 flex flex-wrap gap-2">
-      <Button
-        class="min-h-9 pointer-coarse:min-h-11"
-        data-testid="source-record-inflow"
-        @click="openSheet()"
-      >
-        {{ t('inflows.record') }}
-      </Button>
       <Button
         variant="outline"
         class="min-h-9 pointer-coarse:min-h-11"

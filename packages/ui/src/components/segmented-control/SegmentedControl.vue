@@ -40,7 +40,7 @@ function onKeydown(e: KeyboardEvent, index: number) {
     role="radiogroup"
     :aria-label="ariaLabel"
     data-slot="segmented-control"
-    :class="cn('flex items-center gap-0.5 rounded-lg bg-muted/60 p-0.5', props.class)"
+    :class="cn('flex items-center gap-0.5 rounded-lg bg-surface-sunken p-0.5', props.class)"
   >
     <button
       v-for="(option, index) in options"
@@ -54,7 +54,7 @@ function onKeydown(e: KeyboardEvent, index: number) {
       class="min-h-9 min-w-0 flex-1 truncate rounded-lg px-3 py-1 text-sm select-none outline-offset-2 transition-colors duration-fast focus-visible:outline-2 focus-visible:outline-ring pointer-coarse:min-h-11"
       :class="
         option.value === modelValue
-          ? 'bg-surface-raised text-foreground ring-1 ring-foreground/10'
+          ? 'bg-surface-raised font-semibold text-foreground shadow-card ring-1 ring-card-edge'
           : 'text-muted-foreground hover:text-foreground'
       "
       @click="emit('update:modelValue', option.value)"

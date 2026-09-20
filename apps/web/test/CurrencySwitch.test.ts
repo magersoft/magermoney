@@ -87,16 +87,53 @@ describe('CurrencySwitch', () => {
     for (const code of codes) expect(code.classes()).not.toContain('max-sm:sr-only');
   });
 
-  it('hands the codes to the screen reader below sm: once a third one arrives', async () => {
-    // Three codes, the rates link and the theme button do not fit a 375px
-    // header; the currency's own mark identifies the segment instead.
+  it('keeps the chosen code on a phone and hands only the others to the screen reader', async () => {
+    /*
+     * Three codes do not fit a 375px row, so the unchosen ones drop to the
+     * screen reader and each currency's own mark identifies its segment. The
+     * chosen one keeps its word at every width: three flags in a row say which
+     * currencies there are and nothing about which one is on.
+     */
     const wrapper = mountSwitch(['USD', 'EUR', 'RUB']);
     await flushPromises();
 
-    const codes = wrapper.get('[data-testid="currency-switch"]').findAll('span.font-mono');
+    const segments = wrapper.get('[data-testid="currency-switch"]').findAll('button');
+    expect(segments).toHaveLength(3);
 
-    expect(codes).toHaveLength(3);
-    for (const code of codes) expect(code.classes()).toContain('max-sm:sr-only');
+    for (const segment of segments) {
+      const code = segment.get('span.font-mono');
+      const chosen = segment.attributes('aria-pressed') === 'true';
+      expect(code.classes().includes('max-sm:sr-only'), code.text()).toBe(!chosen);
+    }
+  });
+
+  /*
+   * The whole point of the control, and it may not rest on colour alone: the
+   * chosen segment is raised onto its own surface and its code is set heavier.
+   */
+  it('marks the chosen segment by surface and weight, not by colour alone', async () => {
+    const wrapper = mountSwitch();
+    await flushPromises();
+
+    const chosen = wrapper
+      .get('[data-testid="currency-switch"]')
+      .findAll('button')
+      .find((b) => b.attributes('aria-pressed') === 'true')!;
+
+    expect(chosen.get('span.font-mono').classes()).toContain('font-semibold');
+    /* The raised surface is a sibling of the label, laid behind it. */
+    expect(chosen.get('div').classes()).toEqual(
+      expect.arrayContaining(['bg-surface-raised', 'ring-1', 'ring-card-edge']),
+    );
+
+    const others = wrapper
+      .get('[data-testid="currency-switch"]')
+      .findAll('button')
+      .filter((b) => b.attributes('aria-pressed') === 'false');
+    for (const other of others) {
+      expect(other.find('div').exists()).toBe(false);
+      expect(other.get('span.font-mono').classes()).not.toContain('font-semibold');
+    }
   });
 
   it('links to the rates screen, which no longer has a tab of its own', async () => {

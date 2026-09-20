@@ -33,6 +33,7 @@ import {
 import { useCurrencies } from '@/modules/currencies';
 import { todayIso } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import { usePageTitle } from '@/shared/layout/page-bar';
 import type { DateLocale } from '@/shared/dates/format';
 import { useDeleteBudget, useUpdateBudget } from '../application/use-budget-mutations';
 import { useBudgets } from '../application/use-budgets';
@@ -86,6 +87,12 @@ const hasLimit = computed(
   () => form.monthlyLimit !== '' && new Decimal(form.monthlyLimit).greaterThan(0),
 );
 const found = computed(() => editingId.value === null || existing.value !== undefined);
+
+/*
+ * Only when editing. The wizard names its own steps, and a bar repeating
+ * "Budget" over "Which categories?" says less than the step already does.
+ */
+usePageTitle(() => (editingId.value === null ? null : t('budgets.form.editTitle')));
 const uiLocale = computed(() => locale.value as DateLocale);
 const back = () => router.replace({ name: 'plan', query: { tab: 'budgets' } });
 
@@ -158,7 +165,8 @@ const del = () => run(() => remove(editingId.value!));
       data-testid="budget-form"
       @submit.prevent="submit"
     >
-      <h1 class="text-2xl font-semibold tracking-[-0.01em]">
+      <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+      <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
         {{ t('budgets.form.editTitle') }}
       </h1>
 

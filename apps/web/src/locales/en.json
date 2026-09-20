@@ -311,7 +311,6 @@
     }
   },
   "theme": {
-    "label": "Switch theme (now {theme})",
     "system": "system",
     "light": "light",
     "dark": "dark"
@@ -457,6 +456,10 @@
     "theme": {
       "label": "Theme"
     },
+    "display": {
+      "label": "Display currency",
+      "hint": "Amounts on Home and in the lists are shown in it."
+    },
     "currencies": {
       "title": "Reporting currencies",
       "hint": "Amounts on the home screen switch between these. One of them is the main one.",
@@ -492,6 +495,11 @@
       "failedBody": "A link lasts an hour and works once. Ask for a new one.",
       "retry": "Back to sign in"
     }
+  },
+  "action": {
+    "back": "Back",
+    "add": "Add",
+    "record": "Record"
   },
   "a11y": {
     "primaryNav": "Main navigation",

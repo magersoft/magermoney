@@ -16,11 +16,11 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { Motion } from 'motion-v';
-import { PlusIcon } from '@lucide/vue';
-import { Button, TabBar, fadeUp } from '@magermoney/ui';
+import { TabBar, fadeUp } from '@magermoney/ui';
 import { BudgetsSegment } from '@/modules/budgets';
 import { ExpensesSegment } from '@/modules/expenses';
 import { IncomeSegment } from '@/modules/income';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 
 const TABS = ['income', 'expenses', 'budgets'] as const;
 type Tab = (typeof TABS)[number];
@@ -45,25 +45,30 @@ function openTab(value: string) {
   if (isTab(value)) void router.replace({ name: 'plan', query: { tab: value } });
 }
 const tabs = computed(() => TABS.map((value) => ({ value, label: t(`plan.tabs.${value}`) })));
+
+/*
+ * Adding is this screen's action, and what it adds is whichever ledger is open
+ * — so the bar says "Add" and the open tab says the rest. A screen reader gets
+ * the whole phrase, because it lands on the button without the tab strip above
+ * it.
+ */
+usePageTitle(() => t('plan.title'));
+
+usePageAction(() => ({
+  label: t('action.add'),
+  ariaLabel: t(`plan.add.${tab.value}`),
+  onSelect: () => void router.push({ name: ADD_ROUTE[tab.value] }),
+  testid: 'plan-add',
+}));
 </script>
 
 <template>
   <section class="flex flex-col gap-4 pb-8">
-    <header class="flex items-center justify-between gap-3 pt-1">
-      <h1 class="text-2xl font-semibold tracking-[-0.01em]">
+    <header class="pt-1">
+      <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+      <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
         {{ t('plan.title') }}
       </h1>
-      <Button
-        size="icon"
-        variant="outline"
-        class="size-11 rounded-full"
-        :aria-label="t(`plan.add.${tab}`)"
-        :title="t(`plan.add.${tab}`)"
-        data-testid="plan-add"
-        @click="router.push({ name: ADD_ROUTE[tab] })"
-      >
-        <PlusIcon aria-hidden="true" class="size-5" />
-      </Button>
     </header>
 
     <TabBar

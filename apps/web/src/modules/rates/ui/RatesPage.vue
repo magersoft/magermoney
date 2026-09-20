@@ -6,6 +6,7 @@ import { Badge, Button, CurrencyIcon, Skeleton, useToast } from '@magermoney/ui'
 import { toCurrency, useCurrencies } from '@/modules/currencies';
 import { Money } from '@magermoney/domain';
 import { formatMoney, type MoneyLocale } from '@/shared/money/format';
+import { usePageTitle } from '@/shared/layout/page-bar';
 import { useDisplayCurrency } from '../application/use-display-currency';
 import { useRates } from '../application/use-rates';
 import { useManualRate } from '../application/use-manual-rate';
@@ -16,6 +17,8 @@ const { toast } = useToast();
 const currencies = useCurrencies();
 const { current } = useDisplayCurrency();
 const { table, date, rows } = useRates();
+
+usePageTitle(() => t('rates.title'));
 const { remove } = useManualRate();
 const manualBases = computed(
   () => new Set(rows.value.filter((r) => r.source === 'manual').map((r) => r.base)),
@@ -64,7 +67,8 @@ async function removeManual(code: string) {
 
 <template>
   <section class="pb-8">
-    <h1 class="text-2xl font-semibold tracking-[-0.01em]">
+    <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+    <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
       {{ t('rates.title') }}
     </h1>
     <p class="mt-1 text-xs text-muted-foreground">

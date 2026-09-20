@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
@@ -15,7 +16,14 @@ vi.mock('@/modules/budgets', () => ({
 }));
 
 import PlanPage from '../src/modules/plan/ui/PlanPage.vue';
+import AppShell from '../src/shared/layout/AppShell.vue';
 
+/**
+ * Mounted inside the shell rather than alone: adding is declared as the top
+ * bar's action now, so a Plan with no bar around it has no "+" to press — and
+ * a test that mounted it bare would be asserting about a screen the app never
+ * shows.
+ */
 async function mountAt(path: string) {
   const blank = { template: '<div />' };
   const router = createRouter({
@@ -28,8 +36,9 @@ async function mountAt(path: string) {
     ],
   });
   await router.push(path);
-  const w = mount(PlanPage, {
+  const w = mount(AppShell, {
     global: { plugins: [createI18n({ legacy: false, locale: 'ru', messages: { ru } }), router] },
+    slots: { default: () => h(PlanPage) },
   });
   await flushPromises();
   return { w, router };

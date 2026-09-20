@@ -47,3 +47,18 @@ export const isCurrent = (item: NavItem, path: string): boolean =>
   item.owns.length === 0
     ? path === '/'
     : item.owns.some((p) => path === p || path.startsWith(`${p}/`));
+
+/**
+ * A tab's own screen — the place the navigation lands you. These are where a
+ * visit starts, so there is nothing behind them and the top bar shows no way
+ * back.
+ */
+export const isRoot = (path: string): boolean => NAV.some((item) => item.to === path);
+
+/**
+ * Where "back" goes when there is no history to step through: a screen opened
+ * from a link, a notification or a reloaded tab still owes the person a way
+ * out, and the tab that owns the path is the one they would have come from.
+ */
+export const backTarget = (path: string): string =>
+  NAV.find((item) => item.owns.some((p) => path === p || path.startsWith(`${p}/`)))?.to ?? '/';
