@@ -1,7 +1,7 @@
 ---
 id: TASK-045
 title: 'Шапка приложения: навигация назад слева и действие справа, как в дизайне Moni'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-20 07:25'
