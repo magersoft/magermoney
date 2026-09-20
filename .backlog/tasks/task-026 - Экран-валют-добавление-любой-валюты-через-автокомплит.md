@@ -4,11 +4,12 @@ title: 'Экран валют: добавление любой валюты че
 status: To Do
 assignee: []
 created_date: '2026-09-19 13:17'
+updated_date: '2026-09-20 09:32'
 labels:
   - ui
   - currencies
 dependencies:
-  - TASK-025
+  - TASK-050
 ordinal: 24000
 ---
 
