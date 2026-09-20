@@ -12,7 +12,7 @@ import {
   SheetTitle,
   useToast,
 } from '@magermoney/ui';
-import { useCurrencies } from '@/modules/currencies';
+import { AppCurrencySelect } from '@/modules/currencies';
 import type { MoneyLocale } from '@/shared/money/format';
 import { todayIso } from '../domain';
 import { useManualRate } from '../application/use-manual-rate';
@@ -22,7 +22,6 @@ const props = defineProps<{ open: boolean; base?: string }>();
 const emit = defineEmits<{ 'update:open': [open: boolean] }>();
 const { t, locale } = useI18n();
 const { toast } = useToast();
-const currencies = useCurrencies();
 const { set, isPending } = useManualRate();
 const base = ref(props.base ?? 'EUR');
 const date = ref(todayIso());
@@ -69,22 +68,13 @@ async function submit() {
         <SheetTitle>{{ t('rates.sheetTitle') }}</SheetTitle>
       </SheetHeader>
       <form class="mt-4 space-y-4" @submit.prevent="submit">
-        <label class="block"
-          ><span class="text-xs text-muted-foreground">{{ t('rates.currency') }}</span>
-          <select
-            v-model="base"
-            data-testid="manual-base"
-            class="mt-1 h-11 min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
-          >
-            <option
-              v-for="c in currencies.filter((x) => x.code !== 'USD')"
-              :key="c.code"
-              :value="c.code"
-            >
-              {{ c.code }}
-            </option>
-          </select>
-        </label>
+        <!-- Rates are stored against the dollar, so the dollar cannot be the one being priced. -->
+        <AppCurrencySelect
+          v-model="base"
+          :label="t('rates.currency')"
+          :filter="(c) => c.code !== 'USD'"
+          data-testid="manual-base"
+        />
         <label class="block"
           ><span class="text-xs text-muted-foreground">{{ t('rates.date') }}</span
           ><Input v-model="date" type="date" class="mt-1" data-testid="manual-date"

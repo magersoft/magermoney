@@ -5,18 +5,10 @@
  * Removing the current default moves it rather than sending a pair the API will
  * reject, and the last currency cannot be removed at all.
  */
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  Button,
-  CurrencyIcon,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@magermoney/ui';
-import { useCurrencies } from '@/modules/currencies';
+import { Button, CurrencyIcon, CurrencySelect } from '@magermoney/ui';
+import { useCurrencies, useCurrencyOptions } from '@/modules/currencies';
 import { withoutCurrency } from '../domain/profile';
 
 const props = defineProps<{
@@ -47,6 +39,20 @@ const rows = computed(() =>
 );
 
 const addable = computed(() => currencies.value.filter((c) => !props.selected.includes(c.code)));
+const addableOptions = useCurrencyOptions(addable);
+
+/*
+ * The picker is an action, not a field: choosing a currency adds it and the
+ * control goes back to its placeholder, ready for the next one. Holding on to
+ * the choice would leave the row showing a currency that is already in the
+ * list below it.
+ */
+const pending = ref('');
+watch(pending, (code) => {
+  if (!code) return;
+  add(code);
+  pending.value = '';
+});
 
 function add(code: string): void {
   if (!code || props.selected.includes(code)) return;
@@ -122,20 +128,18 @@ function makeDefault(code: string): void {
     </ul>
 
     <div class="mt-4 flex items-center gap-3">
-      <Select :key="selected.join()" @update:model-value="(v: unknown) => add(String(v))">
-        <SelectTrigger
-          class="h-11"
-          :aria-label="t('settings.currencies.add')"
-          :disabled="addable.length === 0"
-        >
-          <SelectValue :placeholder="t('settings.currencies.add')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="c in addable" :key="c.code" :value="c.code">
-            {{ c.code }} · {{ (locale === 'ru' ? c.nameRu : c.nameEn) ?? '' }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <CurrencySelect
+        v-model="pending"
+        :options="addableOptions"
+        :label="t('settings.currencies.add')"
+        :placeholder="t('settings.currencies.add')"
+        :search-placeholder="t('currencySelect.search')"
+        :empty-label="t('currencySelect.empty')"
+        :fiat-label="t('currencySelect.fiat')"
+        :crypto-label="t('currencySelect.crypto')"
+        :disabled="addable.length === 0"
+        class="flex-1"
+      />
     </div>
   </fieldset>
 </template>

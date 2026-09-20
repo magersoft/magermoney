@@ -10,3 +10,5 @@ export {
   useCurrencyCatalogue,
   useCurrencyRegistry,
 } from './application/use-currencies';
+export { toCurrencyOption, useCurrencyOptions } from './application/use-currency-options';
+export { default as AppCurrencySelect } from './ui/AppCurrencySelect.vue';

@@ -171,6 +171,9 @@ export { loadCountryFlags, countryFlagsReady } from './icons/country-flags';
 export { default as CountrySelect } from './components/country-select/CountrySelect.vue';
 export { default as CountryFlag } from './components/country-select/CountryFlag.vue';
 export { filterCountries } from './components/country-select/filter';
+export { default as CurrencySelect } from './components/currency-select/CurrencySelect.vue';
+export { filterCurrencies, groupCurrencies } from './components/currency-select/filter';
+export type { CurrencyGroup, CurrencyOption } from './components/currency-select/filter';
 export type { CountryOption } from './components/country-select/filter';
 
 export {

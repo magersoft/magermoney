@@ -8,6 +8,7 @@ import ru from '../src/locales/ru.json';
 import { API_KEY } from '../src/shared/api/use-api.js';
 import AccountFormPage from '../src/modules/accounts/ui/AccountFormPage.vue';
 import AppShell from '../src/shared/layout/AppShell.vue';
+import { pickCurrency } from './fixtures/currency-picker.js';
 
 const currencies = [
   {
@@ -127,7 +128,7 @@ describe('AccountFormPage', () => {
     await w.get('[data-testid="form-name"]').setValue('Карман');
     await w.get('[data-testid="form-bank"]').setValue('Bank');
     await pickCountry(w, 'Росс', 'RU');
-    await w.get('[data-testid="form-currency"]').setValue('EUR');
+    await pickCurrency(w.get('[data-testid="form-currency"]').element, 'EUR');
     await w.get('[data-testid="account-form"]').trigger('submit');
     await flushPromises();
 

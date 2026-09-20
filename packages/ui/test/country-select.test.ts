@@ -89,6 +89,14 @@ describe('CountrySelect', () => {
     w.unmount();
   });
 
+  it('still offers every country when it opens on one already chosen', async () => {
+    const w = open('PT');
+    await w.get('[data-testid="country-trigger"]').trigger('click');
+    await flushPromises();
+    expect(listed()).toEqual(['DE', 'PT', 'RU']);
+    w.unmount();
+  });
+
   it('says what is wrong where the value would be, and announces it', () => {
     const w = mount(CountrySelect, {
       props: { options: OPTIONS, modelValue: null, ...WORDS, error: 'Выберите страну' },

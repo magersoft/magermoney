@@ -3,6 +3,7 @@ import { DOMWrapper, flushPromises } from '@vue/test-utils';
 import InflowSheet from '../src/modules/income/ui/InflowSheet.vue';
 import { inflowDto, sourceDto, SOURCE_ID } from './fixtures/income.js';
 import { acc, apiOf, json, mountAt } from './fixtures/income-mount.js';
+import { pickCurrency } from './fixtures/currency-picker.js';
 
 const { toast } = vi.hoisted(() => ({ toast: vi.fn() }));
 vi.mock('@magermoney/ui', async (importOriginal) => {
@@ -112,7 +113,7 @@ describe('InflowSheet', () => {
     await flushPromises();
     await body().get('[data-testid="inflow-source"]').setValue('__new__');
     await body().get('[data-testid="inflow-new-name"]').setValue('Gift');
-    await body().get('[data-testid="inflow-new-currency"]').setValue('EUR');
+    await pickCurrency(body().get('[data-testid="inflow-new-currency"]').element, 'EUR');
     await body().get('[data-testid="inflow-amount"]').setValue('50');
     await body().get('form').trigger('submit');
     await flushPromises();

@@ -22,8 +22,8 @@ import {
   useToast,
 } from '@magermoney/ui';
 import { useAccounts } from '@/modules/accounts';
-import { useCurrencies, useCurrencyRegistry } from '@/modules/currencies';
-import { todayIso, useRates } from '@/modules/rates';
+import { AppCurrencySelect, useCurrencies, useCurrencyRegistry } from '@/modules/currencies';
+import { todayIso, useDisplayCurrency, useRates } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import type { DateLocale } from '@/shared/dates/format';
 import { useIncomeSources } from '../application/use-income-sources';
@@ -45,6 +45,7 @@ const { toast } = useToast();
 const { dtos: sources } = useIncomeSources();
 const { accounts } = useAccounts();
 const currencies = useCurrencies();
+const { options: reportingCurrencies } = useDisplayCurrency();
 const registry = useCurrencyRegistry();
 const rates = useRates();
 const { create, isPending: creating } = useCreateInflow();
@@ -275,13 +276,16 @@ async function del() {
             <span class="text-xs font-medium text-muted-foreground">{{
               t('inflows.newCurrency')
             }}</span>
-            <select
+            <!-- Compact: the column is 7rem wide, and the name beside it is the
+                 field that matters here. -->
+            <AppCurrencySelect
               v-model="newCurrency"
+              variant="compact"
+              :label="t('inflows.newCurrency')"
+              :frequent="reportingCurrencies"
               data-testid="inflow-new-currency"
-              class="mt-1 flex min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
-            >
-              <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }}</option>
-            </select>
+              class="mt-1"
+            />
           </label>
         </div>
 

@@ -151,7 +151,18 @@ function clear() {
     </ComboboxAnchor>
 
     <ComboboxList align="start">
-      <ComboboxInput v-model="query" :placeholder="props.searchPlaceholder" />
+      <!--
+        `display-value` has to be pinned to the query. Left to itself the
+        combobox writes the chosen country's code into the search field when the
+        list opens, which this component then reads as a search for that code —
+        so editing an account showed a list of exactly the country it already
+        had.
+      -->
+      <ComboboxInput
+        v-model="query"
+        :display-value="() => query"
+        :placeholder="props.searchPlaceholder"
+      />
       <ComboboxEmpty>{{ props.emptyLabel }}</ComboboxEmpty>
       <ComboboxViewport>
         <ComboboxItem

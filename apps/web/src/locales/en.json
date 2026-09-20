@@ -512,6 +512,15 @@
   "money": {
     "noRate": "No rate for {code} on {date}"
   },
+  "currencySelect": {
+    "label": "Currency",
+    "placeholder": "Pick a currency",
+    "search": "Name or code",
+    "empty": "Nothing matches",
+    "fiat": "Currencies",
+    "crypto": "Crypto",
+    "frequent": "Yours"
+  },
   "rates": {
     "title": "Rates",
     "asOf": "Rates for {date}, in {code}",

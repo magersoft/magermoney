@@ -15,12 +15,13 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
 import { Button, CountrySelect, MoneyInput, useToast } from '@magermoney/ui';
-import { useCurrencies } from '@/modules/currencies';
+import { AppCurrencySelect, useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useCountryOptions } from '@/shared/countries/options';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
+import { useDisplayCurrency } from '@/modules/rates';
 import { useAccount } from '../application/use-accounts';
 import { useCreateAccount, useUpdateAccount } from '../application/use-account-mutations';
 import FormFieldRow from './FormFieldRow.vue';
@@ -31,6 +32,8 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const { toast } = useToast();
 const currencies = useCurrencies();
+/* The report currencies first: the ones this person already thinks in. */
+const { options: reportingCurrencies } = useDisplayCurrency();
 const countries = useCountryOptions();
 const editingId = computed(() => (route.params.id ? String(route.params.id) : null));
 const existing = useAccount(() => editingId.value ?? '');
@@ -217,21 +220,14 @@ async function submit() {
         :error="countryError"
         data-testid="form-country"
       />
-      <FormFieldRow
+      <AppCurrencySelect
+        v-model="form.currency"
         :label="t('accounts.form.currency')"
         :hint="currencyLocked ? t('accounts.form.currencyLocked') : undefined"
-      >
-        <select
-          v-model="form.currency"
-          :disabled="currencyLocked"
-          data-testid="form-currency"
-          :class="[CONTROL, 'disabled:opacity-60']"
-        >
-          <option v-for="c in currencies" :key="c.code" :value="c.code">
-            {{ c.code }}
-          </option>
-        </select>
-      </FormFieldRow>
+        :frequent="reportingCurrencies"
+        :disabled="currencyLocked"
+        data-testid="form-currency"
+      />
       <FormFieldRow :label="t('accounts.form.kind')">
         <select v-model="form.kind" data-testid="form-kind" :class="CONTROL">
           <option v-for="k in ACCOUNT_KINDS" :key="k" :value="k">

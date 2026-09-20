@@ -26,10 +26,9 @@ import {
   InputRow,
   MoneyInput,
   ProgressRule,
-  SelectRow,
   useToast,
 } from '@magermoney/ui';
-import { useCurrencies } from '@/modules/currencies';
+import { AppCurrencySelect, useCurrencies } from '@/modules/currencies';
 import { todayIso, useDisplayCurrency } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import type { DateLocale } from '@/shared/dates/format';
@@ -58,7 +57,7 @@ const emit = defineEmits<{
 const { t, locale } = useI18n();
 const { toast } = useToast();
 const currencies = useCurrencies();
-const { current: displayCurrency } = useDisplayCurrency();
+const { current: displayCurrency, options: reportingCurrencies } = useDisplayCurrency();
 const { create, isPending } = useCreateBudget();
 
 const step = ref<BudgetStep>('period');
@@ -78,9 +77,6 @@ const isLast = computed(() => step.value === 'confirm');
 const canAdvance = computed(() => isStepComplete(draft.value, step.value));
 const scale = computed(
   () => currencies.value.find((c) => c.code === draft.value.currency)?.scale ?? 2,
-);
-const currencyOptions = computed(() =>
-  currencies.value.map((c) => ({ value: c.code, label: c.code })),
 );
 const palette = computed(() =>
   BUDGET_PALETTE.map((c) => ({
@@ -174,11 +170,11 @@ async function forward() {
         />
       </template>
 
-      <SelectRow
+      <AppCurrencySelect
         v-else-if="step === 'currency'"
         v-model="draft.currency"
         :label="t('budgets.form.currency')"
-        :options="currencyOptions"
+        :frequent="reportingCurrencies"
         data-testid="budget-currency"
       />
 

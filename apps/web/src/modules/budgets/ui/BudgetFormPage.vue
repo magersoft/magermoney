@@ -30,8 +30,8 @@ import {
   Skeleton,
   useToast,
 } from '@magermoney/ui';
-import { useCurrencies } from '@/modules/currencies';
-import { todayIso } from '@/modules/rates';
+import { AppCurrencySelect, useCurrencies } from '@/modules/currencies';
+import { todayIso, useDisplayCurrency } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import { usePageTitle } from '@/shared/layout/page-bar';
 import type { DateLocale } from '@/shared/dates/format';
@@ -44,6 +44,7 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const { toast } = useToast();
 const currencies = useCurrencies();
+const { options: reportingCurrencies } = useDisplayCurrency();
 const { dtos, isLoading, isError } = useBudgets();
 const { update, isPending: updating } = useUpdateBudget();
 const { remove } = useDeleteBudget();
@@ -188,19 +189,12 @@ const del = () => run(() => remove(editingId.value!));
         />
       </label>
 
-      <label class="block">
-        <span class="text-muted-foreground text-xs font-medium">{{
-          t('budgets.form.currency')
-        }}</span>
-        <!-- Native select, like the income and expense forms: the e2e drives it with `selectOption`, and on a phone the platform picker wins. -->
-        <select
-          v-model="form.currency"
-          data-testid="budget-currency"
-          class="border-border bg-background mt-1 flex min-h-11 w-full rounded-lg border px-3 text-sm"
-        >
-          <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }}</option>
-        </select>
-      </label>
+      <AppCurrencySelect
+        v-model="form.currency"
+        :label="t('budgets.form.currency')"
+        :frequent="reportingCurrencies"
+        data-testid="budget-currency"
+      />
 
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
