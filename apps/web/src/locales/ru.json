@@ -514,7 +514,7 @@
   },
   "currencySelect": {
     "label": "Валюта",
-    "placeholder": "Выберите валюту",
+    "placeholder": "Выбрать валюту",
     "search": "Название или код",
     "empty": "Ничего не нашлось",
     "fiat": "Валюты",

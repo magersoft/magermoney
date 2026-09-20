@@ -172,7 +172,7 @@ const {
         :disabled-codes="connectedCodes"
         :disabled-label="t('currencies.alreadyAdded')"
         :label="t('currencies.add')"
-        :placeholder="loadingCatalogue ? t('currencies.loading') : t('currencies.add')"
+        :placeholder="loadingCatalogue ? t('currencies.loading') : t('currencySelect.placeholder')"
         :search-placeholder="t('currencySelect.search')"
         :empty-label="t('currencySelect.empty')"
         :fiat-label="t('currencySelect.fiat')"

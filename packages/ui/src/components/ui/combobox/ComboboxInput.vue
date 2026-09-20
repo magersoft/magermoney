@@ -30,25 +30,31 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
     does not carry. The wrapper is the same two things without it: the search
     mark, and a rule under the field that separates it from the list.
   -->
-  <div
-    data-slot="combobox-input-wrapper"
-    class="border-border flex h-12 items-center gap-2.5 border-b px-3 md:h-11"
-  >
-    <SearchIcon class="size-4 shrink-0 opacity-50" />
+  <div data-slot="combobox-input-wrapper" class="border-border border-b p-2">
     <!--
-      16px on a phone, and no smaller: Safari zooms the whole page into any
-      field it has to magnify to read, and coming back out of that zoom is
-      manual. The desktop size is the one the rest of the popup is set in.
+      A field, drawn as one: the search used to run edge to edge with a rule
+      beneath it, which put the text hard against the popup's corner and read
+      as a heading someone had left a caret in.
     -->
-    <ComboboxInput
-      data-slot="combobox-input"
-      :class="
-        cn(
-          'placeholder:text-muted-foreground h-full flex-1 bg-transparent text-base outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-          props.class,
-        )
-      "
-      v-bind="{ ...$attrs, ...forwarded }"
-    />
+    <div
+      class="bg-surface-sunken focus-within:outline-ring flex h-11 items-center gap-2.5 rounded-lg px-3 outline-offset-[-2px] focus-within:outline-2"
+    >
+      <SearchIcon class="size-4 shrink-0 opacity-50" />
+      <!--
+        16px on a phone, and no smaller: Safari zooms the whole page into any
+        field it has to magnify to read, and coming back out of that zoom is
+        manual. The desktop size is the one the rest of the popup is set in.
+      -->
+      <ComboboxInput
+        data-slot="combobox-input"
+        :class="
+          cn(
+            'placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent text-base leading-none outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+            props.class,
+          )
+        "
+        v-bind="{ ...$attrs, ...forwarded }"
+      />
+    </div>
   </div>
 </template>
