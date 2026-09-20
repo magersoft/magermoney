@@ -1,9 +1,11 @@
 ---
 id: TASK-054
 title: 'Импорт: строка курсов ищется подстрокой и молча находит подзаголовок'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-20 18:14'
+updated_date: '2026-09-20 18:15'
 labels: []
 dependencies: []
 type: bug
