@@ -1,7 +1,7 @@
 ---
 id: TASK-048
 title: 'Главная: у переключателя валют не видно выбранной валюты'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-20 07:39'
