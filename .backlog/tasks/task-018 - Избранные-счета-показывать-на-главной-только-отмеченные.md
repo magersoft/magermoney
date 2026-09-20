@@ -1,7 +1,7 @@
 ---
 id: TASK-018
 title: 'Избранные счета: показывать на главной только отмеченные'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-19 13:03'
@@ -67,3 +67,13 @@ Not done here: no live browser screenshot, the app needs a Supabase backend this
 
 Validation: bun run test (801 tests across 6 packages), bun run lint, bun run typecheck, bun run build — all green.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Added a Pinned account flag end to end so the Home strip is a short overview again instead of a row that grows with every account.
+
+Migration 20260920000012 adds accounts.is_pinned (not null, default false); contracts carry isPinned in the DTO, default it to false on create and leave it out of a partial update unless sent; the API returns and patches it through the existing account update (still filtered by userId); the account form has a second switch row, 'On Home'; the Accounts screen marks a pinned card with a pin; and the Home strip shows only pinned accounts in the same order, with a hint pointing at the switch when nothing is pinned rather than falling back to showing everything.
+
+Verified with: new contract tests (create default, partial update), a new API test (created unpinned → PATCH pins → list reflects it → another user gets 404), new web tests for the filtered strip, the nothing-pinned hint, the card marker and the form switch, plus a real-postgres run of the migration on both a clean base and an existing row and of PgAccountRepository create/update/list. bun run test (801 tests), lint, typecheck and build all pass.
+<!-- SECTION:FINAL_SUMMARY:END -->
