@@ -1,11 +1,17 @@
 <script setup lang="ts">
 /**
- * Which currencies this person uses.
+ * Which currencies this person uses, and which three of them the display
+ * switch offers.
  *
  * The catalogue holds a couple of hundred; this screen is the short list they
  * picked out of it, and the one place to add to it or take something off. Every
  * other screen — the account form, the budget wizard, the rates list — offers
  * exactly what is here.
+ *
+ * The switch's currencies sit at the top, in the order the switch shows them,
+ * because that list is read as a picture of the control it drives: someone
+ * checking what the header will look like should not have to assemble it from
+ * ticks scattered down a list of twenty. Everything else follows underneath.
  *
  * The rows say two things a code cannot: the currency's name, and whether
  * anyone quotes a rate for it. A currency nobody quotes still works; it just
@@ -14,9 +20,18 @@
  */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { MAX_REPORTING_CURRENCIES } from '@magermoney/contracts';
 import { Button, CurrencyIcon, CurrencySelect, Skeleton, useToast } from '@magermoney/ui';
+import { useProfile } from '@/modules/profile';
 import { ApiError } from '@/shared/api/client';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
+import {
+  addToSwitch,
+  makeMain,
+  moveInSwitch,
+  removeFromSwitch,
+  type SwitchList,
+} from '../domain/switch-list';
 import {
   useConnectedCurrencies,
   useCurrencies,
@@ -29,6 +44,7 @@ const { toast } = useToast();
 
 const connected = useCurrencies();
 const { connect, disconnect, isPending } = useConnectedCurrencies();
+const { profile, update } = useProfile();
 
 /*
  * The catalogue is a couple of hundred rows and no other screen wants it — but
@@ -41,10 +57,22 @@ const options = useCurrencyOptions(connected);
 
 const connectedCodes = computed(() => connected.value.map((c) => c.code));
 
+const switchList = computed<SwitchList>(() => ({
+  reportingCurrencies: profile.value?.reportingCurrencies ?? [],
+  defaultCurrency: profile.value?.defaultCurrency ?? '',
+}));
+const inSwitch = computed(() => switchList.value.reportingCurrencies);
+const full = computed(() => inSwitch.value.length >= MAX_REPORTING_CURRENCIES);
+
 /* Joined once here rather than looked up per row inside the template. */
 const rows = computed(() =>
   options.value.map((o, i) => ({ ...o, quoted: connected.value[i]?.rateSource !== null })),
 );
+const byCode = computed(() => new Map(rows.value.map((r) => [r.code, r])));
+
+/** The switch's own currencies, in the order it shows them. */
+const switchRows = computed(() => inSwitch.value.flatMap((c) => byCode.value.get(c) ?? []));
+const otherRows = computed(() => rows.value.filter((r) => !inSwitch.value.includes(r.code)));
 
 usePageTitle(() => t('currencies.title'));
 /*
@@ -86,6 +114,27 @@ async function remove(code: string) {
     toast(e instanceof ApiError ? e.message : t('currencies.removeFailed'));
   }
 }
+
+/**
+ * Every change to the switch goes through here, so the disabled states above
+ * and the request below cannot disagree: a move the rules refuse returns null,
+ * and nothing is sent.
+ */
+async function applySwitch(next: SwitchList | null) {
+  if (!next) return;
+  try {
+    await update(next);
+  } catch (e) {
+    toast(e instanceof ApiError ? e.message : t('currencies.switchFailed'));
+  }
+}
+
+const toggle = (code: string) =>
+  applySwitch(
+    inSwitch.value.includes(code)
+      ? removeFromSwitch(switchList.value, code)
+      : addToSwitch(switchList.value, code),
+  );
 </script>
 
 <template>
@@ -119,47 +168,217 @@ async function remove(code: string) {
     </div>
 
     <Skeleton v-if="connected.length === 0" class="mt-4 h-12 w-full" />
-    <ul v-else class="divide-border/60 mt-4 divide-y" data-testid="currencies-list">
-      <li
-        v-for="c in rows"
-        :key="c.code"
-        :data-testid="`currency-row-${c.code}`"
-        class="flex min-h-14 items-center gap-3 py-2"
-      >
-        <CurrencyIcon :code="c.code" :kind="c.kind" :size="24" />
-        <span class="flex min-w-0 flex-1 flex-col">
-          <span class="truncate text-sm">{{ c.name }}</span>
-          <span v-if="!c.quoted" class="text-muted-foreground text-xs">{{
-            t('currencies.noRateSource')
-          }}</span>
-        </span>
-        <span class="text-muted-foreground shrink-0 font-mono text-xs tracking-[0.08em]">{{
-          c.code
-        }}</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          type="button"
-          class="shrink-0 pointer-coarse:size-11"
-          :disabled="connected.length < 2 || isPending"
-          :aria-label="t('currencies.remove', { code: c.code })"
-          :title="t('currencies.remove', { code: c.code })"
-          :data-testid="`currency-remove-${c.code}`"
-          @click="remove(c.code)"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            class="size-4"
-            aria-hidden="true"
+
+    <template v-else>
+      <section class="mt-6" aria-labelledby="switch-heading">
+        <div class="flex items-baseline justify-between gap-3">
+          <h2 id="switch-heading" class="text-sm font-medium">
+            {{ t('currencies.switchSection') }}
+          </h2>
+          <!-- The counter is the answer to "why can I not tick this one". -->
+          <span
+            class="text-muted-foreground shrink-0 font-mono text-xs tabular-nums"
+            data-testid="switch-count"
+            >{{
+              t('currencies.switchCount', { n: inSwitch.length, max: MAX_REPORTING_CURRENCIES })
+            }}</span
           >
-            <path d="M6 6l12 12M18 6 6 18" />
-          </svg>
-        </Button>
-      </li>
-    </ul>
+        </div>
+        <p class="text-muted-foreground mt-1 text-sm leading-relaxed">
+          {{ full ? t('currencies.switchFull') : t('currencies.switchHint') }}
+        </p>
+
+        <ul class="divide-border/60 mt-3 divide-y" data-testid="switch-list">
+          <li
+            v-for="(c, i) in switchRows"
+            :key="c.code"
+            :data-testid="`switch-row-${c.code}`"
+            class="flex min-h-14 items-center gap-2 py-2"
+          >
+            <CurrencyIcon :code="c.code" :kind="c.kind" :size="24" />
+            <span class="min-w-0 flex-1 truncate text-sm">{{ c.name }}</span>
+
+            <!-- Which one every new form starts from. A radio, because it is one of these. -->
+            <label
+              class="flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 px-1 text-xs"
+              :title="t('currencies.makeMain', { code: c.code })"
+            >
+              <input
+                type="radio"
+                name="main-currency"
+                class="accent-primary outline-ring size-4 outline-offset-2 focus-visible:outline-2"
+                :value="c.code"
+                :checked="c.code === switchList.defaultCurrency"
+                :data-testid="`switch-main-${c.code}`"
+                @change="applySwitch(makeMain(switchList, c.code))"
+              />
+              <span
+                :class="
+                  c.code === switchList.defaultCurrency
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
+                "
+                >{{ t('currencies.main') }}</span
+              >
+            </label>
+
+            <div class="flex shrink-0 items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                class="pointer-coarse:size-11"
+                :disabled="i === 0"
+                :aria-label="t('currencies.moveUp', { code: c.code })"
+                :data-testid="`switch-up-${c.code}`"
+                @click="applySwitch(moveInSwitch(switchList, c.code, -1))"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="size-4"
+                  aria-hidden="true"
+                >
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                class="pointer-coarse:size-11"
+                :disabled="i === switchRows.length - 1"
+                :aria-label="t('currencies.moveDown', { code: c.code })"
+                :data-testid="`switch-down-${c.code}`"
+                @click="applySwitch(moveInSwitch(switchList, c.code, 1))"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="size-4"
+                  aria-hidden="true"
+                >
+                  <path d="M12 5v14M19 12l-7 7-7-7" />
+                </svg>
+              </Button>
+            </div>
+
+            <label class="flex min-h-11 shrink-0 cursor-pointer items-center px-1">
+              <input
+                type="checkbox"
+                checked
+                class="accent-primary outline-ring size-4 outline-offset-2 focus-visible:outline-2 disabled:opacity-50"
+                :disabled="switchRows.length < 2"
+                :aria-label="t('currencies.inSwitchAria', { code: c.code })"
+                :data-testid="`switch-toggle-${c.code}`"
+                @change="toggle(c.code)"
+              />
+            </label>
+
+            <!-- Disconnecting works here too: the backend takes the currency out
+                 of the switch on the way, so there is no order to get right. -->
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              class="shrink-0 pointer-coarse:size-11"
+              :disabled="connected.length < 2 || isPending"
+              :aria-label="t('currencies.remove', { code: c.code })"
+              :title="t('currencies.remove', { code: c.code })"
+              :data-testid="`currency-remove-${c.code}`"
+              @click="remove(c.code)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                class="size-4"
+                aria-hidden="true"
+              >
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </Button>
+          </li>
+        </ul>
+        <!-- Said once, next to the list it applies to, rather than on every row. -->
+        <p
+          v-if="switchRows.length < 2"
+          class="text-muted-foreground mt-2 text-xs"
+          data-testid="switch-last-note"
+        >
+          {{ t('currencies.lastInSwitch') }}
+        </p>
+      </section>
+
+      <section v-if="otherRows.length > 0" class="mt-8" aria-labelledby="others-heading">
+        <h2 id="others-heading" class="text-sm font-medium">
+          {{ t('currencies.others') }}
+        </h2>
+        <ul class="divide-border/60 mt-3 divide-y" data-testid="currencies-list">
+          <li
+            v-for="c in otherRows"
+            :key="c.code"
+            :data-testid="`currency-row-${c.code}`"
+            class="flex min-h-14 items-center gap-3 py-2"
+          >
+            <CurrencyIcon :code="c.code" :kind="c.kind" :size="24" />
+            <span class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm">{{ c.name }}</span>
+              <span v-if="!c.quoted" class="text-muted-foreground text-xs">{{
+                t('currencies.noRateSource')
+              }}</span>
+            </span>
+            <span class="text-muted-foreground shrink-0 font-mono text-xs tracking-[0.08em]">{{
+              c.code
+            }}</span>
+
+            <label class="flex min-h-11 shrink-0 cursor-pointer items-center px-1">
+              <input
+                type="checkbox"
+                class="accent-primary outline-ring size-4 outline-offset-2 focus-visible:outline-2 disabled:opacity-50"
+                :disabled="full"
+                :aria-label="t('currencies.inSwitchAria', { code: c.code })"
+                :data-testid="`switch-toggle-${c.code}`"
+                @change="toggle(c.code)"
+              />
+            </label>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              class="shrink-0 pointer-coarse:size-11"
+              :disabled="connected.length < 2 || isPending"
+              :aria-label="t('currencies.remove', { code: c.code })"
+              :title="t('currencies.remove', { code: c.code })"
+              :data-testid="`currency-remove-${c.code}`"
+              @click="remove(c.code)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                class="size-4"
+                aria-hidden="true"
+              >
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </Button>
+          </li>
+        </ul>
+      </section>
+    </template>
   </section>
 </template>

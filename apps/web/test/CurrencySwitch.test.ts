@@ -53,6 +53,13 @@ describe('CurrencySwitch', () => {
   // set of currencies has to start from a clean one.
   beforeEach(resetDisplayCurrency);
 
+  it('takes no room at all when there is one currency to switch between', async () => {
+    const wrapper = mountSwitch(['USD']);
+    await flushPromises();
+    expect(wrapper.find('[data-testid="currency-switch"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
   it('gives every segment a 44px target on a coarse pointer', async () => {
     const wrapper = mountSwitch();
     await flushPromises();

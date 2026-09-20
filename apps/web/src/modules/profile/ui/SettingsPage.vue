@@ -5,7 +5,7 @@
  * moment it is made — there is no Save button, because there is nothing here
  * worth a second step — and shown immediately, with a toast if the PATCH fails.
  */
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import {
@@ -26,7 +26,6 @@ import { THEMES, useTheme, type Theme } from '@/shared/theme';
 import { ApiError } from '@/shared/api/client';
 import { LOCALES, type Locale } from '../domain/profile';
 import { useProfile } from '../application/use-profile';
-import CurrencyListEditor from './CurrencyListEditor.vue';
 
 const { t, locale } = useI18n();
 const { toast } = useToast();
@@ -46,8 +45,6 @@ watch(
   },
   { immediate: true },
 );
-
-const currencies = computed(() => profile.value?.reportingCurrencies ?? []);
 
 usePageTitle(() => t('settings.title'));
 
@@ -174,22 +171,6 @@ async function signOut(): Promise<void> {
             :rates-link="false"
             class="self-start"
             data-testid="settings-display-currency"
-          />
-        </div>
-
-        <div class="border-t border-border pt-6 md:pt-5">
-          <h2 class="text-sm font-medium">
-            {{ t('settings.currencies.title') }}
-          </h2>
-          <p class="mt-1 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            {{ t('settings.currencies.hint') }}
-          </p>
-          <CurrencyListEditor
-            v-if="profile"
-            :selected="currencies"
-            :default-currency="profile.defaultCurrency"
-            :busy="saving"
-            @change="(v) => save(v)"
           />
         </div>
 

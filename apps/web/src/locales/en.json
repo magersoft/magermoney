@@ -532,7 +532,20 @@
     "remove": "Remove {code}",
     "addFailed": "Could not add that currency.",
     "removeFailed": "Could not remove that currency.",
-    "settingsHint": "Add the currencies you use, and take off the ones you don't."
+    "settingsHint": "Add the currencies you use, and take off the ones you don't.",
+    "inSwitch": "In the switch",
+    "inSwitchAria": "Show {code} in the currency switch",
+    "switchSection": "Currency switch",
+    "switchHint": "Amounts on every screen switch between these. Tap one to add it.",
+    "switchCount": "{n} of {max}",
+    "switchFull": "Take one off to add another.",
+    "lastInSwitch": "Keep at least one.",
+    "main": "main",
+    "makeMain": "Make {code} the main currency",
+    "moveUp": "Move {code} earlier",
+    "moveDown": "Move {code} later",
+    "others": "Everything else",
+    "switchFailed": "Could not change the switch."
   },
   "rates": {
     "title": "Rates",
