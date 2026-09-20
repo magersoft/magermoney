@@ -44,6 +44,24 @@ export const scaleIn = {
 } as const;
 
 /**
+ * A sheet coming up from the bottom edge. It travels further than `fadeUp`'s
+ * 8px because it is a bigger object and it arrives from off-screen — but it
+ * still settles rather than springs, and it leaves in 150ms, because going away
+ * must never hold anyone up. Only `transform` and `opacity`, so the panel never
+ * relayouts the form inside it while it moves.
+ */
+export const sheetUp = {
+  initial: { opacity: 0, transform: 'translateY(24px)' },
+  animate: { opacity: 1, transform: 'translateY(0px)' },
+  exit: {
+    opacity: 0,
+    transform: 'translateY(24px)',
+    transition: { duration: 0.15, ease: 'linear' },
+  },
+  transition: { duration: 0.24, ease: EASE_OUT_QUART },
+} as const;
+
+/**
  * Something appearing in place inside something that is already moving: a field
  * a form grows, a line that answers what was just typed. Opacity only — a
  * second movement inside a sliding sheet reads as the form jumping — at the
@@ -71,7 +89,7 @@ export const listStagger = (i: number) => ({
 
 /** The shape every preset satisfies; `listStagger` returns one of these. */
 export type MotionPreset =
-  typeof fadeUp | typeof scaleIn | typeof fade | ReturnType<typeof listStagger>;
+  typeof fadeUp | typeof scaleIn | typeof fade | typeof sheetUp | ReturnType<typeof listStagger>;
 
 /**
  * Strips the movement out of a preset when the user asked for reduced motion,

@@ -48,6 +48,7 @@
       "name": "@magermoney/web",
       "version": "0.0.0",
       "dependencies": {
+        "@lucide/vue": "^1.45.0",
         "@magermoney/contracts": "workspace:*",
         "@magermoney/domain": "workspace:*",
         "@magermoney/ui": "workspace:*",
@@ -137,6 +138,7 @@
         "@iconify/utils": "^3.1.7",
         "@magermoney/config": "workspace:*",
         "@tailwindcss/vite": "^4.3.3",
+        "@types/node": "^24.0.0",
         "@vitejs/plugin-vue": "^6.0.0",
         "@vue/test-utils": "^2.5.0",
         "happy-dom": "^18.0.0",

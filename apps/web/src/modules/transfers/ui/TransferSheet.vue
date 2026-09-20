@@ -1,8 +1,15 @@
 <script setup lang="ts">
 /**
- * Money from one account to another. When currencies match the person types
- * one number; when they differ, two, with the day's rate as a hint and the
- * realised rate shown once both are in — the fee hides inside that rate.
+ * Money from one account to another, on the reference's add-operation layout
+ * (slide 13): what is sent is the first and largest field, the kind of
+ * operation is the segment under it, and the accounts are rows.
+ *
+ * When currencies match the person types one number; when they differ, two,
+ * with the day's rate as a hint and the realised rate shown once both are in —
+ * the fee hides inside that rate. That arithmetic is unchanged.
+ *
+ * The currency beside the amount is the sending account's and only ever that:
+ * a transfer cannot be made in a currency the account is not kept in.
  */
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -10,13 +17,13 @@ import type { TransferDto } from '@magermoney/contracts';
 import { Money, deriveTransfer } from '@magermoney/domain';
 import {
   Button,
-  Input,
+  InputRow,
   MoneyInput,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
+  QuickActionSheet,
+  SelectRow,
   useToast,
+  type AmountLocale,
+  type SegmentedOption,
 } from '@magermoney/ui';
 import { useAccounts } from '@/modules/accounts';
 import { useCurrencies, useCurrencyRegistry } from '@/modules/currencies';
@@ -30,8 +37,18 @@ import {
   useUpdateTransfer,
 } from '../application/use-transfer-mutations';
 
-const props = defineProps<{ open: boolean; fromAccountId?: string; transfer?: TransferDto }>();
-const emit = defineEmits<{ 'update:open': [open: boolean] }>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    fromAccountId?: string;
+    transfer?: TransferDto;
+    types?: readonly SegmentedOption[];
+    type?: string;
+  }>(),
+  { fromAccountId: undefined, transfer: undefined, types: () => [], type: '' },
+);
+const emit = defineEmits<{ 'update:open': [open: boolean]; 'update:type': [type: string] }>();
+
 const { t, locale } = useI18n();
 /**
  * A plain computed rather than an inline `as 'ru' | 'en'` cast in the
@@ -39,6 +56,7 @@ const { t, locale } = useI18n();
  * `|` inside a bound attribute as a (deprecated) filter pipe.
  */
 const uiLocale = computed(() => locale.value as DateLocale);
+const amountLocale = computed(() => locale.value as AmountLocale);
 const { toast } = useToast();
 const { accounts } = useAccounts();
 const currencies = useCurrencies();
@@ -55,6 +73,7 @@ const received = ref('');
 const fee = ref('');
 const occurredAt = ref(toLocalInput(new Date().toISOString()));
 const note = ref('');
+const showErrors = ref(false);
 /**
  * The `datetime-local` field only has minute precision, so its default value
  * ("now") is coarser than the server's own `now()` — sending it unconditionally
@@ -75,6 +94,7 @@ watch(
     occurredAt.value = toLocalInput(props.transfer?.occurredAt ?? new Date().toISOString());
     note.value = props.transfer?.note ?? '';
     dateTouched.value = false;
+    showErrors.value = false;
   },
   { immediate: true },
 );
@@ -86,6 +106,12 @@ const scaleOf = (code: string | undefined) =>
   currencies.value.find((c) => c.code === code)?.scale ?? 2;
 const cross = computed(() =>
   Boolean(fromAcc.value && toAcc.value && fromAcc.value.currency !== toAcc.value.currency),
+);
+const label = (a: (typeof accounts.value)[number]) =>
+  t('transfers.option', { name: a.name, balance: a.balance ?? '0', currency: a.currency });
+const fromOptions = computed(() => active.value.map((a) => ({ value: a.id, label: label(a) })));
+const toOptions = computed(() =>
+  active.value.filter((a) => a.id !== from.value).map((a) => ({ value: a.id, label: label(a) })),
 );
 
 const hint = computed(() => {
@@ -114,12 +140,21 @@ const realised = computed(() => {
 });
 const canSubmit = computed(
   () =>
-    from.value &&
-    to.value &&
+    Boolean(from.value) &&
+    Boolean(to.value) &&
     from.value !== to.value &&
     sent.value !== '' &&
     (!cross.value || received.value !== ''),
 );
+/* Said on the field it is about, and only once the sheet is asked to send. */
+const fromError = computed(() =>
+  showErrors.value && !from.value ? t('transfers.fromRequired') : undefined,
+);
+const toError = computed(() => {
+  if (!showErrors.value) return undefined;
+  if (!to.value) return t('transfers.toRequired');
+  return to.value === from.value ? t('transfers.sameAccount') : undefined;
+});
 
 function amounts() {
   if (cross.value) return { amountSent: sent.value, amountReceived: received.value };
@@ -146,7 +181,10 @@ function messageFor(e: unknown): string {
   return t(errorKeyFor(e, 'transfers.failed'));
 }
 async function submit() {
-  if (!canSubmit.value) return;
+  if (!canSubmit.value) {
+    showErrors.value = true;
+    return;
+  }
   const input = {
     ...amounts(),
     ...(dateTouched.value ? { occurredAt: fromLocalInput(occurredAt.value) } : {}),
@@ -175,125 +213,109 @@ async function del() {
     toast(messageFor(e));
   }
 }
-const label = (a: (typeof accounts.value)[number]) =>
-  t('transfers.option', { name: a.name, balance: a.balance ?? '0', currency: a.currency });
 </script>
 
 <template>
-  <Sheet :open="open" @update:open="emit('update:open', $event)">
-    <SheetContent side="bottom" class="rounded-t-2xl pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <SheetHeader>
-        <SheetTitle>
-          {{ transfer ? t('transfers.editTitle') : t('transfers.sheetTitle') }}
-        </SheetTitle>
-      </SheetHeader>
-      <form class="mt-4 space-y-4" @submit.prevent="submit">
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{ t('transfers.from') }}</span>
-          <select
-            v-model="from"
-            data-testid="transfer-from"
-            :disabled="Boolean(transfer)"
-            class="mt-1 flex min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
-          >
-            <option v-for="a in active" :key="a.id" :value="a.id">{{ label(a) }}</option>
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{ t('transfers.to') }}</span>
-          <select
-            v-model="to"
-            data-testid="transfer-to"
-            :disabled="Boolean(transfer)"
-            class="mt-1 flex min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
-          >
-            <option v-for="a in active.filter((x) => x.id !== from)" :key="a.id" :value="a.id">
-              {{ label(a) }}
-            </option>
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground"
-            >{{ t('transfers.sent') }} · {{ fromAcc?.currency }}</span
-          >
-          <MoneyInput
-            v-model="sent"
-            data-testid="transfer-sent"
-            :scale="scaleOf(fromAcc?.currency)"
-            :locale="uiLocale"
-            class="mt-1"
-            autofocus
-          />
-        </label>
-        <label v-if="cross" class="block">
-          <span class="text-xs font-medium text-muted-foreground"
-            >{{ t('transfers.received') }} · {{ toAcc?.currency }}</span
-          >
-          <MoneyInput
-            v-model="received"
-            data-testid="transfer-received"
-            :scale="scaleOf(toAcc?.currency)"
-            :locale="uiLocale"
-            class="mt-1"
-          />
-          <span
-            v-if="hint"
-            data-testid="transfer-hint"
-            class="mt-1 block text-xs text-muted-foreground"
-            >{{ t('transfers.hint', { amount: `${hint} ${toAcc?.currency}` }) }}</span
-          >
-          <span v-if="realised" class="mt-1 block text-xs text-muted-foreground">{{
-            t('transfers.rate', { from: fromAcc?.currency, to: toAcc?.currency, rate: realised })
-          }}</span>
-        </label>
-        <label v-else class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{ t('transfers.fee') }}</span>
-          <MoneyInput
-            v-model="fee"
-            data-testid="transfer-fee"
-            :scale="scaleOf(fromAcc?.currency)"
-            :locale="uiLocale"
-            class="mt-1"
-          />
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{
-            t('transfers.occurredAt')
-          }}</span>
-          <Input
-            v-model="occurredAt"
-            type="datetime-local"
-            class="mt-1"
-            data-testid="transfer-occurred-at"
-            @change="dateTouched = true"
-          />
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{ t('transfers.note') }}</span>
-          <Input v-model="note" class="mt-1" />
-        </label>
-        <div class="flex gap-2">
-          <Button
-            type="submit"
-            size="lg"
-            class="min-h-9 flex-1 pointer-coarse:min-h-11"
-            :disabled="!canSubmit || creating || updating"
-            data-testid="transfer-save"
-          >
-            {{ transfer ? t('transfers.update') : t('transfers.save') }}
-          </Button>
-          <Button
-            v-if="transfer"
-            type="button"
-            size="lg"
-            variant="destructive"
-            class="min-h-9 pointer-coarse:min-h-11"
-            @click="del"
-          >
-            {{ t('transfers.delete') }}
-          </Button>
-        </div>
-      </form>
-    </SheetContent>
-  </Sheet>
+  <QuickActionSheet
+    :open="props.open"
+    :title="props.transfer ? t('transfers.editTitle') : t('transfers.sheetTitle')"
+    :amount="sent"
+    :amount-label="t('transfers.sent')"
+    :code="fromAcc?.currency ?? ''"
+    :currencies="fromAcc ? [fromAcc.currency] : []"
+    :currency-label="t('transfers.sentCurrency')"
+    :scale="scaleOf(fromAcc?.currency)"
+    :locale="amountLocale"
+    :types="props.types"
+    :type="props.type"
+    :type-label="t('quick.type')"
+    :confirm-label="props.transfer ? t('transfers.update') : t('transfers.save')"
+    :close-label="t('transfers.cancel')"
+    :confirm-disabled="creating || updating"
+    data-testid="transfer-form"
+    @update:open="emit('update:open', $event)"
+    @update:amount="sent = $event"
+    @update:type="emit('update:type', $event)"
+    @confirm="submit"
+  >
+    <template #fields>
+      <SelectRow
+        v-model="from"
+        :label="t('transfers.from')"
+        :options="fromOptions"
+        :placeholder="t('transfers.pick')"
+        :error="fromError"
+        :disabled="Boolean(transfer)"
+        data-testid="transfer-from"
+      />
+      <SelectRow
+        v-model="to"
+        :label="t('transfers.to')"
+        :options="toOptions"
+        :placeholder="t('transfers.pick')"
+        :error="toError"
+        :disabled="Boolean(transfer)"
+        data-testid="transfer-to"
+      />
+
+      <label
+        v-if="cross"
+        class="bg-surface-sunken flex min-h-14 flex-col justify-center gap-0.5 rounded-lg px-3 py-2"
+      >
+        <span class="text-muted-foreground text-xs"
+          >{{ t('transfers.received') }} · {{ toAcc?.currency }}</span
+        >
+        <MoneyInput
+          v-model="received"
+          data-testid="transfer-received"
+          :scale="scaleOf(toAcc?.currency)"
+          :locale="uiLocale"
+          class="h-auto border-0 bg-transparent p-0 text-sm font-medium focus-visible:ring-0"
+        />
+      </label>
+      <label
+        v-else
+        class="bg-surface-sunken flex min-h-14 flex-col justify-center gap-0.5 rounded-lg px-3 py-2"
+      >
+        <span class="text-muted-foreground text-xs">{{ t('transfers.fee') }}</span>
+        <MoneyInput
+          v-model="fee"
+          data-testid="transfer-fee"
+          :scale="scaleOf(fromAcc?.currency)"
+          :locale="uiLocale"
+          class="h-auto border-0 bg-transparent p-0 text-sm font-medium focus-visible:ring-0"
+        />
+      </label>
+
+      <p v-if="hint" data-testid="transfer-hint" class="text-muted-foreground px-3 text-xs">
+        {{ t('transfers.hint', { amount: `${hint} ${toAcc?.currency}` }) }}
+      </p>
+      <p v-if="realised" class="text-muted-foreground px-3 text-xs">
+        {{ t('transfers.rate', { from: fromAcc?.currency, to: toAcc?.currency, rate: realised }) }}
+      </p>
+
+      <InputRow
+        v-model="occurredAt"
+        :label="t('transfers.occurredAt')"
+        type="datetime-local"
+        data-testid="transfer-occurred-at"
+        @update:model-value="dateTouched = true"
+      />
+      <InputRow v-model="note" :label="t('transfers.note')" maxlength="200" />
+    </template>
+
+    <Button
+      v-if="transfer"
+      type="button"
+      variant="ghost"
+      class="text-destructive min-h-11"
+      data-testid="transfer-delete"
+      @click="del"
+    >
+      {{ t('transfers.delete') }}
+    </Button>
+    <template #secondary>
+      <slot name="secondary" />
+    </template>
+  </QuickActionSheet>
 </template>

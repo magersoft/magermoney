@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
+import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import ru from '../src/locales/ru.json';
@@ -10,9 +11,10 @@ import { resetDisplayCurrency } from '../src/modules/rates/application/use-displ
 import DashboardPage from '../src/modules/dashboard/ui/DashboardPage.vue';
 
 const SRC = '11111111-1111-4111-8111-111111111111';
+const ACCOUNT = '22222222-2222-4222-8222-222222222222';
 const profile = {
-  id: 'u',
-  displayName: null,
+  id: '99999999-9999-4999-8999-999999999999',
+  displayName: 'Влад',
   locale: 'ru',
   defaultCurrency: 'USD',
   reportingCurrencies: ['USD', 'EUR'],
@@ -24,7 +26,7 @@ const currencies = [
 ];
 const rates = [{ base: 'EUR', quote: 'USD', value: '1.2', date: '2026-09-17', source: 'api' }];
 const account = {
-  id: '22222222-2222-4222-8222-222222222222',
+  id: ACCOUNT,
   name: 'Card',
   bank: 'Bank',
   country: 'PT',
@@ -78,6 +80,13 @@ const inflowDto = {
   realisedRate: null,
   note: null,
 };
+/** Last month's receipt: what the income tile measures this month against. */
+const lastMonthInflowDto = {
+  ...inflowDto,
+  id: '88888888-8888-4888-8888-888888888888',
+  amount: '1000',
+  receivedOn: '2026-08-12',
+};
 const expenseDto = {
   id: '44444444-4444-4444-8444-444444444444',
   categoryId: '55555555-5555-4555-8555-555555555555',
@@ -110,7 +119,7 @@ const json = (body: unknown) =>
   });
 
 function mountPage(
-  data: { sources: unknown[]; inflows: unknown[]; expenses: unknown[] },
+  data: { sources: unknown[]; inflows: unknown[]; expenses: unknown[]; accounts?: unknown[] },
   failing?: string,
 ) {
   resetDisplayCurrency();
@@ -119,7 +128,7 @@ function mountPage(
     if (path === '/me') return json(profile);
     if (path === '/currencies') return json(currencies);
     if (path.startsWith('/rates')) return json(rates);
-    if (path === '/accounts') return json([account]);
+    if (path === '/accounts') return json(data.accounts ?? [account]);
     if (path.startsWith('/income-sources')) return json(data.sources);
     if (path.startsWith('/inflows')) return json(data.inflows);
     if (path === '/expenses') return json(data.expenses);
@@ -131,13 +140,17 @@ function mountPage(
     routes: [
       { path: '/', name: 'home', component: DashboardPage },
       { path: '/accounts', name: 'accounts', component: blank },
+      { path: '/accounts/new', name: 'account-new', component: blank },
+      { path: '/accounts/:id', name: 'account', component: blank },
       { path: '/plan', name: 'plan', component: blank },
       { path: '/plan/income/:id', name: 'income-source', component: blank },
+      { path: '/settings/rates', name: 'rates', component: blank },
     ],
   });
   return mount(DashboardPage, {
     global: {
       plugins: [
+        createPinia(),
         [
           VueQueryPlugin,
           { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) },
@@ -151,13 +164,7 @@ function mountPage(
         router,
       ],
       provide: { [API_KEY as unknown as string]: { fetch } },
-      stubs: {
-        Motion: { template: '<div><slot /></div>' },
-        InflowSheet: {
-          props: ['open'],
-          template: '<div data-testid="inflow-sheet" :data-open="String(open)" />',
-        },
-      },
+      stubs: { Motion: { template: '<div><slot /></div>' } },
     },
   });
 }
@@ -169,7 +176,15 @@ describe('DashboardPage', () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it('shows capital, days to payday, the month plan, inflows and what is coming', async () => {
+  it('greets the person and hands them the currency switch', async () => {
+    const w = mountPage({ sources: [sourceDto], inflows: [inflowDto], expenses: [] });
+    await flushPromises();
+    expect(w.get('[data-testid="home-greeting"]').text()).toContain('Влад');
+    expect(w.get('[data-testid="home-avatar"]').text()).toBe('В');
+    expect(w.find('[data-testid="currency-switch"]').exists()).toBe(true);
+  });
+
+  it('sets the total with the rates it was summed at, and what is left until payday', async () => {
     const w = mountPage({
       sources: [sourceDto, unratedSourceDto],
       inflows: [inflowDto],
@@ -177,31 +192,86 @@ describe('DashboardPage', () => {
     });
     await flushPromises();
     expect(w.get('[data-testid="capital-total"]').text()).toContain('800');
+    // The footnote is part of the figure: a total summed from a dozen currencies without it is a guess.
+    expect(w.get('[data-testid="dash-rate-note"]').text()).toContain('2026-09-17');
     expect(norm(w.get('[data-testid="dash-available"]').text())).toContain('800,00');
     expect(w.get('[data-testid="dash-days"]').text()).toContain('8 дней');
-    expect(w.get('[data-testid="dash-per-day"]').text()).toContain('100');
-    expect(norm(w.get('[data-testid="dash-net-income"]').text())).toContain('3 000,00');
-    expect(w.get('[data-testid="dash-remainder"]').attributes('data-sign')).toBe('positive');
-    // The month cannot price Lessons, so its "0 of 0" row is named rather than left standing.
-    expect(w.get('[data-testid="dash-inflows-unconvertible"]').text()).toContain('Lessons');
-    expect(w.get('[data-testid="dash-upcoming-undated"]').text()).toContain('ещё 1');
-    expect(w.get(`[data-testid="dash-inflow-row-${SRC}"]`).text()).toContain('из');
+    expect(norm(w.get('[data-testid="dash-per-day"]').text())).toContain('100,00');
+  });
+
+  it('lays the accounts out as cards that end with the way to add one', async () => {
+    const w = mountPage({ sources: [sourceDto], inflows: [inflowDto], expenses: [] });
+    await flushPromises();
+    const strip = w.get('[data-slot="account-card-strip"]');
+    expect(strip.text()).toContain('Card');
+    expect(strip.find(`a[href="/accounts/${ACCOUNT}"]`).exists()).toBe(true);
+    expect(strip.get('[data-slot="add-account-tile"]').attributes('href')).toBe('/accounts/new');
+  });
+
+  it('sets what came in and what the month costs against the month before', async () => {
+    const w = mountPage({
+      sources: [sourceDto],
+      inflows: [inflowDto, lastMonthInflowDto],
+      expenses: [expenseDto],
+    });
+    await flushPromises();
+    const income = w.get('[data-testid="dash-stat-income"]');
+    expect(norm(income.text())).toContain('1 500,00');
+    // 1500 against last month's 1000: half as much again, and income growing is good news.
+    expect(income.get('[data-slot="stat-tile-delta"]').attributes('data-tone')).toBe('good');
+    expect(income.get('[data-slot="stat-tile-delta"]').text()).toContain('50');
+    expect(norm(w.get('[data-testid="dash-stat-outgo"]').text())).toContain('1 200,00');
+  });
+
+  it('names the receipts the day rates cannot price instead of dropping them from the tile', async () => {
+    const w = mountPage({
+      sources: [sourceDto, unratedSourceDto],
+      inflows: [inflowDto],
+      expenses: [],
+    });
+    await flushPromises();
+    expect(w.get('[data-testid="dash-stats-unconvertible"]').text()).toContain('Lessons');
+  });
+
+  it('draws the month plan as a ring with what is left in its gap', async () => {
+    const w = mountPage({ sources: [sourceDto], inflows: [inflowDto], expenses: [expenseDto] });
+    await flushPromises();
+    const donut = w.get('[data-testid="dash-plan-donut"]');
+    // 3000 net income, 1200 planned: 1800 left, and the caption says both figures.
+    expect(norm(donut.get('[data-slot="donut-centre"]').text())).toContain('1 800,00');
+    expect(norm(donut.get('[data-slot="donut-caption"]').text())).toContain('1 200');
+    expect(donut.attributes('data-over')).toBe('false');
+  });
+
+  it('says so in words when the month plans to spend more than it brings', async () => {
+    const w = mountPage({
+      sources: [sourceDto],
+      inflows: [],
+      expenses: [
+        expenseDto,
+        {
+          ...expenseDto,
+          id: '12121212-1212-4121-8121-121212121212',
+          name: 'Villa',
+          amount: '3000',
+        },
+      ],
+    });
+    await flushPromises();
+    const donut = w.get('[data-testid="dash-plan-donut"]');
+    expect(donut.attributes('data-over')).toBe('true');
+    expect(donut.get('[data-slot="donut-over"]').text()).toContain('больше дохода');
+  });
+
+  it('groups what is coming by day and counts the charges it cannot place', async () => {
+    const w = mountPage({
+      sources: [sourceDto],
+      inflows: [inflowDto],
+      expenses: [expenseDto, undatedExpenseDto],
+    });
+    await flushPromises();
     expect(w.find('[data-testid="dash-upcoming-day-2026-09-25"]').exists()).toBe(true);
     expect(w.find('[data-testid="dash-upcoming-day-2026-10-05"]').exists()).toBe(true);
-  });
-
-  it('opens the inflow sheet from the inflows block', async () => {
-    const w = mountPage({ sources: [sourceDto], inflows: [], expenses: [] });
-    await flushPromises();
-    expect(w.get('[data-testid="inflow-sheet"]').attributes('data-open')).toBe('false');
-    await w.get('[data-testid="dash-record-inflow"]').trigger('click');
-    expect(w.get('[data-testid="inflow-sheet"]').attributes('data-open')).toBe('true');
-  });
-
-  it('counts the expenses it cannot place even when nothing is dated', async () => {
-    const w = mountPage({ sources: [], inflows: [], expenses: [undatedExpenseDto] });
-    await flushPromises();
-    expect(w.find('[data-testid="dash-upcoming-empty"]').exists()).toBe(true);
     expect(w.get('[data-testid="dash-upcoming-undated"]').text()).toContain('ещё 1');
   });
 
@@ -210,17 +280,16 @@ describe('DashboardPage', () => {
     await flushPromises();
     expect(w.find('[data-testid="dash-error"]').exists()).toBe(true);
     // Everything here is derived from every list at once: one missing list makes the total a lie.
-    expect(w.find('[data-testid="dash-net-income"]').exists()).toBe(false);
+    expect(w.find('[data-testid="dash-plan-donut"]').exists()).toBe(false);
   });
 
-  it('leads to the matching Plan segment from each empty state', async () => {
-    const w = mountPage({ sources: [], inflows: [], expenses: [] });
+  it('leads somewhere from every empty block instead of standing blank', async () => {
+    const w = mountPage({ sources: [], inflows: [], expenses: [], accounts: [] });
     await flushPromises();
+    expect(w.find('[data-testid="dash-accounts-empty"]').exists()).toBe(true);
+    expect(w.get('[data-slot="add-account-tile"]').attributes('href')).toBe('/accounts/new');
     expect(w.get('[data-testid="dash-payday-setup"]').attributes('href')).toBe('/plan?tab=income');
     expect(w.get('[data-testid="dash-plan-empty"] a').attributes('href')).toBe('/plan?tab=income');
-    expect(w.get('[data-testid="dash-inflows-empty"] a').attributes('href')).toBe(
-      '/plan?tab=income',
-    );
     expect(w.get('[data-testid="dash-upcoming-empty"] a').attributes('href')).toBe(
       '/plan?tab=expenses',
     );

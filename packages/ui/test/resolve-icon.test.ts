@@ -42,4 +42,36 @@ describe('resolveCurrencyIcon with a country', () => {
       name: 'circle-flags:no',
     });
   });
+  /*
+   * The whole point of the change: an account is held somewhere, and where it is
+   * held is a truer thing to draw than what it is denominated in. A Portuguese
+   * euro account is Portuguese.
+   */
+  it('prefers the country over the currency table', () => {
+    expect(resolveCurrencyIcon({ code: 'EUR', kind: 'fiat', country: 'PT' })).toEqual({
+      kind: 'iconify',
+      name: 'circle-flags:pt',
+    });
+  });
+  it('falls back to the currency flag when the account has no country', () => {
+    expect(resolveCurrencyIcon({ code: 'EUR', kind: 'fiat', country: null })).toEqual({
+      kind: 'iconify',
+      name: 'circle-flags:european-union',
+    });
+    expect(resolveCurrencyIcon({ code: 'EUR', kind: 'fiat', country: '' })).toEqual({
+      kind: 'iconify',
+      name: 'circle-flags:european-union',
+    });
+  });
+  it('ignores a country on a crypto account', () => {
+    expect(resolveCurrencyIcon({ code: 'BTC', kind: 'crypto', country: 'PT' })).toEqual({
+      kind: 'iconify',
+      name: 'cryptocurrency-color:btc',
+    });
+  });
+  it('still prefers an explicit icon over the country', () => {
+    expect(
+      resolveCurrencyIcon({ code: 'EUR', kind: 'fiat', country: 'PT', icon: 'local:eur' }),
+    ).toEqual({ kind: 'iconify', name: 'local:eur' });
+  });
 });

@@ -1,45 +1,45 @@
 <script setup lang="ts">
 /**
- * Create or edit an account. The card block appears only for cards; the
- * currency locks once the account has history (the API refuses anyway, the
- * form just says so first). Opening balance only when creating.
+ * Create or edit an account, in the row language of the reference (slide 13):
+ * no bordered fields, every question a row on a surface, one dark button at the
+ * bottom. The card block appears only for cards; the currency locks once the
+ * account has history (the API refuses anyway, the form just says so first).
+ * Opening balance only when creating.
+ *
+ * The choices are native `<select>`s rather than a rebuilt listbox. In a row
+ * that is all a select has to be — the row carries the label and the height,
+ * and the platform carries the keyboard, the wheel and the screen reader.
  */
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
-import {
-  Button,
-  Input,
-  MoneyInput,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  useToast,
-} from '@magermoney/ui';
+import { Button, CountrySelect, MoneyInput, Switch, useToast } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import { useCountryOptions } from '@/shared/countries/options';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
 import { useAccount } from '../application/use-accounts';
 import { useCreateAccount, useUpdateAccount } from '../application/use-account-mutations';
+import FormFieldRow from './FormFieldRow.vue';
 
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 const { toast } = useToast();
 const currencies = useCurrencies();
+const countries = useCountryOptions();
 const editingId = computed(() => (route.params.id ? String(route.params.id) : null));
 const existing = useAccount(() => editingId.value ?? '');
 const { create, isPending: creating } = useCreateAccount();
 const { update, isPending: updating } = useUpdateAccount();
+const spendingLabelId = `${useId()}-spending`;
 
 const form = reactive({
   name: '',
   bank: '',
-  country: '',
+  country: null as string | null,
   currency: 'USD',
   kind: 'bank_account' as (typeof ACCOUNT_KINDS)[number],
   isSpending: false,
@@ -86,11 +86,29 @@ const busy = computed(() => creating.value || updating.value);
  */
 const uiLocale = computed(() => locale.value as DateLocale);
 
+/* Every control in a row shares one look: no border of its own, the row's. */
+const CONTROL =
+  'w-full min-w-0 bg-transparent text-sm font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted-foreground';
+
+/*
+ * The country is the one answer the browser cannot police for us: a combobox is
+ * not an input with `required`, so the form says what is missing itself. It
+ * only says it once asked to save — a field cannot be wrong before it is due.
+ */
+const countryMissing = ref(false);
+const countryError = computed(() =>
+  countryMissing.value && !form.country ? t('accounts.form.countryRequired') : undefined,
+);
+watch(
+  () => form.country,
+  (country) => country && (countryMissing.value = false),
+);
+
 function payload() {
   const base = {
     name: form.name,
     bank: form.bank,
-    country: form.country.toUpperCase(),
+    country: (form.country ?? '').toUpperCase(),
     currency: form.currency,
     kind: form.kind,
     isSpending: form.isSpending,
@@ -108,6 +126,10 @@ function payload() {
   return { ...base, ...card };
 }
 async function submit() {
+  if (!form.country) {
+    countryMissing.value = true;
+    return;
+  }
   try {
     if (editingId.value) {
       const full = payload();
@@ -132,141 +154,130 @@ async function submit() {
 </script>
 
 <template>
-  <form class="space-y-5 pb-8" data-testid="account-form" @submit.prevent="submit">
+  <form class="flex flex-col gap-6 pb-8" data-testid="account-form" @submit.prevent="submit">
     <h1 class="text-2xl font-semibold tracking-[-0.01em]">
       {{ editingId ? t('accounts.form.editTitle') : t('accounts.form.createTitle') }}
     </h1>
 
-    <label class="block"
-      ><span class="text-xs font-medium text-muted-foreground">{{ t('accounts.form.name') }}</span
-      ><Input v-model="form.name" required data-testid="form-name" class="mt-1"
-    /></label>
-    <label class="block"
-      ><span class="text-xs font-medium text-muted-foreground">{{ t('accounts.form.bank') }}</span
-      ><Input v-model="form.bank" required data-testid="form-bank" class="mt-1"
-    /></label>
-    <label class="block"
-      ><span class="text-xs font-medium text-muted-foreground">{{
-        t('accounts.form.country')
-      }}</span
-      ><Input
+    <div class="flex flex-col gap-2">
+      <FormFieldRow :label="t('accounts.form.name')">
+        <input v-model="form.name" required data-testid="form-name" :class="CONTROL" />
+      </FormFieldRow>
+      <FormFieldRow :label="t('accounts.form.bank')">
+        <input v-model="form.bank" required data-testid="form-bank" :class="CONTROL" />
+      </FormFieldRow>
+      <CountrySelect
         v-model="form.country"
-        required
-        maxlength="2"
-        pattern="[A-Za-z]{2}"
+        :options="countries"
+        :label="t('accounts.form.country')"
+        :placeholder="t('accounts.form.countryPlaceholder')"
+        :search-placeholder="t('accounts.form.countrySearch')"
+        :empty-label="t('accounts.form.countryEmpty')"
+        :clear-label="t('accounts.form.countryClear')"
+        :error="countryError"
         data-testid="form-country"
-        class="mt-1 uppercase"
-    /></label>
-
-    <label class="block">
-      <span class="text-xs font-medium text-muted-foreground">{{
-        t('accounts.form.currency')
-      }}</span>
-      <Select v-model="form.currency" :disabled="currencyLocked">
-        <SelectTrigger class="mt-1 w-full" data-testid="form-currency"
-          ><SelectValue
-        /></SelectTrigger>
-        <SelectContent
-          ><SelectItem v-for="c in currencies" :key="c.code" :value="c.code">{{
-            c.code
-          }}</SelectItem></SelectContent
+      />
+      <FormFieldRow
+        :label="t('accounts.form.currency')"
+        :hint="currencyLocked ? t('accounts.form.currencyLocked') : undefined"
+      >
+        <select
+          v-model="form.currency"
+          :disabled="currencyLocked"
+          data-testid="form-currency"
+          :class="[CONTROL, 'disabled:opacity-60']"
         >
-      </Select>
-      <span v-if="currencyLocked" class="text-xs text-muted-foreground">{{
-        t('accounts.form.currencyLocked')
-      }}</span>
-    </label>
+          <option v-for="c in currencies" :key="c.code" :value="c.code">
+            {{ c.code }}
+          </option>
+        </select>
+      </FormFieldRow>
+      <FormFieldRow :label="t('accounts.form.kind')">
+        <select v-model="form.kind" data-testid="form-kind" :class="CONTROL">
+          <option v-for="k in ACCOUNT_KINDS" :key="k" :value="k">
+            {{ t(ACCOUNT_KIND_KEYS[k]) }}
+          </option>
+        </select>
+      </FormFieldRow>
 
-    <label class="block">
-      <span class="text-xs font-medium text-muted-foreground">{{ t('accounts.form.kind') }}</span>
-      <Select v-model="form.kind">
-        <SelectTrigger class="mt-1 w-full" data-testid="form-kind"><SelectValue /></SelectTrigger>
-        <SelectContent
-          ><SelectItem v-for="k in ACCOUNT_KINDS" :key="k" :value="k">{{
-            t(ACCOUNT_KIND_KEYS[k])
-          }}</SelectItem></SelectContent
-        >
-      </Select>
-    </label>
+      <!--
+        A switch, not a row that opens something, so it is a div rather than a
+        label: a label wrapping a button can toggle it twice on one click.
+      -->
+      <div
+        class="flex min-h-14 w-full items-center gap-3 rounded-lg bg-surface px-3 py-2 text-ink"
+        data-slot="form-field-row"
+      >
+        <span :id="spendingLabelId" class="min-w-0 flex-1 text-sm">
+          {{ t('accounts.form.spending') }}
+        </span>
+        <Switch
+          v-model="form.isSpending"
+          :aria-labelledby="spendingLabelId"
+          data-testid="form-spending"
+        />
+      </div>
+    </div>
 
-    <label class="flex min-h-9 items-center gap-3 pointer-coarse:min-h-11"
-      ><input
-        v-model="form.isSpending"
-        type="checkbox"
-        class="size-5"
-        data-testid="form-spending"
-      /><span class="text-sm">{{ t('accounts.form.spending') }}</span></label
-    >
-
-    <fieldset v-if="isCard" class="space-y-4 border-t border-border pt-4">
-      <label class="block">
-        <span class="text-xs font-medium text-muted-foreground">{{
-          t('accounts.form.cardType')
-        }}</span>
-        <Select v-model="form.cardType"
-          ><SelectTrigger class="mt-1 w-full"><SelectValue /></SelectTrigger
-          ><SelectContent
-            ><SelectItem v-for="ct in CARD_TYPES" :key="ct" :value="ct">{{
-              t(`accounts.cardType.${ct}`)
-            }}</SelectItem></SelectContent
-          ></Select
-        >
-      </label>
-      <label class="block"
-        ><span class="text-xs font-medium text-muted-foreground">{{
-          t('accounts.form.cardNetwork')
-        }}</span
-        ><Input v-model="form.cardNetwork" class="mt-1"
-      /></label>
-      <label class="block"
-        ><span class="text-xs font-medium text-muted-foreground">{{
-          t('accounts.form.cardTier')
-        }}</span
-        ><Input v-model="form.cardTier" class="mt-1"
-      /></label>
-      <label class="block"
-        ><span class="text-xs font-medium text-muted-foreground">{{
-          t('accounts.form.cardLast4')
-        }}</span
-        ><Input
+    <fieldset v-if="isCard" class="flex flex-col gap-2">
+      <legend class="mb-2 font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
+        {{ t('accounts.form.cardSection') }}
+      </legend>
+      <FormFieldRow :label="t('accounts.form.cardType')">
+        <select v-model="form.cardType" data-testid="form-card-type" :class="CONTROL">
+          <option v-for="ct in CARD_TYPES" :key="ct" :value="ct">
+            {{ t(`accounts.cardType.${ct}`) }}
+          </option>
+        </select>
+      </FormFieldRow>
+      <FormFieldRow :label="t('accounts.form.cardNetwork')">
+        <input v-model="form.cardNetwork" :class="CONTROL" />
+      </FormFieldRow>
+      <FormFieldRow :label="t('accounts.form.cardTier')">
+        <input v-model="form.cardTier" :class="CONTROL" />
+      </FormFieldRow>
+      <FormFieldRow :label="t('accounts.form.cardLast4')">
+        <input
           v-model="form.cardLast4"
           inputmode="numeric"
           maxlength="4"
           pattern="\d{4}"
-          class="mt-1"
-      /></label>
-      <label class="block"
-        ><span class="text-xs font-medium text-muted-foreground">{{
-          t('accounts.form.cardExpires')
-        }}</span
-        ><Input v-model="form.cardExpires" type="date" class="mt-1"
-      /></label>
+          :class="CONTROL"
+        />
+      </FormFieldRow>
+      <FormFieldRow :label="t('accounts.form.cardExpires')">
+        <input v-model="form.cardExpires" type="date" :class="CONTROL" />
+      </FormFieldRow>
     </fieldset>
 
-    <label class="block"
-      ><span class="text-xs font-medium text-muted-foreground">{{ t('accounts.form.note') }}</span
-      ><textarea
-        v-model="form.note"
-        rows="3"
-        class="mt-1 w-full rounded-lg border border-border bg-background p-2 text-sm"
-      />
-    </label>
+    <div class="flex flex-col gap-2">
+      <FormFieldRow :label="t('accounts.form.note')" class="items-start">
+        <textarea v-model="form.note" rows="2" :class="[CONTROL, 'resize-none']" />
+      </FormFieldRow>
 
-    <label v-if="!editingId" class="block">
-      <span class="text-xs font-medium text-muted-foreground"
-        >{{ t('accounts.form.openingBalance') }} · {{ form.currency }}</span
+      <FormFieldRow
+        v-if="!editingId"
+        :label="`${t('accounts.form.openingBalance')} · ${form.currency}`"
       >
-      <MoneyInput
-        v-model="form.openingBalance"
-        :scale="scale"
-        :locale="uiLocale"
-        :allow-negative="isCard && form.cardType === 'credit'"
-        data-testid="form-opening"
-        class="mt-1"
-      />
-    </label>
+        <MoneyInput
+          v-model="form.openingBalance"
+          :scale="scale"
+          :locale="uiLocale"
+          :allow-negative="isCard && form.cardType === 'credit'"
+          data-testid="form-opening"
+          class="h-auto rounded-none border-0 bg-transparent px-0 py-0 text-sm font-medium shadow-none focus-visible:ring-0"
+        />
+      </FormFieldRow>
+    </div>
 
-    <Button type="submit" size="lg" class="w-full" :disabled="busy" data-testid="form-submit">
+    <!-- The reference's finishing button: full width, 48px, its own weight. -->
+    <Button
+      type="submit"
+      size="lg"
+      class="h-12 w-full rounded-xl text-base"
+      :disabled="busy"
+      data-testid="form-submit"
+    >
       {{ editingId ? t('accounts.form.save') : t('accounts.form.create') }}
     </Button>
   </form>

@@ -19,6 +19,7 @@ const { t } = useI18n();
     <CurrencyIcon
       :code="account.balance.currency.code"
       :kind="account.balance.currency.kind"
+      :country="account.country"
       :size="28"
     />
     <span class="min-w-0 flex-1">

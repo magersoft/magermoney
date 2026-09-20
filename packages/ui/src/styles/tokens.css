@@ -6,13 +6,16 @@
  * maps the shadcn names onto these, so changing a value here retints every
  * generated component.
  *
- * Neutrals sit on hue 80 (warm paper) at chroma <= 0.012; the brand accent is
- * hue 272 — fountain-pen ink, the mark of a hand-kept ledger.
+ * The palette comes from the Moni reference: a light blue canvas carrying white
+ * cards, one blue accent. Neutrals sit on hue 265/285 (cool) at chroma <= 0.026.
  *
- * Every foreground token clears 4.5:1 against its own theme's `--mm-bg`, and
- * `--mm-line-strong` clears 3:1 for the boundaries of form controls (WCAG 1.4.11).
- * `--mm-line` is the row hairline and is deliberately quiet; never use it to
- * outline something the user has to find.
+ * Two brand colours cannot be text: the blue reads 4.24 on the canvas and the
+ * green 1.65. Accent and positive therefore have two roles each — `*-fill` is
+ * the brand colour under a shape, the bare token is the darkened tone for text
+ * and icons. `test/tokens-contrast.test.ts` reads this file and holds the line:
+ * every text token clears 4.5:1 on its own surfaces, `--mm-line-strong` clears
+ * 3:1 for control boundaries (WCAG 1.4.11). `--mm-line` is the card edge and is
+ * deliberately quiet; never use it to outline something the user has to find.
  */
 
 @import 'tailwindcss';
@@ -30,14 +33,40 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /*
-   * Two tiers: soft containers, sharp data rows. Tailwind's own scale already
-   * puts controls where we want them — `rounded-lg` (what every shadcn control
-   * uses) is 0.5rem / 8px — so only the container tier is redefined, keeping
-   * the scale monotonic. Cards are `rounded-xl` (14px), sheets and toasts
-   * `rounded-2xl` (20px). Data rows stay square.
+   * The scale carried over from the reference: 11 / 12 / 14 / 16 / 22 / 28 / 34
+   * / 40, each with its own leading rather than a multiplier — a screen full of
+   * numbers needs the tight pairs at the top and the loose ones at the bottom.
+   * Tracking closes up from 28px, where the default spacing starts to gap.
    */
-  --radius-xl: 0.875rem;
-  --radius-2xl: 1.25rem;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 0.875rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.375rem;
+  --text-lg: 1.375rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.75rem;
+  --text-xl--line-height: 2.125rem;
+  --text-xl--letter-spacing: -0.01em;
+  --text-2xl: 2.125rem;
+  --text-2xl--line-height: 2.375rem;
+  --text-2xl--letter-spacing: -0.01em;
+  --text-3xl: 2.5rem;
+  --text-3xl--line-height: 2.875rem;
+  --text-3xl--letter-spacing: -0.01em;
+
+  /*
+   * One soft tier, no sharp one: the hairline-separated data row is gone, and
+   * with it the reason for square corners. Controls 12px, cards 20px, sheets
+   * and toasts 28px, pills 999px. There are no right angles in the interface.
+   */
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.75rem;
+  --radius-full: 999px;
 
   /* Everything that enters uses this curve. Nothing overshoots. */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
@@ -49,45 +78,158 @@
    * re-point `--mm-*` at one of them. A value therefore cannot drift between
    * the `prefers-color-scheme` branch and the `data-theme` branch.
    */
-  --mm-light-bg: oklch(0.981 0.005 85);
-  --mm-light-surface: oklch(0.995 0.002 85);
+  --mm-light-bg: oklch(0.979 0.006 265);
+  --mm-light-surface: oklch(1 0 0);
   --mm-light-surface-raised: oklch(1 0 0);
-  --mm-light-ink: oklch(0.23 0.012 80);
-  --mm-light-muted: oklch(0.52 0.012 80);
-  --mm-light-line: oklch(0.9 0.008 80);
-  --mm-light-line-strong: oklch(0.65 0.01 80);
-  --mm-light-accent: oklch(0.52 0.19 272);
-  --mm-light-accent-fg: oklch(0.99 0 0);
-  --mm-light-positive: oklch(0.52 0.13 155);
-  --mm-light-negative: oklch(0.53 0.19 25);
-  --mm-light-warning: oklch(0.555 0.14 75);
+  --mm-light-surface-sunken: oklch(0.937 0.003 355);
+  --mm-light-ink: oklch(0.254 0.026 284);
+  --mm-light-muted: oklch(0.55 0.02 265);
+  --mm-light-line: oklch(0.915 0.008 265);
+  --mm-light-line-strong: oklch(0.645 0.015 265);
+  --mm-light-accent: oklch(0.56 0.18 262);
+  --mm-light-accent-fill: oklch(0.574 0.18 262);
+  --mm-light-accent-fg: oklch(1 0 0);
+  --mm-light-positive: oklch(0.54 0.104 171);
+  --mm-light-positive-fill: oklch(0.799 0.156 171);
+  --mm-light-positive-fg: oklch(0.254 0.026 284);
+  --mm-light-negative: oklch(0.576 0.19 25);
+  /*
+   * The delta badge is a filled pill in both directions, so the red needs the
+   * two roles the green already has. The fill is set at the green's lightness
+   * so a pair of badges reads as one object with two states, and the red that
+   * is text keeps its own darker tone.
+   */
+  --mm-light-negative-fill: oklch(0.8 0.1 25);
+  --mm-light-negative-fg: oklch(0.254 0.026 284);
+  --mm-light-warning: oklch(0.558 0.116 75);
+  /*
+   * The account card's fill. The currency picks the hue and nothing else; the
+   * theme fixes lightness and chroma, which is what keeps ink above AA on every
+   * hue of the wheel (`test/tokens-contrast.test.ts` walks all 360°).
+   *
+   * Chroma is also capped by the gamut, not by taste: near white the sRGB cone
+   * narrows fast, and a chroma the browser has to map back collapses distant
+   * hues onto the same colour — which would quietly undo one currency, one
+   * colour. The same test holds the whole wheel inside sRGB.
+   */
+  --mm-light-tint-l: 0.86;
+  --mm-light-tint-c: 0.06;
+  /*
+   * The donut's arcs. Same shape as the card tint and for the same reason — a
+   * category picks a hue, the theme fixes the rest — but the numbers are the
+   * opposite end of the scale: a tint sits under ink, an arc sits on a surface
+   * and has to be told apart from it. The bar is WCAG 1.4.11's 3:1, held on
+   * every hue and on every surface a chart can land on, and the chroma is again
+   * capped by the sRGB cone rather than by taste, so no two categories collapse
+   * onto the same colour after gamut mapping.
+   */
+  --mm-light-segment-l: 0.56;
+  --mm-light-segment-c: 0.09;
+  /* The card is lifted, not outlined: one soft diffuse shadow, nothing deeper. */
+  --mm-light-shadow-card:
+    0 1px 2px oklch(0.254 0.026 284 / 0.05), 0 8px 24px oklch(0.254 0.026 284 / 0.06);
+  /*
+   * A card dealt onto another one. The offsets point up because that is the
+   * direction the overlap goes: a card in the stack covers the bottom of the
+   * one before it, so the shadow it casts falls upwards, onto that card.
+   *
+   * It is a separate token from `shadow-card` because it survives the dark
+   * theme. A shadow on the canvas reads as dirt and is dropped there; a shadow
+   * between two cards that touch is the only thing saying they are two.
+   */
+  --mm-light-shadow-stack:
+    0 -1px 2px oklch(0.254 0.026 284 / 0.06), 0 -10px 22px oklch(0.254 0.026 284 / 0.1),
+    0 8px 24px oklch(0.254 0.026 284 / 0.06);
+  /* No edge: in light the shadow already says where the card ends. */
+  --mm-light-card-edge: transparent;
 
-  --mm-dark-bg: oklch(0.18 0.008 80);
-  --mm-dark-surface: oklch(0.22 0.008 80);
-  --mm-dark-surface-raised: oklch(0.26 0.009 80);
-  --mm-dark-ink: oklch(0.96 0.004 85);
-  --mm-dark-muted: oklch(0.68 0.01 80);
-  --mm-dark-line: oklch(0.31 0.008 80);
-  --mm-dark-line-strong: oklch(0.49 0.01 80);
-  --mm-dark-accent: oklch(0.68 0.16 272);
-  --mm-dark-accent-fg: oklch(0.17 0.02 272);
-  --mm-dark-positive: oklch(0.72 0.14 155);
-  --mm-dark-negative: oklch(0.7 0.17 25);
-  --mm-dark-warning: oklch(0.8 0.13 75);
+  /*
+   * Dark surfaces separate by lightness, not by borders, so the shadow is
+   * dropped entirely — a shadow on a dark canvas reads as dirt. Foregrounds are
+   * measured from `surface-raised`, the lightest surface they can land on.
+   */
+  --mm-dark-bg: oklch(0.231 0.019 285);
+  --mm-dark-surface: oklch(0.275 0.018 285);
+  --mm-dark-surface-raised: oklch(0.322 0.018 285);
+  --mm-dark-surface-sunken: oklch(0.252 0.018 285);
+  --mm-dark-ink: oklch(0.96 0.004 265);
+  --mm-dark-muted: oklch(0.7 0.015 265);
+  --mm-dark-line: oklch(0.36 0.015 285);
+  /* Lighter than the canvas alone would need, so a field on a sheet still reads. */
+  --mm-dark-line-strong: oklch(0.595 0.015 265);
+  --mm-dark-accent: oklch(0.694 0.16 262);
+  --mm-dark-accent-fill: oklch(0.574 0.18 262);
+  --mm-dark-accent-fg: oklch(1 0 0);
+  --mm-dark-positive: oklch(0.676 0.116 171);
+  /*
+   * The two badge fills are the same colour in both themes — a brand pastel
+   * does not have a dark counterpart — so their foreground is dark in both, and
+   * cannot be `--mm-dark-ink`.
+   */
+  --mm-dark-positive-fill: oklch(0.799 0.156 171);
+  --mm-dark-positive-fg: oklch(0.254 0.026 284);
+  --mm-dark-negative: oklch(0.71 0.17 25);
+  --mm-dark-negative-fill: oklch(0.8 0.1 25);
+  --mm-dark-negative-fg: oklch(0.254 0.026 284);
+  --mm-dark-warning: oklch(0.696 0.13 75);
+  /*
+   * Tinted the way the dark surfaces are: lighter than the canvas, never black.
+   *
+   * Lighter than the first pass, and for two reasons at once. A card carries
+   * no shadow against the dark canvas, so the fill has to stand off it on its
+   * own — 2:1, held on every hue. And the
+   * sRGB cone is narrow down here: at L 0.36 the wheel runs out of gamut by
+   * chroma 0.06, which is too little colour to tell two currencies apart. Every
+   * step up in lightness buys chroma, so the fill is as light as the dark theme
+   * can bear and as colourful as that lightness allows.
+   */
+  --mm-dark-tint-l: 0.46;
+  --mm-dark-tint-c: 0.077;
+  /* An arc is lighter than every dark surface, where light is darker than every light one. */
+  --mm-dark-segment-l: 0.74;
+  --mm-dark-segment-c: 0.115;
+  --mm-dark-shadow-card: none;
+  /*
+   * The one shadow the dark theme keeps. It never falls on the canvas — only on
+   * the card underneath, where two cards touch — so it darkens a lit surface
+   * instead of dirtying an unlit one, and it is close to black because that is
+   * what registers against a fill this light.
+   */
+  --mm-dark-shadow-stack:
+    0 -1px 2px oklch(0.12 0.02 285 / 0.55), 0 -12px 26px oklch(0.1 0.02 285 / 0.6);
+  /*
+   * And the edge the shadow cannot draw. Ink at a tenth of its strength: light
+   * enough to catch the top of every card against the one it covers, too faint
+   * to read as an outline around a card standing on its own.
+   */
+  --mm-dark-card-edge: oklch(0.96 0.004 265 / 0.16);
 
   /* Light is the default. */
   --mm-bg: var(--mm-light-bg);
   --mm-surface: var(--mm-light-surface);
   --mm-surface-raised: var(--mm-light-surface-raised);
+  --mm-surface-sunken: var(--mm-light-surface-sunken);
   --mm-ink: var(--mm-light-ink);
   --mm-muted: var(--mm-light-muted);
   --mm-line: var(--mm-light-line);
   --mm-line-strong: var(--mm-light-line-strong);
   --mm-accent: var(--mm-light-accent);
+  --mm-accent-fill: var(--mm-light-accent-fill);
   --mm-accent-fg: var(--mm-light-accent-fg);
   --mm-positive: var(--mm-light-positive);
+  --mm-positive-fill: var(--mm-light-positive-fill);
+  --mm-positive-fg: var(--mm-light-positive-fg);
   --mm-negative: var(--mm-light-negative);
+  --mm-negative-fill: var(--mm-light-negative-fill);
+  --mm-negative-fg: var(--mm-light-negative-fg);
   --mm-warning: var(--mm-light-warning);
+  --mm-tint-l: var(--mm-light-tint-l);
+  --mm-tint-c: var(--mm-light-tint-c);
+  --mm-segment-l: var(--mm-light-segment-l);
+  --mm-segment-c: var(--mm-light-segment-c);
+  --mm-shadow-card: var(--mm-light-shadow-card);
+  --mm-shadow-stack: var(--mm-light-shadow-stack);
+  --mm-card-edge: var(--mm-light-card-edge);
 
   --mm-duration-fast: 150ms;
   --mm-duration-base: 240ms;
@@ -101,15 +243,28 @@
     --mm-bg: var(--mm-dark-bg);
     --mm-surface: var(--mm-dark-surface);
     --mm-surface-raised: var(--mm-dark-surface-raised);
+    --mm-surface-sunken: var(--mm-dark-surface-sunken);
     --mm-ink: var(--mm-dark-ink);
     --mm-muted: var(--mm-dark-muted);
     --mm-line: var(--mm-dark-line);
     --mm-line-strong: var(--mm-dark-line-strong);
     --mm-accent: var(--mm-dark-accent);
+    --mm-accent-fill: var(--mm-dark-accent-fill);
     --mm-accent-fg: var(--mm-dark-accent-fg);
     --mm-positive: var(--mm-dark-positive);
+    --mm-positive-fill: var(--mm-dark-positive-fill);
+    --mm-positive-fg: var(--mm-dark-positive-fg);
     --mm-negative: var(--mm-dark-negative);
+    --mm-negative-fill: var(--mm-dark-negative-fill);
+    --mm-negative-fg: var(--mm-dark-negative-fg);
     --mm-warning: var(--mm-dark-warning);
+    --mm-tint-l: var(--mm-dark-tint-l);
+    --mm-tint-c: var(--mm-dark-tint-c);
+    --mm-segment-l: var(--mm-dark-segment-l);
+    --mm-segment-c: var(--mm-dark-segment-c);
+    --mm-shadow-card: var(--mm-dark-shadow-card);
+    --mm-shadow-stack: var(--mm-dark-shadow-stack);
+    --mm-card-edge: var(--mm-dark-card-edge);
   }
 }
 
@@ -119,15 +274,28 @@
   --mm-bg: var(--mm-dark-bg);
   --mm-surface: var(--mm-dark-surface);
   --mm-surface-raised: var(--mm-dark-surface-raised);
+  --mm-surface-sunken: var(--mm-dark-surface-sunken);
   --mm-ink: var(--mm-dark-ink);
   --mm-muted: var(--mm-dark-muted);
   --mm-line: var(--mm-dark-line);
   --mm-line-strong: var(--mm-dark-line-strong);
   --mm-accent: var(--mm-dark-accent);
+  --mm-accent-fill: var(--mm-dark-accent-fill);
   --mm-accent-fg: var(--mm-dark-accent-fg);
   --mm-positive: var(--mm-dark-positive);
+  --mm-positive-fill: var(--mm-dark-positive-fill);
+  --mm-positive-fg: var(--mm-dark-positive-fg);
   --mm-negative: var(--mm-dark-negative);
+  --mm-negative-fill: var(--mm-dark-negative-fill);
+  --mm-negative-fg: var(--mm-dark-negative-fg);
   --mm-warning: var(--mm-dark-warning);
+  --mm-tint-l: var(--mm-dark-tint-l);
+  --mm-tint-c: var(--mm-dark-tint-c);
+  --mm-segment-l: var(--mm-dark-segment-l);
+  --mm-segment-c: var(--mm-dark-segment-c);
+  --mm-shadow-card: var(--mm-dark-shadow-card);
+  --mm-shadow-stack: var(--mm-dark-shadow-stack);
+  --mm-card-edge: var(--mm-dark-card-edge);
 }
 
 :root[data-theme='light'] {

@@ -14,3 +14,4 @@ test-results/
 dev-dist/
 apps/api/api/
 imports/
+docs/design/reference/

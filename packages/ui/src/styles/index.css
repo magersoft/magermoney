@@ -33,10 +33,31 @@
   --color-line: var(--mm-line);
   --color-surface: var(--mm-surface);
   --color-surface-raised: var(--mm-surface-raised);
+  --color-surface-sunken: var(--mm-surface-sunken);
   --color-line-strong: var(--mm-line-strong);
   --color-positive: var(--mm-positive);
+  /*
+   * `*-fill` is the brand colour under a shape; the bare token is text. A fill
+   * is the same colour in both themes and carries its own `*-fg`, which is
+   * therefore dark in both — never `--color-ink`.
+   */
+  --color-positive-fill: var(--mm-positive-fill);
+  --color-positive-fg: var(--mm-positive-fg);
+  --color-accent-fill: var(--mm-accent-fill);
   --color-negative: var(--mm-negative);
+  --color-negative-fill: var(--mm-negative-fill);
+  --color-negative-fg: var(--mm-negative-fg);
   --color-warning: var(--mm-warning);
+
+  /* `shadow-card` lifts a card in light; in dark the token is `none`. */
+  --shadow-card: var(--mm-shadow-card);
+  /*
+   * `shadow-stack` is the one a card casts on the card it covers, and the one
+   * shadow the dark theme keeps; `border-card-edge` is the hairline that draws
+   * the same seam in dark and is transparent in light.
+   */
+  --shadow-stack: var(--mm-shadow-stack);
+  --color-card-edge: var(--mm-card-edge);
 
   --transition-duration-fast: var(--mm-duration-fast);
   --transition-duration-base: var(--mm-duration-base);
@@ -77,6 +98,31 @@
 }
 
 /*
+ * The account card's fill. The currency hands in a hue through `--mm-card-hue`
+ * (see `components/account-card/currency-tint.ts`); lightness and chroma belong
+ * to the theme, so one card retints with the theme and ink stays above AA on
+ * every hue the wheel can hand out. The card always supplies the hue; the
+ * fallback only keeps the declaration valid if one ever renders without it.
+ */
+@utility bg-currency-tint {
+  background-color: oklch(var(--mm-tint-l) var(--mm-tint-c) var(--mm-card-hue, 0));
+}
+
+/*
+ * The donut's arcs and the dots that label them, on the same terms: the chart
+ * hands in a hue through `--mm-segment-hue` (see `components/donut/segments.ts`)
+ * and the theme owns the rest, so one arc separates from its surface at 3:1 in
+ * both themes without the chart knowing which theme it is in.
+ */
+@utility stroke-segment {
+  stroke: oklch(var(--mm-segment-l) var(--mm-segment-c) var(--mm-segment-hue, 0));
+}
+
+@utility bg-segment {
+  background-color: oklch(var(--mm-segment-l) var(--mm-segment-c) var(--mm-segment-hue, 0));
+}
+
+/*
  * Every shadcn variable resolves to a token, so the generated components follow
  * the palette in both themes without being edited. `--mm-*` flips with the
  * theme; these mappings never need to.
@@ -91,9 +137,10 @@
   --card-foreground: var(--mm-ink);
   --popover: var(--mm-surface-raised);
   --popover-foreground: var(--mm-ink);
-  --primary: var(--mm-accent);
+  /* A filled control takes the brand colour; only text takes the darker tone. */
+  --primary: var(--mm-accent-fill);
   --primary-foreground: var(--mm-accent-fg);
-  --secondary: color-mix(in oklab, var(--mm-ink) 6%, transparent);
+  --secondary: var(--mm-surface-sunken);
   --secondary-foreground: var(--mm-ink);
   --muted: color-mix(in oklab, var(--mm-ink) 5%, transparent);
   --muted-foreground: var(--mm-muted);
@@ -106,15 +153,15 @@
   --ring: var(--mm-accent);
 
   /* Charts stay on the brand hue and step in lightness: one story, not five. */
-  --chart-1: var(--mm-accent);
-  --chart-2: oklch(from var(--mm-accent) calc(l + 0.1) calc(c - 0.05) h);
-  --chart-3: oklch(from var(--mm-accent) calc(l + 0.2) calc(c - 0.09) h);
-  --chart-4: var(--mm-positive);
+  --chart-1: var(--mm-accent-fill);
+  --chart-2: oklch(from var(--mm-accent-fill) calc(l + 0.1) calc(c - 0.05) h);
+  --chart-3: oklch(from var(--mm-accent-fill) calc(l + 0.2) calc(c - 0.09) h);
+  --chart-4: var(--mm-positive-fill);
   --chart-5: var(--mm-warning);
 
   --sidebar: var(--mm-surface);
   --sidebar-foreground: var(--mm-ink);
-  --sidebar-primary: var(--mm-accent);
+  --sidebar-primary: var(--mm-accent-fill);
   --sidebar-primary-foreground: var(--mm-accent-fg);
   --sidebar-accent: var(--accent);
   --sidebar-accent-foreground: var(--mm-accent);
@@ -147,6 +194,22 @@
   body {
     @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * Headings and labels are set Medium, not Regular — the reference's weight.
+   * Nothing goes heavier: bold on a screen full of numbers reads as alarm.
+   */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  th,
+  label,
+  [data-slot='label'] {
+    font-weight: 500;
   }
 
   /*

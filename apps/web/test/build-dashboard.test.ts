@@ -63,6 +63,13 @@ const inflow: Inflow = {
   creditedAmount: null,
   note: null,
 };
+/** The month before: what the tiles measure this month against. */
+const lastMonthInflow: Inflow = {
+  ...inflow,
+  id: 'i0',
+  amount: Money.of('1000', USD),
+  receivedOn: '2026-08-12',
+};
 const capital = {
   total: Money.of('5000', USD),
   availableUntilPayday: Money.of('800', USD),
@@ -117,6 +124,34 @@ describe('buildDashboard', () => {
     const row = buildDashboard(input())!.inflows.rows[0]!;
     expect(row.received.round().toString()).toBe('1500');
     expect(row.expected.round().toString()).toBe('3000');
+  });
+
+  it('sets this month against the one before it, on both tiles', () => {
+    const d = buildDashboard(input({ inflows: [inflow, lastMonthInflow] }))!;
+    expect(d.stats.income.amount.round().toString()).toBe('1500');
+    expect(d.stats.income.previous.round().toString()).toBe('1000');
+    expect(d.stats.income.delta).toBeCloseTo(0.5);
+    // Nothing started or ended between the two months, so the plan did not move.
+    expect(d.stats.outgo.amount.round().toString()).toBe('1530');
+    expect(d.stats.outgo.previous.round().toString()).toBe('1530');
+    expect(d.stats.outgo.delta).toBe(0);
+  });
+
+  it('reads an obligation that started this month as the plan growing', () => {
+    const d = buildDashboard(
+      input({
+        expenses: [expense(), expense({ id: 'e3', name: 'Coworking', activeFrom: '2026-09-01' })],
+      }),
+    )!;
+    expect(d.stats.outgo.previous.round().toString()).toBe('1500');
+    expect(d.stats.outgo.amount.round().toString()).toBe('2700');
+    expect(d.stats.outgo.delta).toBeCloseTo(0.8);
+  });
+
+  it('has no delta to show when the month before held nothing', () => {
+    const d = buildDashboard(input({ inflows: [inflow] }))!;
+    expect(d.stats.income.previous.isZero()).toBe(true);
+    expect(d.stats.income.delta).toBeNull();
   });
 
   it('groups upcoming events by date and counts expenses that have no date', () => {

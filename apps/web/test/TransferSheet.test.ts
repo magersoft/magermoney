@@ -114,14 +114,14 @@ describe('TransferSheet', () => {
     // The sheet's content is teleported to `document.body` (reka-ui's
     // DialogPortal), outside `w.element` — query the body, not the wrapper.
     const body = new DOMWrapper(document.body);
-    await body.get('[data-testid="transfer-to"]').setValue(USD2_ID);
+    await body.get('[data-testid="transfer-to"] select').setValue(USD2_ID);
     expect(body.find('[data-testid="transfer-received"]').exists()).toBe(false);
-    await body.get('[data-testid="transfer-to"]').setValue(EUR_ID);
+    await body.get('[data-testid="transfer-to"] select').setValue(EUR_ID);
     expect(body.find('[data-testid="transfer-received"]').exists()).toBe(true);
-    await body.get('[data-testid="transfer-sent"]').setValue('100');
+    await body.get('[data-slot="quick-action-amount"] input').setValue('100');
     expect(body.get('[data-testid="transfer-hint"]').text()).toContain('86');
     await body.get('[data-testid="transfer-received"]').setValue('86');
-    await body.get('form').trigger('submit');
+    await body.get('[data-slot="quick-action-confirm"]').trigger('click');
     await flushPromises();
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
     const postBody = JSON.parse(post?.[1]?.body as string);
@@ -174,10 +174,10 @@ describe('TransferSheet', () => {
     const w = mountSheet(fetch);
     await flushPromises();
     const body = new DOMWrapper(document.body);
-    await body.get('[data-testid="transfer-to"]').setValue(USD2_ID);
-    await body.get('[data-testid="transfer-sent"]').setValue('100');
-    await body.get('[data-testid="transfer-occurred-at"]').setValue('2026-09-01T10:00');
-    await body.get('form').trigger('submit');
+    await body.get('[data-testid="transfer-to"] select').setValue(USD2_ID);
+    await body.get('[data-slot="quick-action-amount"] input').setValue('100');
+    await body.get('[data-testid="transfer-occurred-at"] input').setValue('2026-09-01T10:00');
+    await body.get('[data-slot="quick-action-confirm"]').trigger('click');
     await flushPromises();
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
     const postBody = JSON.parse(post?.[1]?.body as string);
@@ -219,9 +219,9 @@ describe('TransferSheet', () => {
     });
     await flushPromises();
     const body = new DOMWrapper(document.body);
-    await body.get('[data-testid="transfer-to"]').setValue(USD2_ID);
-    await body.get('[data-testid="transfer-sent"]').setValue('10');
-    await body.get('form').trigger('submit');
+    await body.get('[data-testid="transfer-to"] select').setValue(USD2_ID);
+    await body.get('[data-slot="quick-action-amount"] input').setValue('10');
+    await body.get('[data-slot="quick-action-confirm"]').trigger('click');
     for (let i = 0; i < 400 && !w.emitted('update:open'); i++) {
       await new Promise((r) => setTimeout(r, 10));
       await flushPromises();
@@ -229,7 +229,7 @@ describe('TransferSheet', () => {
 
     expect(w.emitted('update:open')?.at(-1)).toEqual([false]);
     expect(toast).toHaveBeenCalledWith(ru.offline.saved);
-    expect(body.get('[data-testid="transfer-save"]').attributes('disabled')).toBeUndefined();
+    expect(body.get('[data-slot="quick-action-confirm"]').attributes('disabled')).toBeUndefined();
     onlineManager.setOnline(true);
     w.unmount();
   }, 15000);
@@ -246,9 +246,9 @@ describe('TransferSheet', () => {
     const w = mountSheet(fetch);
     await flushPromises();
     const body = new DOMWrapper(document.body);
-    await body.get('[data-testid="transfer-to"]').setValue(USD2_ID);
-    await body.get('[data-testid="transfer-sent"]').setValue('10');
-    await body.get('form').trigger('submit');
+    await body.get('[data-testid="transfer-to"] select').setValue(USD2_ID);
+    await body.get('[data-slot="quick-action-amount"] input').setValue('10');
+    await body.get('[data-slot="quick-action-confirm"]').trigger('click');
     await flushPromises();
 
     expect(toast).toHaveBeenCalledWith(ru.errors.transferBackdated);

@@ -1,6 +1,9 @@
 import type { ExpenseCategoryDto, ExpenseDto } from '@magermoney/contracts';
 import {
   Money,
+  firstOfMonth,
+  isActiveWithin,
+  lastOfMonth,
   monthlyAmount,
   type CurrencyRegistry,
   type Expense,
@@ -24,7 +27,10 @@ export interface ExpenseGroups {
   groups: ExpenseGroup[];
   planned: Money;
   essential: Money;
+  /** Over before the month being read began. */
   ended: Expense[];
+  /** Not started by the end of it: part of the plan, just not of this month. */
+  upcoming: Expense[];
   unconvertible: Expense[];
 }
 
@@ -35,7 +41,16 @@ const UNKNOWN: ExpenseCategoryDto = {
   sortOrder: Number.MAX_SAFE_INTEGER,
 };
 
-/** Pure: the Expenses segment from DTOs, a rate table and a display currency. Undefined while an input is missing. */
+/**
+ * Pure: the Expenses segment from DTOs, a rate table and a display currency,
+ * for one month. Undefined while an input is missing.
+ *
+ * The month is what the screen is reading, not what today is: the segment pages
+ * back and forward, and a month shows the obligations that were live in it.
+ * What falls outside is not dropped — an expense that is over and one that has
+ * not started are two different lists the screen can offer, so paging never
+ * hides something the plan still holds.
+ */
 export function groupExpenses(
   dtos: readonly ExpenseDto[],
   categories: readonly ExpenseCategoryDto[],
@@ -43,15 +58,15 @@ export function groupExpenses(
   registry: CurrencyRegistry,
   display: string,
   today: IsoDate,
+  month: IsoDate = today,
 ): ExpenseGroups | undefined {
   const currency = registry.get(display);
   if (!table || currency.isErr()) return undefined;
   const zero = Money.zero(currency.value);
   const all = dtos.map((d) => toExpense(d, registry));
-  /* An expense that starts next month is already part of the plan — the same
-   * reading the Income segment gives a source that has not begun paying yet.
-   * "Ended" is the only thing that takes a row out of the list. */
-  const current = all.filter((e) => e.activeTo === null || e.activeTo >= today);
+  const from = firstOfMonth(month);
+  const to = lastOfMonth(month);
+  const current = all.filter((e) => isActiveWithin(e, from, to));
   const byCategory = new Map<string, ExpenseGroup>();
   let planned = zero;
   let essential = zero;
@@ -80,7 +95,8 @@ export function groupExpenses(
     ),
     planned,
     essential,
-    ended: all.filter((e) => e.activeTo !== null && e.activeTo < today),
+    ended: all.filter((e) => e.activeTo !== null && e.activeTo < from),
+    upcoming: all.filter((e) => e.activeFrom > to),
     unconvertible,
   };
 }

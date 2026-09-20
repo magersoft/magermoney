@@ -17,7 +17,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "backlog": "npx backlog browser"
   },
   "devDependencies": {
     "@vue/eslint-config-typescript": "^14.9.0",

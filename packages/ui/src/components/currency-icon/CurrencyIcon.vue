@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { Icon } from '@iconify/vue';
+import { computed, onMounted, watch } from 'vue';
+import { Icon, iconLoaded } from '@iconify/vue';
+import { countryFlagsReady, loadCountryFlags } from '../../icons/country-flags';
 import { resolveCurrencyIcon } from './resolve-icon';
 
 const props = withDefaults(
@@ -10,15 +11,40 @@ const props = withDefaults(
     kind: 'fiat' | 'crypto';
     /** Explicit Iconify name, for currencies the resolver does not know. */
     icon?: string | null;
+    /** ISO 3166-1 alpha-2 country the account is held in. Outranks the currency. */
+    country?: string | null;
     /** Rendered size in px. Stays square. */
     size?: number;
   }>(),
-  { icon: null, size: 24 },
+  { icon: null, country: null, size: 24 },
 );
 
-const resolved = computed(() =>
-  resolveCurrencyIcon({ code: props.code, kind: props.kind, icon: props.icon }),
-);
+/*
+ * Only a country can name a flag we have not registered yet, so only a country
+ * sends for the chunk — and it does so from the component rather than from the
+ * screens, which would each have to remember to.
+ */
+const wantsCountryFlag = computed(() => props.kind === 'fiat' && !props.icon && !!props.country);
+onMounted(() => {
+  watch(wantsCountryFlag, (wants) => wants && void loadCountryFlags(), { immediate: true });
+});
+
+/**
+ * What to draw, and what to draw until the country's flag is here. Asking
+ * Iconify for an unregistered name would send it to the Iconify API — a
+ * request over the network, from an app that is meant to work without one — so
+ * an unavailable flag is stepped back to the currency's, which is always
+ * registered, and redraws when `countryFlagsReady` flips.
+ */
+const resolved = computed(() => {
+  const withoutCountry = { code: props.code, kind: props.kind, icon: props.icon };
+  const wanted = resolveCurrencyIcon({ ...withoutCountry, country: props.country });
+  if (!wantsCountryFlag.value) return wanted;
+  /* `iconLoaded` is a lookup, not a signal; the ready flag is what re-runs this. */
+  void countryFlagsReady.value;
+  const available = wanted.kind === 'iconify' && iconLoaded(wanted.name);
+  return available ? wanted : resolveCurrencyIcon(withoutCountry);
+});
 
 /**
  * Two letters have to stay legible inside a small circle, so the type scales

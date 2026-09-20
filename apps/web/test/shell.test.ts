@@ -41,7 +41,7 @@ async function mountShell(at = '/') {
 /**
  * The labels of the links that claim to be the current page. Not deduplicated:
  * exactly one tab per navigation has to be lit, so the same label twice is the
- * assertion — once would mean the desktop bar and the phone tab bar disagree.
+ * assertion — once would mean the desktop bar and the phone pill disagree.
  */
 const current = (shell: Awaited<ReturnType<typeof mountShell>>) =>
   shell.findAll('a[aria-current="page"]').map((a) => a.text());
@@ -50,7 +50,7 @@ describe('AppShell', () => {
   it('offers four tabs in both navigations, and rates is no longer one of them', async () => {
     const shell = await mountShell();
     const labels = shell.findAll('nav a').map((a) => a.text());
-    // Two navs (desktop bar, phone tab bar), four links each.
+    // Two navs (desktop bar, phone pill), four links each.
     expect(labels).toEqual([
       'Home',
       'Accounts',
@@ -81,7 +81,13 @@ describe('AppShell', () => {
 
   it('asks for the next theme in the cycle rather than setting it itself', async () => {
     const shell = await mountShell();
-    await shell.get('button').trigger('click');
+    await shell.get('header button').trigger('click');
     expect(shell.emitted('update:theme')).toEqual([['light']]);
+  });
+
+  it('passes the pill\'s "+" on to whoever owns the quick actions', async () => {
+    const shell = await mountShell('/settings');
+    await shell.get('[data-testid="quick-add"]').trigger('click');
+    expect(shell.emitted('quick')).toHaveLength(1);
   });
 });
