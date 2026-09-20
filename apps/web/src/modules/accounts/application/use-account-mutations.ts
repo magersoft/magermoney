@@ -1,8 +1,14 @@
+import { computed } from 'vue';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { AccountDto, CreateAccountInput, UpdateAccountInput } from '@magermoney/contracts';
-import { useApi } from '@/shared/api/use-api';
+import { useApi, useOwnerId } from '@/shared/api/use-api';
 import { accountsApi } from '../infrastructure/accounts-api';
 import { ACCOUNTS_KEY } from './use-accounts';
+import {
+  registerAccountMutations,
+  UPDATE_ACCOUNT_KEY,
+  type UpdateAccountVars,
+} from './mutation-defaults';
 
 const replaceIn = (list: AccountDto[] | undefined, dto: AccountDto) =>
   (list ?? []).map((a) => (a.id === dto.id ? dto : a));
@@ -19,17 +25,23 @@ export function useCreateAccount() {
   return { create: (input: CreateAccountInput) => m.mutateAsync(input), isPending: m.isPending };
 }
 
+/**
+ * Editing an account, including the colour of its card and the star that puts
+ * it on Home. What the mutation does lives in the client's defaults
+ * (`mutation-defaults.ts`), so an edit made with no connection is parked on the
+ * device and goes out by itself — a restored mutation has no component, and its
+ * function and optimistic patch cannot live in this composable alone.
+ */
 export function useUpdateAccount() {
-  const api = accountsApi(useApi());
   const qc = useQueryClient();
-  const m = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: UpdateAccountInput }) => api.update(id, input),
-    onSuccess: (dto) => qc.setQueryData<AccountDto[]>(ACCOUNTS_KEY, (list) => replaceIn(list, dto)),
-    onSettled: () => qc.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
-  });
+  const ownerId = useOwnerId();
+  registerAccountMutations(qc, useApi(), ownerId);
+  const m = useMutation<AccountDto, Error, UpdateAccountVars>({ mutationKey: UPDATE_ACCOUNT_KEY });
   return {
-    update: (id: string, input: UpdateAccountInput) => m.mutateAsync({ id, input }),
-    isPending: m.isPending,
+    update: (id: string, input: UpdateAccountInput) =>
+      m.mutateAsync({ ownerId: ownerId(), id, input }),
+    /* A parked edit is not pending on anything the person should wait for. */
+    isPending: computed(() => m.isPending.value && !m.isPaused.value),
   };
 }
 

@@ -200,6 +200,69 @@ describe('the currency tint', () => {
   });
 });
 
+/**
+ * The card is not its fill any more: `card-gloss` lays a sheen of white and
+ * black over it (`index.css`), and the ink lies on the result. Measuring the
+ * bare tint would therefore prove something the screen never shows — and the
+ * first values written for the sheen did exactly that, clearing AA on paper
+ * while a dark card's brightest corner carried ink at 3.7:1.
+ *
+ * So the wheel is walked again with the sheen composited on, at the two corners
+ * where it is strongest: the top-left, where the sweep and the bloom stack into
+ * the lightest point a card has, and the foot, where the shading makes the
+ * darkest. Compositing happens in gamma-encoded sRGB, because that is where the
+ * browser does it.
+ */
+describe('the card tint under its sheen', () => {
+  const encode = (u: number) => (u <= 0.0031308 ? 12.92 * u : 1.055 * u ** (1 / 2.4) - 0.055);
+  const decode = (s: number) => (s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4);
+  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
+
+  /** The tint as the browser holds it, with each sheen layer painted over in turn. */
+  const glossed = (tint: Oklch, layers: readonly (readonly [value: number, alpha: number])[]) => {
+    let channels = linearRgb(tint).map((channel) => encode(clamp(channel)));
+    for (const [value, alpha] of layers)
+      channels = channels.map((channel) => channel * (1 - alpha) + value * alpha);
+    const [r, g, b] = channels.map(decode) as [number, number, number];
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const against = (ink: Oklch, background: number) => {
+    const inkLuminance = luminance(ink);
+    const lighter = Math.max(inkLuminance, background);
+    const darker = Math.min(inkLuminance, background);
+    return Math.round(((lighter + 0.05) / (darker + 0.05)) * 10) / 10;
+  };
+
+  it.each(['light', 'dark'])('carries ink at AA on every hue, glossed, in %s', (theme) => {
+    const lightness = scalar(`mm-${theme}-tint-l`);
+    const chroma = scalar(`mm-${theme}-tint-c`);
+    const sweep = scalar(`mm-${theme}-gloss-sweep`);
+    const bloom = scalar(`mm-${theme}-gloss-bloom`);
+    const shade = scalar(`mm-${theme}-gloss-shade`);
+    const ink = token(`mm-${theme}-ink`);
+
+    /* The bloom is under the sweep in the stack, so it is painted on first. */
+    const brightest = [
+      [1, bloom],
+      [1, sweep],
+    ] as const;
+    const darkest = [[0, shade]] as const;
+
+    const worst = Array.from({ length: 360 }, (_, hue) => {
+      const tint: Oklch = [lightness, chroma, hue];
+      return {
+        hue,
+        ratio: Math.min(
+          against(ink, glossed(tint, brightest)),
+          against(ink, glossed(tint, darkest)),
+        ),
+      };
+    }).reduce((a, b) => (b.ratio < a.ratio ? b : a));
+
+    expect(worst.ratio).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 describe('the donut segment palette', () => {
   /*
    * The one chart in the app, and the same proof the card tint gets: a segment

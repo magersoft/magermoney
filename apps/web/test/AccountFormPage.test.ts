@@ -46,6 +46,7 @@ const created = {
   cardNetwork: null,
   cardTier: null,
   cardExpires: null,
+  colorway: null as string | null,
   note: null,
   sortOrder: 0,
   archivedAt: null,
@@ -206,6 +207,39 @@ describe('AccountFormPage', () => {
 
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(JSON.parse(String(post?.[1]?.body))).toMatchObject({ name: 'Карман', country: 'RU' });
+  });
+
+  /*
+   * The colour is chosen on the card itself, so the test drives what a person
+   * drives: the card in front of them repaints, and what is saved is the colour
+   * that was on it.
+   */
+  it('paints the card as the colour is picked, and saves the colour that is on it', async () => {
+    const { w, fetch } = await mountForm();
+    await flushPromises();
+
+    const preview = () => w.get('[data-testid="colorway-preview"]');
+    expect(preview().attributes('data-colorway')).toBeUndefined();
+
+    await w.get('[data-testid="colorway-rose"]').trigger('click');
+    expect(preview().attributes('data-colorway')).toBe('rose');
+
+    await w.get('[data-testid="form-name"]').setValue('Карман');
+    await w.get('[data-testid="form-bank"]').setValue('Bank');
+    await pickCountry(w, 'Росс', 'RU');
+    await w.get('[data-testid="account-form"]').trigger('submit');
+    await flushPromises();
+
+    const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(JSON.parse(String(post?.[1]?.body))).toMatchObject({ colorway: 'rose' });
+  });
+
+  it('opens an account on the colour it is already painted in', async () => {
+    const { w } = await mountForm({ ...created, colorway: 'teal' });
+    await flushPromises();
+
+    expect(w.get('[data-testid="colorway-preview"]').attributes('data-colorway')).toBe('teal');
+    expect(w.get('[data-testid="colorway-teal"]').attributes('aria-checked')).toBe('true');
   });
 
   it('opens on the country the account is already held in', async () => {

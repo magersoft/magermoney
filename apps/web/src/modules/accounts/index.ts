@@ -4,8 +4,15 @@ import { routeComponent } from '@/shared/layout/route-fallback';
 
 export { toAccount } from './domain/mappers';
 export { ACCOUNT_KIND_KEYS } from './domain/labels';
+export { toCardItem, cardExpiry, accountReference } from './domain/account-card';
 export { useAccounts, useAccount } from './application/use-accounts';
-export { ACCOUNTS_KEY, registerAccountMutations, RECORD_BALANCE_KEY } from './offline';
+export { useAccountCards } from './application/use-account-cards';
+export {
+  ACCOUNTS_KEY,
+  registerAccountMutations,
+  RECORD_BALANCE_KEY,
+  UPDATE_ACCOUNT_KEY,
+} from './offline';
 export {
   useCreateAccount,
   useUpdateAccount,

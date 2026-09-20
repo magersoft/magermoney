@@ -8,7 +8,12 @@ import {
 } from '@tanstack/vue-query';
 import { defaultQueryOptions } from '../src/app/query.js';
 import { ApiError } from '../src/shared/api/client.js';
-import { RECORD_BALANCE_KEY, registerAccountMutations } from '../src/modules/accounts/index.js';
+import {
+  ACCOUNTS_KEY,
+  RECORD_BALANCE_KEY,
+  UPDATE_ACCOUNT_KEY,
+  registerAccountMutations,
+} from '../src/modules/accounts/index.js';
 
 const ACCOUNT_ID = '11111111-1111-4111-8111-111111111111';
 const OWNER = '99999999-9999-4999-8999-999999999999';
@@ -137,6 +142,57 @@ describe('mutations made offline', () => {
     expect(post?.[0]).toBe(`/accounts/${ACCOUNT_ID}/balances`);
     expect(JSON.parse(post?.[1]?.body as string)).toMatchObject({ amount: '99' });
     // The pause waits out the retryer's back-off before anything is dehydrated.
+  }, 15000);
+
+  /*
+   * The colour of a card is changed in exactly the place you have no signal —
+   * on a train, looking at the account. It is parked like a balance, and unlike
+   * a balance it is safe to replay: it sets a field rather than adding a row.
+   */
+  it('replays an account edit that was persisted while the tab was closed, and shows it meanwhile', async () => {
+    const offline = newClient();
+    offline.setQueryData(ACCOUNTS_KEY, [{ id: ACCOUNT_ID, name: 'Alfa', colorway: null }]);
+    registerAccountMutations(
+      offline,
+      {
+        fetch: async () => {
+          throw new TypeError('Failed to fetch');
+        },
+      },
+      () => OWNER,
+    );
+    onlineManager.setOnline(false);
+    void offline
+      .getMutationCache()
+      .build(offline, {
+        ...offline.getMutationDefaults(UPDATE_ACCOUNT_KEY),
+        mutationKey: UPDATE_ACCOUNT_KEY,
+      })
+      .execute({ ownerId: OWNER, id: ACCOUNT_ID, input: { colorway: 'teal' } })
+      .catch(() => undefined);
+    await whenPaused(offline);
+
+    /* The card is already teal on every screen, with the PATCH still parked. */
+    expect(offline.getQueryData(ACCOUNTS_KEY)).toEqual([
+      { id: ACCOUNT_ID, name: 'Alfa', colorway: 'teal' },
+    ]);
+
+    const persisted = JSON.parse(JSON.stringify(dehydrate(offline))) as DehydratedState;
+    expect(persisted.mutations).toHaveLength(1);
+
+    onlineManager.setOnline(true);
+    const fetch = vi.fn(async (path: string, init?: RequestInit) => {
+      if (init?.method === 'PATCH') return json({ id: ACCOUNT_ID, colorway: 'teal' });
+      return json([]);
+    });
+    const restored = newClient();
+    registerAccountMutations(restored, { fetch }, () => OWNER);
+    hydrate(restored, persisted);
+    await restored.resumePausedMutations();
+
+    const patch = fetch.mock.calls.find(([, init]) => init?.method === 'PATCH');
+    expect(patch?.[0]).toBe(`/accounts/${ACCOUNT_ID}`);
+    expect(JSON.parse(patch?.[1]?.body as string)).toEqual({ colorway: 'teal' });
   }, 15000);
 
   it('refuses to replay a write that belongs to another account', async () => {

@@ -1,5 +1,10 @@
 import type { QueryClient } from '@tanstack/vue-query';
-import type { AccountDto, BalanceEntryDto, RecordBalanceInput } from '@magermoney/contracts';
+import type {
+  AccountDto,
+  BalanceEntryDto,
+  RecordBalanceInput,
+  UpdateAccountInput,
+} from '@magermoney/contracts';
 import type { ApiClient } from '@/shared/api/client';
 import { assertOwner } from '@/shared/api/offline-write';
 import { accountsApi } from '../infrastructure/accounts-api';
@@ -14,6 +19,24 @@ import { ACCOUNTS_KEY, balancesKey } from './use-accounts';
  * composable alone.
  */
 export const RECORD_BALANCE_KEY = ['accounts', 'record-balance'] as const;
+
+/**
+ * Editing an account has to survive a closed tab for the same reason: most of
+ * what this mutation carries — the colour of a card, the star that puts it on
+ * Home, a corrected name — is changed while looking at the account, and none of
+ * it is worth losing because the lift had no signal. Unlike a balance, an edit
+ * is safe to replay: it sets fields rather than adding a row.
+ */
+export const UPDATE_ACCOUNT_KEY = ['accounts', 'update'] as const;
+
+export interface UpdateAccountVars {
+  ownerId: string | null;
+  id: string;
+  input: UpdateAccountInput;
+}
+export interface AccountsSnapshot {
+  prev: AccountDto[] | undefined;
+}
 
 export interface RecordBalanceVars {
   /** Who made the write; checked against the session before it is sent, never part of the body. */
@@ -38,6 +61,38 @@ export function registerAccountMutations(
   signedInId: () => string | null = () => null,
 ): void {
   const api = accountsApi(client);
+
+  queryClient.setMutationDefaults(UPDATE_ACCOUNT_KEY, {
+    mutationFn: ({ ownerId, id, input }: UpdateAccountVars): Promise<AccountDto> => {
+      assertOwner(ownerId, signedInId());
+      return api.update(id, input);
+    },
+    /*
+     * The edit shows on every card at once — the stack, the strip, the account's
+     * own screen all read this one list — and stays shown while the PATCH is on
+     * its way, or parked. Merged into the cached account rather than replacing
+     * it, because the input is a patch: the fields it leaves out keep their
+     * values, exactly as the API will decide them.
+     */
+    onMutate: async ({ id, input }: UpdateAccountVars): Promise<AccountsSnapshot> => {
+      await queryClient.cancelQueries({ queryKey: ACCOUNTS_KEY });
+      const prev = queryClient.getQueryData<AccountDto[]>(ACCOUNTS_KEY);
+      queryClient.setQueryData<AccountDto[]>(ACCOUNTS_KEY, (list) =>
+        (list ?? []).map((a) => (a.id === id ? { ...a, ...input } : a)),
+      );
+      return { prev };
+    },
+    onError: (_e: unknown, _vars: UpdateAccountVars, ctx: AccountsSnapshot | undefined): void => {
+      if (ctx?.prev) queryClient.setQueryData(ACCOUNTS_KEY, ctx.prev);
+    },
+    onSuccess: (dto: AccountDto): void => {
+      queryClient.setQueryData<AccountDto[]>(ACCOUNTS_KEY, (list) =>
+        (list ?? []).map((a) => (a.id === dto.id ? dto : a)),
+      );
+    },
+    onSettled: (): Promise<unknown> => queryClient.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
+  });
+
   queryClient.setMutationDefaults(RECORD_BALANCE_KEY, {
     // The owner id travels with the mutation, not in the request: it decides
     // whether the write may be sent at all, and the API knows the user from the token.

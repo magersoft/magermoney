@@ -142,6 +142,15 @@
     0 8px 24px oklch(0.254 0.026 284 / 0.06);
   /* No edge: in light the shadow already says where the card ends. */
   --mm-light-card-edge: transparent;
+  /*
+   * The sheen on a card's surface (`card-gloss` in `index.css`). Faint in
+   * light, because a light tint has little headroom above it before the sheen
+   * turns into a white patch — the highlight is what a lit card looks like,
+   * not a shape of its own.
+   */
+  --mm-light-gloss-sweep: 0.3;
+  --mm-light-gloss-bloom: 0.26;
+  --mm-light-gloss-shade: 0.05;
 
   /*
    * Dark surfaces separate by lightness, not by borders, so the shadow is
@@ -211,6 +220,24 @@
    * to read as an outline around a card standing on its own.
    */
   --mm-dark-card-edge: oklch(0.96 0.004 265 / 0.16);
+  /*
+   * The same sheen, read against a darker fill — and the direction that matters
+   * flips with the theme. In light the ink is dark, so a highlight only helps
+   * it; in dark the ink is near-white and every point of white in the sheen is
+   * contrast taken away from the text lying on it. At the values light uses,
+   * the brightest corner of a dark card carries ink at 3.7:1 — under AA, on
+   * exactly the hues the bare tint clears by the smallest margin.
+   *
+   * So the highlight is held to what the worst hue can afford (the proof is in
+   * `test/tokens-contrast.test.ts`, which composites the sheen over the tint
+   * rather than measuring the bare fill), and the shading at the foot carries
+   * the modelling instead: it darkens, which the ink is only helped by, and a
+   * dark card needs its bottom edge to fall away or it reads as a flat
+   * rectangle on a flat screen.
+   */
+  --mm-dark-gloss-sweep: 0.05;
+  --mm-dark-gloss-bloom: 0.06;
+  --mm-dark-gloss-shade: 0.2;
 
   /* Light is the default. */
   --mm-bg: var(--mm-light-bg);
@@ -238,6 +265,9 @@
   --mm-shadow-card: var(--mm-light-shadow-card);
   --mm-shadow-stack: var(--mm-light-shadow-stack);
   --mm-card-edge: var(--mm-light-card-edge);
+  --mm-gloss-sweep: var(--mm-light-gloss-sweep);
+  --mm-gloss-bloom: var(--mm-light-gloss-bloom);
+  --mm-gloss-shade: var(--mm-light-gloss-shade);
 
   --mm-duration-fast: 150ms;
   --mm-duration-base: 240ms;
@@ -273,6 +303,9 @@
     --mm-shadow-card: var(--mm-dark-shadow-card);
     --mm-shadow-stack: var(--mm-dark-shadow-stack);
     --mm-card-edge: var(--mm-dark-card-edge);
+    --mm-gloss-sweep: var(--mm-dark-gloss-sweep);
+    --mm-gloss-bloom: var(--mm-dark-gloss-bloom);
+    --mm-gloss-shade: var(--mm-dark-gloss-shade);
   }
 }
 
@@ -304,6 +337,9 @@
   --mm-shadow-card: var(--mm-dark-shadow-card);
   --mm-shadow-stack: var(--mm-dark-shadow-stack);
   --mm-card-edge: var(--mm-dark-card-edge);
+  --mm-gloss-sweep: var(--mm-dark-gloss-sweep);
+  --mm-gloss-bloom: var(--mm-dark-gloss-bloom);
+  --mm-gloss-shade: var(--mm-dark-gloss-shade);
 }
 
 :root[data-theme='light'] {

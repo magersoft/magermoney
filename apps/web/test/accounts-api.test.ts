@@ -15,6 +15,7 @@ const dto = {
   cardNetwork: null,
   cardTier: null,
   cardExpires: null,
+  colorway: null,
   note: null,
   sortOrder: 0,
   archivedAt: null,

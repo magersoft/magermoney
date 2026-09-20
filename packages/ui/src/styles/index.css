@@ -116,6 +116,42 @@
 }
 
 /*
+ * The light on a card's surface (reference slide 12): a bank card is a piece of
+ * printed plastic, and what says so is the way a sheen falls across it.
+ *
+ * Three layers, all of them the same neutral white and black at low alpha, so
+ * the sheen is *light* rather than a fourth colour — it lies over whatever hue
+ * the card is painted in without arguing with it, and the ink underneath keeps
+ * the contrast the tint tokens prove (`test/tokens-contrast.test.ts`), because
+ * a wash this faint cannot move a fill across the AA line in either direction
+ * far enough to matter.
+ *
+ * The sweep runs corner to corner, the bloom sits where a light source would
+ * be, and the last layer darkens the bottom edge so the card reads as lit from
+ * above rather than evenly printed.
+ *
+ * It is drawn, never animated: a permanent gradient has nothing for
+ * `prefers-reduced-motion` to reduce, and the one thing on this card that does
+ * move — the swipe between colours — answers that setting itself.
+ */
+@utility card-gloss {
+  background-image:
+    linear-gradient(
+      125deg,
+      rgb(255 255 255 / var(--mm-gloss-sweep)) 0%,
+      rgb(255 255 255 / 0) 42%,
+      rgb(255 255 255 / 0) 58%,
+      rgb(255 255 255 / calc(var(--mm-gloss-sweep) * 0.55)) 100%
+    ),
+    radial-gradient(
+      120% 90% at 18% 0%,
+      rgb(255 255 255 / var(--mm-gloss-bloom)) 0%,
+      rgb(255 255 255 / 0) 60%
+    ),
+    linear-gradient(to top, rgb(0 0 0 / var(--mm-gloss-shade)) 0%, rgb(0 0 0 / 0) 45%);
+}
+
+/*
  * The donut's arcs and the dots that label them, on the same terms: the chart
  * hands in a hue through `--mm-segment-hue` (see `components/donut/segments.ts`)
  * and the theme owns the rest, so one arc separates from its surface at 3:1 in

@@ -133,6 +133,8 @@ export function mapAccounts(
         : null,
       cardTier: isCard ? tier : null,
       cardExpires,
+      /* The spreadsheet has no colours; an imported account wears its currency's. */
+      colorway: null,
       note: noteLines.length > 0 ? noteLines.join('\n') : null,
       sortOrder: out.length,
       balance,

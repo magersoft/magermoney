@@ -28,6 +28,8 @@ export const toNewAccount = (input: Omit<CreateAccountInput, 'openingBalance'>):
   cardNetwork: input.kind === 'card' ? (input.cardNetwork ?? null) : null,
   cardTier: input.kind === 'card' ? (input.cardTier ?? null) : null,
   cardExpires: input.kind === 'card' ? (input.cardExpires ?? null) : null,
+  /* Not gated on `kind`: every account is drawn as a card, so every one may be painted. */
+  colorway: input.colorway ?? null,
   note: input.note ?? null,
   sortOrder: input.sortOrder ?? 0,
 });

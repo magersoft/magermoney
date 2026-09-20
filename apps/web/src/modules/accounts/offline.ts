@@ -9,5 +9,7 @@ export { ACCOUNTS_KEY, balancesKey } from './application/use-accounts';
 export {
   registerAccountMutations,
   RECORD_BALANCE_KEY,
+  UPDATE_ACCOUNT_KEY,
   type RecordBalanceVars,
+  type UpdateAccountVars,
 } from './application/mutation-defaults';

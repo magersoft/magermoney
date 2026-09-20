@@ -1,16 +1,27 @@
 <script setup lang="ts">
 /**
- * An account, as a card. The reference's payment card with its two pieces of
- * bank furniture swapped for ours: the scheme logo becomes the currency mark,
- * the masked number becomes the account's name, and the fill carries the
- * currency instead of decorating (`currency-tint.ts`).
+ * An account, as a card — laid out the way a bank card is (reference slide 12):
+ * the issuing mark and the scheme at the top, the balance in the middle, the
+ * chip and the card's identity along the foot.
  *
- * Everything the card says sits in its top band, because the stack layout
- * overlaps into the bottom one — a card whose amount could be covered would be
- * a card you have to open to read.
+ * Two of the reference's pieces of furniture are ours rather than a bank's. The
+ * scheme logo is the scheme's only when the account *is* a payment card;
+ * everything else — a deposit, a wallet, cash — puts the currency mark there,
+ * because what an account is held in is the nearest thing it has to an issuer.
+ * And the masked number is a masked number only where four digits exist: we
+ * never hold more of a card than that, and for everything else the foot says
+ * where the money is kept instead.
+ *
+ * What the card says is ordered by what a covered card still has to answer. In
+ * the stack every card but the last is overlapped from below, so the name, the
+ * mark and the balance sit in the band that stays visible, and the foot — the
+ * identity line — is the part that may be covered. Reading a stack is «which
+ * account, how much»; reading one card is everything.
  *
  * All the type is ink. A balance is never coloured (docs/design/direction.md),
- * and a second, quieter tone would not clear AA on the tint anyway.
+ * and a second, quieter tone would not clear AA on the tint anyway. The sheen
+ * (`card-gloss`) lies over the fill and under the ink, and is drawn rather than
+ * animated, so it has nothing to take away under reduced motion.
  */
 import { computed } from 'vue';
 import { StarIcon } from '@lucide/vue';
@@ -20,7 +31,9 @@ import { cn } from '../../lib/utils';
 import AmountLockup from '../amount-lockup/AmountLockup.vue';
 import CurrencyIcon from '../currency-icon/CurrencyIcon.vue';
 import type { AmountLocale } from '../amount-lockup/format-amount';
-import { currencyTintStyle } from './currency-tint';
+import CardBrandMark from './CardBrandMark.vue';
+import { cardBrand } from './card-brand';
+import { cardTintStyle } from './colorways';
 import type { AccountCardItem } from './types';
 
 interface Props extends PrimitiveProps {
@@ -52,6 +65,19 @@ const foreign = computed(
     props.account.code.toUpperCase() !== props.baseCode.toUpperCase(),
 );
 
+/** The scheme, when the account is a payment card and the network names one. */
+const brand = computed(() => (props.account.isCard ? cardBrand(props.account.network) : null));
+
+/*
+ * What the foot says. A payment card says what is embossed on one — the digits
+ * it is known by, and when it runs out. Anything else says where it is kept,
+ * which is the only identity it has: we store no account numbers.
+ */
+const masked = computed(() => (props.account.last4 ? `•• ${props.account.last4}` : null));
+const footing = computed(() =>
+  props.account.isCard ? masked.value : (props.account.reference ?? null),
+);
+
 /*
  * One destination, spelled the way the element it renders as expects it: an
  * anchor takes `href`, a router link takes `to`. A screen therefore swaps `as`
@@ -69,11 +95,12 @@ const linkAttrs = computed(() => {
     :as="as"
     :as-child="asChild"
     :data-foreign="foreign || undefined"
-    :style="currencyTintStyle(props.account.code)"
+    :data-colorway="props.account.colorway ?? undefined"
+    :style="cardTintStyle(props.account.code, props.account.colorway)"
     v-bind="linkAttrs"
     :class="
       cn(
-        'bg-currency-tint text-ink shadow-card relative flex flex-col gap-2 rounded-xl p-4',
+        'bg-currency-tint text-ink shadow-card relative flex flex-col rounded-xl p-4',
         /*
          * The edge the dark theme needs and the light one does not: with no
          * shadow on a dark canvas, a hairline of ink is what catches the top of
@@ -81,10 +108,24 @@ const linkAttrs = computed(() => {
          * transparent and this draws nothing.
          */
         'border-card-edge border',
+        /*
+         * The sheen is painted on the element itself rather than in a layer of
+         * its own: `background-image` sits above `background-color` and below
+         * every child, which is exactly where light on a surface belongs, and
+         * it saves an overlay that would have to be excluded from the a11y tree
+         * and from pointer events.
+         */
+        'card-gloss overflow-hidden bg-clip-padding',
         'duration-fast ease-out-quart outline-offset-2 transition-transform',
         'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
         'focus-visible:outline-ring focus-visible:outline-2 motion-reduce:transition-none',
-        props.size === 'sm' ? 'min-h-28' : 'min-h-36',
+        /*
+         * Tall enough for the foot to sit at a card's bottom edge rather than
+         * under the balance, and no taller: a card sized to a real one's
+         * proportions opens a void in its middle, because the reference fills
+         * that middle with a balance we keep in the top band (see above).
+         */
+        props.size === 'sm' ? 'min-h-28 gap-1.5' : 'min-h-36 gap-2',
         props.class,
       )
     "
@@ -108,8 +149,15 @@ const linkAttrs = computed(() => {
           :aria-label="props.account.pinnedLabel"
           :size="props.size === 'sm' ? 14 : 16"
         />
-        <!-- The mark is where the account is held; the code is announced by the foreign badge. -->
-        <span aria-hidden="true">
+        <!--
+          The corner a bank puts its scheme in. A payment card whose scheme we
+          recognise gets the scheme; every other account gets the mark of what
+          it holds, which is the closest thing it has to one. Both are silent —
+          the code is announced by the foreign badge, and the scheme is spelled
+          out in the foot for anyone listening.
+        -->
+        <CardBrandMark v-if="brand" :brand="brand" :size="props.size === 'sm' ? 22 : 28" />
+        <span v-else aria-hidden="true">
           <CurrencyIcon
             :code="props.account.code"
             :kind="props.account.kind"
@@ -119,6 +167,7 @@ const linkAttrs = computed(() => {
         </span>
       </span>
     </span>
+
     <span class="flex items-baseline justify-between gap-2">
       <AmountLockup
         :amount="props.account.amount"
@@ -132,6 +181,66 @@ const linkAttrs = computed(() => {
         data-slot="account-card-foreign"
         class="bg-ink/10 text-2xs shrink-0 rounded-full px-2 py-0.5 font-mono tracking-[0.08em] uppercase"
         >{{ props.account.code.toUpperCase() }}</span
+      >
+    </span>
+
+    <!--
+      The foot. `mt-auto` pushes it to the bottom edge whatever the card's
+      height, which is what makes the chip and the digits sit where they sit on
+      a real card rather than floating under the balance.
+    -->
+    <span class="mt-auto flex items-end justify-between gap-2 pt-2">
+      <!--
+        The chip: the one piece of a bank card that is a shape rather than a
+        word, and the fastest signal that this rectangle is meant to be a card.
+        Drawn in ink at a low opacity, so it belongs to the surface rather than
+        sitting on it, and hidden from the a11y tree — it says nothing.
+      -->
+      <svg
+        data-slot="account-card-chip"
+        :width="props.size === 'sm' ? 22 : 28"
+        :height="props.size === 'sm' ? 17 : 22"
+        viewBox="0 0 28 22"
+        aria-hidden="true"
+        focusable="false"
+        class="shrink-0"
+      >
+        <!--
+          A filled pad with its contacts cut out of it, rather than an outline:
+          an outlined grid reads as a table icon, and the thing that makes a
+          chip a chip is that it is a solid gold pad with seams.
+        -->
+        <rect x="0" y="0" width="28" height="22" rx="3.5" fill="currentColor" fill-opacity="0.38" />
+        <path
+          d="M0 7.5h28M0 14.5h28M10 0v22M18.5 0v22"
+          stroke="currentColor"
+          stroke-opacity="0.5"
+          stroke-width="1.25"
+        />
+        <rect x="10" y="7.5" width="8.5" height="7" fill="currentColor" fill-opacity="0.22" />
+      </svg>
+
+      <span
+        v-if="footing"
+        data-slot="account-card-footing"
+        class="text-2xs min-w-0 truncate font-mono tracking-[0.12em] tabular-nums"
+        >{{ footing }}</span
+      >
+      <!--
+        The expiry keeps its own slot at the right edge rather than joining the
+        line above: on a card these two are read separately, and a date that
+        truncated with the digits would be neither.
+
+        It is the first thing to go on the strip's narrow tile, where the two of
+        them together push the digits into an ellipsis. A truncated date is a
+        date you still recognise; «•• 23…» is a number that has stopped being
+        one, so the date yields and the digits stay whole.
+      -->
+      <span
+        v-if="props.size === 'md' && props.account.isCard && props.account.expires"
+        data-slot="account-card-expires"
+        class="text-2xs shrink-0 font-mono tracking-[0.12em] tabular-nums opacity-70"
+        >{{ props.account.expires }}</span
       >
     </span>
   </Primitive>

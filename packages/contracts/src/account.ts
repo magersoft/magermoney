@@ -1,9 +1,10 @@
 import { z } from '@hono/zod-openapi';
-import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
+import { ACCOUNT_COLORWAYS, ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
 import { CurrencyCodeSchema, DecimalString, IsoDateSchema } from './common.js';
 
 export const AccountKindSchema = z.enum(ACCOUNT_KINDS);
 export const CardTypeSchema = z.enum(CARD_TYPES);
+export const AccountColorwaySchema = z.enum(ACCOUNT_COLORWAYS);
 export const IdParamSchema = z.object({ id: z.uuid() });
 
 export const AccountDtoSchema = z
@@ -21,6 +22,8 @@ export const AccountDtoSchema = z
     cardNetwork: z.string().nullable(),
     cardTier: z.string().nullable(),
     cardExpires: IsoDateSchema.nullable(),
+    /** The colour the owner painted the card. Null means the currency's own. */
+    colorway: AccountColorwaySchema.nullable(),
     note: z.string().nullable(),
     sortOrder: z.number().int(),
     archivedAt: z.iso.datetime().nullable(),
@@ -53,6 +56,11 @@ const accountFields = {
   cardNetwork: z.string().trim().max(40).nullable().optional(),
   cardTier: z.string().trim().max(40).nullable().optional(),
   cardExpires: IsoDateSchema.nullable().optional(),
+  /*
+   * Not under `cardFieldsOnlyOnCards`: every account gets a card on screen, so
+   * every account may be painted — a cash account is drawn as a card too.
+   */
+  colorway: AccountColorwaySchema.nullable().optional(),
   note: z.string().max(4000).nullable().optional(),
   sortOrder: z.number().int().min(0).optional(),
 };

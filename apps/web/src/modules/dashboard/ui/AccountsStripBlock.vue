@@ -19,7 +19,7 @@ import { computed, markRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 import { AccountCardStrip, type AccountCardItem, type AmountLocale } from '@magermoney/ui';
-import type { CapitalSummary } from '@/modules/accounts';
+import { useAccountCards, type CapitalSummary } from '@/modules/accounts';
 
 /** How many accounts stand in while none is starred: a strip you take in at a glance. */
 const FALLBACK = 3;
@@ -35,17 +35,13 @@ const all = computed(() => capital.groups.flatMap((g) => g.accounts));
 const pinned = computed(() => all.value.filter((a) => a.isPinned));
 /** The user's pick when there is one, the first few standing in when there is not. */
 const standingIn = computed(() => pinned.value.length === 0 && all.value.length > 0);
+/* The summary orders them; the accounts query says what is on each card. */
+const cardsById = useAccountCards();
 const accounts = computed<AccountCardItem[]>(() =>
-  (standingIn.value ? all.value.slice(0, FALLBACK) : pinned.value).map((a) => ({
-    id: a.id,
-    name: a.name,
-    href: `/accounts/${a.id}`,
-    amount: a.balance.toString(),
-    code: a.balance.currency.code,
-    kind: a.balance.currency.kind,
-    country: a.country,
-    scale: a.balance.currency.scale,
-  })),
+  (standingIn.value ? all.value.slice(0, FALLBACK) : pinned.value).flatMap((a) => {
+    const card = cardsById.value.get(a.id);
+    return card ? [card] : [];
+  }),
 );
 </script>
 

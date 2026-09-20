@@ -17,6 +17,7 @@ const newAccount = {
   cardNetwork: null,
   cardTier: null,
   cardExpires: null,
+  colorway: null,
   note: null,
   sortOrder: 0,
 };

@@ -23,11 +23,15 @@ const props = withDefaults(
     baseCode?: string;
     locale?: AmountLocale;
     as?: string | Component;
-    /** How much of a covered card stays visible. Its whole top band, by design. */
+    /**
+     * How much of a covered card stays visible: its name, its mark and its
+     * balance — everything a stack is read for. The foot, which carries the
+     * card's identity, is the part a covering card is allowed to hide.
+     */
     peek?: string;
     class?: HTMLAttributes['class'];
   }>(),
-  { baseCode: undefined, locale: 'en', as: 'a', peek: '5.5rem', class: '' },
+  { baseCode: undefined, locale: 'en', as: 'a', peek: '6.25rem', class: '' },
 );
 </script>
 

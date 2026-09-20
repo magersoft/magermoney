@@ -353,6 +353,16 @@
     },
     "spending": "Spending",
     "pinned": "On Home",
+    "colorway": {
+      "default": "Currency colour ({code})",
+      "slate": "Slate",
+      "ocean": "Ocean",
+      "violet": "Violet",
+      "rose": "Rose",
+      "amber": "Amber",
+      "lime": "Lime",
+      "teal": "Teal"
+    },
     "detail": {
       "menu": "Account actions",
       "pin": "Show on Home",
@@ -419,6 +429,10 @@
       "currencyLocked": "Currency cannot change once there are balances",
       "kind": "Type",
       "spending": "Spending: counted as available until payday",
+      "namePlaceholder": "New account",
+      "colorSection": "Colour",
+      "color": "Card colour",
+      "colorHint": "Swipe the card to try a colour",
       "cardSection": "Card",
       "cardType": "Card type",
       "cardNetwork": "Network",

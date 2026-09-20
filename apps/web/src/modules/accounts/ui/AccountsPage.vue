@@ -35,6 +35,7 @@ import { useDisplayCurrency, useRefreshRates } from '@/modules/rates';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useScreenRefresh } from '@/shared/query/use-screen-refresh';
 import { useCapitalSummary } from '../application/use-capital-summary';
+import { useAccountCards } from '../application/use-account-cards';
 import AccountRow from './AccountRow.vue';
 
 const { t, locale } = useI18n();
@@ -63,19 +64,17 @@ const shown = computed(() =>
     : active.value,
 );
 
+/*
+ * The summary decides the order, the cards decide what is on them — the colour
+ * the owner painted, the scheme, the last digits. Both read the same query, so
+ * a card that is still on its way is simply not dealt yet.
+ */
+const cardsById = useAccountCards();
 const cards = computed<AccountCardItem[]>(() =>
-  shown.value.map((a) => ({
-    id: a.id,
-    name: a.name,
-    href: `/accounts/${a.id}`,
-    amount: a.balance.toString(),
-    code: a.balance.currency.code,
-    kind: a.balance.currency.kind,
-    country: a.country,
-    scale: a.balance.currency.scale,
-    pinned: a.isPinned,
-    pinnedLabel: t('accounts.pinned'),
-  })),
+  shown.value.flatMap((a) => {
+    const card = cardsById.value.get(a.id);
+    return card ? [card] : [];
+  }),
 );
 const chips = computed<FilterChipItem[]>(() =>
   currency.value
@@ -211,7 +210,7 @@ async function refreshAccounts() {
       nothing to a stack reads as two different screens.
     -->
       <div v-if="!summary" class="flex flex-col gap-2" data-testid="accounts-loading">
-        <Skeleton v-for="i in 3" :key="i" class="h-[5.5rem] w-full rounded-xl" />
+        <Skeleton v-for="i in 3" :key="i" class="h-25 w-full rounded-xl" />
       </div>
 
       <div v-else-if="isEmpty" class="mt-4 text-center">

@@ -1,4 +1,4 @@
-import type { AccountKind, CardType } from '@magermoney/domain';
+import type { AccountColorway, AccountKind, CardType } from '@magermoney/domain';
 
 export interface AccountRow {
   id: string;
@@ -15,6 +15,8 @@ export interface AccountRow {
   cardNetwork: string | null;
   cardTier: string | null;
   cardExpires: string | null; // YYYY-MM-DD
+  /** The colour the owner picked, or null for the currency's own. */
+  colorway: AccountColorway | null;
   note: string | null;
   sortOrder: number;
   archivedAt: string | null; // ISO

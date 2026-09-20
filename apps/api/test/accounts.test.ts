@@ -48,6 +48,40 @@ describe('accounts', () => {
       (await authed(app, 'PATCH', `/accounts/${created.id}`, { isPinned: true }, OTHER)).status,
     ).toBe(404);
   });
+  /*
+   * The colour is the owner's, not the currency's, once they have picked one.
+   * An account starts without one — that is not "unset pending a default", it
+   * is the account keeping the colour of what it holds, which the card draws.
+   */
+  it('creates an account uncoloured and paints it through an update', async () => {
+    const app = mk();
+    const created = await (await authed(app, 'POST', '/accounts', alfa)).json();
+    expect(created.colorway).toBeNull();
+    const painted = await authed(app, 'PATCH', `/accounts/${created.id}`, { colorway: 'teal' });
+    expect(painted.status).toBe(200);
+    expect((await painted.json()).colorway).toBe('teal');
+    const [listed] = await (await authed(app, 'GET', '/accounts')).json();
+    expect(listed.colorway).toBe('teal');
+    /* And back to the currency's colour, which is a choice like any other. */
+    const stripped = await authed(app, 'PATCH', `/accounts/${created.id}`, { colorway: null });
+    expect((await stripped.json()).colorway).toBeNull();
+  });
+
+  it('refuses a colour that is not one of ours, and paints accounts that are not cards', async () => {
+    const app = mk();
+    expect((await authed(app, 'POST', '/accounts', { ...alfa, colorway: 'puce' })).status).toBe(
+      400,
+    );
+    /* Unlike the card fields, the colour is not gated on `kind`: cash gets a card too. */
+    const cash = await authed(app, 'POST', '/accounts', {
+      ...alfa,
+      kind: 'cash',
+      colorway: 'amber',
+    });
+    expect(cash.status).toBe(201);
+    expect((await cash.json()).colorway).toBe('amber');
+  });
+
   it('rejects an unknown currency and a future opening balance', async () => {
     const app = mk();
     expect((await authed(app, 'POST', '/accounts', { ...alfa, currency: 'XYZ' })).status).toBe(400);

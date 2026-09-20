@@ -21,7 +21,7 @@ const fromRaw = (r: Raw): AccountRow => ({
 const SELECT = `
   select a.id, a.user_id, a.name, a.bank, a.country, a.currency, a.kind, a.card_type, a.is_spending, a.is_pinned,
          a.card_last4, a.card_network, a.card_tier, to_char(a.card_expires, 'YYYY-MM-DD') as card_expires,
-         a.note, a.sort_order, a.archived_at,
+         a.colorway, a.note, a.sort_order, a.archived_at,
          b.amount::text as balance, b.recorded_at as balance_recorded_at
   from accounts a
   left join lateral (
@@ -45,6 +45,7 @@ const toColumns = (p: AccountPatch): Record<string, unknown> => {
   if (p.cardNetwork !== undefined) d.card_network = p.cardNetwork;
   if (p.cardTier !== undefined) d.card_tier = p.cardTier;
   if (p.cardExpires !== undefined) d.card_expires = p.cardExpires;
+  if (p.colorway !== undefined) d.colorway = p.colorway;
   if (p.note !== undefined) d.note = p.note;
   if (p.sortOrder !== undefined) d.sort_order = p.sortOrder;
   return d;

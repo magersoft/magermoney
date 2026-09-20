@@ -18,6 +18,7 @@ const newAccount = {
   cardNetwork: null,
   cardTier: null,
   cardExpires: null,
+  colorway: null,
   note: null,
   sortOrder: 0,
 };
@@ -49,6 +50,7 @@ describe('PgAccountRepository', () => {
       balance: '100',
       balanceRecordedAt: '2026-09-01T00:00:00.000Z',
       cardExpires: null,
+      colorway: null,
       archivedAt: null,
     });
     await repos.balances.insert(uid, {

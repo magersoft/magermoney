@@ -72,6 +72,7 @@ import {
   type DateLocale,
 } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
+import { toCardItem } from '../domain/account-card';
 import {
   accountPeriod,
   movementDays,
@@ -132,8 +133,20 @@ const amountLocale = computed(() => locale.value as AmountLocale);
 /** The account's own currency decides how many digits belong on screen; the stored amount keeps all of them. */
 const currency = computed(() => currencies.value.find((c) => c.code === account.value?.currency));
 const scale = computed(() => currency.value?.scale ?? 2);
-/** Fiat until the catalogue says otherwise, which is what the mark falls back to anyway. */
-const currencyKind = computed(() => currency.value?.kind ?? 'fiat');
+/**
+ * The card, assembled where every other screen assembles it, so the account's
+ * own screen and the stack it came from are the same card. Fiat until the
+ * catalogue says otherwise, which is what the mark falls back to anyway.
+ */
+const card = computed(() =>
+  account.value
+    ? toCardItem(
+        account.value,
+        { kind: currency.value?.kind ?? 'fiat', scale: scale.value },
+        { pinned: t('accounts.pinned') },
+      )
+    : undefined,
+);
 const { entries, isLoading } = useAccountBalances(id);
 const { setArchived } = useArchiveAccount();
 const { remove } = useDeleteAccount();
@@ -361,17 +374,10 @@ async function del() {
 
       <!-- The same card the accounts stack deals, alone and at full size. -->
       <AccountCard
+        v-if="card"
         as="div"
         data-testid="account-card"
-        :account="{
-          id: account.id,
-          name: account.name,
-          amount: account.balance ?? '0',
-          code: account.currency,
-          kind: currencyKind,
-          country: account.country,
-          scale,
-        }"
+        :account="card"
         :locale="amountLocale"
       />
       <p v-if="!account.balance" class="text-muted-foreground -mt-4 text-sm">

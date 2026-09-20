@@ -90,11 +90,22 @@ export type {
 export { default as AccountCard } from './components/account-card/AccountCard.vue';
 export { default as AccountCardStrip } from './components/account-card/AccountCardStrip.vue';
 export { default as AccountCardStack } from './components/account-card/AccountCardStack.vue';
+export { default as AccountColorPicker } from './components/account-card/AccountColorPicker.vue';
+export { default as CardBrandMark } from './components/account-card/CardBrandMark.vue';
 export {
   currencyHue,
   currencyTintStyle,
   CURRENCY_TINT_ORDER,
 } from './components/account-card/currency-tint';
+export {
+  cardHue,
+  cardTintStyle,
+  ACCOUNT_COLORWAYS,
+  ACCOUNT_COLORWAY_HUES,
+} from './components/account-card/colorways';
+export type { AccountColorway } from './components/account-card/colorways';
+export { cardBrand, CARD_BRANDS } from './components/account-card/card-brand';
+export type { CardBrand } from './components/account-card/card-brand';
 export type { AccountCardItem } from './components/account-card/types';
 
 /*

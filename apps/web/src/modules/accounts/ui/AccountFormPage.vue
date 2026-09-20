@@ -13,14 +13,28 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
-import { Button, CountrySelect, MoneyInput, useToast } from '@magermoney/ui';
+import {
+  ACCOUNT_COLORWAYS,
+  ACCOUNT_KINDS,
+  CARD_TYPES,
+  type AccountColorway,
+} from '@magermoney/domain';
+import {
+  AccountColorPicker,
+  Button,
+  CountrySelect,
+  MoneyInput,
+  useToast,
+  type AccountCardItem,
+  type AmountLocale,
+} from '@magermoney/ui';
 import { AppCurrencySelect, useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useCountryOptions } from '@/shared/countries/options';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
+import { accountReference, cardExpiry } from '../domain/account-card';
 import { useDisplayCurrency } from '@/modules/rates';
 import { useAccount } from '../application/use-accounts';
 import { useCreateAccount, useUpdateAccount } from '../application/use-account-mutations';
@@ -54,6 +68,8 @@ const form = reactive({
   cardExpires: '',
   note: '',
   openingBalance: '',
+  /* Null is a colour too: the one the account's currency gives it. */
+  colorway: null as AccountColorway | null,
 });
 watch(
   existing,
@@ -72,6 +88,7 @@ watch(
       cardLast4: a.cardLast4 ?? '',
       cardExpires: a.cardExpires ?? '',
       note: a.note ?? '',
+      colorway: a.colorway,
     });
   },
   { immediate: true },
@@ -89,6 +106,40 @@ const busy = computed(() => creating.value || updating.value);
  * `|` inside a bound attribute as a (deprecated) filter pipe.
  */
 const uiLocale = computed(() => locale.value as DateLocale);
+const amountLocale = computed(() => locale.value as AmountLocale);
+
+/*
+ * The card being painted, built from the form rather than from what is saved:
+ * the colour is picked on the real card, with the real balance and the real
+ * furniture, so nothing about the result is left to imagine. A new account has
+ * no balance yet and shows the opening one, which is the number it will open
+ * with.
+ */
+const preview = computed<AccountCardItem>(() => {
+  const isCardKind = form.kind === 'card';
+  return {
+    id: editingId.value ?? 'preview',
+    name: form.name.trim() || t('accounts.form.namePlaceholder'),
+    amount: existing.value?.balance ?? (form.openingBalance || '0'),
+    code: form.currency,
+    kind: currencies.value.find((c) => c.code === form.currency)?.kind ?? 'fiat',
+    country: form.country,
+    scale: scale.value,
+    colorway: form.colorway,
+    isCard: isCardKind,
+    network: isCardKind ? form.cardNetwork : null,
+    last4: isCardKind ? form.cardLast4 : null,
+    expires: isCardKind ? cardExpiry(form.cardExpires || null) : null,
+    reference: isCardKind
+      ? null
+      : accountReference({ bank: form.bank.trim() || '—', country: form.country ?? '—' }),
+  };
+});
+
+/** Each colour, in the language the app is in. The design system has no words of its own. */
+const colorLabels = computed(() =>
+  Object.fromEntries(ACCOUNT_COLORWAYS.map((c) => [c, t(`accounts.colorway.${c}`)])),
+);
 
 /* Every control in a row shares one look: no border of its own, the row's. */
 const CONTROL =
@@ -117,6 +168,7 @@ function payload() {
     kind: form.kind,
     isSpending: form.isSpending,
     note: form.note.trim() || null,
+    colorway: form.colorway,
   };
   const card = isCard.value
     ? {
@@ -277,6 +329,30 @@ async function submit() {
       <FormFieldRow :label="t('accounts.form.cardExpires')">
         <input v-model="form.cardExpires" type="date" :class="CONTROL" />
       </FormFieldRow>
+    </fieldset>
+
+    <!--
+      The colour, picked on the card itself rather than from a row of swatches:
+      the question is «which of these do I want this account to be», and the
+      only honest way to ask it is to show the account in each.
+
+      It sits after the card block so that a payment card is already wearing its
+      scheme and its digits by the time you paint it.
+    -->
+    <fieldset class="flex flex-col gap-2">
+      <legend class="text-muted-foreground mb-2 font-mono text-xs tracking-[0.08em] uppercase">
+        {{ t('accounts.form.colorSection') }}
+      </legend>
+      <AccountColorPicker
+        v-model="form.colorway"
+        :account="preview"
+        :locale="amountLocale"
+        :label="t('accounts.form.color')"
+        :color-labels="colorLabels"
+        :default-label="t('accounts.colorway.default', { code: form.currency })"
+        :hint="t('accounts.form.colorHint')"
+        data-testid="form-colorway"
+      />
     </fieldset>
 
     <div class="flex flex-col gap-2">

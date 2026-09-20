@@ -13,6 +13,30 @@ export const CARD_TYPES = ['debit', 'credit'] as const;
 export type CardType = (typeof CARD_TYPES)[number];
 
 /**
+ * The colours an account may be painted in. Names rather than values: what a
+ * name is worth in light and in dark is the design system's business
+ * (`account-card/colorways.ts`), and the same account has to be the same
+ * account in both themes.
+ *
+ * An account with none keeps the colour of what it holds, which is what every
+ * account had before the choice existed.
+ *
+ * The list is **append-only** and mirrored by a check constraint in
+ * `supabase/migrations`: a name that leaves this list is a colour some account
+ * is already painted in.
+ */
+export const ACCOUNT_COLORWAYS = [
+  'slate',
+  'ocean',
+  'violet',
+  'rose',
+  'amber',
+  'lime',
+  'teal',
+] as const;
+export type AccountColorway = (typeof ACCOUNT_COLORWAYS)[number];
+
+/**
  * What the read models need to know about an Account. Presentation details
  * (card number, note, network) stay in the DTO; the domain only carries what
  * changes a number: the currency (through `balance`), whether it is a spending

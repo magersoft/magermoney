@@ -35,6 +35,7 @@ export const usd = (name: string) => ({
   cardNetwork: null,
   cardTier: null,
   cardExpires: null,
+  colorway: null,
   note: null,
   sortOrder: 0,
 });
