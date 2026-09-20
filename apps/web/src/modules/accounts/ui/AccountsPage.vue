@@ -19,7 +19,6 @@
 import { computed, markRaw, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRouter } from 'vue-router';
-import { PlusIcon } from '@lucide/vue';
 import {
   AccountCardStack,
   AmountLockup,
@@ -96,14 +95,13 @@ const isEmpty = computed(
 );
 
 /*
- * The list's one action. The empty screen keeps its own worded button — there
- * the invitation is the whole screen, and a glyph in the corner is not an
- * invitation.
+ * The list's one action. The empty screen keeps its own button — there the
+ * invitation is the whole screen, and a word in the corner is not one.
  */
 usePageAction(() => ({
-  label: t('accounts.add'),
+  label: t('action.add'),
+  ariaLabel: t('accounts.add'),
   onSelect: () => void router.push('/accounts/new'),
-  icon: PlusIcon,
   testid: 'accounts-add-action',
 }));
 </script>

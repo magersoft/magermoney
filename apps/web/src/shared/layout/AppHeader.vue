@@ -12,7 +12,15 @@
  * the bottom.
  *
  * The right is the screen's, through `page-action.ts`. The bar renders what it
- * was handed and never invents an action of its own.
+ * was handed and never invents an action of its own. It is a word in the
+ * accent colour and nothing else: a bar holding one action does not need a
+ * filled shape to say which one it is, and a disc with a glyph in it turns a
+ * sentence into furniture.
+ *
+ * A bar with nothing on it is not a bar. On the home screen there is no way
+ * back, no action, and the currency switch belongs to the screen itself — so
+ * on a phone the bar is not rendered at all rather than drawn empty. A wide
+ * window still gets it, because there the tab links live in it.
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -22,13 +30,20 @@ import { Button } from '@magermoney/ui';
 import { backTarget, isCurrent, isRoot, NAV } from '@/shared/layout/nav';
 import type { PageAction } from '@/shared/layout/page-action';
 
-const { action } = defineProps<{ action: PageAction | null }>();
+const { action, showCurrency } = defineProps<{
+  action: PageAction | null;
+  /** Home carries its own switch; everywhere else the bar carries it. */
+  showCurrency: boolean;
+}>();
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
 const canGoBack = computed(() => !isRoot(route.path));
+
+/** Nothing on the left but the wordmark, nothing on the right at all. */
+const bare = computed(() => !canGoBack.value && !action && !showCurrency);
 
 /**
  * `router.back()` needs somewhere to go back to. A screen opened from a link,
@@ -45,6 +60,7 @@ function goBack(): void {
 <template>
   <header
     class="sticky top-0 z-20 border-b border-border bg-background"
+    :class="bare ? 'hidden md:block' : ''"
     style="padding-top: env(safe-area-inset-top)"
   >
     <div class="mx-auto flex h-14 w-full max-w-3xl items-center gap-3 px-4 md:px-6">
@@ -102,36 +118,29 @@ function goBack(): void {
         </RouterLink>
       </nav>
 
-      <div class="ms-auto flex shrink-0 items-center gap-2">
-        <slot name="currency" />
+      <div class="ms-auto flex shrink-0 items-center gap-1">
+        <slot v-if="showCurrency" name="currency" />
 
         <!--
-          One button, two shapes: a glyph where the action is common enough to
-          be recognised as one (adding), the words themselves where it is not.
-          Either way the label is what a screen reader reads out, so the shapes
-          never differ in what they say.
-
           A running action says so where it was pressed. `aria-busy` alone is a
           promise to a screen reader that the eye never collects — the spinner
-          is the same statement, made visibly, and it takes the glyph's place
-          rather than pushing the words around.
+          is the same statement, made visibly, and it takes the word's place so
+          the bar does not shuffle while the save is in flight.
         -->
         <Button
           v-if="action"
-          :variant="action.icon ? 'outline' : 'default'"
-          :size="action.icon ? 'icon' : 'sm'"
+          variant="ghost"
+          size="sm"
           type="button"
-          :class="action.icon ? 'size-11 rounded-full' : '-me-1 min-h-11 rounded-full px-4'"
-          :aria-label="action.icon ? action.label : undefined"
-          :title="action.icon ? action.label : undefined"
+          class="-me-2 min-h-11 rounded-full px-3 text-[15px] font-medium text-accent-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:text-muted-foreground disabled:opacity-100"
+          :aria-label="action.ariaLabel"
           :disabled="action.disabled || action.pending"
           :aria-busy="action.pending ? 'true' : undefined"
           :data-testid="action.testid ?? 'page-action'"
           @click="action.onSelect"
         >
-          <Loader2Icon v-if="action.pending" :size="20" class="animate-spin" aria-hidden="true" />
-          <component :is="action.icon" v-else-if="action.icon" :size="20" aria-hidden="true" />
-          <template v-if="!action.icon">
+          <Loader2Icon v-if="action.pending" :size="18" class="animate-spin" aria-hidden="true" />
+          <template v-else>
             {{ action.label }}
           </template>
         </Button>

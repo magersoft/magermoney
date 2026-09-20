@@ -42,7 +42,11 @@ function makeRouter(): Router {
   });
 }
 
-async function mountShell(at = '/', slots: Record<string, () => VNode> = {}) {
+async function mountShell(
+  at = '/',
+  slots: Record<string, () => VNode> = {},
+  props: { showCurrency?: boolean } = {},
+) {
   const i18n = createI18n({
     legacy: false,
     locale: 'en',
@@ -52,7 +56,7 @@ async function mountShell(at = '/', slots: Record<string, () => VNode> = {}) {
   const router = makeRouter();
   await router.push(at);
   await router.isReady();
-  const shell = mount(AppShell, { global: { plugins: [i18n, router] }, slots });
+  const shell = mount(AppShell, { props, global: { plugins: [i18n, router] }, slots });
   await flushPromises();
   return { shell, router };
 }
@@ -126,6 +130,44 @@ describe('the top bar', () => {
     const button = shell.get('[data-testid="page-action"]');
     expect(button.attributes('disabled')).toBeDefined();
     expect(button.attributes('aria-busy')).toBe('true');
+  });
+
+  /*
+   * Home has no way back, no action of its own, and carries its own currency
+   * switch — so on a phone there is nothing for the bar to hold. A wide window
+   * keeps it: the tab links live in it there.
+   */
+  it('is not drawn on a phone when it would hold nothing', async () => {
+    const { shell } = await mountShell('/', {}, { showCurrency: false });
+    expect(shell.get('header').classes()).toContain('hidden');
+    expect(shell.get('header').classes()).toContain('md:block');
+  });
+
+  it('is drawn once the screen hands it something to hold', async () => {
+    const withAction = await mountShell(
+      '/',
+      { default: acting(() => ({ label: 'Add', onSelect: () => {} })) },
+      { showCurrency: false },
+    );
+    expect(withAction.shell.get('header').classes()).not.toContain('hidden');
+
+    const withCurrency = await mountShell('/', {}, { showCurrency: true });
+    expect(withCurrency.shell.get('header').classes()).not.toContain('hidden');
+
+    const inner = await mountShell('/accounts/new', {}, { showCurrency: false });
+    expect(inner.shell.get('header').classes()).not.toContain('hidden');
+  });
+
+  /* The bar holds one action; a word in the accent colour is the whole of it. */
+  it('writes the action out rather than drawing it as a glyph', async () => {
+    const { shell } = await mountShell('/plan', {
+      default: acting(() => ({ label: 'Add', ariaLabel: 'Add income source', onSelect: () => {} })),
+    });
+
+    const button = shell.get('[data-testid="page-action"]');
+    expect(button.text()).toBe('Add');
+    expect(button.attributes('aria-label')).toBe('Add income source');
+    expect(button.find('svg').exists()).toBe(false);
   });
 
   it('no longer carries the theme, which belongs to the settings screen', async () => {

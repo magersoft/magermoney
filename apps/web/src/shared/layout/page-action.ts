@@ -17,22 +17,29 @@ import {
   shallowRef,
   toValue,
   watchEffect,
-  type FunctionalComponent,
   type InjectionKey,
   type MaybeRefOrGetter,
   type ShallowRef,
 } from 'vue';
 
 export type PageAction = {
-  /** Names the action, and labels the button for a screen reader when an icon replaces it. */
+  /**
+   * The words on the button, and short enough to sit in a bar: "Save", "Add".
+   * The screen around it says what is being saved or added.
+   */
   readonly label: string;
+  /**
+   * The whole phrase, for when the short one is too little on its own — a
+   * screen reader that lands on the button has no screen around it to read.
+   * It has to contain `label` word for word, or the voice and the eye are
+   * naming two different buttons.
+   */
+  readonly ariaLabel?: string;
   readonly onSelect: () => void;
   /** The action exists but cannot run yet — an incomplete form, most often. */
   readonly disabled?: boolean;
   /** The action is running: the button says so and refuses a second press. */
   readonly pending?: boolean;
-  /** Shown instead of the label where the action is common enough to be a glyph. */
-  readonly icon?: FunctionalComponent;
   readonly testid?: string;
 };
 

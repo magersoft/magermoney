@@ -21,6 +21,13 @@ import AppHeader from '@/shared/layout/AppHeader.vue';
 import BottomNav from '@/shared/layout/BottomNav.vue';
 import { providePageAction } from '@/shared/layout/page-action';
 
+/*
+ * The default is spelled out rather than left to `?? true` downstream: Vue
+ * casts an absent `Boolean` prop to `false`, not to `undefined`, so a
+ * defaulting expression further down never runs and the bar quietly drops the
+ * currency switch on every screen.
+ */
+const { showCurrency = true } = defineProps<{ showCurrency?: boolean }>();
 const emit = defineEmits<{ quick: [] }>();
 
 const { t } = useI18n();
@@ -37,7 +44,7 @@ const action = providePageAction();
       {{ t('a11y.skipToContent') }}
     </a>
 
-    <AppHeader :action="action">
+    <AppHeader :action="action" :show-currency="showCurrency">
       <template #currency>
         <slot name="currency" />
       </template>

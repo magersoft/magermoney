@@ -16,7 +16,6 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { Motion } from 'motion-v';
-import { PlusIcon } from '@lucide/vue';
 import { TabBar, fadeUp } from '@magermoney/ui';
 import { BudgetsSegment } from '@/modules/budgets';
 import { ExpensesSegment } from '@/modules/expenses';
@@ -49,15 +48,14 @@ const tabs = computed(() => TABS.map((value) => ({ value, label: t(`plan.tabs.${
 
 /*
  * Adding is this screen's action, and what it adds is whichever ledger is open
- * — so the label follows the tab rather than the screen. It sits in the bar
- * with every other screen's action instead of beside the title: a screen that
- * keeps its own copy of the corner is a screen the corner has to be read twice
- * on.
+ * — so the bar says "Add" and the open tab says the rest. A screen reader gets
+ * the whole phrase, because it lands on the button without the tab strip above
+ * it.
  */
 usePageAction(() => ({
-  label: t(`plan.add.${tab.value}`),
+  label: t('action.add'),
+  ariaLabel: t(`plan.add.${tab.value}`),
   onSelect: () => void router.push({ name: ADD_ROUTE[tab.value] }),
-  icon: PlusIcon,
   testid: 'plan-add',
 }));
 </script>

@@ -57,9 +57,9 @@ const quickOpen = ref(false);
     >
       <RouterView />
     </main>
-    <AppShell v-else @quick="quickOpen = true">
+    <AppShell v-else :show-currency="!ownsCurrency" @quick="quickOpen = true">
       <template #currency>
-        <CurrencySwitch v-if="!ownsCurrency" />
+        <CurrencySwitch />
       </template>
       <template #fab>
         <QuickActions v-model:open="quickOpen" />

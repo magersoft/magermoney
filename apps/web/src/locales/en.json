@@ -492,6 +492,9 @@
       "retry": "Back to sign in"
     }
   },
+  "action": {
+    "add": "Add"
+  },
   "a11y": {
     "back": "Back",
     "primaryNav": "Main navigation",
