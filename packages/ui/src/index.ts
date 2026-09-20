@@ -53,6 +53,17 @@ export type { SegmentedOption } from './components/segmented-control/types';
 export { default as TabBar } from './components/tab-bar/TabBar.vue';
 export type { TabItem } from './components/tab-bar/types';
 
+/* Pull a list down to reload it. Wraps content; the page keeps the scrolling. */
+export { default as PullToRefresh } from './components/pull-to-refresh/PullToRefresh.vue';
+export {
+  pullOffset,
+  pullPhase,
+  pullProgress,
+  PULL_THRESHOLD,
+  PULL_MAX,
+} from './components/pull-to-refresh/pull';
+export type { PullPhase } from './components/pull-to-refresh/pull';
+
 export { default as DayOfMonthPicker } from './components/day-of-month-picker/DayOfMonthPicker.vue';
 export { default as ProgressRule } from './components/progress-rule/ProgressRule.vue';
 
