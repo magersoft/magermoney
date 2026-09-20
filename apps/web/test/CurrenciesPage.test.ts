@@ -258,18 +258,24 @@ describe('CurrenciesPage, the display switch', () => {
     w.unmount();
   });
 
-  it('reorders the switch', async () => {
+  it('reorders the switch from the keyboard, without a pointer', async () => {
     const calls: { path: string; body: unknown }[] = [];
     const w = mountPage(patched(calls, ['USD', 'EUR']), CONNECTED, ['USD', 'EUR']);
     await flushPromises();
 
-    await w.get('[data-testid="switch-up-EUR"]').trigger('click');
+    await w.get('[data-testid="switch-drag-EUR"]').trigger('keydown', { key: 'ArrowUp' });
     await flushPromises();
     expect(calls.at(-1)?.body).toMatchObject({ reportingCurrencies: ['EUR', 'USD'] });
 
-    // The ends cannot move further.
-    expect(w.get('[data-testid="switch-up-USD"]').attributes('disabled')).toBeDefined();
-    expect(w.get('[data-testid="switch-down-EUR"]').attributes('disabled')).toBeDefined();
+    // The top row stays put rather than sending a move the API would refuse.
+    const first = w.element
+      .querySelector('[data-testid^="switch-row-"]')
+      ?.getAttribute('data-testid')
+      ?.replace('switch-row-', '');
+    const before = calls.length;
+    await w.get(`[data-testid="switch-drag-${first}"]`).trigger('keydown', { key: 'ArrowUp' });
+    await flushPromises();
+    expect(calls.length).toBe(before);
     w.unmount();
   });
 

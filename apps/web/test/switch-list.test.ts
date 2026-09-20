@@ -4,6 +4,7 @@ import {
   makeMain,
   moveInSwitch,
   removeFromSwitch,
+  reorderSwitch,
 } from '../src/modules/currencies/domain/switch-list.js';
 
 const list = (codes: string[], main = codes[0]!) => ({
@@ -62,6 +63,31 @@ describe('moveInSwitch', () => {
   it('refuses at either end', () => {
     expect(moveInSwitch(list(['USD', 'EUR']), 'USD', -1)).toBeNull();
     expect(moveInSwitch(list(['USD', 'EUR']), 'EUR', 1)).toBeNull();
+  });
+});
+
+describe('reorderSwitch', () => {
+  it('drops the currency where the drag ended, in either direction', () => {
+    expect(reorderSwitch(list(['USD', 'EUR', 'RUB'], 'EUR'), 0, 2)?.reportingCurrencies).toEqual([
+      'EUR',
+      'RUB',
+      'USD',
+    ]);
+    expect(reorderSwitch(list(['USD', 'EUR', 'RUB']), 2, 0)?.reportingCurrencies).toEqual([
+      'RUB',
+      'USD',
+      'EUR',
+    ]);
+  });
+
+  it('keeps the main currency, wherever it lands', () => {
+    expect(reorderSwitch(list(['USD', 'EUR', 'RUB'], 'RUB'), 2, 0)?.defaultCurrency).toBe('RUB');
+  });
+
+  it('refuses a drag that ended where it started, or outside the list', () => {
+    expect(reorderSwitch(list(['USD', 'EUR']), 1, 1)).toBeNull();
+    expect(reorderSwitch(list(['USD', 'EUR']), 0, 2)).toBeNull();
+    expect(reorderSwitch(list(['USD', 'EUR']), -1, 0)).toBeNull();
   });
 });
 

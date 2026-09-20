@@ -542,8 +542,8 @@
     "lastInSwitch": "Keep at least one.",
     "main": "main",
     "makeMain": "Make {code} the main currency",
-    "moveUp": "Move {code} earlier",
-    "moveDown": "Move {code} later",
+    "reorder": "Reorder {code}",
+    "reorderHint": "Drag the handle to change the order, or use the up and down arrow keys.",
     "others": "Everything else",
     "switchFailed": "Could not change the switch."
   },

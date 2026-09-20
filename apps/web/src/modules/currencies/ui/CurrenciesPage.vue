@@ -30,6 +30,7 @@ import {
   makeMain,
   moveInSwitch,
   removeFromSwitch,
+  reorderSwitch,
   type SwitchList,
 } from '../domain/switch-list';
 import {
@@ -38,6 +39,7 @@ import {
   useCurrencyCatalogue,
 } from '../application/use-currencies';
 import { useCurrencyOptions } from '../application/use-currency-options';
+import { useDragReorder } from './use-drag-reorder';
 
 const { t } = useI18n();
 const { toast } = useToast();
@@ -135,6 +137,20 @@ const toggle = (code: string) =>
       ? removeFromSwitch(switchList.value, code)
       : addToSwitch(switchList.value, code),
   );
+
+/*
+ * Dragging is the gesture the order deserves — two arrows per row is four
+ * controls to read before the first move. The keyboard keeps the arrows, on the
+ * handle itself, so the order is reachable without a pointer.
+ */
+const switchListEl = ref<HTMLElement | null>(null);
+const {
+  dragging,
+  offsetOf,
+  start: startDrag,
+} = useDragReorder(switchListEl, (from, to) =>
+  applySwitch(reorderSwitch(switchList.value, from, to)),
+);
 </script>
 
 <template>
@@ -188,13 +204,58 @@ const toggle = (code: string) =>
           {{ full ? t('currencies.switchFull') : t('currencies.switchHint') }}
         </p>
 
-        <ul class="divide-border/60 mt-3 divide-y" data-testid="switch-list">
+        <p id="switch-reorder-hint" class="sr-only">
+          {{ t('currencies.reorderHint') }}
+        </p>
+        <ul ref="switchListEl" class="mt-3 space-y-1" data-testid="switch-list">
           <li
             v-for="(c, i) in switchRows"
             :key="c.code"
             :data-testid="`switch-row-${c.code}`"
-            class="flex min-h-14 items-center gap-2 py-2"
+            :class="[
+              'bg-background flex min-h-14 items-center gap-1 rounded-lg py-2 pr-1',
+              /* The row under the finger rides above the rest and stops
+                 animating: it is already following the pointer. */
+              dragging === i
+                ? 'ring-border relative z-10 shadow-lg ring-1'
+                : 'transition-transform duration-150',
+              dragging !== null && 'select-none',
+            ]"
+            :style="{ transform: offsetOf(i) ? `translateY(${offsetOf(i)}px)` : undefined }"
           >
+            <!--
+              The grip is the whole drag target, not the row: a row that drags
+              anywhere cannot also be tapped, and every other control on it is a
+              tap. `touch-action: none` is what stops the phone reading the
+              press as the start of a scroll.
+            -->
+            <button
+              type="button"
+              class="text-muted-foreground hover:text-foreground outline-ring flex size-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-md outline-offset-[-2px] focus-visible:outline-2 active:cursor-grabbing"
+              :aria-label="t('currencies.reorder', { code: c.code })"
+              :title="t('currencies.reorder', { code: c.code })"
+              aria-describedby="switch-reorder-hint"
+              :data-testid="`switch-drag-${c.code}`"
+              @pointerdown="startDrag($event, i)"
+              @keydown.up.prevent="applySwitch(moveInSwitch(switchList, c.code, -1))"
+              @keydown.down.prevent="applySwitch(moveInSwitch(switchList, c.code, 1))"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-4"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <circle cx="9" cy="6" r="1.5" />
+                <circle cx="15" cy="6" r="1.5" />
+                <circle cx="9" cy="12" r="1.5" />
+                <circle cx="15" cy="12" r="1.5" />
+                <circle cx="9" cy="18" r="1.5" />
+                <circle cx="15" cy="18" r="1.5" />
+              </svg>
+            </button>
+
             <CurrencyIcon :code="c.code" :kind="c.kind" :size="24" />
             <span class="min-w-0 flex-1 truncate text-sm">{{ c.name }}</span>
 
@@ -221,55 +282,6 @@ const toggle = (code: string) =>
                 >{{ t('currencies.main') }}</span
               >
             </label>
-
-            <div class="flex shrink-0 items-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                class="pointer-coarse:size-11"
-                :disabled="i === 0"
-                :aria-label="t('currencies.moveUp', { code: c.code })"
-                :data-testid="`switch-up-${c.code}`"
-                @click="applySwitch(moveInSwitch(switchList, c.code, -1))"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="size-4"
-                  aria-hidden="true"
-                >
-                  <path d="M12 19V5M5 12l7-7 7 7" />
-                </svg>
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                class="pointer-coarse:size-11"
-                :disabled="i === switchRows.length - 1"
-                :aria-label="t('currencies.moveDown', { code: c.code })"
-                :data-testid="`switch-down-${c.code}`"
-                @click="applySwitch(moveInSwitch(switchList, c.code, 1))"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="size-4"
-                  aria-hidden="true"
-                >
-                  <path d="M12 5v14M19 12l-7 7-7-7" />
-                </svg>
-              </Button>
-            </div>
 
             <label class="flex min-h-11 shrink-0 cursor-pointer items-center px-1">
               <input

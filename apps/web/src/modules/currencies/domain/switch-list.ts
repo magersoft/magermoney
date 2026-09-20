@@ -48,6 +48,19 @@ export function moveInSwitch(current: SwitchList, code: string, by: -1 | 1): Swi
   return { ...current, reportingCurrencies: next };
 }
 
+/**
+ * Moves the currency at `from` to `to`. What a drag ends in: the pointer names
+ * a position rather than a direction, and a drag that lands where it started
+ * returns `null` so nothing is sent.
+ */
+export function reorderSwitch(current: SwitchList, from: number, to: number): SwitchList | null {
+  const last = current.reportingCurrencies.length - 1;
+  if (from === to || from < 0 || to < 0 || from > last || to > last) return null;
+  const next = [...current.reportingCurrencies];
+  next.splice(to, 0, ...next.splice(from, 1));
+  return { ...current, reportingCurrencies: next };
+}
+
 /** Makes a currency the main one. `null` when it already is, or is not in the switch. */
 export function makeMain(current: SwitchList, code: string): SwitchList | null {
   if (code === current.defaultCurrency) return null;

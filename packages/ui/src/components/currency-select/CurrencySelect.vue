@@ -212,7 +212,7 @@ function onOpen(value: boolean) {
       />
     </ComboboxAnchor>
 
-    <ComboboxList align="start" :class="props.variant === 'compact' ? 'w-64' : undefined">
+    <ComboboxList align="start" :class="props.variant === 'compact' ? 'w-72' : undefined">
       <!--
         `display-value` has to be pinned to the query. Left to itself the
         combobox writes the selected code into the search field when the list
