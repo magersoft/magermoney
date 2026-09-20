@@ -506,7 +506,8 @@
     "skipToContent": "Skip to content",
     "displayCurrency": "Display currency",
     "showIn": "Show amounts in {code}",
-    "openRates": "Exchange rates"
+    "openRates": "Exchange rates",
+    "refreshing": "Refreshing"
   },
   "money": {
     "noRate": "No rate for {code} on {date}"

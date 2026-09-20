@@ -47,6 +47,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   FilterChipRow,
+  PullToRefresh,
   RowGroup,
   Skeleton,
   StatTile,
@@ -59,9 +60,10 @@ import {
   type FilterChipItem,
 } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
-import { todayIso } from '@/modules/rates';
+import { todayIso, useRefreshRates } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
+import { useScreenRefresh } from '@/shared/query/use-screen-refresh';
 import {
   formatDate,
   formatDayAndMonth,
@@ -136,6 +138,17 @@ const { entries, isLoading } = useAccountBalances(id);
 const { setArchived } = useArchiveAccount();
 const { remove } = useDeleteAccount();
 const { update, isPending: pinning } = useUpdateAccount();
+
+/*
+ * The account, its journal and the share each origin holds all come from
+ * queries this screen is observing, so the gesture reloads them together; the
+ * rates go first because the period figures are shown converted.
+ */
+const { refresh: refreshRates } = useRefreshRates();
+const { refresh, isPending: refreshing } = useScreenRefresh(refreshRates);
+async function refreshAccount() {
+  if (!(await refresh())) toast(t('rates.refreshFailed'));
+}
 
 const balanceOpen = ref(false);
 const transferOpen = ref(false);
@@ -264,330 +277,341 @@ async function del() {
 </script>
 
 <template>
-  <section v-if="account" class="flex flex-col gap-6 pb-8">
-    <header class="flex items-start gap-3 pt-1">
-      <div class="min-w-0 flex-1">
-        <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
-        <h1
-          class="sr-only truncate text-2xl font-semibold tracking-[-0.01em] md:not-sr-only"
-          data-testid="account-name"
-        >
-          {{ account.name }}
-        </h1>
-        <p class="text-muted-foreground text-sm">
-          {{ t(ACCOUNT_KIND_KEYS[account.kind]) }} · {{ account.bank }} · {{ account.country }}
-        </p>
-      </div>
-      <!--
+  <PullToRefresh
+    :refreshing="refreshing"
+    :busy-label="t('a11y.refreshing')"
+    @refresh="refreshAccount"
+  >
+    <section v-if="account" class="flex flex-col gap-6 pb-8">
+      <header class="flex items-start gap-3 pt-1">
+        <div class="min-w-0 flex-1">
+          <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+          <h1
+            class="sr-only truncate text-2xl font-semibold tracking-[-0.01em] md:not-sr-only"
+            data-testid="account-name"
+          >
+            {{ account.name }}
+          </h1>
+          <p class="text-muted-foreground text-sm">
+            {{ t(ACCOUNT_KIND_KEYS[account.kind]) }} · {{ account.bank }} · {{ account.country }}
+          </p>
+        </div>
+        <!--
         Both are furniture for the same title, so they sit as one group with no
         gap between them: two 44px targets touching read as a toolbar, while the
         row's `gap-3` keeps them off the name.
       -->
-      <div class="flex shrink-0 items-center">
-        <!--
+        <div class="flex shrink-0 items-center">
+          <!--
           The star answers one question and answers it in place, so it is a
           button of its own rather than a fifth line in the menu: a toggle
           behind a menu cannot show its own state, and this one's whole job is
           to. `aria-pressed` carries the state, the label names the action — the
           way the rest of the screen's icon buttons are written.
         -->
-        <Button
-          variant="ghost"
-          size="icon"
-          class="size-11"
-          :aria-pressed="account.isPinned"
-          :aria-label="account.isPinned ? t('accounts.detail.unpin') : t('accounts.detail.pin')"
-          :disabled="pinning"
-          data-testid="account-pin"
-          @click="togglePin"
-        >
-          <!--
+          <Button
+            variant="ghost"
+            size="icon"
+            class="size-11"
+            :aria-pressed="account.isPinned"
+            :aria-label="account.isPinned ? t('accounts.detail.unpin') : t('accounts.detail.pin')"
+            :disabled="pinning"
+            data-testid="account-pin"
+            @click="togglePin"
+          >
+            <!--
             Filled when it is on, hollow and quiet when it is not: the fill is
             the state, and the outline never pretends to be a live one.
           -->
-          <StarIcon
-            :size="20"
-            :class="account.isPinned ? 'fill-current' : 'text-muted-foreground'"
-          />
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button
-              variant="ghost"
-              size="icon"
-              class="size-11"
-              :aria-label="t('accounts.detail.menu')"
-              data-testid="account-menu"
-            >
-              <span aria-hidden="true">⋯</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem @select="archive">
-              {{
-                account.archivedAt ? t('accounts.detail.unarchive') : t('accounts.detail.archive')
-              }}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              @select="router.push({ path: '/transfers', query: { accountId: account.id } })"
-            >
-              {{ t('accounts.detail.transfers') }}
-            </DropdownMenuItem>
-            <DropdownMenuItem class="text-destructive" @select="confirmDelete = true">
-              {{ t('accounts.detail.delete') }}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </header>
+            <StarIcon
+              :size="20"
+              :class="account.isPinned ? 'fill-current' : 'text-muted-foreground'"
+            />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-11"
+                :aria-label="t('accounts.detail.menu')"
+                data-testid="account-menu"
+              >
+                <span aria-hidden="true">⋯</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @select="archive">
+                {{
+                  account.archivedAt ? t('accounts.detail.unarchive') : t('accounts.detail.archive')
+                }}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                @select="router.push({ path: '/transfers', query: { accountId: account.id } })"
+              >
+                {{ t('accounts.detail.transfers') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem class="text-destructive" @select="confirmDelete = true">
+                {{ t('accounts.detail.delete') }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
 
-    <!-- The same card the accounts stack deals, alone and at full size. -->
-    <AccountCard
-      as="div"
-      data-testid="account-card"
-      :account="{
-        id: account.id,
-        name: account.name,
-        amount: account.balance ?? '0',
-        code: account.currency,
-        kind: currencyKind,
-        country: account.country,
-        scale,
-      }"
-      :locale="amountLocale"
-    />
-    <p v-if="!account.balance" class="text-muted-foreground -mt-4 text-sm">
-      {{ t('accounts.noBalance') }}
-    </p>
-
-    <div class="grid grid-cols-2 gap-2">
-      <Button size="lg" class="min-h-11" data-testid="account-record" @click="openRecord()">
-        {{ t('accounts.detail.recordBalance') }}
-      </Button>
-      <Button
-        size="lg"
-        variant="outline"
-        class="min-h-11"
-        data-testid="account-transfer"
-        @click="transferOpen = true"
-      >
-        {{ t('accounts.detail.transfer') }}
-      </Button>
-    </div>
-
-    <section class="flex flex-col gap-3">
-      <div class="flex items-center justify-between gap-3">
-        <h2 class="text-muted-foreground font-mono text-xs tracking-[0.08em] uppercase">
-          {{ t('accounts.detail.overview') }}
-        </h2>
-        <!-- The period is stated where it is changed, so the button is the month itself. -->
-        <Button
-          variant="outline"
-          size="sm"
-          class="min-h-11 rounded-full px-4"
-          :aria-label="t('accounts.period.change', { period: monthLabel })"
-          data-testid="account-period-open"
-          @click="periodOpen = true"
-        >
-          {{ monthLabel }}
-        </Button>
-      </div>
-
-      <FilterChipRow
-        :chips="chips"
-        :aria-label="t('accounts.detail.filters')"
-        data-testid="account-filters"
-        @remove="dropChip"
+      <!-- The same card the accounts stack deals, alone and at full size. -->
+      <AccountCard
+        as="div"
+        data-testid="account-card"
+        :account="{
+          id: account.id,
+          name: account.name,
+          amount: account.balance ?? '0',
+          code: account.currency,
+          kind: currencyKind,
+          country: account.country,
+          scale,
+        }"
+        :locale="amountLocale"
       />
+      <p v-if="!account.balance" class="text-muted-foreground -mt-4 text-sm">
+        {{ t('accounts.noBalance') }}
+      </p>
 
-      <!--
+      <div class="grid grid-cols-2 gap-2">
+        <Button size="lg" class="min-h-11" data-testid="account-record" @click="openRecord()">
+          {{ t('accounts.detail.recordBalance') }}
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          class="min-h-11"
+          data-testid="account-transfer"
+          @click="transferOpen = true"
+        >
+          {{ t('accounts.detail.transfer') }}
+        </Button>
+      </div>
+
+      <section class="flex flex-col gap-3">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-muted-foreground font-mono text-xs tracking-[0.08em] uppercase">
+            {{ t('accounts.detail.overview') }}
+          </h2>
+          <!-- The period is stated where it is changed, so the button is the month itself. -->
+          <Button
+            variant="outline"
+            size="sm"
+            class="min-h-11 rounded-full px-4"
+            :aria-label="t('accounts.period.change', { period: monthLabel })"
+            data-testid="account-period-open"
+            @click="periodOpen = true"
+          >
+            {{ monthLabel }}
+          </Button>
+        </div>
+
+        <FilterChipRow
+          :chips="chips"
+          :aria-label="t('accounts.detail.filters')"
+          data-testid="account-filters"
+          @remove="dropChip"
+        />
+
+        <!--
         The overview keeps its shape while the journal is on its way: tiles and
         a ring reading zero would be a month that looks empty and then is not.
       -->
-      <template v-if="isLoading">
-        <div class="grid grid-cols-2 gap-3">
-          <Skeleton v-for="i in 2" :key="i" class="h-28 w-full rounded-xl" />
+        <template v-if="isLoading">
+          <div class="grid grid-cols-2 gap-3">
+            <Skeleton v-for="i in 2" :key="i" class="h-28 w-full rounded-xl" />
+          </div>
+          <Skeleton class="h-72 w-full rounded-xl" />
+        </template>
+
+        <div v-else class="grid grid-cols-2 gap-3">
+          <StatTile
+            data-testid="account-incoming"
+            :label="t('accounts.detail.incoming')"
+            :amount="period.incoming"
+            :code="account.currency"
+            :scale="scale"
+            :locale="amountLocale"
+            :delta="periodShare(period.incoming, previous.incoming)"
+            :delta-caption="t('accounts.detail.vsLastMonth')"
+          />
+          <StatTile
+            data-testid="account-outgoing"
+            :label="t('accounts.detail.outgoing')"
+            :amount="period.outgoing"
+            :code="account.currency"
+            :scale="scale"
+            :locale="amountLocale"
+            :delta="periodShare(period.outgoing, previous.outgoing)"
+            :up-is-good="false"
+            :delta-caption="t('accounts.detail.vsLastMonth')"
+          />
         </div>
-        <Skeleton class="h-72 w-full rounded-xl" />
-      </template>
 
-      <div v-else class="grid grid-cols-2 gap-3">
-        <StatTile
-          data-testid="account-incoming"
-          :label="t('accounts.detail.incoming')"
-          :amount="period.incoming"
-          :code="account.currency"
-          :scale="scale"
-          :locale="amountLocale"
-          :delta="periodShare(period.incoming, previous.incoming)"
-          :delta-caption="t('accounts.detail.vsLastMonth')"
-        />
-        <StatTile
-          data-testid="account-outgoing"
-          :label="t('accounts.detail.outgoing')"
-          :amount="period.outgoing"
-          :code="account.currency"
-          :scale="scale"
-          :locale="amountLocale"
-          :delta="periodShare(period.outgoing, previous.outgoing)"
-          :up-is-good="false"
-          :delta-caption="t('accounts.detail.vsLastMonth')"
-        />
-      </div>
+        <div v-if="!isLoading" class="bg-surface shadow-card rounded-xl p-4">
+          <DonutChart
+            data-testid="account-donut"
+            :label="t('accounts.detail.turnover')"
+            :amount="period.turnover"
+            :code="account.currency"
+            :scale="scale"
+            :locale="amountLocale"
+            :segments="segments"
+            :period="monthLabel"
+            :prev-label="t('accounts.period.prev')"
+            :next-label="t('accounts.period.next')"
+            :next-disabled="month >= thisMonth"
+            :caption="netCaption"
+            :empty-label="t('accounts.detail.emptyMonth')"
+            :active-id="origin"
+            :legend-label="t('accounts.detail.turnover')"
+            @prev="stepMonth(-1)"
+            @next="stepMonth(1)"
+            @update:active-id="pickSlice"
+          />
+        </div>
+      </section>
 
-      <div v-if="!isLoading" class="bg-surface shadow-card rounded-xl p-4">
-        <DonutChart
-          data-testid="account-donut"
-          :label="t('accounts.detail.turnover')"
-          :amount="period.turnover"
-          :code="account.currency"
-          :scale="scale"
-          :locale="amountLocale"
-          :segments="segments"
-          :period="monthLabel"
-          :prev-label="t('accounts.period.prev')"
-          :next-label="t('accounts.period.next')"
-          :next-disabled="month >= thisMonth"
-          :caption="netCaption"
-          :empty-label="t('accounts.detail.emptyMonth')"
-          :active-id="origin"
-          :legend-label="t('accounts.detail.turnover')"
-          @prev="stepMonth(-1)"
-          @next="stepMonth(1)"
-          @update:active-id="pickSlice"
-        />
-      </div>
-    </section>
+      <section class="flex flex-col gap-3">
+        <h2 class="text-muted-foreground font-mono text-xs tracking-[0.08em] uppercase">
+          {{ t('accounts.detail.operations') }}
+        </h2>
 
-    <section class="flex flex-col gap-3">
-      <h2 class="text-muted-foreground font-mono text-xs tracking-[0.08em] uppercase">
-        {{ t('accounts.detail.operations') }}
-      </h2>
+        <Skeleton v-if="isLoading" class="h-24 w-full rounded-xl" />
 
-      <Skeleton v-if="isLoading" class="h-24 w-full rounded-xl" />
-
-      <!-- An account with no journal at all is a different screen from a quiet month. -->
-      <div
-        v-else-if="entries.length === 0"
-        class="bg-surface shadow-card flex flex-col items-start gap-2 rounded-xl p-4"
-        data-testid="account-no-history"
-      >
-        <p class="text-sm font-medium">
-          {{ t('accounts.detail.noHistory') }}
-        </p>
-        <p class="text-muted-foreground text-sm">
-          {{ t('accounts.detail.noHistoryBody') }}
-        </p>
-        <Button size="sm" class="mt-1 min-h-11 rounded-xl px-4" @click="openRecord()">
-          {{ t('accounts.detail.recordBalance') }}
-        </Button>
-      </div>
-
-      <div
-        v-else-if="days.length === 0"
-        class="bg-surface shadow-card flex flex-col items-start gap-2 rounded-xl p-4"
-        data-testid="account-empty-period"
-      >
-        <p class="text-sm font-medium">
-          {{ origin ? t('accounts.detail.emptySlice') : t('accounts.detail.emptyPeriod') }}
-        </p>
-        <Button
-          v-if="origin || month !== thisMonth"
-          variant="ghost"
-          size="sm"
-          class="min-h-11 px-2"
-          data-testid="account-reset-filters"
-          @click="
-            origin = null;
-            month = thisMonth;
-          "
+        <!-- An account with no journal at all is a different screen from a quiet month. -->
+        <div
+          v-else-if="entries.length === 0"
+          class="bg-surface shadow-card flex flex-col items-start gap-2 rounded-xl p-4"
+          data-testid="account-no-history"
         >
-          {{ t('accounts.detail.resetFilters') }}
-        </Button>
-      </div>
+          <p class="text-sm font-medium">
+            {{ t('accounts.detail.noHistory') }}
+          </p>
+          <p class="text-muted-foreground text-sm">
+            {{ t('accounts.detail.noHistoryBody') }}
+          </p>
+          <Button size="sm" class="mt-1 min-h-11 rounded-xl px-4" @click="openRecord()">
+            {{ t('accounts.detail.recordBalance') }}
+          </Button>
+        </div>
 
-      <RowGroup
-        v-for="day in days"
-        v-else
-        :key="day.day"
-        :title="formatDayAndMonth(day.day, uiLocale)"
-        :amount="day.subtotal"
-        :code="account.currency"
-        :scale="scale"
-        :locale="amountLocale"
-        variant="change"
-        :data-testid="`account-day-${day.day}`"
-      >
-        <li v-for="m in day.movements" :key="m.id">
-          <!--
+        <div
+          v-else-if="days.length === 0"
+          class="bg-surface shadow-card flex flex-col items-start gap-2 rounded-xl p-4"
+          data-testid="account-empty-period"
+        >
+          <p class="text-sm font-medium">
+            {{ origin ? t('accounts.detail.emptySlice') : t('accounts.detail.emptyPeriod') }}
+          </p>
+          <Button
+            v-if="origin || month !== thisMonth"
+            variant="ghost"
+            size="sm"
+            class="min-h-11 px-2"
+            data-testid="account-reset-filters"
+            @click="
+              origin = null;
+              month = thisMonth;
+            "
+          >
+            {{ t('accounts.detail.resetFilters') }}
+          </Button>
+        </div>
+
+        <RowGroup
+          v-for="day in days"
+          v-else
+          :key="day.day"
+          :title="formatDayAndMonth(day.day, uiLocale)"
+          :amount="day.subtotal"
+          :code="account.currency"
+          :scale="scale"
+          :locale="amountLocale"
+          variant="change"
+          :data-testid="`account-day-${day.day}`"
+        >
+          <li v-for="m in day.movements" :key="m.id">
+            <!--
             The entry behind a movement can be edited only while it is the
             newest and a person wrote it; every other row is a record, and a
             record that looked tappable would be a promise the screen cannot
             keep.
           -->
-          <TransactionRow
-            :as="m.id === latestManualId ? 'button' : 'div'"
-            :type="m.id === latestManualId ? 'button' : undefined"
-            :title="m.note ?? t(ORIGIN_KEYS[m.origin])"
-            :category="m.note ? t(ORIGIN_KEYS[m.origin]) : undefined"
-            :amount="m.delta"
-            :code="account.currency"
-            :scale="scale"
-            :locale="amountLocale"
-            variant="change"
-            :time="formatTime(m.recordedAt, uiLocale)"
-            :data-testid="`balance-entry-${m.id}`"
-            @click="m.id === latestManualId && openRecord(entryOf(m.id))"
-          />
-        </li>
-      </RowGroup>
-    </section>
+            <TransactionRow
+              :as="m.id === latestManualId ? 'button' : 'div'"
+              :type="m.id === latestManualId ? 'button' : undefined"
+              :title="m.note ?? t(ORIGIN_KEYS[m.origin])"
+              :category="m.note ? t(ORIGIN_KEYS[m.origin]) : undefined"
+              :amount="m.delta"
+              :code="account.currency"
+              :scale="scale"
+              :locale="amountLocale"
+              variant="change"
+              :time="formatTime(m.recordedAt, uiLocale)"
+              :data-testid="`balance-entry-${m.id}`"
+              @click="m.id === latestManualId && openRecord(entryOf(m.id))"
+            />
+          </li>
+        </RowGroup>
+      </section>
 
-    <section v-if="account.kind === 'card' || account.note" class="flex flex-col gap-2">
-      <h2 class="text-muted-foreground font-mono text-xs tracking-[0.08em] uppercase">
-        {{ t('accounts.detail.details') }}
-      </h2>
-      <p v-if="account.kind === 'card'" class="text-sm">
-        {{
-          t('accounts.detail.card', {
-            network: account.cardNetwork ?? '',
-            tier: account.cardTier ?? '',
-            last4: account.cardLast4 ? `•••• ${account.cardLast4}` : '',
-          })
-        }}
-        <span v-if="account.cardExpires" class="text-muted-foreground">
-          ·
+      <section v-if="account.kind === 'card' || account.note" class="flex flex-col gap-2">
+        <h2 class="text-muted-foreground font-mono text-xs tracking-[0.08em] uppercase">
+          {{ t('accounts.detail.details') }}
+        </h2>
+        <p v-if="account.kind === 'card'" class="text-sm">
           {{
-            t('accounts.detail.expires', {
-              date: formatDate(account.cardExpires, uiLocale),
+            t('accounts.detail.card', {
+              network: account.cardNetwork ?? '',
+              tier: account.cardTier ?? '',
+              last4: account.cardLast4 ? `•••• ${account.cardLast4}` : '',
             })
-          }}</span
-        >
-      </p>
-      <pre
-        v-if="account.note"
-        class="text-muted-foreground font-sans text-sm whitespace-pre-wrap"
-        >{{ account.note }}</pre>
+          }}
+          <span v-if="account.cardExpires" class="text-muted-foreground">
+            ·
+            {{
+              t('accounts.detail.expires', {
+                date: formatDate(account.cardExpires, uiLocale),
+              })
+            }}</span
+          >
+        </p>
+        <pre
+          v-if="account.note"
+          class="text-muted-foreground font-sans text-sm whitespace-pre-wrap"
+          >{{ account.note }}</pre>
+      </section>
+
+      <RecordBalanceSheet v-model:open="balanceOpen" :account-id="account.id" :entry="editing" />
+      <TransferSheet v-model:open="transferOpen" :from-account-id="account.id" />
+      <PeriodSheet
+        v-model:open="periodOpen"
+        :month="month"
+        :latest="thisMonth"
+        @apply="applyMonth"
+      />
+
+      <AlertDialog v-model:open="confirmDelete">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{{ t('accounts.detail.deleteTitle') }}</AlertDialogTitle>
+            <AlertDialogDescription>{{ t('accounts.detail.deleteBody') }}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{{ t('accounts.detail.cancel') }}</AlertDialogCancel>
+            <AlertDialogAction @click="del">
+              {{ t('accounts.detail.deleteConfirm') }}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
-
-    <RecordBalanceSheet v-model:open="balanceOpen" :account-id="account.id" :entry="editing" />
-    <TransferSheet v-model:open="transferOpen" :from-account-id="account.id" />
-    <PeriodSheet v-model:open="periodOpen" :month="month" :latest="thisMonth" @apply="applyMonth" />
-
-    <AlertDialog v-model:open="confirmDelete">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{{ t('accounts.detail.deleteTitle') }}</AlertDialogTitle>
-          <AlertDialogDescription>{{ t('accounts.detail.deleteBody') }}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{{ t('accounts.detail.cancel') }}</AlertDialogCancel>
-          <AlertDialogAction @click="del">
-            {{ t('accounts.detail.deleteConfirm') }}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  </section>
-  <Skeleton v-else class="h-24 w-full" />
+    <Skeleton v-else class="h-24 w-full" />
+  </PullToRefresh>
 </template>

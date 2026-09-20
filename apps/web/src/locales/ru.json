@@ -506,7 +506,8 @@
     "skipToContent": "Перейти к содержимому",
     "displayCurrency": "Валюта отображения",
     "showIn": "Показывать суммы в {code}",
-    "openRates": "Курсы валют"
+    "openRates": "Курсы валют",
+    "refreshing": "Обновляем"
   },
   "money": {
     "noRate": "Нет курса {code} на {date}"

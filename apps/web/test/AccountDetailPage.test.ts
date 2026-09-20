@@ -3,10 +3,14 @@ import { flushPromises } from '@vue/test-utils';
 import AccountDetailPage from '../src/modules/accounts/ui/AccountDetailPage.vue';
 import { acc, apiOf, json, mountAt } from './fixtures/income-mount.js';
 
+const toast = vi.fn();
 vi.mock('@magermoney/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@magermoney/ui')>();
-  return { ...actual, useToast: () => ({ toast: vi.fn() }) };
+  return { ...actual, useToast: () => ({ toast }) };
 });
+
+/** Every path the mounted screen asked for, in order. */
+const paths: string[] = [];
 
 const ACCOUNT_ID = '33333333-3333-4333-8333-333333333333';
 const LATEST = '99999999-9999-4999-8999-999999999999';
@@ -40,8 +44,11 @@ const mountWith = (entries: ReturnType<typeof entry>[]) =>
     AccountDetailPage,
     `/accounts/${ACCOUNT_ID}`,
     apiOf((path) => {
+      paths.push(path);
       if (path === '/accounts') return json([acc(ACCOUNT_ID, 'USD')]);
       if (path.startsWith(`/accounts/${ACCOUNT_ID}/balances`)) return json(entries);
+      if (path === '/rates/refresh')
+        return json({ stored: 2, refreshed: true, refreshedAt: '2026-09-20T09:00:00.000Z' });
       return undefined;
     }),
   );
@@ -238,6 +245,27 @@ describe('AccountDetailPage', () => {
     expect(JSON.parse(String(patch?.[1]?.body))).toEqual({ isPinned: true });
     expect(star.attributes('aria-pressed')).toBe('true');
     expect(star.attributes('aria-label')).toBe('Убрать с главной');
+    wrapper.unmount();
+  });
+
+  it('reloads the account and its journal when the screen is pulled down', async () => {
+    const { wrapper } = await mountWith(journal);
+    await flushPromises();
+    paths.length = 0;
+    toast.mockClear();
+
+    const { PullToRefresh } = await import('@magermoney/ui');
+    await (
+      wrapper.findComponent(PullToRefresh).vm as unknown as { refresh: () => Promise<void> }
+    ).refresh();
+    await flushPromises();
+
+    expect(paths).toContain('/rates/refresh');
+    expect(paths).toContain('/accounts');
+    expect(paths.some((p) => p.startsWith(`/accounts/${ACCOUNT_ID}/balances`))).toBe(true);
+    expect(toast).not.toHaveBeenCalled();
+    /* The journal is still there: a refresh re-reads, it does not empty the screen. */
+    expect(wrapper.findAll('[data-slot="transaction-row"]').length).toBeGreaterThan(0);
     wrapper.unmount();
   });
 });

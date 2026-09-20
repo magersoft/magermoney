@@ -10,6 +10,15 @@ import { API_KEY } from '../src/shared/api/use-api.js';
 import { resetDisplayCurrency } from '../src/modules/rates/application/use-display-currency.js';
 import DashboardPage from '../src/modules/dashboard/ui/DashboardPage.vue';
 
+const toast = vi.fn();
+vi.mock('@magermoney/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@magermoney/ui')>();
+  return { ...actual, useToast: () => ({ toast }) };
+});
+
+/** Every path the mounted screen asked for, in order. */
+const paths: string[] = [];
+
 const SRC = '11111111-1111-4111-8111-111111111111';
 const ACCOUNT = '22222222-2222-4222-8222-222222222222';
 const profile = {
@@ -129,7 +138,10 @@ function mountPage(
   resetDisplayCurrency();
   failing = failsOn;
   const fetch = vi.fn(async (path: string) => {
+    paths.push(path);
     if (failing && path.startsWith(failing)) return new Response('boom', { status: 500 });
+    if (path === '/rates/refresh')
+      return json({ stored: 2, refreshed: true, refreshedAt: '2026-09-20T09:00:00.000Z' });
     if (path === '/me') return json(profile);
     if (path === '/currencies') return json(currencies);
     if (path.startsWith('/rates')) return json(rates);
@@ -389,5 +401,30 @@ describe('DashboardPage', () => {
     expect(w.get('[data-testid="dash-upcoming-empty"] a').attributes('href')).toBe(
       '/plan?tab=expenses',
     );
+  });
+
+  /*
+   * Home has no data of its own, so "refresh" is every module it composes at
+   * once: the test asserts the gesture reaches all of them rather than the one
+   * list that happens to be on top.
+   */
+  it('reloads every list the screen is composed of, and asks for fresh rates', async () => {
+    const w = mountPage({ sources: [sourceDto], inflows: [inflowDto], expenses: [expenseDto] });
+    await flushPromises();
+    paths.length = 0;
+    toast.mockClear();
+
+    const { PullToRefresh } = await import('@magermoney/ui');
+    await (
+      w.findComponent(PullToRefresh).vm as unknown as { refresh: () => Promise<void> }
+    ).refresh();
+    await flushPromises();
+
+    expect(paths).toContain('/rates/refresh');
+    expect(paths).toContain('/accounts');
+    expect(paths).toContain('/expenses');
+    expect(paths.some((p) => p.startsWith('/income-sources'))).toBe(true);
+    expect(paths.some((p) => p.startsWith('/inflows'))).toBe(true);
+    expect(toast).not.toHaveBeenCalled();
   });
 });

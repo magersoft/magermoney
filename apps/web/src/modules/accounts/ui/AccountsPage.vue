@@ -24,13 +24,16 @@ import {
   AmountLockup,
   Button,
   FilterChipRow,
+  PullToRefresh,
   Skeleton,
+  useToast,
   type AccountCardItem,
   type AmountLocale,
   type FilterChipItem,
 } from '@magermoney/ui';
-import { useDisplayCurrency } from '@/modules/rates';
+import { useDisplayCurrency, useRefreshRates } from '@/modules/rates';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
+import { useScreenRefresh } from '@/shared/query/use-screen-refresh';
 import { useCapitalSummary } from '../application/use-capital-summary';
 import AccountRow from './AccountRow.vue';
 
@@ -112,139 +115,156 @@ usePageAction(() => ({
   onSelect: () => void router.push('/accounts/new'),
   testid: 'accounts-add-action',
 }));
+
+/*
+ * The total on this screen is every account converted, so the gesture asks for
+ * today's rates before it re-reads the accounts themselves.
+ */
+const { toast } = useToast();
+const { refresh: refreshRates } = useRefreshRates();
+const { refresh, isPending: refreshing } = useScreenRefresh(refreshRates);
+async function refreshAccounts() {
+  if (!(await refresh())) toast(t('rates.refreshFailed'));
+}
 </script>
 
 <template>
-  <section class="flex flex-col gap-6 pb-8">
-    <h1 class="sr-only">
-      {{ t('accounts.title') }}
-    </h1>
+  <PullToRefresh
+    :refreshing="refreshing"
+    :busy-label="t('a11y.refreshing')"
+    @refresh="refreshAccounts"
+  >
+    <section class="flex flex-col gap-6 pb-8">
+      <h1 class="sr-only">
+        {{ t('accounts.title') }}
+      </h1>
 
-    <header class="flex flex-col gap-1 pt-1">
-      <div class="flex items-start justify-between gap-3">
-        <h2 class="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-          {{ t('accounts.total') }}
-        </h2>
+      <header class="flex flex-col gap-1 pt-1">
+        <div class="flex items-start justify-between gap-3">
+          <h2 class="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
+            {{ t('accounts.total') }}
+          </h2>
 
-        <!--
+          <!--
           A native select: the filter is a list of codes, and nothing about it
           is worth the keyboard and screen-reader work of rebuilding a listbox.
         -->
-        <select
-          v-if="codes.length > 1"
-          v-model="currency"
-          data-testid="accounts-currency-filter"
-          :aria-label="t('accounts.filter.label')"
-          class="h-11 shrink-0 rounded-full border border-input bg-surface px-3 font-mono text-xs uppercase tracking-[0.08em] text-ink outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
-        >
-          <option value="">
-            {{ t('accounts.filter.all') }}
-          </option>
-          <option v-for="code in codes" :key="code" :value="code">
-            {{ code }}
-          </option>
-        </select>
-      </div>
+          <select
+            v-if="codes.length > 1"
+            v-model="currency"
+            data-testid="accounts-currency-filter"
+            :aria-label="t('accounts.filter.label')"
+            class="h-11 shrink-0 rounded-full border border-input bg-surface px-3 font-mono text-xs uppercase tracking-[0.08em] text-ink outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <option value="">
+              {{ t('accounts.filter.all') }}
+            </option>
+            <option v-for="code in codes" :key="code" :value="code">
+              {{ code }}
+            </option>
+          </select>
+        </div>
 
-      <Skeleton v-if="!summary" class="mt-1 h-10 w-48" />
-      <AmountLockup
-        v-else
-        data-testid="capital-total"
-        class="text-[40px] leading-[46px] tracking-[-0.01em]"
-        :amount="summary.total.toString()"
-        :code="summary.total.currency.code"
-        :scale="summary.total.currency.scale"
-        :locale="amountLocale"
-      />
-      <p class="text-xs text-muted-foreground" data-testid="accounts-rate-note">
-        {{ t('accounts.rateDate', { date: rateDate }) }}
-      </p>
-      <p
-        v-if="summary && summary.unconvertible.length > 0"
-        class="text-xs text-muted-foreground"
-        data-testid="accounts-unconvertible"
-      >
-        {{ t('accounts.unconvertible', { codes: unconvertibleCodes }) }}
-      </p>
-      <!--
+        <Skeleton v-if="!summary" class="mt-1 h-10 w-48" />
+        <AmountLockup
+          v-else
+          data-testid="capital-total"
+          class="text-[40px] leading-[46px] tracking-[-0.01em]"
+          :amount="summary.total.toString()"
+          :code="summary.total.currency.code"
+          :scale="summary.total.currency.scale"
+          :locale="amountLocale"
+        />
+        <p class="text-xs text-muted-foreground" data-testid="accounts-rate-note">
+          {{ t('accounts.rateDate', { date: rateDate }) }}
+        </p>
+        <p
+          v-if="summary && summary.unconvertible.length > 0"
+          class="text-xs text-muted-foreground"
+          data-testid="accounts-unconvertible"
+        >
+          {{ t('accounts.unconvertible', { codes: unconvertibleCodes }) }}
+        </p>
+        <!--
         The reference's «3 active cards», in the only unit we have. It counts
         what the stack below actually shows rather than everything there is:
         «4 счёта» over a single card is the screen contradicting itself.
       -->
-      <p
-        v-if="shown.length > 0"
-        class="mt-1 text-sm text-muted-foreground"
-        data-testid="accounts-count"
-      >
-        {{ t('accounts.count', { n: shown.length }, shown.length) }}
-      </p>
-    </header>
+        <p
+          v-if="shown.length > 0"
+          class="mt-1 text-sm text-muted-foreground"
+          data-testid="accounts-count"
+        >
+          {{ t('accounts.count', { n: shown.length }, shown.length) }}
+        </p>
+      </header>
 
-    <FilterChipRow
-      :chips="chips"
-      :aria-label="t('accounts.filter.label')"
-      @remove="currency = ''"
-    />
+      <FilterChipRow
+        :chips="chips"
+        :aria-label="t('accounts.filter.label')"
+        @remove="currency = ''"
+      />
 
-    <!--
+      <!--
       Three cards' worth of space while the accounts and the rates are still
       coming: the stack is the shape of this screen, and a page that jumps from
       nothing to a stack reads as two different screens.
     -->
-    <div v-if="!summary" class="flex flex-col gap-2" data-testid="accounts-loading">
-      <Skeleton v-for="i in 3" :key="i" class="h-[5.5rem] w-full rounded-xl" />
-    </div>
+      <div v-if="!summary" class="flex flex-col gap-2" data-testid="accounts-loading">
+        <Skeleton v-for="i in 3" :key="i" class="h-[5.5rem] w-full rounded-xl" />
+      </div>
 
-    <div v-else-if="isEmpty" class="mt-4 text-center">
-      <p class="text-lg font-semibold">
-        {{ t('accounts.empty.title') }}
-      </p>
-      <p class="mt-1 text-sm text-muted-foreground">
-        {{ t('accounts.empty.body') }}
-      </p>
-      <Button as-child size="lg" class="mt-4 min-h-11 rounded-xl px-5">
-        <RouterLink to="/accounts/new" data-testid="accounts-add">
-          {{ t('accounts.empty.cta') }}
-        </RouterLink>
-      </Button>
-    </div>
+      <div v-else-if="isEmpty" class="mt-4 text-center">
+        <p class="text-lg font-semibold">
+          {{ t('accounts.empty.title') }}
+        </p>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {{ t('accounts.empty.body') }}
+        </p>
+        <Button as-child size="lg" class="mt-4 min-h-11 rounded-xl px-5">
+          <RouterLink to="/accounts/new" data-testid="accounts-add">
+            {{ t('accounts.empty.cta') }}
+          </RouterLink>
+        </Button>
+      </div>
 
-    <p
-      v-else-if="currency && cards.length === 0"
-      class="text-sm text-muted-foreground"
-      data-testid="accounts-filter-empty"
-    >
-      {{ t('accounts.filter.empty', { code: currency }) }}
-    </p>
-
-    <AccountCardStack
-      v-else
-      :accounts="cards"
-      :base-code="baseCode"
-      :locale="amountLocale"
-      :as="link"
-    />
-
-    <div v-if="summary && summary.archived.length > 0">
-      <Button
-        variant="ghost"
-        size="sm"
-        class="min-h-9 pointer-coarse:min-h-11"
-        :aria-expanded="showArchived"
-        aria-controls="archived-accounts"
-        @click="showArchived = !showArchived"
+      <p
+        v-else-if="currency && cards.length === 0"
+        class="text-sm text-muted-foreground"
+        data-testid="accounts-filter-empty"
       >
-        {{
-          showArchived
-            ? t('accounts.archived.hide')
-            : t('accounts.archived.show', { n: summary.archived.length })
-        }}
-      </Button>
-      <ul v-if="showArchived" id="archived-accounts" class="mt-2 divide-y divide-border/60">
-        <li v-for="a in summary.archived" :key="a.id" class="grayscale">
-          <AccountRow :account="a" />
-        </li>
-      </ul>
-    </div>
-  </section>
+        {{ t('accounts.filter.empty', { code: currency }) }}
+      </p>
+
+      <AccountCardStack
+        v-else
+        :accounts="cards"
+        :base-code="baseCode"
+        :locale="amountLocale"
+        :as="link"
+      />
+
+      <div v-if="summary && summary.archived.length > 0">
+        <Button
+          variant="ghost"
+          size="sm"
+          class="min-h-9 pointer-coarse:min-h-11"
+          :aria-expanded="showArchived"
+          aria-controls="archived-accounts"
+          @click="showArchived = !showArchived"
+        >
+          {{
+            showArchived
+              ? t('accounts.archived.hide')
+              : t('accounts.archived.show', { n: summary.archived.length })
+          }}
+        </Button>
+        <ul v-if="showArchived" id="archived-accounts" class="mt-2 divide-y divide-border/60">
+          <li v-for="a in summary.archived" :key="a.id" class="grayscale">
+            <AccountRow :account="a" />
+          </li>
+        </ul>
+      </div>
+    </section>
+  </PullToRefresh>
 </template>

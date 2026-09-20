@@ -10,6 +10,15 @@ import { resetDisplayCurrency } from '../src/modules/rates/application/use-displ
 import AccountsPage from '../src/modules/accounts/ui/AccountsPage.vue';
 import AppShell from '../src/shared/layout/AppShell.vue';
 
+const toast = vi.fn();
+vi.mock('@magermoney/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@magermoney/ui')>();
+  return { ...actual, useToast: () => ({ toast }) };
+});
+
+/** Every path the mounted page asked for, in order, across the whole mount. */
+const paths: string[] = [];
+
 const profile = {
   id: 'u',
   displayName: null,
@@ -54,11 +63,19 @@ const USD_ID = '11111111-1111-4111-8111-111111111111';
 const EUR_ID = '22222222-2222-4222-8222-222222222222';
 const ARCHIVED_ID = '33333333-3333-4333-8333-333333333333';
 
-function mountPage(accounts: unknown[], inShell = false) {
+function mountPage(accounts: unknown[], inShell = false, refreshStatus = 200) {
   resetDisplayCurrency();
   const fetch = vi.fn(async (path: string) => {
+    paths.push(path);
     if (path === '/me') return json(profile);
     if (path === '/currencies') return json(currencies);
+    if (path === '/rates/refresh')
+      return refreshStatus === 200
+        ? json({ stored: 2, refreshed: true, refreshedAt: '2026-09-20T09:00:00.000Z' })
+        : new Response(JSON.stringify({ code: 'PROVIDER_FAILED', message: 'boom' }), {
+            status: 502,
+            headers: { 'content-type': 'application/json' },
+          });
     if (path.startsWith('/rates')) return json(rates);
     return json(accounts);
   });
@@ -89,6 +106,15 @@ function mountPage(accounts: unknown[], inShell = false) {
 }
 
 describe('AccountsPage', () => {
+  /* The gesture has no keyboard, so the test drives what the gesture drives. */
+  const pull = async (w: ReturnType<typeof mountPage>) => {
+    const { PullToRefresh } = await import('@magermoney/ui');
+    await (
+      w.findComponent(PullToRefresh).vm as unknown as { refresh: () => Promise<void> }
+    ).refresh();
+    await flushPromises();
+  };
+
   /* The list's action is the bar's, so it only exists with the bar around it. */
   it('offers the new account from the top bar', async () => {
     const w = mountPage([acc(USD_ID, {})], true);
@@ -184,5 +210,33 @@ describe('AccountsPage', () => {
 
     expect(toggle.attributes('aria-expanded')).toBe('true');
     expect(w.find(`[data-testid="account-row-${ARCHIVED_ID}"]`).exists()).toBe(true);
+  });
+
+  it('reloads the accounts and asks for fresh rates when the list is pulled down', async () => {
+    paths.length = 0;
+    toast.mockClear();
+    const w = mountPage([acc(USD_ID, {})]);
+    await flushPromises();
+    const before = paths.length;
+
+    await pull(w);
+
+    expect(paths.slice(before)).toContain('/rates/refresh');
+    expect(paths.slice(before)).toContain('/accounts');
+    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('still reloads the accounts when the rates cannot be fetched, and says so', async () => {
+    paths.length = 0;
+    toast.mockClear();
+    const w = mountPage([acc(USD_ID, {})], false, 502);
+    await flushPromises();
+    const before = paths.length;
+
+    await pull(w);
+
+    expect(paths.slice(before)).toContain('/accounts');
+    expect(toast).toHaveBeenCalledWith(ru.rates.refreshFailed);
+    expect(w.find('[data-testid="capital-total"]').exists()).toBe(true);
   });
 });
