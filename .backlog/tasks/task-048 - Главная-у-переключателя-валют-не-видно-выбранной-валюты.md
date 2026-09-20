@@ -1,9 +1,11 @@
 ---
 id: TASK-048
 title: 'Главная: у переключателя валют не видно выбранной валюты'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-20 07:39'
+updated_date: '2026-09-20 10:34'
 labels: []
 dependencies: []
 type: bug
