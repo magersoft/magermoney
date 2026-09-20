@@ -1,7 +1,7 @@
 ---
 id: TASK-046
 title: 'Карточка счёта: вид банковской карты, бренд платёжной системы и выбор цвета'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-20 07:29'
