@@ -20,19 +20,29 @@ export const useSessionStore = defineStore('session', () => {
   let started: Promise<void> | undefined;
 
   /**
-   * Read the stored session once, then follow the provider. Awaited before the
-   * app mounts, so the first navigation already knows whether it is allowed.
+   * Read the stored session once, then follow the provider. Awaited by the
+   * guard, so the first navigation already knows whether it is allowed.
+   *
+   * It never rejects. Reading the stored session can fail on its own — blocked
+   * storage, a private window, a corrupt entry — and a navigation left hanging
+   * on a rejected promise would show nothing at all. Being treated as signed
+   * out is recoverable; a blank page is not.
    */
   const init = (): Promise<void> => {
     started ??= (async () => {
-      const { data } = await supabase().auth.getSession();
-      adopt(data.session?.user);
-      supabase().auth.onAuthStateChange((event, session) => {
-        adopt(session?.user);
-        // Covers the sign-outs `signOut()` never sees: an expired session, or
-        // another tab signing out.
-        if (event === 'SIGNED_OUT') void clearClientCaches();
-      });
+      try {
+        const { data } = await supabase().auth.getSession();
+        adopt(data.session?.user);
+        supabase().auth.onAuthStateChange((event, session) => {
+          adopt(session?.user);
+          // Covers the sign-outs `signOut()` never sees: an expired session, or
+          // another tab signing out.
+          if (event === 'SIGNED_OUT') void clearClientCaches();
+        });
+      } catch (error) {
+        console.error('Could not restore the session; starting signed out', error);
+        adopt(null);
+      }
       ready.value = true;
     })();
     return started;

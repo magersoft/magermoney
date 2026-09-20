@@ -119,11 +119,15 @@ const json = (body: unknown) =>
     headers: { 'content-type': 'application/json' },
   });
 
+/** The path the fake API is currently refusing; a test clears it to let the retry succeed. */
+let failing: string | undefined;
+
 function mountPage(
   data: { sources: unknown[]; inflows: unknown[]; expenses: unknown[]; accounts?: unknown[] },
-  failing?: string,
+  failsOn?: string,
 ) {
   resetDisplayCurrency();
+  failing = failsOn;
   const fetch = vi.fn(async (path: string) => {
     if (failing && path.startsWith(failing)) return new Response('boom', { status: 500 });
     if (path === '/me') return json(profile);
@@ -358,6 +362,21 @@ describe('DashboardPage', () => {
     expect(w.find('[data-testid="dash-error"]').exists()).toBe(true);
     // Everything here is derived from every list at once: one missing list makes the total a lie.
     expect(w.find('[data-testid="dash-plan-donut"]').exists()).toBe(false);
+    // A failure a signed-in person can do something about: the screen offers the retry.
+    expect(w.get('[data-testid="route-reload"]').text()).toBe(ru.dashboard.error.retry);
+  });
+
+  it('recovers when the retry succeeds', async () => {
+    const w = mountPage({ sources: [sourceDto], inflows: [inflowDto], expenses: [] }, '/expenses');
+    await flushPromises();
+    expect(w.find('[data-testid="dash-error"]').exists()).toBe(true);
+
+    failing = undefined;
+    await w.get('[data-testid="route-reload"]').trigger('click');
+    await flushPromises();
+
+    expect(w.find('[data-testid="dash-error"]').exists()).toBe(false);
+    expect(w.get('[data-testid="capital-total"]').text()).toContain('800');
   });
 
   it('leads somewhere from every empty block instead of standing blank', async () => {

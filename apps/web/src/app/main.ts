@@ -6,8 +6,9 @@ import App from '@/app/App.vue';
 import { i18n } from '@/app/i18n';
 import { cacheRestored, clientPersister, queryClient, replayOfflineMutations } from '@/app/query';
 import { router } from '@/app/router';
+import { startRouting } from '@/app/start-routing';
 import { registerAccountMutations } from '@/modules/accounts/offline';
-import { authGuard, useSession, useSessionStore } from '@/modules/auth';
+import { useSession } from '@/modules/auth';
 import { registerIncomeMutations } from '@/modules/income/offline';
 import { registerTransferMutations } from '@/modules/transfers/offline';
 import { createApiClient } from '@/shared/api/client';
@@ -16,7 +17,7 @@ import '@/app/styles/index.css';
 
 registerSW({ immediate: true });
 
-const app = createApp(App).use(createPinia()).use(router).use(i18n);
+const app = createApp(App).use(createPinia()).use(i18n);
 
 const session = useSession();
 
@@ -39,27 +40,20 @@ registerIncomeMutations(queryClient, api, ownerId);
 app.use(VueQueryPlugin, { queryClient, clientPersister });
 
 /**
- * The stored session is read before the first navigation, so a signed-in person
- * is never bounced to sign-in on a cold start, and the app is mounted only once
- * the guard can answer.
+ * The guard goes on before the router is installed — installing it is what
+ * starts the first navigation — and the guard reads the stored session itself,
+ * so a signed-in person is never bounced to sign-in on a cold start and an
+ * anonymous one reaches sign-in instead of a home screen whose queries have
+ * nothing to travel with. Mounting waits for the destination to settle.
  */
-void useSessionStore()
-  .init()
-  .catch((error: unknown) => {
-    // Reading the stored session can fail on its own — blocked storage, a
-    // private window, a corrupt entry. Mount anyway: the guard then treats the
-    // person as signed out, which is recoverable. A blank page is not.
-    console.error('Could not restore the session; starting signed out', error);
-  })
-  .finally(() => {
-    router.beforeEach(authGuard(session));
-    app.mount('#app');
-    // Only now are both halves true: the persisted cache is back (paused
-    // mutations included) and the session is known, so a write made offline can
-    // go out with a token behind it.
-    void cacheRestored
-      .then(() => replayOfflineMutations(queryClient))
-      .catch((error: unknown) => {
-        console.error('Could not replay the writes made offline', error);
-      });
-  });
+void startRouting(app, router, session).finally(() => {
+  app.mount('#app');
+  // Only now are both halves true: the persisted cache is back (paused
+  // mutations included) and the session is known, so a write made offline can
+  // go out with a token behind it.
+  void cacheRestored
+    .then(() => replayOfflineMutations(queryClient))
+    .catch((error: unknown) => {
+      console.error('Could not replay the writes made offline', error);
+    });
+});

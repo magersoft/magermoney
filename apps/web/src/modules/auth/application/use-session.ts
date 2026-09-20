@@ -20,6 +20,12 @@ const callbackUrl = (redirect?: string): string => {
 export interface Session {
   user: Ref<SessionUser | null>;
   ready: Ref<boolean>;
+  /**
+   * Settles once the stored session has been read, whatever the answer. The
+   * guard awaits it before it decides; every later call is the same settled
+   * promise, so asking costs nothing.
+   */
+  whenReady(): Promise<void>;
   signInWithGoogle(redirect?: string): Promise<void>;
   signInWithMagicLink(email: string, redirect?: string): Promise<Result<void, Error>>;
   signOut(): Promise<void>;
@@ -32,11 +38,13 @@ export interface Session {
  * sign-in form has to render, not an exception.
  */
 export function useSession(): Session {
-  const { user, ready } = storeToRefs(useSessionStore());
+  const store = useSessionStore();
+  const { user, ready } = storeToRefs(store);
 
   return {
     user,
     ready,
+    whenReady: () => store.init(),
     signInWithGoogle: async (redirect?: string) => {
       const { error } = await supabase().auth.signInWithOAuth({
         provider: 'google',
