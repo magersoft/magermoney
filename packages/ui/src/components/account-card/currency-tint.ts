@@ -1,10 +1,9 @@
 /**
- * The colour of an account card, as data.
+ * Which hue an account card gets from what it holds.
  *
  * The reference colours its cards; we colour ours by what they hold. A currency
- * therefore owns a hue, and only a hue: lightness and chroma are fixed by the
- * theme (`--mm-tint-l` / `--mm-tint-c` in `tokens.css`), which is what lets ink
- * clear AA on every fill the wheel can produce — proved across all 360° in
+ * owns a hue and only a hue — what that hue becomes, and which ink survives on
+ * it, is `palette.ts`'s answer, proved across all 360° in
  * `test/tokens-contrast.test.ts` rather than spot-checked per currency.
  *
  * Two cards in the same currency are the same colour. That is the point: on a
@@ -70,13 +69,4 @@ export function currencyHue(code: string): number {
   const index = CURRENCY_TINT_ORDER.indexOf(upper);
   const seed = index >= 0 ? index : hash(upper);
   return Math.round(((seed * GOLDEN_ANGLE) % 360) * 10) / 10;
-}
-
-/**
- * What a card puts in its `style`. The fill itself is written in CSS, from the
- * theme's lightness and chroma plus this hue, so the card retints with the
- * theme without re-rendering.
- */
-export function currencyTintStyle(code: string): Record<string, string> {
-  return { '--mm-card-hue': `${currencyHue(code)}` };
 }

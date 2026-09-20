@@ -24,7 +24,8 @@ import { computed, nextTick, ref, useTemplateRef } from 'vue';
 import type { HTMLAttributes } from 'vue';
 import { cn } from '../../lib/utils';
 import AccountCard from './AccountCard.vue';
-import { ACCOUNT_COLORWAYS, cardTintStyle, type AccountColorway } from './colorways';
+import { currencyHue } from './currency-tint';
+import { ACCOUNT_COLORWAYS, cardFillStyle, type AccountColorway } from './palette';
 import type { AmountLocale } from '../amount-lockup/format-amount';
 import type { AccountCardItem } from './types';
 
@@ -190,10 +191,10 @@ const offset = computed(() => (dragging.value ? `translateX(${dx.value}px)` : un
         :tabindex="choice === model ? 0 : -1"
         :aria-label="nameOf(choice)"
         :title="nameOf(choice)"
-        :style="cardTintStyle(props.account.code, choice)"
+        :style="cardFillStyle(currencyHue(props.account.code), choice)"
         :class="
           cn(
-            'bg-currency-tint border-card-edge ring-offset-background size-8 rounded-full border',
+            'bg-card-fill border-card-edge ring-offset-background size-8 rounded-full border',
             'outline-offset-2 focus-visible:outline-ring focus-visible:outline-2',
             'pointer-coarse:size-11',
             choice === model ? 'ring-ink ring-2 ring-offset-2' : '',

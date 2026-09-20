@@ -26,13 +26,14 @@ export type CardType = (typeof CARD_TYPES)[number];
  * is already painted in.
  */
 export const ACCOUNT_COLORWAYS = [
-  'slate',
-  'ocean',
-  'violet',
-  'rose',
+  'red',
+  'orange',
   'amber',
-  'lime',
+  'green',
   'teal',
+  'blue',
+  'violet',
+  'pink',
 ] as const;
 export type AccountColorway = (typeof ACCOUNT_COLORWAYS)[number];
 

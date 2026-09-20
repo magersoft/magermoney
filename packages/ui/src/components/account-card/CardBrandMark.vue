@@ -31,21 +31,29 @@ const word = computed(() => WORDMARKS[props.brand]);
 <template>
   <!--
     The circles carry their own colour rather than the card's ink: this is the
-    one mark people read as a colour, and both discs stay legible on any tint
-    because they overlap into a third, lighter shape in the middle.
+    one mark people read as a colour.
+
+    Which is also why it needs a plate under it. The fills are now saturated,
+    and a red disc on a red or magenta card is simply not there — the mark
+    survived the pastel palette and vanished on the vivid one. So it sits on a
+    light rounded plate, the way a scheme logo sits on a printed patch on a real
+    card: the discs are then read against a constant, whatever the card is
+    painted in, and the graphic keeps the 3:1 it owes (WCAG 1.4.11) without the
+    card's colour having a say.
   -->
   <svg
     v-if="props.brand === 'mastercard'"
     data-slot="card-brand"
     :data-brand="props.brand"
     :width="props.size"
-    :height="(props.size * 22) / 36"
-    viewBox="0 0 36 22"
+    :height="(props.size * 26) / 42"
+    viewBox="0 0 42 26"
     aria-hidden="true"
     focusable="false"
   >
-    <circle cx="13" cy="11" r="11" fill="#EB001B" />
-    <circle cx="23" cy="11" r="11" fill="#F79E1B" fill-opacity="0.9" />
+    <rect x="0" y="0" width="42" height="26" rx="4" fill="#FFFFFF" fill-opacity="0.92" />
+    <circle cx="17" cy="13" r="8" fill="#EB001B" />
+    <circle cx="25" cy="13" r="8" fill="#F79E1B" fill-opacity="0.9" />
   </svg>
 
   <!--

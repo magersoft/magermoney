@@ -221,8 +221,8 @@ describe('AccountFormPage', () => {
     const preview = () => w.get('[data-testid="colorway-preview"]');
     expect(preview().attributes('data-colorway')).toBeUndefined();
 
-    await w.get('[data-testid="colorway-rose"]').trigger('click');
-    expect(preview().attributes('data-colorway')).toBe('rose');
+    await w.get('[data-testid="colorway-red"]').trigger('click');
+    expect(preview().attributes('data-colorway')).toBe('red');
 
     await w.get('[data-testid="form-name"]').setValue('Карман');
     await w.get('[data-testid="form-bank"]').setValue('Bank');
@@ -231,7 +231,7 @@ describe('AccountFormPage', () => {
     await flushPromises();
 
     const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
-    expect(JSON.parse(String(post?.[1]?.body))).toMatchObject({ colorway: 'rose' });
+    expect(JSON.parse(String(post?.[1]?.body))).toMatchObject({ colorway: 'red' });
   });
 
   it('opens an account on the colour it is already painted in', async () => {

@@ -355,13 +355,14 @@
     "pinned": "On Home",
     "colorway": {
       "default": "Currency colour ({code})",
-      "slate": "Slate",
-      "ocean": "Ocean",
-      "violet": "Violet",
-      "rose": "Rose",
+      "red": "Red",
+      "orange": "Orange",
       "amber": "Amber",
-      "lime": "Lime",
-      "teal": "Teal"
+      "green": "Green",
+      "teal": "Teal",
+      "blue": "Blue",
+      "violet": "Violet",
+      "pink": "Pink"
     },
     "detail": {
       "menu": "Account actions",

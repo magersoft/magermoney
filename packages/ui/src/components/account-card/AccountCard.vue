@@ -33,7 +33,8 @@ import CurrencyIcon from '../currency-icon/CurrencyIcon.vue';
 import type { AmountLocale } from '../amount-lockup/format-amount';
 import CardBrandMark from './CardBrandMark.vue';
 import { cardBrand } from './card-brand';
-import { cardTintStyle } from './colorways';
+import { currencyHue } from './currency-tint';
+import { cardFillStyle } from './palette';
 import type { AccountCardItem } from './types';
 
 interface Props extends PrimitiveProps {
@@ -96,11 +97,11 @@ const linkAttrs = computed(() => {
     :as-child="asChild"
     :data-foreign="foreign || undefined"
     :data-colorway="props.account.colorway ?? undefined"
-    :style="cardTintStyle(props.account.code, props.account.colorway)"
+    :style="cardFillStyle(currencyHue(props.account.code), props.account.colorway)"
     v-bind="linkAttrs"
     :class="
       cn(
-        'bg-currency-tint text-ink shadow-card relative flex flex-col rounded-xl p-4',
+        'bg-card-fill text-card-ink shadow-card relative flex flex-col rounded-xl p-4',
         /*
          * The edge the dark theme needs and the light one does not: with no
          * shadow on a dark canvas, a hairline of ink is what catches the top of

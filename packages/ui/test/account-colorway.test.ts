@@ -4,12 +4,15 @@ import AccountCard from '../src/components/account-card/AccountCard.vue';
 import AccountColorPicker from '../src/components/account-card/AccountColorPicker.vue';
 import { cardBrand, CARD_BRANDS } from '../src/components/account-card/card-brand';
 import {
-  cardHue,
-  cardTintStyle,
+  cardFill,
+  cardFillStyle,
+  fillForHue,
+  contrastOn,
+  luminance,
   ACCOUNT_COLORWAYS,
-  ACCOUNT_COLORWAY_HUES,
+  ACCOUNT_COLORWAY_FILLS,
   type AccountColorway,
-} from '../src/components/account-card/colorways';
+} from '../src/components/account-card/palette';
 import { currencyHue } from '../src/components/account-card/currency-tint';
 import type { AccountCardItem } from '../src/components/account-card/types';
 
@@ -23,16 +26,16 @@ const account = (over: Partial<AccountCardItem> = {}): AccountCardItem => ({
   ...over,
 });
 
-describe('cardHue', () => {
+describe('cardFill', () => {
   it('paints an unpainted account in the colour of what it holds', () => {
-    expect(cardHue('USD')).toBe(currencyHue('USD'));
-    expect(cardHue('USD', null)).toBe(currencyHue('USD'));
+    expect(cardFill(currencyHue('USD'))).toEqual(fillForHue(currencyHue('USD')));
+    expect(cardFill(currencyHue('USD'), null)).toEqual(fillForHue(currencyHue('USD')));
   });
 
   it('lets a colorway outrank the currency', () => {
-    expect(cardHue('USD', 'teal')).toBe(ACCOUNT_COLORWAY_HUES.teal);
+    expect(cardFill(currencyHue('USD'), 'teal')).toEqual(ACCOUNT_COLORWAY_FILLS.teal);
     /* Two accounts in different currencies, painted the same, are the same colour. */
-    expect(cardHue('RUB', 'teal')).toBe(cardHue('USD', 'teal'));
+    expect(cardFill(currencyHue('RUB'), 'teal')).toEqual(cardFill(currencyHue('USD'), 'teal'));
   });
 
   /*
@@ -40,27 +43,38 @@ describe('cardHue', () => {
    * render: colours are added over time and a stale client is a normal client.
    */
   it('falls back to the currency for a colour it does not know', () => {
-    expect(cardHue('USD', 'ultramarine')).toBe(currencyHue('USD'));
-  });
-
-  it('keeps every colour far enough from the next to be told apart', () => {
-    const sorted = [...ACCOUNT_COLORWAYS]
-      .map((c) => ACCOUNT_COLORWAY_HUES[c])
-      .sort((a, b) => a - b);
-    expect(new Set(sorted).size).toBe(sorted.length);
-    const gaps = sorted.map((hue, i) =>
-      i === 0 ? 360 + sorted.at(-1)! - hue : hue - sorted[i - 1]!,
-    );
-    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(30);
+    expect(cardFill(currencyHue('USD'), 'ultramarine')).toEqual(fillForHue(currencyHue('USD')));
   });
 
   /*
-   * The hue is all a colorway hands in. Lightness and chroma stay the theme's,
-   * which is what `tokens-contrast.test.ts` proves across the whole wheel — a
-   * colorway that shipped a lightness of its own would step outside that proof.
+   * The whole point of the palette: a card is saturated, and it carries ink
+   * that survives on it. Contrast alone would be satisfied by going pale again,
+   * so vividness is asserted beside it.
    */
-  it('hands the card a hue and nothing else', () => {
-    expect(Object.keys(cardTintStyle('USD', 'rose'))).toEqual(['--mm-card-hue']);
+  it('is vivid and legible at once, on every named colour', () => {
+    for (const name of ACCOUNT_COLORWAYS) {
+      const fill = ACCOUNT_COLORWAY_FILLS[name];
+      expect(contrastOn(fill.ink, luminance(fill))).toBeGreaterThanOrEqual(4.5);
+      expect(fill.c).toBeGreaterThanOrEqual(0.08);
+    }
+  });
+
+  /* Deep colours take white; the ones that have no rich dark version take ink. */
+  it('gives yellows dark ink and deep colours white', () => {
+    expect(ACCOUNT_COLORWAY_FILLS.amber.ink).toBe('dark');
+    expect(ACCOUNT_COLORWAY_FILLS.orange.ink).toBe('dark');
+    expect(ACCOUNT_COLORWAY_FILLS.red.ink).toBe('light');
+    expect(ACCOUNT_COLORWAY_FILLS.blue.ink).toBe('light');
+  });
+
+  /* The card hands CSS the fill's coordinates and its ink, nothing resolved. */
+  it('hands the card its fill and its ink as custom properties', () => {
+    expect(Object.keys(cardFillStyle(currencyHue('USD'), 'red'))).toEqual([
+      '--mm-card-l',
+      '--mm-card-c',
+      '--mm-card-hue',
+      '--mm-card-ink',
+    ]);
   });
 });
 
@@ -131,12 +145,16 @@ describe('AccountCard, as a bank card', () => {
   });
 
   it('carries the picked colour into its fill, and the currency when none was picked', () => {
-    const painted = mount(AccountCard, { props: { account: account({ colorway: 'rose' }) } });
-    expect(painted.attributes('style')).toContain(`--mm-card-hue: ${ACCOUNT_COLORWAY_HUES.rose}`);
-    expect(painted.attributes('data-colorway')).toBe('rose');
+    const painted = mount(AccountCard, { props: { account: account({ colorway: 'red' }) } });
+    const style = painted.attributes('style') ?? '';
+    expect(style).toContain(`--mm-card-hue: ${ACCOUNT_COLORWAY_FILLS.red.h}`);
+    expect(style).toContain(`--mm-card-c: ${ACCOUNT_COLORWAY_FILLS.red.c}`);
+    expect(painted.attributes('data-colorway')).toBe('red');
 
     const plain = mount(AccountCard, { props: { account: account() } });
-    expect(plain.attributes('style')).toContain(`--mm-card-hue: ${currencyHue('USD')}`);
+    expect(plain.attributes('style')).toContain(
+      `--mm-card-hue: ${fillForHue(currencyHue('USD')).h}`,
+    );
   });
 });
 
@@ -188,15 +206,15 @@ describe('AccountColorPicker', () => {
     expect(teal.attributes('aria-checked')).toBe('true');
     /* One tab stop for the whole set, on the colour that is on. */
     expect(teal.attributes('tabindex')).toBe('0');
-    expect(wrapper.find('[data-testid="colorway-rose"]').attributes('tabindex')).toBe('-1');
+    expect(wrapper.find('[data-testid="colorway-pink"]').attributes('tabindex')).toBe('-1');
     expect(teal.attributes('aria-label')).toBe('Colour teal');
     expect(wrapper.find('[data-testid="colorway-default"]').attributes('aria-label')).toBe(
       'Currency colour',
     );
 
     picked = [];
-    await wrapper.find('[data-testid="colorway-rose"]').trigger('click');
-    expect(picked).toEqual(['rose']);
+    await wrapper.find('[data-testid="colorway-pink"]').trigger('click');
+    expect(picked).toEqual(['pink']);
   });
 
   it('paints the preview in the colour being tried, not the one that is saved', () => {

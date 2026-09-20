@@ -105,14 +105,21 @@
 }
 
 /*
- * The account card's fill. The currency hands in a hue through `--mm-card-hue`
- * (see `components/account-card/currency-tint.ts`); lightness and chroma belong
- * to the theme, so one card retints with the theme and ink stays above AA on
- * every hue the wheel can hand out. The card always supplies the hue; the
- * fallback only keeps the declaration valid if one ever renders without it.
+ * The account card's fill, and the ink that survives on it. Both arrive from
+ * the card itself (`components/account-card/palette.ts`), which picks the most
+ * saturated fill a hue can hold together with whichever ink clears AA on it —
+ * the reason lightness and chroma are no longer the theme's to decide, and the
+ * reason a red card is the same red on a light screen and a dark one.
+ *
+ * The fallbacks keep the declarations valid if a card ever renders without
+ * them; nothing in the app relies on hitting them.
  */
-@utility bg-currency-tint {
-  background-color: oklch(var(--mm-tint-l) var(--mm-tint-c) var(--mm-card-hue, 0));
+@utility bg-card-fill {
+  background-color: oklch(var(--mm-card-l, 0.6) var(--mm-card-c, 0.1) var(--mm-card-hue, 0));
+}
+
+@utility text-card-ink {
+  color: var(--mm-card-ink, oklch(1 0 0));
 }
 
 /*
@@ -121,10 +128,15 @@
  *
  * Three layers, all of them the same neutral white and black at low alpha, so
  * the sheen is *light* rather than a fourth colour — it lies over whatever hue
- * the card is painted in without arguing with it, and the ink underneath keeps
- * the contrast the tint tokens prove (`test/tokens-contrast.test.ts`), because
- * a wash this faint cannot move a fill across the AA line in either direction
- * far enough to matter.
+ * the card is painted in without arguing with it.
+ *
+ * How faint they are is not a matter of taste. The sheen sits between the fill
+ * and the ink, so it is part of what the ink is read against, and the direction
+ * of harm follows the ink: white highlights spend the contrast of a white-inked
+ * card, the shading at the foot spends that of a dark-inked one. The values
+ * below are the most either can be while every fill in the palette still clears
+ * AA through them, which `test/tokens-contrast.test.ts` proves by compositing
+ * the sheen rather than measuring the bare fill.
  *
  * The sweep runs corner to corner, the bloom sits where a light source would
  * be, and the last layer darkens the bottom edge so the card reads as lit from

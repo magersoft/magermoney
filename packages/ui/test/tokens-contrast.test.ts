@@ -4,6 +4,13 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import {
+  contrastOn,
+  fillForHue,
+  ACCOUNT_COLORWAYS,
+  ACCOUNT_COLORWAY_FILLS,
+  type CardFill,
+} from '../src/components/account-card/palette';
 
 /**
  * The palette is data, not code, so the guard reads the stylesheet itself: a
@@ -148,121 +155,97 @@ const scalar = (name: string): number => {
   return Number(match[1]);
 };
 
-describe('the currency tint', () => {
-  /*
-   * An account card is filled by its currency, and the currency only picks a
-   * hue. That is what makes this provable rather than spot-checked: walk the
-   * whole wheel at the theme's fixed lightness and chroma, and no currency —
-   * including one nobody has added yet — can produce a card ink fails on.
-   */
-  it.each(['light', 'dark'])('carries ink at AA on every hue, in %s', (theme) => {
-    const lightness = scalar(`mm-${theme}-tint-l`);
-    const chroma = scalar(`mm-${theme}-tint-c`);
-    const ink = token(`mm-${theme}-ink`);
-    const wheel = Array.from({ length: 360 }, (_, hue) => ({
-      hue,
-      ratio: Math.round(contrast(ink, [lightness, chroma, hue]) * 10) / 10,
-    }));
-    // Reported as the worst hue, so a failure says which currency colour broke.
-    const worst = wheel.reduce((a, b) => (b.ratio < a.ratio ? b : a));
-    expect(worst.ratio).toBeGreaterThanOrEqual(4.5);
-  });
-
-  /*
-   * The sRGB cone narrows towards white, so a chroma chosen by eye is easily
-   * one the browser has to map back — and mapping pulls far-apart hues onto the
-   * same colour, which is how "one currency, one colour" would fail silently.
-   */
-  it.each(['light', 'dark'])('stays inside sRGB on every hue, in %s', (theme) => {
-    const lightness = scalar(`mm-${theme}-tint-l`);
-    const chroma = scalar(`mm-${theme}-tint-c`);
-    const outside = Array.from({ length: 360 }, (_, hue) => hue).filter((hue) =>
-      linearRgb([lightness, chroma, hue]).some((channel) => channel < -0.001 || channel > 1.001),
-    );
-    expect(outside).toEqual([]);
-  });
-
-  /*
-   * In light the card is lifted off the canvas by its shadow. In dark there is
-   * no shadow — one on a dark canvas reads as dirt — so the fill is the only
-   * thing that says where a card ends, and a stack of them has to be a stack
-   * rather than one dark block. 2:1 against the canvas is what that takes.
-   */
-  it('stands off the dark canvas on every hue', () => {
-    const lightness = scalar('mm-dark-tint-l');
-    const chroma = scalar('mm-dark-tint-c');
-    const canvas = token('mm-dark-bg');
-    const worst = Array.from({ length: 360 }, (_, hue) => ({
-      hue,
-      ratio: Math.round(contrast(canvas, [lightness, chroma, hue]) * 10) / 10,
-    })).reduce((a, b) => (b.ratio < a.ratio ? b : a));
-    expect(worst.ratio).toBeGreaterThanOrEqual(2);
-  });
-});
-
 /**
- * The card is not its fill any more: `card-gloss` lays a sheen of white and
- * black over it (`index.css`), and the ink lies on the result. Measuring the
- * bare tint would therefore prove something the screen never shows — and the
- * first values written for the sheen did exactly that, clearing AA on paper
- * while a dark card's brightest corner carried ink at 3.7:1.
+ * The card palette.
  *
- * So the wheel is walked again with the sheen composited on, at the two corners
- * where it is strongest: the top-left, where the sweep and the bloom stack into
- * the lightest point a card has, and the foot, where the shading makes the
- * darkest. Compositing happens in gamma-encoded sRGB, because that is where the
- * browser does it.
+ * A fill is no longer a hue handed to theme-fixed lightness and chroma, so one
+ * proof no longer covers every colour by construction. It is replaced by two,
+ * matching how the two kinds of colour are chosen: the eight named colorways
+ * are design decisions and each is checked, while the colour a currency lands
+ * on is a rule applied to a hue and is checked across the whole wheel.
+ *
+ * Both are measured through the sheen rather than on the bare fill. The sheen
+ * lies between the fill and the ink, so it is part of what the ink is read
+ * against — and measuring the fill alone is exactly how a previous version of
+ * this file passed while a card carried text at 3.7:1.
  */
-describe('the card tint under its sheen', () => {
+describe('the card palette', () => {
   const encode = (u: number) => (u <= 0.0031308 ? 12.92 * u : 1.055 * u ** (1 / 2.4) - 0.055);
   const decode = (s: number) => (s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4);
-  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
 
-  /** The tint as the browser holds it, with each sheen layer painted over in turn. */
-  const glossed = (tint: Oklch, layers: readonly (readonly [value: number, alpha: number])[]) => {
-    let channels = linearRgb(tint).map((channel) => encode(clamp(channel)));
+  const sweep = scalar('mm-gloss-sweep');
+  const bloom = scalar('mm-gloss-bloom');
+  const shade = scalar('mm-gloss-shade');
+
+  /** The fill with each sheen layer painted over it, in gamma-encoded sRGB. */
+  const through = (
+    fill: CardFill,
+    layers: readonly (readonly [value: number, alpha: number])[],
+  ) => {
+    let channels = linearRgb([fill.l, fill.c, fill.h]).map((ch) =>
+      encode(Math.min(1, Math.max(0, ch))),
+    );
     for (const [value, alpha] of layers)
-      channels = channels.map((channel) => channel * (1 - alpha) + value * alpha);
+      channels = channels.map((ch) => ch * (1 - alpha) + value * alpha);
     const [r, g, b] = channels.map(decode) as [number, number, number];
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
-  const against = (ink: Oklch, background: number) => {
-    const inkLuminance = luminance(ink);
-    const lighter = Math.max(inkLuminance, background);
-    const darker = Math.min(inkLuminance, background);
-    return Math.round(((lighter + 0.05) / (darker + 0.05)) * 10) / 10;
-  };
 
-  it.each(['light', 'dark'])('carries ink at AA on every hue, glossed, in %s', (theme) => {
-    const lightness = scalar(`mm-${theme}-tint-l`);
-    const chroma = scalar(`mm-${theme}-tint-c`);
-    const sweep = scalar(`mm-${theme}-gloss-sweep`);
-    const bloom = scalar(`mm-${theme}-gloss-bloom`);
-    const shade = scalar(`mm-${theme}-gloss-shade`);
-    const ink = token(`mm-${theme}-ink`);
+  /*
+   * The two corners where the sheen is strongest: the top-left, where the
+   * bloom and the sweep stack into the lightest point a card has, and the foot,
+   * where the shading makes the darkest. The bloom is under the sweep in the
+   * stack, so it is painted on first.
+   */
+  const worstThroughGloss = (fill: CardFill) =>
+    Math.min(
+      contrastOn(
+        fill.ink,
+        through(fill, [
+          [1, bloom],
+          [1, sweep],
+        ]),
+      ),
+      contrastOn(fill.ink, through(fill, [[0, shade]])),
+    );
 
-    /* The bloom is under the sweep in the stack, so it is painted on first. */
-    const brightest = [
-      [1, bloom],
-      [1, sweep],
-    ] as const;
-    const darkest = [[0, shade]] as const;
+  it.each(ACCOUNT_COLORWAYS)('carries its ink at AA through the sheen: %s', (name) => {
+    expect(worstThroughGloss(ACCOUNT_COLORWAY_FILLS[name])).toBeGreaterThanOrEqual(4.5);
+  });
 
-    const worst = Array.from({ length: 360 }, (_, hue) => {
-      const tint: Oklch = [lightness, chroma, hue];
-      return {
-        hue,
-        ratio: Math.min(
-          against(ink, glossed(tint, brightest)),
-          against(ink, glossed(tint, darkest)),
-        ),
-      };
-    }).reduce((a, b) => (b.ratio < a.ratio ? b : a));
-
+  it('carries ink at AA on every hue a currency can land on', () => {
+    const worst = Array.from({ length: 360 }, (_, hue) => ({
+      hue,
+      ratio: worstThroughGloss(fillForHue(hue)),
+    })).reduce((a, b) => (b.ratio < a.ratio ? b : a));
     expect(worst.ratio).toBeGreaterThanOrEqual(4.5);
   });
-});
 
+  /*
+   * The point of the change: the palette is saturated. A fill that drifted back
+   * towards pastel would still pass every contrast check above — contrast is
+   * exactly what pastel is good at — so vividness needs a floor of its own.
+   */
+  it('stays vivid on every hue rather than drifting back to pastel', () => {
+    /*
+     * The floor is what the narrowest part of the wheel can hold — the teals,
+     * whose gamut is thin — not a round number. The old pastel fill sat at
+     * 0.06 with a lightness of 0.86; nothing here can get back there.
+     */
+    const chromas = Array.from({ length: 360 }, (_, hue) => fillForHue(hue).c);
+    expect(Math.min(...chromas)).toBeGreaterThanOrEqual(0.08);
+    for (const name of ACCOUNT_COLORWAYS)
+      expect(ACCOUNT_COLORWAY_FILLS[name].c).toBeGreaterThanOrEqual(0.08);
+  });
+
+  /* Every fill must be a colour sRGB can actually show, or the browser maps it. */
+  it('keeps every fill inside sRGB', () => {
+    const outside = Array.from({ length: 360 }, (_, hue) => fillForHue(hue)).filter((f) =>
+      linearRgb([f.l, f.c, f.h]).some((ch) => ch < -0.001 || ch > 1.001),
+    );
+    expect(outside).toEqual([]);
+  });
+});
 describe('the donut segment palette', () => {
   /*
    * The one chart in the app, and the same proof the card tint gets: a segment
