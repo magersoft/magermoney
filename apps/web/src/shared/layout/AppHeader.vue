@@ -10,9 +10,11 @@
  * has room for the sections themselves, so it gets the wordmark and the tab
  * links and lets the screen's own heading name the screen.
  *
- * The action is a word in the accent colour and nothing else: a bar holding
- * one action does not need a filled shape to say which one it is, and a disc
- * with a glyph in it turns a sentence into furniture.
+ * Both corners are a word in the accent colour and nothing else: a bar holding
+ * one thing per side does not need a filled shape to say which one it is, and
+ * a disc with a glyph in it turns a sentence into furniture. The way back says
+ * "Back" rather than drawing a lone chevron — a chevron is a hint, and the one
+ * control everybody reaches for should not have to be guessed at.
  *
  * A bar with nothing on it is not a bar. Where there is no way back, no title
  * and no action — the home screen — it is not rendered on a phone rather than
@@ -54,31 +56,31 @@ function goBack(): void {
     :class="bare ? 'hidden md:block' : ''"
     style="padding-top: env(safe-area-inset-top)"
   >
-    <div class="relative mx-auto flex h-14 w-full max-w-3xl items-center gap-3 px-4 md:px-6">
+    <div class="relative mx-auto flex h-14 w-full max-w-3xl items-center gap-2 px-4 md:px-6">
       <Button
         v-if="canGoBack"
         variant="ghost"
-        size="icon"
+        size="sm"
         type="button"
-        class="-ms-2 size-11 shrink-0"
-        :aria-label="t('a11y.back')"
+        class="-ms-2 min-h-11 shrink-0 gap-0.5 rounded-full ps-1 pe-3 text-[15px] font-medium text-accent-foreground hover:bg-accent/10 hover:text-accent-foreground"
         data-testid="nav-back"
         @click="goBack"
       >
         <ChevronLeftIcon :size="22" aria-hidden="true" />
+        {{ t('action.back') }}
       </Button>
 
       <!--
-        Centred on the bar rather than between the buttons: a title that
-        centres itself in the leftover space shifts as soon as one side grows,
-        and a title that moves when you navigate reads as a different bar. It
-        is `absolute` so the two corners keep the width they had, and it stops
-        short of both of them — a long account name truncates instead of
-        sliding under the action.
+        Centred on the bar, not between the corners. Only one corner is filled
+        on most screens, and a title that centres itself in the leftover space
+        sits visibly left of centre on one screen and right of centre on the
+        next — which reads as the bar moving rather than the screen changing.
+        So it is pinned to the middle and capped at the width that clears both
+        corners; a long name truncates there instead of sliding under a word.
       -->
       <h2
         v-if="title"
-        class="absolute inset-x-[4.5rem] truncate text-center text-[17px] font-semibold tracking-[-0.01em] md:hidden"
+        class="absolute left-1/2 max-w-[calc(100%-15rem)] -translate-x-1/2 truncate text-center text-[17px] font-semibold tracking-[-0.01em] md:hidden"
         data-testid="page-title"
       >
         {{ title }}

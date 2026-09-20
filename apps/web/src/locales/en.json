@@ -497,11 +497,11 @@
     }
   },
   "action": {
+    "back": "Back",
     "add": "Add",
     "record": "Record"
   },
   "a11y": {
-    "back": "Back",
     "primaryNav": "Main navigation",
     "skipToContent": "Skip to content",
     "displayCurrency": "Display currency",

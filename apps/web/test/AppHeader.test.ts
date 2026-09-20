@@ -80,6 +80,14 @@ describe('the top bar', () => {
     }
   });
 
+  /* Named, not just drawn: a lone chevron is a hint, and this is the control everybody reaches for. */
+  it('says "Back" rather than leaving the chevron to explain itself', async () => {
+    const { shell } = await mountShell('/accounts/new');
+    const button = shell.get('[data-testid="nav-back"]');
+    expect(button.text()).toBe(en.action.back);
+    expect(button.classes()).toContain('text-accent-foreground');
+  });
+
   it('steps through history when there is history to step through', async () => {
     const i18n = createI18n({
       legacy: false,
