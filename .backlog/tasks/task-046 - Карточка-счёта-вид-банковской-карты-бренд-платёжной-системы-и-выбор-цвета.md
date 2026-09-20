@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-20 07:29'
-updated_date: '2026-09-20 17:34'
+updated_date: '2026-09-20 17:36'
 labels: []
 dependencies: []
 type: feature
@@ -29,3 +29,16 @@ ordinal: 44000
 - [ ] #7 Реквизиты и номера не попадают в логи; полные номера карт не хранятся и не показываются
 - [ ] #8 Анимация свайпа уважает prefers-reduced-motion; тесты покрывают выбор бренда и выбор цвета
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Данные. ACCOUNT_COLORWAYS в packages/domain (hue-only набор), colorway в AccountDtoSchema и accountFields (contracts), миграция accounts.colorway text null + check по списку (RLS уже на таблице), проброс в AccountRow/toColumns/SELECT pg-репозитория, memory-репозиторий и dto.ts API.
+2. Токены и заливка. ACCOUNT_COLORWAY_HUES рядом с currency-tint.ts; cardTintStyle(code, colorway) — colorway задаёт только --mm-card-hue, светлота и цветность остаются темой, поэтому гарантия контраста из tokens-contrast.test.ts действует без изменений. Пустой colorway = оттенок валюты (AC#6).
+3. Блеск. Утилита card-gloss в packages/ui/src/styles/index.css: слоистые градиенты поверх заливки, своя непрозрачность в светлой и тёмной теме, ничего не рисует под prefers-reduced-motion только если появится движение (сам блеск статичен).
+4. Карта как банковская. AccountCard.vue: чип, слот бренда, маскированные цифры (••2340), срок; для kind=card — Visa/Mastercard из cardNetwork через новый CardBrandMark.vue + нормализатор card-brand.ts; для обычного счёта вместо реквизитов — номер счёта/название; для крипты — значок валюты. Полные номера не хранятся и не показываются, в логи ничего не пишется (AC#7).
+5. Выбор цвета. AccountColorway swipe: композабл жеста (переиспользовать подход use-drag-reorder), превью карточки в форме счёта меняется сразу, есть клавиатурная альтернатива и точки-индикаторы; свайп уважает prefers-reduced-motion (AC#8).
+6. Проброс во все места карточки. application/account-cards.ts — единая чистая сборка AccountCardItem из AccountDto (цвет, бренд, реквизиты), используется экраном Счетов, экраном счёта и полосой на главной; домен Account не трогаем.
+7. Офлайн и сохранение. colorway идёт обычным PATCH через useUpdateAccount с оптимистичным патчем; проверить, что отложенная запись восстанавливается (AC#5).
+8. Локали ru/en, тесты: выбор бренда, выбор цвета, дефолтный цвет, контраст, reduced-motion. bun run test/lint/typecheck.
+<!-- SECTION:PLAN:END -->
