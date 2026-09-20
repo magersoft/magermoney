@@ -1,9 +1,11 @@
 ---
 id: TASK-055
 title: 'Карточки счетов: насыщенная палитра вместо пастельной, ink как часть цвета'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-20 19:03'
+updated_date: '2026-09-20 19:04'
 labels: []
 dependencies: []
 type: feature
