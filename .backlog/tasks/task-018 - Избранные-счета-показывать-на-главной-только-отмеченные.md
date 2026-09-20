@@ -51,3 +51,19 @@ Zero-pinned ruling: no soft fallback to all accounts. A fallback would silently 
 7. Locale strings in en.json and ru.json (form label, accounts list marker, dashboard hint), humanized.
 8. Tests: contracts, api accounts, web AccountFormPage/AccountsPage/DashboardPage (filtering + empty case). Run bun run test, lint, typecheck.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Naming: Pinned account (is_pinned / isPinned), a new CONTEXT.md entry next to Spending account. Avoided 'favourite' and 'primary' — the latter is the Income source's word.
+
+Zero-pinned ruling: no fallback to showing every account. The strip tells the user where the switch is (dashboard.accounts.unpinned) and keeps the 'All' link to the Accounts screen; the add tile stays only for the genuinely-no-accounts case, since with an account already there the switch is what is off, not the account that is missing.
+
+Migration verified outside the Supabase CLI (not installed here): applied every migration in order to a throwaway postgres:16 with auth/role stubs, then applied 20260920000012 twice over — once on the clean base, once with an accounts row already present. The existing row took is_pinned = false and an update to true stuck. The same database then ran PgAccountRepository.create/update/list directly: isPinned came back true, patched to false, and listed per account, so the SELECT and the toColumns mapping are exercised against real SQL.
+
+Polish pass (/impeccable audit + detector, 0 findings): pulled the duplicated switch row into FormSwitchRow.vue rather than shipping a second copy of it, and grouped the pin with the currency mark at full ink — AccountCard's own rule is that all type on the tint is ink, and a 60%% pin would not clear the 3:1 WCAG 1.4.11 asks of a graphic.
+
+Not done here: no live browser screenshot, the app needs a Supabase backend this environment has no credentials for. The behaviour is covered by mounted-component tests instead (AccountsStripBlock through DashboardPage, the card marker through AccountsPage and packages/ui).
+
+Validation: bun run test (801 tests across 6 packages), bun run lint, bun run typecheck, bun run build — all green.
+<!-- SECTION:NOTES:END -->
