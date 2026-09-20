@@ -30,10 +30,7 @@ async function mountShell(at = '/') {
   });
   await router.push(at);
   await router.isReady();
-  const shell = mount(AppShell, {
-    props: { theme: 'system' as const },
-    global: { plugins: [i18n, router] },
-  });
+  const shell = mount(AppShell, { global: { plugins: [i18n, router] } });
   await flushPromises();
   return shell;
 }
@@ -77,12 +74,6 @@ describe('AppShell', () => {
 
   it('makes the skip link target focusable, so the skip actually moves focus', async () => {
     expect((await mountShell()).get('main#main').attributes('tabindex')).toBe('-1');
-  });
-
-  it('asks for the next theme in the cycle rather than setting it itself', async () => {
-    const shell = await mountShell();
-    await shell.get('header button').trigger('click');
-    expect(shell.emitted('update:theme')).toEqual([['light']]);
   });
 
   it('passes the pill\'s "+" on to whoever owns the quick actions', async () => {

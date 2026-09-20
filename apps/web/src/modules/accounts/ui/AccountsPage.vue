@@ -18,7 +18,8 @@
  */
 import { computed, markRaw, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
+import { PlusIcon } from '@lucide/vue';
 import {
   AccountCardStack,
   AmountLockup,
@@ -30,10 +31,12 @@ import {
   type FilterChipItem,
 } from '@magermoney/ui';
 import { useDisplayCurrency } from '@/modules/rates';
+import { usePageAction } from '@/shared/layout/page-action';
 import { useCapitalSummary } from '../application/use-capital-summary';
 import AccountRow from './AccountRow.vue';
 
 const { t, locale } = useI18n();
+const router = useRouter();
 const { summary, rateDate } = useCapitalSummary();
 const { current: baseCode } = useDisplayCurrency();
 const amountLocale = computed(() => locale.value as AmountLocale);
@@ -91,6 +94,18 @@ const isEmpty = computed(
   () =>
     summary.value !== undefined && active.value.length === 0 && summary.value.archived.length === 0,
 );
+
+/*
+ * The list's one action. The empty screen keeps its own worded button — there
+ * the invitation is the whole screen, and a glyph in the corner is not an
+ * invitation.
+ */
+usePageAction(() => ({
+  label: t('accounts.add'),
+  onSelect: () => void router.push('/accounts/new'),
+  icon: PlusIcon,
+  testid: 'accounts-add-action',
+}));
 </script>
 
 <template>

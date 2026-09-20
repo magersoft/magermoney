@@ -5,7 +5,7 @@
 
 export type Theme = 'system' | 'light' | 'dark';
 
-/** The order the shell's toggle walks through. */
+/** Every theme the settings screen offers, in the order it lists them. */
 export const THEMES: readonly Theme[] = ['system', 'light', 'dark'];
 
 /**

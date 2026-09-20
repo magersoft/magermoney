@@ -17,6 +17,7 @@ import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
 import { Button, CountrySelect, MoneyInput, useToast } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import { usePageAction } from '@/shared/layout/page-action';
 import { useCountryOptions } from '@/shared/countries/options';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
@@ -125,6 +126,34 @@ function payload() {
     : {};
   return { ...base, ...card };
 }
+/*
+ * What the browser's own `required` would refuse, asked a step earlier so the
+ * bar's button can show it. It is a floor, not the whole contract — the form
+ * still submits through `submit`, which is what actually reports a missing
+ * country and what the Enter key reaches.
+ */
+const complete = computed(
+  () => form.name.trim() !== '' && form.bank.trim() !== '' && Boolean(form.country),
+);
+
+const submitLabel = computed(() =>
+  editingId.value ? t('accounts.form.save') : t('accounts.form.create'),
+);
+
+/*
+ * The same action, in the bar and at the foot of the form. A form you have
+ * scrolled to the bottom of should not make you go back up to save it, and one
+ * you have only glanced at should not make you scroll down — so both exist and
+ * both are the one `submit`.
+ */
+usePageAction(() => ({
+  label: submitLabel.value,
+  onSelect: () => void submit(),
+  disabled: !complete.value,
+  pending: busy.value,
+  testid: 'account-form-action',
+}));
+
 async function submit() {
   if (!form.country) {
     countryMissing.value = true;
@@ -271,7 +300,7 @@ async function submit() {
       :disabled="busy"
       data-testid="form-submit"
     >
-      {{ editingId ? t('accounts.form.save') : t('accounts.form.create') }}
+      {{ submitLabel }}
     </Button>
   </form>
 </template>

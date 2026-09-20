@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { createI18n } from 'vue-i18n';
@@ -7,6 +8,7 @@ import ru from '../src/locales/ru.json';
 import { API_KEY } from '../src/shared/api/use-api.js';
 import { resetDisplayCurrency } from '../src/modules/rates/application/use-display-currency.js';
 import AccountsPage from '../src/modules/accounts/ui/AccountsPage.vue';
+import AppShell from '../src/shared/layout/AppShell.vue';
 
 const profile = {
   id: 'u',
@@ -52,7 +54,7 @@ const USD_ID = '11111111-1111-4111-8111-111111111111';
 const EUR_ID = '22222222-2222-4222-8222-222222222222';
 const ARCHIVED_ID = '33333333-3333-4333-8333-333333333333';
 
-function mountPage(accounts: unknown[]) {
+function mountPage(accounts: unknown[], inShell = false) {
   resetDisplayCurrency();
   const fetch = vi.fn(async (path: string) => {
     if (path === '/me') return json(profile);
@@ -64,11 +66,13 @@ function mountPage(accounts: unknown[]) {
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: AccountsPage },
+      { path: '/accounts', component: AccountsPage },
       { path: '/accounts/new', component: { template: '<div />' } },
       { path: '/accounts/:id', component: { template: '<div />' } },
     ],
   });
-  return mount(AccountsPage, {
+  return mount(inShell ? AppShell : AccountsPage, {
+    ...(inShell ? { slots: { default: () => h(AccountsPage) } } : {}),
     global: {
       plugins: [
         [
@@ -85,6 +89,18 @@ function mountPage(accounts: unknown[]) {
 }
 
 describe('AccountsPage', () => {
+  /* The list's action is the bar's, so it only exists with the bar around it. */
+  it('offers the new account from the top bar', async () => {
+    const w = mountPage([acc(USD_ID, {})], true);
+    await flushPromises();
+
+    const add = w.get('[data-testid="accounts-add-action"]');
+    expect(add.attributes('aria-label')).toBe(ru.accounts.add);
+    await add.trigger('click');
+    await flushPromises();
+    expect(w.vm.$router.currentRoute.value.path).toBe('/accounts/new');
+  });
+
   it('shows the total with its rate footnote and one card per active account', async () => {
     const w = mountPage([
       acc(USD_ID, { isSpending: true }),

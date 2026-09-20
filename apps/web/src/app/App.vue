@@ -16,7 +16,13 @@ import { CurrencySwitch, useDisplayCurrency } from '@/modules/rates';
 import { useTheme } from '@/app/theme';
 import QuickActions from '@/app/QuickActions.vue';
 
-const { theme, set } = useTheme();
+/*
+ * Asked for its effect, not its value: `useTheme` is what applies the stored
+ * preference to the document, and the settings screen is the only place that
+ * changes it. Dropping this call would leave a reloaded app in whatever theme
+ * the CSS defaults to until someone opened Settings.
+ */
+useTheme();
 const route = useRoute();
 
 /*
@@ -51,7 +57,7 @@ const quickOpen = ref(false);
     >
       <RouterView />
     </main>
-    <AppShell v-else :theme="theme" @update:theme="set" @quick="quickOpen = true">
+    <AppShell v-else @quick="quickOpen = true">
       <template #currency>
         <CurrencySwitch v-if="!ownsCurrency" />
       </template>

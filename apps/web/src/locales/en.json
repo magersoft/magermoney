@@ -311,7 +311,6 @@
     }
   },
   "theme": {
-    "label": "Switch theme (now {theme})",
     "system": "system",
     "light": "light",
     "dark": "dark"
@@ -494,6 +493,7 @@
     }
   },
   "a11y": {
+    "back": "Back",
     "primaryNav": "Main navigation",
     "skipToContent": "Skip to content",
     "displayCurrency": "Display currency",
