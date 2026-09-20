@@ -188,7 +188,15 @@
   /* An arc is lighter than every dark surface, where light is darker than every light one. */
   --mm-dark-segment-l: 0.74;
   --mm-dark-segment-c: 0.115;
-  --mm-dark-shadow-card: none;
+  /*
+   * A shadow that draws nothing, rather than the keyword that draws nothing.
+   * Tailwind composes `shadow-*` and `ring-*` into one comma-separated
+   * `box-shadow`, and `none` is not a shadow — it is the keyword that replaces
+   * the whole list, so an element carrying both loses its ring in the dark
+   * theme and nobody finds out until the ring was the only thing marking it.
+   * `0 0 #0000` is the same nothing, composable.
+   */
+  --mm-dark-shadow-card: 0 0 #0000;
   /*
    * The one shadow the dark theme keeps. It never falls on the canvas — only on
    * the card underneath, where two cards touch — so it darkens a lit surface
