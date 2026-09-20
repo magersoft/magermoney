@@ -30,6 +30,39 @@ describe('IncomeSourcePage', () => {
     wrapper.unmount();
   });
 
+  /*
+   * Writing down money that arrived is what this screen is opened for, so it
+   * sits in the bar rather than at the head of a row of four buttons. Only the
+   * shell has a bar, so only a mount inside it has the action.
+   */
+  it('records an inflow from the top bar, and leaves the rarer actions on the page', async () => {
+    const { wrapper } = await mountAt(
+      IncomeSourcePage,
+      `/plan/income/${sourceDto.id}`,
+      apiOf((p) => {
+        if (p === '/income-sources') return json([sourceDto]);
+        if (p.startsWith('/inflows')) return json([]);
+        return undefined;
+      }),
+      {},
+      true,
+    );
+    await flushPromises();
+
+    const record = wrapper.get('[data-testid="source-record-inflow"]');
+    expect(record.text()).toBe('Записать');
+    expect(record.attributes('aria-label')).toBe('Записать поступление');
+
+    await record.trigger('click');
+    await flushPromises();
+    expect(document.querySelector('[data-testid="inflow-amount"]')).not.toBeNull();
+
+    /* The three that stayed are still where they were. */
+    expect(wrapper.find('[data-testid="source-edit"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="source-delete"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
   it('ends a source by dating it, never by deleting it', async () => {
     const bodies: unknown[] = [];
     const { wrapper } = await mountAt(

@@ -497,7 +497,8 @@
     }
   },
   "action": {
-    "add": "Add"
+    "add": "Add",
+    "record": "Record"
   },
   "a11y": {
     "back": "Back",
