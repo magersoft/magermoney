@@ -7,6 +7,11 @@ import { useApi } from '@/shared/api/use-api';
 import { ratesApi } from '../infrastructure/rates-api';
 import { todayIso } from '../domain';
 
+/** Everything rate-shaped hangs off this root, so one invalidation reaches every day. */
+export const RATES_KEY = ['rates'] as const;
+/** One day's rates. `null` is the backend's today, which is a different key from any date. */
+export const ratesKey = (date?: string) => ['rates', date ?? null] as const;
+
 /**
  * The rates for a day, as the domain's `RateTable`. The registry comes from the
  * backend's currency list rather than the compiled-in defaults, so a currency
@@ -25,7 +30,7 @@ export function useRates(date?: string): {
 } {
   const api = ratesApi(useApi());
   const registry = useCurrencyRegistry();
-  const query = useQuery({ queryKey: ['rates', date ?? null], queryFn: () => api.list(date) });
+  const query = useQuery({ queryKey: ratesKey(date), queryFn: () => api.list(date) });
 
   const table = computed(() => {
     const rates = query.data.value;

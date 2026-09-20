@@ -525,7 +525,12 @@
     "save": "Save",
     "remove": "Remove manual rate",
     "failed": "Could not save the rate.",
-    "noRate": "no rate"
+    "noRate": "no rate",
+    "refresh": "Update",
+    "refreshAria": "Update the rates",
+    "refreshing": "Updating the rates",
+    "alreadyFresh": "These are already the latest rates.",
+    "refreshFailed": "Could not fetch the rates. Try again in a moment."
   },
   "transfers": {
     "title": "Transfers",

@@ -2,14 +2,15 @@
 /** What one unit of each reporting currency is worth in the display currency today, and which of those numbers were typed by hand. */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Badge, Button, CurrencyIcon, Skeleton, useToast } from '@magermoney/ui';
+import { Badge, Button, CurrencyIcon, PullToRefresh, Skeleton, useToast } from '@magermoney/ui';
 import { toCurrency, useCurrencies } from '@/modules/currencies';
 import { Money } from '@magermoney/domain';
 import { formatMoney, type MoneyLocale } from '@/shared/money/format';
-import { usePageTitle } from '@/shared/layout/page-bar';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useDisplayCurrency } from '../application/use-display-currency';
 import { useRates } from '../application/use-rates';
 import { useManualRate } from '../application/use-manual-rate';
+import { useRefreshRates } from '../application/use-refresh-rates';
 import ManualRateSheet from './ManualRateSheet.vue';
 
 const { t, locale } = useI18n();
@@ -19,6 +20,29 @@ const { current } = useDisplayCurrency();
 const { table, date, rows } = useRates();
 
 usePageTitle(() => t('rates.title'));
+
+/*
+ * Pulling the list down is the gesture; the bar's action is the same call for
+ * anyone who is not holding the phone — a keyboard, a pointer, a screen reader.
+ */
+const { refresh, isPending: refreshing } = useRefreshRates();
+async function refreshRates() {
+  try {
+    const { refreshed } = await refresh();
+    // Already fresh is not a failure, and must not read like one.
+    if (!refreshed) toast(t('rates.alreadyFresh'));
+  } catch {
+    toast(t('rates.refreshFailed'));
+  }
+}
+usePageAction(() => ({
+  label: t('rates.refresh'),
+  ariaLabel: t('rates.refreshAria'),
+  onSelect: () => void refreshRates(),
+  pending: refreshing.value,
+  testid: 'rates-refresh',
+}));
+
 const { remove } = useManualRate();
 const manualBases = computed(
   () => new Set(rows.value.filter((r) => r.source === 'manual').map((r) => r.base)),
@@ -74,39 +98,46 @@ async function removeManual(code: string) {
     <p class="mt-1 text-xs text-muted-foreground">
       {{ t('rates.asOf', { date, code: current }) }}
     </p>
-    <Skeleton v-if="!table" class="mt-4 h-12 w-full" />
-    <ul v-else class="mt-4 divide-y divide-border/60">
-      <li
-        v-for="r in rowList"
-        :key="r.code"
-        :data-testid="`rate-row-${r.code}`"
-        class="flex min-h-12 items-center gap-3 py-2"
-      >
-        <CurrencyIcon :code="r.code" :kind="r.kind" :size="24" />
-        <span class="flex-1 text-sm">{{ t('rates.one', { code: r.code }) }}</span>
-        <Badge v-if="r.manual" variant="secondary">
-          {{ t('rates.manual') }}
-        </Badge>
-        <button
-          type="button"
-          class="min-h-9 font-mono text-sm tabular-nums pointer-coarse:min-h-11"
-          :aria-label="t('rates.one', { code: r.code })"
-          @click="edit(r.code)"
+    <!-- The list is what goes stale, so the list is what is pulled. -->
+    <PullToRefresh
+      :refreshing="refreshing"
+      :busy-label="t('rates.refreshing')"
+      @refresh="refreshRates"
+    >
+      <Skeleton v-if="!table" class="mt-4 h-12 w-full" />
+      <ul v-else class="mt-4 divide-y divide-border/60">
+        <li
+          v-for="r in rowList"
+          :key="r.code"
+          :data-testid="`rate-row-${r.code}`"
+          class="flex min-h-12 items-center gap-3 py-2"
         >
-          {{ r.text }}
-        </button>
-        <Button
-          v-if="r.manual"
-          variant="ghost"
-          size="xs"
-          class="min-h-9 pointer-coarse:min-h-11"
-          :aria-label="t('rates.remove')"
-          @click="removeManual(r.code)"
-        >
-          ×
-        </Button>
-      </li>
-    </ul>
+          <CurrencyIcon :code="r.code" :kind="r.kind" :size="24" />
+          <span class="flex-1 text-sm">{{ t('rates.one', { code: r.code }) }}</span>
+          <Badge v-if="r.manual" variant="secondary">
+            {{ t('rates.manual') }}
+          </Badge>
+          <button
+            type="button"
+            class="min-h-9 font-mono text-sm tabular-nums pointer-coarse:min-h-11"
+            :aria-label="t('rates.one', { code: r.code })"
+            @click="edit(r.code)"
+          >
+            {{ r.text }}
+          </button>
+          <Button
+            v-if="r.manual"
+            variant="ghost"
+            size="xs"
+            class="min-h-9 pointer-coarse:min-h-11"
+            :aria-label="t('rates.remove')"
+            @click="removeManual(r.code)"
+          >
+            ×
+          </Button>
+        </li>
+      </ul>
+    </PullToRefresh>
     <Button
       class="mt-6 w-full"
       variant="outline"

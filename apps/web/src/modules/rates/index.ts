@@ -8,6 +8,7 @@ import { routeComponent } from '@/shared/layout/route-fallback';
 export { todayIso } from './domain';
 export { useRates } from './application/use-rates';
 export { useManualRate } from './application/use-manual-rate';
+export { useRefreshRates } from './application/use-refresh-rates';
 export {
   createConvertToDisplay,
   useConvertToDisplay,
