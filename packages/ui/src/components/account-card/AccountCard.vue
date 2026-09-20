@@ -121,12 +121,23 @@ const linkAttrs = computed(() => {
         'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
         'focus-visible:outline-ring focus-visible:outline-2 motion-reduce:transition-none',
         /*
-         * Tall enough for the foot to sit at a card's bottom edge rather than
-         * under the balance, and no taller: a card sized to a real one's
-         * proportions opens a void in its middle, because the reference fills
-         * that middle with a balance we keep in the top band (see above).
+         * The proportions of the thing itself: 85.6 × 54 mm, the ID-1 format
+         * every payment card in the world is cut to. Stated as a ratio rather
+         * than a height, so one rule gives the strip's narrow tile and the
+         * stack's full-width card their sizes, and neither can drift.
+         *
+         * The width is capped for the same reason. The page it sits on runs to
+         * 768px, and a card stretched to that stops reading as an object you
+         * could hold — at this cap it stays roughly life-size on a phone and
+         * still card-sized on a desktop.
+         *
+         * The empty middle is the card, not a gap: the reference's own card
+         * (slide 12) carries its balance in the upper band and its number along
+         * the foot, with the plastic showing between them. Keeping the balance
+         * high is also what lets the stack overlap deeply and still be read.
          */
-        props.size === 'sm' ? 'min-h-28 gap-1.5' : 'min-h-36 gap-2',
+        'aspect-[1.586/1]',
+        props.size === 'sm' ? 'gap-1.5' : 'max-w-[22rem] gap-2',
         props.class,
       )
     "

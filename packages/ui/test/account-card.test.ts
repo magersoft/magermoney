@@ -73,6 +73,24 @@ describe('currencyHue', () => {
 });
 
 describe('AccountCard', () => {
+  /*
+   * A card is the shape of a card, not a box with a height someone chose: 85.6
+   * × 54 mm is the ID-1 format every payment card is cut to. Pinned here
+   * because the ratio is what stops the card stretching to the width of a
+   * desktop page, and because the strip's add tile copies it — a height set
+   * anywhere else would be a second opinion, and the two would drift.
+   */
+  it('has the proportions of a real card, at both sizes', () => {
+    for (const size of ['sm', 'md'] as const) {
+      const card = mount(AccountCard, { props: { account: account(), size } });
+      expect(card.classes()).toContain('aspect-[1.586/1]');
+    }
+    /* And a ceiling on how wide it may get, so a wide page cannot inflate it. */
+    expect(mount(AccountCard, { props: { account: account() } }).classes()).toContain(
+      'max-w-[22rem]',
+    );
+  });
+
   it('shows the name, the balance through the lockup and the currency mark', () => {
     const w = mount(AccountCard, { props: { account: account() } });
     expect(w.text()).toContain('Tinkoff');
@@ -145,7 +163,8 @@ describe('AccountCard', () => {
     const card = w.get('[data-slot="account-card"]');
     expect(card.element.tagName).toBe('A');
     expect(card.attributes('href')).toBe('/accounts/a1');
-    expect(card.classes().join(' ')).toContain('min-h-');
+    /* Its size comes from its proportions now, not from a minimum height. */
+    expect(card.classes()).toContain('aspect-[1.586/1]');
     w.unmount();
   });
 
