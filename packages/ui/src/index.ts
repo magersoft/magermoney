@@ -160,7 +160,9 @@ export type { DonutSegment } from './components/donut/types';
 export { default as CurrencyIcon } from './components/currency-icon/CurrencyIcon.vue';
 export {
   resolveCurrencyIcon,
-  FIAT_FLAG,
+  CORE_FIAT_FLAG,
+  EAGER_FLAGS,
+  fiatFlag,
   CRYPTO_KNOWN,
 } from './components/currency-icon/resolve-icon';
 export type { CurrencyIconInput, ResolvedIcon } from './components/currency-icon/resolve-icon';

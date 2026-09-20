@@ -11,7 +11,7 @@
  * are ~200KB and are needed a beat later, or only once someone opens the
  * country picker — so they are their own chunk, loaded by `loadCountryFlags()`.
  *
- * Run `bun run icons:build` after changing FIAT_FLAG, CRYPTO_KNOWN or
+ * Run `bun run icons:build` after changing CORE_FIAT_FLAG, CRYPTO_KNOWN or
  * COUNTRY_CODES.
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -20,7 +20,7 @@ import type { IconifyJSON } from '@iconify/types';
 import { getIcons } from '@iconify/utils';
 import { icons as circleFlags } from '@iconify-json/circle-flags';
 import { icons as cryptocurrencyColor } from '@iconify-json/cryptocurrency-color';
-import { CRYPTO_KNOWN, FIAT_FLAG } from '../src/components/currency-icon/resolve-icon';
+import { CORE_FIAT_FLAG, CRYPTO_KNOWN } from '../src/components/currency-icon/resolve-icon';
 import { COUNTRY_CODES } from '../src/components/currency-icon/countries';
 
 function subset(collection: IconifyJSON, names: readonly string[]): IconifyJSON {
@@ -44,14 +44,14 @@ function write(name: string, value: unknown, note: string): void {
 }
 
 const eager = {
-  'circle-flags': subset(circleFlags, Object.values(FIAT_FLAG)),
+  'circle-flags': subset(circleFlags, Object.values(CORE_FIAT_FLAG)),
   'cryptocurrency-color': subset(cryptocurrencyColor, [...CRYPTO_KNOWN]),
 };
 /*
  * Flags a currency already brings in are left out — the eager subset is always
  * registered first, and a second copy would be bytes that change nothing.
  */
-const eagerFlags = new Set(Object.values(FIAT_FLAG));
+const eagerFlags = new Set(Object.values(CORE_FIAT_FLAG));
 const countryFlags = subset(
   circleFlags,
   COUNTRY_CODES.map((c) => c.toLowerCase()).filter((c) => !eagerFlags.has(c)),

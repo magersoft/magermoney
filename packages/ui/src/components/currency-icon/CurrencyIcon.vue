@@ -2,7 +2,7 @@
 import { computed, onMounted, watch } from 'vue';
 import { Icon, iconLoaded } from '@iconify/vue';
 import { countryFlagsReady, loadCountryFlags } from '../../icons/country-flags';
-import { resolveCurrencyIcon } from './resolve-icon';
+import { EAGER_FLAGS, fiatFlag, resolveCurrencyIcon } from './resolve-icon';
 
 const props = withDefaults(
   defineProps<{
@@ -20,11 +20,17 @@ const props = withDefaults(
 );
 
 /*
- * Only a country can name a flag we have not registered yet, so only a country
- * sends for the chunk — and it does so from the component rather than from the
- * screens, which would each have to remember to.
+ * A flag that is not in the eagerly-registered subset lives in the lazy country
+ * chunk, so the component sends for it itself rather than leaving every screen
+ * to remember. Two cases reach it: an account held in a named country, and any
+ * fiat currency outside the two dozen the entry bundle carries — which is most
+ * of the catalogue, and so most of the currency picker.
  */
-const wantsCountryFlag = computed(() => props.kind === 'fiat' && !props.icon && !!props.country);
+const wantsCountryFlag = computed(() => {
+  if (props.kind !== 'fiat' || props.icon) return false;
+  const flag = props.country ? props.country.toLowerCase() : fiatFlag(props.code);
+  return !!flag && !EAGER_FLAGS.has(flag);
+});
 onMounted(() => {
   watch(wantsCountryFlag, (wants) => wants && void loadCountryFlags(), { immediate: true });
 });
@@ -43,7 +49,17 @@ const resolved = computed(() => {
   /* `iconLoaded` is a lookup, not a signal; the ready flag is what re-runs this. */
   void countryFlagsReady.value;
   const available = wanted.kind === 'iconify' && iconLoaded(wanted.name);
-  return available ? wanted : resolveCurrencyIcon(withoutCountry);
+  if (available) return wanted;
+  /*
+   * Until the chunk lands, step back to whatever is registered already — the
+   * currency's own flag for an account abroad, initials for a currency whose
+   * flag is in that chunk too. Never the unregistered name: Iconify would go to
+   * its API for it, over a network this app is built to do without.
+   */
+  const fallback = resolveCurrencyIcon(withoutCountry);
+  return fallback.kind === 'iconify' && iconLoaded(fallback.name)
+    ? fallback
+    : { kind: 'initials' as const, text: props.code.slice(0, 2).toUpperCase() };
 });
 
 /**

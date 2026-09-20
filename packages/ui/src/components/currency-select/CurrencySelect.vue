@@ -65,6 +65,15 @@ const props = withDefaults(
      * below rather than repeated, so nothing appears twice in one list.
      */
     frequent?: readonly string[];
+    /**
+     * Codes that cannot be chosen — already added, already in use. They stay in
+     * the list rather than disappearing from it: a currency that is simply
+     * absent reads as one the app does not have, and the person searches for it
+     * again.
+     */
+    disabledCodes?: readonly string[];
+    /** What the mark beside a disabled row says: «уже добавлена». */
+    disabledLabel?: string;
     /** What is wrong, in the screen's words. Announced, not only coloured. */
     error?: string;
     /** A quiet line under the value: why the field is locked, what it affects. */
@@ -81,6 +90,8 @@ const props = withDefaults(
     cryptoLabel: undefined,
     frequentLabel: undefined,
     frequent: () => [],
+    disabledCodes: () => [],
+    disabledLabel: undefined,
     error: undefined,
     hint: undefined,
     disabled: false,
@@ -100,6 +111,8 @@ const headingId = `${uid}-group`;
 const selected = computed(() => props.options.find((o) => o.code === model.value));
 
 const groups = computed(() => groupCurrencies(props.options, query.value, props.frequent));
+
+const unavailable = computed(() => new Set(props.disabledCodes));
 
 const headings = computed<Record<string, string | undefined>>(() => ({
   frequent: props.frequentLabel,
@@ -239,12 +252,18 @@ function onOpen(value: boolean) {
             v-for="currency in group.options"
             :key="`${group.id}-${currency.code}`"
             :value="currency.code"
+            :disabled="unavailable.has(currency.code)"
             :data-testid="`currency-option-${currency.code}`"
             class="gap-3 px-2 py-2 pointer-coarse:min-h-11"
           >
             <CurrencyIcon :code="currency.code" :kind="currency.kind" :size="20" />
             <span class="min-w-0 flex-1 truncate">{{ currency.name }}</span>
-            <span v-if="currency.symbol" class="text-muted-foreground shrink-0 text-xs">{{
+            <span
+              v-if="unavailable.has(currency.code) && props.disabledLabel"
+              class="text-muted-foreground shrink-0 text-xs"
+              >{{ props.disabledLabel }}</span
+            >
+            <span v-else-if="currency.symbol" class="text-muted-foreground shrink-0 text-xs">{{
               currency.symbol
             }}</span>
             <span class="text-muted-foreground shrink-0 font-mono text-xs tracking-[0.08em]">{{

@@ -521,6 +521,19 @@
     "crypto": "Crypto",
     "frequent": "Yours"
   },
+  "currencies": {
+    "title": "Currencies",
+    "hint": "What you can hold, earn and spend. Everything else on the app offers exactly this list.",
+    "add": "Add a currency",
+    "addAria": "Add a currency to your list",
+    "alreadyAdded": "added",
+    "loading": "Loading the catalogue",
+    "noRateSource": "No rate available. Set one by hand on the rates screen.",
+    "remove": "Remove {code}",
+    "addFailed": "Could not add that currency.",
+    "removeFailed": "Could not remove that currency.",
+    "settingsHint": "Add the currencies you use, and take off the ones you don't."
+  },
   "rates": {
     "title": "Rates",
     "asOf": "Rates for {date}, in {code}",

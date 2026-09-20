@@ -86,6 +86,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/modules/profile').then((m) => m.SettingsPage),
   },
   {
+    path: '/settings/currencies',
+    name: 'currencies',
+    component: () => import('@/modules/currencies').then((m) => m.CurrenciesPage),
+  },
+  {
     path: '/settings/rates',
     name: 'rates',
     component: () => import('@/modules/rates').then((m) => m.RatesPage),

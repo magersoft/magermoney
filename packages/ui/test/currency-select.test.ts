@@ -135,6 +135,21 @@ describe('CurrencySelect, row variant', () => {
     expect(w.emitted('update:modelValue')?.at(-1)).toEqual(['BTC']);
     w.unmount();
   });
+  it('keeps an already-added currency in the list, marked and unpickable', async () => {
+    const w = mountIt({ disabledCodes: ['BTC'], disabledLabel: 'added' });
+    await openAndType(w);
+
+    const btc = document.querySelector<HTMLElement>('[data-testid="currency-option-BTC"]')!;
+    // Still listed: a currency that vanished would just be searched for again.
+    expect(btc).not.toBeNull();
+    expect(btc.getAttribute('data-disabled')).not.toBeNull();
+    expect(btc.textContent).toContain('added');
+
+    btc.click();
+    await flushPromises();
+    expect(w.emitted('update:modelValue')).toBeUndefined();
+    w.unmount();
+  });
 });
 
 describe('CurrencySelect, compact variant', () => {
