@@ -37,7 +37,11 @@ const bar = providePageBar();
       {{ t('a11y.skipToContent') }}
     </a>
 
-    <AppHeader :action="bar.action.value" :title="bar.title.value" />
+    <AppHeader :action="bar.action.value" :title="bar.title.value">
+      <template #lead>
+        <slot name="lead" />
+      </template>
+    </AppHeader>
 
     <!--
       The pill is 64px tall, the "+" rises 20px out of it and it floats 12px

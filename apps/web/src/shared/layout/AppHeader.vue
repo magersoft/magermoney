@@ -16,9 +16,16 @@
  * "Back" rather than drawing a lone chevron — a chevron is a hint, and the one
  * control everybody reaches for should not have to be guessed at.
  *
+ * The left corner belongs to the way back whenever there is one. Where there
+ * is not — a tab's own screen — the `lead` slot fills it, and the composition
+ * root puts the person there, because `shared/` may not reach into a module to
+ * fetch them.
+ *
  * A bar with nothing on it is not a bar. Where there is no way back, no title
  * and no action — the home screen — it is not rendered on a phone rather than
- * drawn empty. A wide window still gets it, because the tab links live in it.
+ * drawn empty. The lead does not count towards that: a bar holding nothing but
+ * a face is still a bar holding nothing. A wide window still gets it, because
+ * the tab links live in it.
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -69,6 +76,13 @@ function goBack(): void {
         <ChevronLeftIcon :size="22" aria-hidden="true" />
         {{ t('action.back') }}
       </Button>
+
+      <!--
+        Two things in one corner would make neither of them the obvious one, so
+        this is the way back's place first and the person's only when there is
+        no way back.
+      -->
+      <slot v-else name="lead" />
 
       <!--
         Centred on the bar, not between the corners. Only one corner is filled

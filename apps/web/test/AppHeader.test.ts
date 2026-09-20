@@ -142,6 +142,27 @@ describe('the top bar', () => {
   });
 
   /*
+   * The left corner is the way back's whenever there is one, and the lead's
+   * only when there is not — two things there and neither is the obvious one.
+   */
+  it('gives the left corner to the lead only where there is no way back', async () => {
+    const lead = () => h('i', { 'data-testid': 'lead' });
+
+    const root = await mountShell('/accounts', { lead });
+    expect(root.shell.find('[data-testid="lead"]').exists()).toBe(true);
+
+    const inner = await mountShell('/accounts/new', { lead });
+    expect(inner.shell.find('[data-testid="nav-back"]').exists()).toBe(true);
+    expect(inner.shell.find('[data-testid="lead"]').exists()).toBe(false);
+  });
+
+  /* A bar holding nothing but a face is still a bar holding nothing. */
+  it('stays undrawn on a phone even when a lead is offered', async () => {
+    const { shell } = await mountShell('/', { lead: () => h('i', { 'data-testid': 'lead' }) });
+    expect(shell.get('header').classes()).toContain('hidden');
+  });
+
+  /*
    * Home has no way back, no action of its own, and carries its own currency
    * switch — so on a phone there is nothing for the bar to hold. A wide window
    * keeps it: the tab links live in it there.

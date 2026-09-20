@@ -8,11 +8,13 @@
  * the whole tree: motion-v then keeps the fades and drops the movement.
  */
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { MotionConfig } from 'motion-v';
 import { Toaster } from '@magermoney/ui';
 import AppShell from '@/shared/layout/AppShell.vue';
 import { useDisplayCurrency } from '@/modules/rates';
+import { ProfileAvatar } from '@/modules/profile';
 import { useTheme } from '@/app/theme';
 import QuickActions from '@/app/QuickActions.vue';
 
@@ -24,6 +26,7 @@ import QuickActions from '@/app/QuickActions.vue';
  */
 useTheme();
 const route = useRoute();
+const { t } = useI18n();
 
 /*
  * The display currency is one object for the whole app, and it reads the profile
@@ -35,6 +38,16 @@ const route = useRoute();
 useDisplayCurrency();
 
 const bare = computed(() => Boolean(route.meta.public));
+/**
+ * The person sits in the bar's left corner on the screens with no way back —
+ * the reference's home header, moved to where that corner is otherwise empty.
+ * Phone only: a wide window fills that corner with the wordmark and shows the
+ * settings tab in the bar anyway, so the shortcut would be a third way to the
+ * same screen. And not on the settings screen itself, at any width: a face
+ * that leads to the screen you are already reading is a button that does
+ * nothing.
+ */
+const showAvatar = computed(() => route.name !== 'settings');
 /**
  * The quick actions are mounted once, here, and opened from two places: the
  * "+" in the phone's navigation pill and the floating button on a wide window.
@@ -53,6 +66,17 @@ const quickOpen = ref(false);
       <RouterView />
     </main>
     <AppShell v-else @quick="quickOpen = true">
+      <template #lead>
+        <RouterLink
+          v-if="showAvatar"
+          to="/settings"
+          :aria-label="t('nav.settings')"
+          data-testid="nav-avatar"
+          class="-ms-1 grid size-11 shrink-0 place-items-center rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring md:hidden"
+        >
+          <ProfileAvatar class="size-9 text-sm" />
+        </RouterLink>
+      </template>
       <template #fab>
         <QuickActions v-model:open="quickOpen" />
       </template>
