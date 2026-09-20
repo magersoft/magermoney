@@ -89,7 +89,7 @@ const addAttrs = computed(() => {
         :is="props.as"
         data-slot="add-account-tile"
         v-bind="addAttrs"
-        class="border-line-strong text-ink duration-fast ease-out-quart outline-offset-2 flex aspect-[1.586/1] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none"
+        class="border-line-strong text-ink duration-fast ease-out-quart outline-offset-2 flex aspect-[1.73/1] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none"
       >
         <PlusIcon aria-hidden="true" class="size-5" />
         <span class="text-sm font-medium">{{ props.addLabel }}</span>

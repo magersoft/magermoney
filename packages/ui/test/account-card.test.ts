@@ -74,21 +74,28 @@ describe('currencyHue', () => {
 
 describe('AccountCard', () => {
   /*
-   * A card is the shape of a card, not a box with a height someone chose: 85.6
-   * × 54 mm is the ID-1 format every payment card is cut to. Pinned here
-   * because the ratio is what stops the card stretching to the width of a
-   * desktop page, and because the strip's add tile copies it — a height set
-   * anywhere else would be a second opinion, and the two would drift.
+   * A card is the shape of a card, not a box with a height someone chose. The
+   * shape is a shade flatter than ID-1's 85.6 × 54 mm, because at full column
+   * width the true proportion is 250px deep and the list then shows one card
+   * and a sliver. Pinned here because the ratio is what stops the card
+   * stretching to the width of a desktop page, and because the strip's add tile
+   * copies it — a height set anywhere else would be a second opinion, and the
+   * two would drift.
    */
   it('has the proportions of a real card, at both sizes', () => {
     for (const size of ['sm', 'md'] as const) {
       const card = mount(AccountCard, { props: { account: account(), size } });
-      expect(card.classes()).toContain('aspect-[1.586/1]');
+      expect(card.classes()).toContain('aspect-[1.73/1]');
     }
-    /* And a ceiling on how wide it may get, so a wide page cannot inflate it. */
-    expect(mount(AccountCard, { props: { account: account() } }).classes()).toContain(
-      'max-w-[22rem]',
-    );
+    /*
+     * And a ceiling on how wide it may get, so a wide page cannot inflate it —
+     * from `sm` up only. A phone gives the card its whole column: on the widest
+     * handsets a fixed ceiling stopped the card short of the controls beneath
+     * it, which reads as a misaligned card rather than a life-size one.
+     */
+    const classes = mount(AccountCard, { props: { account: account() } }).classes();
+    expect(classes).toContain('sm:max-w-[22rem]');
+    expect(classes).not.toContain('max-w-[22rem]');
   });
 
   it('shows the name, the balance through the lockup and the currency mark', () => {
@@ -164,7 +171,7 @@ describe('AccountCard', () => {
     expect(card.element.tagName).toBe('A');
     expect(card.attributes('href')).toBe('/accounts/a1');
     /* Its size comes from its proportions now, not from a minimum height. */
-    expect(card.classes()).toContain('aspect-[1.586/1]');
+    expect(card.classes()).toContain('aspect-[1.73/1]');
     w.unmount();
   });
 

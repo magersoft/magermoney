@@ -121,23 +121,33 @@ const linkAttrs = computed(() => {
         'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
         'focus-visible:outline-ring focus-visible:outline-2 motion-reduce:transition-none',
         /*
-         * The proportions of the thing itself: 85.6 × 54 mm, the ID-1 format
-         * every payment card in the world is cut to. Stated as a ratio rather
-         * than a height, so one rule gives the strip's narrow tile and the
-         * stack's full-width card their sizes, and neither can drift.
+         * A ratio rather than a height, so one rule gives the strip's narrow
+         * tile and the stack's full-width card their sizes, and neither can
+         * drift.
          *
-         * The width is capped for the same reason. The page it sits on runs to
+         * 1.73 rather than ID-1's 1.586. Once the card takes the phone's whole
+         * column, the real proportion makes it 250px tall, and a card that deep
+         * eats the screen before the second one starts. Slightly flatter puts it
+         * at ~230px on a large handset and keeps enough foot for the chip and
+         * the footing. A shape read at a glance can be a little wrong; a screen
+         * that only fits one and a half cards is wrong in a way that is felt.
+         *
+         * The width is capped for the same reason: the page it sits on runs to
          * 768px, and a card stretched to that stops reading as an object you
-         * could hold — at this cap it stays roughly life-size on a phone and
-         * still card-sized on a desktop.
+         * could hold. But the cap is a desktop problem, so it starts at `sm`.
+         * A phone's column is already narrower than the cap on every handset
+         * but the largest, where a fixed 22rem left the card visibly short of
+         * the buttons under it — the card read as misaligned rather than
+         * life-size. Below `sm` the column decides, and the ratio does the
+         * rest.
          *
          * The empty middle is the card, not a gap: the reference's own card
          * (slide 12) carries its balance in the upper band and its number along
          * the foot, with the plastic showing between them. Keeping the balance
          * high is also what lets the stack overlap deeply and still be read.
          */
-        'aspect-[1.586/1]',
-        props.size === 'sm' ? 'gap-1.5' : 'max-w-[22rem] gap-2',
+        'aspect-[1.73/1]',
+        props.size === 'sm' ? 'gap-1.5' : 'gap-2 sm:max-w-[22rem]',
         props.class,
       )
     "
