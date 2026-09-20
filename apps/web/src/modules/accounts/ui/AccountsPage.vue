@@ -68,6 +68,8 @@ const cards = computed<AccountCardItem[]>(() =>
     kind: a.balance.currency.kind,
     country: a.country,
     scale: a.balance.currency.scale,
+    pinned: a.isPinned,
+    pinnedLabel: t('accounts.pinned'),
   })),
 );
 const chips = computed<FilterChipItem[]>(() =>

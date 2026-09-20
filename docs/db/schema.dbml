@@ -65,6 +65,7 @@ Table accounts [note: 'phase 2. Holds exactly one currency. Card-specific fields
   kind account_kind [not null]
   card_type card_type [note: 'card only']
   is_spending bool [not null, default: false, note: 'counts towards available-until-payday']
+  is_pinned bool [not null, default: false, note: 'shown in the Home screen strip']
   goal_id uuid [ref: > goals.id, note: 'phase 4: added by a later migration']
   card_last4 text
   card_network text [note: 'Visa, MasterCard, Mir']

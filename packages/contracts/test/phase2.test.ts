@@ -53,6 +53,13 @@ describe('account contracts', () => {
     const { isSpending, ...baseWithoutSpending } = base;
     expect(CreateAccountInputSchema.parse(baseWithoutSpending).isSpending).toBe(false);
   });
+  it('a creation omitting isPinned should default to false', () => {
+    expect(CreateAccountInputSchema.parse(base).isPinned).toBe(false);
+  });
+  it('a partial update carries isPinned only when it is sent', () => {
+    expect(UpdateAccountInputSchema.parse({ name: 'New' })).toEqual({ name: 'New' });
+    expect(UpdateAccountInputSchema.parse({ isPinned: true })).toEqual({ isPinned: true });
+  });
   it('coerces the list limit and caps it', () => {
     expect(CursorQuerySchema.parse({}).limit).toBe(50);
     expect(CursorQuerySchema.parse({ limit: '20' }).limit).toBe(20);

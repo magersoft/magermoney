@@ -30,6 +30,7 @@ const acc = (id: string, over: object) => ({
   kind: 'cash',
   cardType: null,
   isSpending: false,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,
@@ -96,6 +97,16 @@ describe('AccountsPage', () => {
     expect(w.get('[data-testid="accounts-rate-note"]').text()).toContain('2026-09-11');
     expect(w.findAll('[data-slot="account-card"]')).toHaveLength(2);
     expect(w.get('[data-testid="accounts-count"]').text()).toContain('2');
+  });
+
+  it('marks the accounts that are on the home screen', async () => {
+    const w = mountPage([acc(USD_ID, { isPinned: true }), acc(EUR_ID, { currency: 'EUR' })]);
+    await flushPromises();
+
+    const marks = w.findAll('[data-slot="account-card-pinned"]');
+    expect(marks).toHaveLength(1);
+    expect(marks[0]!.attributes('aria-label')).toBe(ru.accounts.pinned);
+    expect(w.findAll('[data-slot="account-card"]')[0]!.text()).toContain(USD_ID);
   });
 
   it('cards lead to their account and keep the tab order of the stack', async () => {

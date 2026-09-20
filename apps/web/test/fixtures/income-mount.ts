@@ -34,6 +34,7 @@ export const acc = (id: string, currency: string, over: object = {}) => ({
   kind: 'bank_account',
   cardType: null,
   isSpending: true,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,

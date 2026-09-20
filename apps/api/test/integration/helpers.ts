@@ -30,6 +30,7 @@ export const usd = (name: string) => ({
   kind: 'bank_account' as const,
   cardType: null,
   isSpending: false,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,

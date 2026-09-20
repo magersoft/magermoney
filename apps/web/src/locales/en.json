@@ -18,7 +18,8 @@
       "title": "Accounts",
       "all": "All",
       "add": "New account",
-      "empty": "No accounts yet"
+      "empty": "No accounts yet",
+      "unpinned": "No account is on Home yet. Turn on \u201cOn Home\u201d in an account and it shows up here."
     },
     "stats": {
       "title": "This month",
@@ -352,6 +353,7 @@
       "credit": "credit"
     },
     "spending": "Spending",
+    "pinned": "On Home",
     "detail": {
       "menu": "Account actions",
       "recordBalance": "Update balance",
@@ -416,6 +418,7 @@
       "currencyLocked": "Currency cannot change once there are balances",
       "kind": "Type",
       "spending": "Spending: counted as available until payday",
+      "pinned": "On Home: shown in the strip at the top",
       "cardSection": "Card",
       "cardType": "Card type",
       "cardNetwork": "Network",

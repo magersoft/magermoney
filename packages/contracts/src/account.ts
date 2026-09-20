@@ -16,6 +16,7 @@ export const AccountDtoSchema = z
     kind: AccountKindSchema,
     cardType: CardTypeSchema.nullable(),
     isSpending: z.boolean(),
+    isPinned: z.boolean(),
     cardLast4: z.string().nullable(),
     cardNetwork: z.string().nullable(),
     cardTier: z.string().nullable(),
@@ -43,6 +44,7 @@ const accountFields = {
   kind: AccountKindSchema,
   cardType: CardTypeSchema.nullable().optional(),
   isSpending: z.boolean(),
+  isPinned: z.boolean(),
   cardLast4: z
     .string()
     .regex(/^\d{4}$/)
@@ -64,6 +66,7 @@ export const CreateAccountInputSchema = z
   .object({
     ...accountFields,
     isSpending: z.boolean().default(false),
+    isPinned: z.boolean().default(false),
     openingBalance: OpeningBalanceSchema.optional(),
   })
   .refine(cardFieldsOnlyOnCards, CARD_MESSAGE)

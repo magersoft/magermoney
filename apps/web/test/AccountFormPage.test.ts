@@ -20,6 +20,7 @@ const created = {
   kind: 'cash',
   cardType: null,
   isSpending: true,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,
@@ -117,6 +118,21 @@ describe('AccountFormPage', () => {
       country: 'RU',
       currency: 'EUR',
     });
+  });
+
+  it('sends the home-screen switch along with the rest of the rows', async () => {
+    const { w, fetch } = await mountForm();
+    await flushPromises();
+
+    await w.get('[data-testid="form-name"]').setValue('Карман');
+    await w.get('[data-testid="form-bank"]').setValue('Bank');
+    await pickCountry(w, 'Росс', 'RU');
+    await w.get('[data-testid="form-pinned"]').trigger('click');
+    await w.get('[data-testid="account-form"]').trigger('submit');
+    await flushPromises();
+
+    const post = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(JSON.parse(String(post?.[1]?.body))).toMatchObject({ isPinned: true });
   });
 
   /*

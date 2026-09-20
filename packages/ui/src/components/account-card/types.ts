@@ -20,4 +20,8 @@ export interface AccountCardItem {
   country?: string | null;
   /** Fraction digits. Two unless the currency says otherwise. */
   scale?: number;
+  /** The account the user keeps on the home screen. Drawn as a pin on the card. */
+  pinned?: boolean;
+  /** What the pin is announced as. The design system has no words of its own. */
+  pinnedLabel?: string;
 }

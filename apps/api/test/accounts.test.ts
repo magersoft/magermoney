@@ -35,6 +35,19 @@ describe('accounts', () => {
     expect(list).toHaveLength(1);
     expect(await (await authed(app, 'GET', '/accounts', undefined, OTHER)).json()).toEqual([]);
   });
+  it('creates an account unpinned and pins it through an update', async () => {
+    const app = mk();
+    const created = await (await authed(app, 'POST', '/accounts', alfa)).json();
+    expect(created.isPinned).toBe(false);
+    const patched = await authed(app, 'PATCH', `/accounts/${created.id}`, { isPinned: true });
+    expect(patched.status).toBe(200);
+    expect((await patched.json()).isPinned).toBe(true);
+    const [listed] = await (await authed(app, 'GET', '/accounts')).json();
+    expect(listed.isPinned).toBe(true);
+    expect(
+      (await authed(app, 'PATCH', `/accounts/${created.id}`, { isPinned: true }, OTHER)).status,
+    ).toBe(404);
+  });
   it('rejects an unknown currency and a future opening balance', async () => {
     const app = mk();
     expect((await authed(app, 'POST', '/accounts', { ...alfa, currency: 'XYZ' })).status).toBe(400);

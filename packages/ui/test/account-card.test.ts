@@ -81,6 +81,21 @@ describe('AccountCard', () => {
     w.unmount();
   });
 
+  it('pins a card that is kept on the home screen, and only announces it once', () => {
+    const plain = mount(AccountCard, { props: { account: account() } });
+    expect(plain.find('[data-slot="account-card-pinned"]').exists()).toBe(false);
+    plain.unmount();
+
+    const w = mount(AccountCard, {
+      props: { account: account({ pinned: true, pinnedLabel: 'On Home' }) },
+    });
+    const pin = w.get('[data-slot="account-card-pinned"]');
+    expect(pin.attributes('aria-label')).toBe('On Home');
+    // The name stays the name: the pin is furniture, not part of the label.
+    expect(w.text()).toBe('Tinkoff$1,200.00$1,200.00');
+    w.unmount();
+  });
+
   /*
    * The card is where the country first has to survive the trip: it is handed
    * an account, not an icon, so the mark can only be Portuguese if the card

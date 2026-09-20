@@ -16,7 +16,8 @@ export type CardType = (typeof CARD_TYPES)[number];
  * What the read models need to know about an Account. Presentation details
  * (card number, note, network) stay in the DTO; the domain only carries what
  * changes a number: the currency (through `balance`), whether it is a spending
- * account, and whether it may go negative.
+ * account, and whether it may go negative. `isPinned` changes no number — it
+ * rides along because the read models are what the Home screen reads.
  */
 export interface Account {
   id: string;
@@ -26,6 +27,8 @@ export interface Account {
   kind: AccountKind;
   cardType: CardType | null;
   isSpending: boolean;
+  /** The user asked for this account on the Home screen. */
+  isPinned: boolean;
   sortOrder: number;
   archived: boolean;
   /** The latest Balance entry, or zero in the account's currency when there is none. */

@@ -14,6 +14,7 @@ export function toAccount(dto: AccountDto, registry: CurrencyRegistry): Account 
     kind: dto.kind,
     cardType: dto.cardType,
     isSpending: dto.isSpending,
+    isPinned: dto.isPinned,
     sortOrder: dto.sortOrder,
     archived: dto.archivedAt !== null,
     balance: dto.balance === null ? Money.zero(currency) : Money.of(dto.balance, currency),

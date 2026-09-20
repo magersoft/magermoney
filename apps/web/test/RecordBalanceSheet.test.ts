@@ -28,6 +28,7 @@ const acc = {
   kind: 'cash',
   cardType: null,
   isSpending: false,
+  isPinned: false,
   cardLast4: null,
   cardNetwork: null,
   cardTier: null,

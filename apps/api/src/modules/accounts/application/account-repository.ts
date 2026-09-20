@@ -10,6 +10,7 @@ export interface AccountRow {
   kind: AccountKind;
   cardType: CardType | null;
   isSpending: boolean;
+  isPinned: boolean;
   cardLast4: string | null;
   cardNetwork: string | null;
   cardTier: string | null;

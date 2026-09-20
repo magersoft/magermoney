@@ -13,6 +13,7 @@
  * and a second, quieter tone would not clear AA on the tint anyway.
  */
 import { computed } from 'vue';
+import { PinIcon } from '@lucide/vue';
 import { Primitive, type PrimitiveProps } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
 import { cn } from '../../lib/utils';
@@ -90,14 +91,30 @@ const linkAttrs = computed(() => {
   >
     <span class="flex items-start justify-between gap-2">
       <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ props.account.name }}</span>
-      <!-- The mark is where the account is held; the code is announced by the foreign badge. -->
-      <span aria-hidden="true" class="shrink-0">
-        <CurrencyIcon
-          :code="props.account.code"
-          :kind="props.account.kind"
-          :country="props.account.country"
-          :size="props.size === 'sm' ? 20 : 24"
+      <!--
+        The pin sits with the furniture rather than the name, so a long name
+        still gets the whole row to truncate in, and it is centred against the
+        mark rather than the text so the two read as one group. Full ink, like
+        everything else on the tint: a quieter tone would not clear the 3:1 a
+        graphic owes (WCAG 1.4.11), and at 14px the size is the quiet.
+      -->
+      <span class="flex shrink-0 items-center gap-1.5">
+        <PinIcon
+          v-if="props.account.pinned"
+          data-slot="account-card-pinned"
+          role="img"
+          :aria-label="props.account.pinnedLabel"
+          :size="props.size === 'sm' ? 14 : 16"
         />
+        <!-- The mark is where the account is held; the code is announced by the foreign badge. -->
+        <span aria-hidden="true">
+          <CurrencyIcon
+            :code="props.account.code"
+            :kind="props.account.kind"
+            :country="props.account.country"
+            :size="props.size === 'sm' ? 20 : 24"
+          />
+        </span>
       </span>
     </span>
     <span class="flex items-baseline justify-between gap-2">

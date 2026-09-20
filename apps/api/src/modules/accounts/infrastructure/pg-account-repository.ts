@@ -19,7 +19,7 @@ const fromRaw = (r: Raw): AccountRow => ({
 
 /** `card_expires` is a `date`: read it as text so no timezone can shift the day. */
 const SELECT = `
-  select a.id, a.user_id, a.name, a.bank, a.country, a.currency, a.kind, a.card_type, a.is_spending,
+  select a.id, a.user_id, a.name, a.bank, a.country, a.currency, a.kind, a.card_type, a.is_spending, a.is_pinned,
          a.card_last4, a.card_network, a.card_tier, to_char(a.card_expires, 'YYYY-MM-DD') as card_expires,
          a.note, a.sort_order, a.archived_at,
          b.amount::text as balance, b.recorded_at as balance_recorded_at
@@ -40,6 +40,7 @@ const toColumns = (p: AccountPatch): Record<string, unknown> => {
   if (p.kind !== undefined) d.kind = p.kind;
   if (p.cardType !== undefined) d.card_type = p.cardType;
   if (p.isSpending !== undefined) d.is_spending = p.isSpending;
+  if (p.isPinned !== undefined) d.is_pinned = p.isPinned;
   if (p.cardLast4 !== undefined) d.card_last4 = p.cardLast4;
   if (p.cardNetwork !== undefined) d.card_network = p.cardNetwork;
   if (p.cardTier !== undefined) d.card_tier = p.cardTier;
