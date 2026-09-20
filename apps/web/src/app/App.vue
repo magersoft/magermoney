@@ -82,6 +82,15 @@ const quickOpen = ref(false);
       </template>
       <RouterView />
     </AppShell>
-    <Toaster />
+    <!--
+      Toasts come down from the top, clear of the header: the bottom of a phone
+      belongs to the navigation pill and the thumb, and a message that lands
+      there covers the way out of the screen it is complaining about.
+    -->
+    <Toaster
+      position="top-center"
+      :offset="{ top: 'calc(env(safe-area-inset-top) + 4.25rem)' }"
+      :mobile-offset="{ top: 'calc(env(safe-area-inset-top) + 4.25rem)' }"
+    />
   </MotionConfig>
 </template>

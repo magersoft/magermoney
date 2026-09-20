@@ -9,6 +9,13 @@
 @import './tokens.css';
 @import 'tw-animate-css';
 @import 'shadcn-vue/tailwind.css';
+/*
+ * vue-sonner ships its stylesheet separately and injects nothing. Without this
+ * line a toast is an unstyled list at the end of the document: it appears
+ * below the whole page instead of over it, which reads as the app dumping an
+ * error at the bottom of the screen rather than raising one.
+ */
+@import 'vue-sonner/style.css';
 
 /*
  * Dark applies on the system preference unless the light theme is pinned, and
