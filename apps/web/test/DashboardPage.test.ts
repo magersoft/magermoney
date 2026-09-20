@@ -161,7 +161,7 @@ function mountPage(
     if (path === '/rates/refresh')
       return json({ stored: 2, refreshed: true, refreshedAt: '2026-09-20T09:00:00.000Z' });
     if (path === '/me') return json(profile);
-    if (path === '/currencies') return json(currencies);
+    if (path === '/me/currencies') return json(currencies);
     if (path.startsWith('/rates')) return json(rates);
     if (path === '/accounts') return json(data.accounts ?? [account]);
     if (path.startsWith('/income-sources')) return json(data.sources);

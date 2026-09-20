@@ -49,9 +49,16 @@ export class MemoryRateRepository implements RateRepository {
   async listCurrencies(): Promise<CurrencyDto[]> {
     return this.currencies;
   }
+  /**
+   * Mirrors `user_currencies`: the codes somebody has connected. `null` means
+   * "everything in the catalogue", which is what a rates test that has nothing
+   * to say about connections wants.
+   */
+  public connectedCodes: Set<string> | null = null;
   async quotable(source: RateSource): Promise<QuotableCurrency[]> {
     return this.currencies
       .filter((c) => c.rateSource === source)
+      .filter((c) => this.connectedCodes === null || this.connectedCodes.has(c.code))
       .map((c) => ({
         code: c.code,
         providerId: source === 'coingecko' ? c.code.toLowerCase() : null,

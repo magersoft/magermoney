@@ -32,7 +32,7 @@ const currency = (code: string): CurrencyDto => ({
 function mountSwitch(codes = ['USD', 'EUR']) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   queryClient.setQueryData(['me'], profileWith(codes));
-  queryClient.setQueryData(['currencies'], codes.map(currency));
+  queryClient.setQueryData(['currencies', 'connected'], codes.map(currency));
 
   const Probe = defineComponent({ setup: () => () => h(CurrencySwitch) });
 

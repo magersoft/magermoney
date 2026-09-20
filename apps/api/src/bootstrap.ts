@@ -8,6 +8,7 @@ import { PgRateRepository } from './modules/rates/infrastructure/pg-rate-reposit
 import { OpenErApiProvider } from './modules/rates/infrastructure/open-er-api-provider.js';
 import { CoinGeckoProvider } from './modules/rates/infrastructure/coingecko-provider.js';
 import { CatalogueRegistry } from './modules/rates/infrastructure/catalogue-registry.js';
+import { PgUserCurrencyRepository } from './modules/currencies/infrastructure/pg-user-currency-repository.js';
 import { pgRepos, pgUnitOfWork } from './shared/db/pg-unit-of-work.js';
 
 /** Shared by the node server (`src/index.ts`) and the Vercel function (`src/vercel-entry.ts`, bundled to `api/index.js`). */
@@ -27,6 +28,7 @@ export function depsFromEnv(env: Env): AppDeps {
     /* The catalogue is the source of truth for currencies, not a list in the build (ADR 0006). */
     registry: new CatalogueRegistry(rates),
     rates,
+    userCurrencies: new PgUserCurrencyRepository(sql),
     rateProviders: [
       new OpenErApiProvider(env.FIAT_RATES_URL),
       new CoinGeckoProvider(env.CRYPTO_RATES_URL),

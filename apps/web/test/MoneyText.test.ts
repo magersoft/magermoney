@@ -37,7 +37,10 @@ const rates: RateDto[] = [
 function mountMoneyText() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   queryClient.setQueryData(['me'], profile);
-  queryClient.setQueryData(['currencies'], [currency('USD'), currency('EUR'), currency('KZT')]);
+  queryClient.setQueryData(
+    ['currencies', 'connected'],
+    [currency('USD'), currency('EUR'), currency('KZT')],
+  );
   queryClient.setQueryData(['rates', null], rates);
 
   const Probe = defineComponent({

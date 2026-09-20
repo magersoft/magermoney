@@ -64,7 +64,7 @@ function mountSegment(expenses: unknown[], expensesStatus = 200) {
   resetDisplayCurrency();
   const fetch = vi.fn(async (path: string) => {
     if (path === '/me') return json(profile);
-    if (path === '/currencies') return json(currencies);
+    if (path === '/me/currencies') return json(currencies);
     if (path.startsWith('/rates')) return json(rates);
     if (path === '/expense-categories')
       return json([{ id: CAT, name: 'Housing', icon: null, sortOrder: 0 }]);

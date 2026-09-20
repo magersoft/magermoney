@@ -78,7 +78,7 @@ function mountSheet(fetch: (path: string, init?: RequestInit) => Promise<Respons
 describe('RecordBalanceSheet', () => {
   it('posts the parsed amount for the account and closes', async () => {
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json([
           {
             code: 'RUB',
@@ -145,7 +145,7 @@ describe('RecordBalanceSheet', () => {
 
   it('sends recordedAt only once the date field has been edited', async () => {
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json([
           {
             code: 'RUB',
@@ -207,7 +207,7 @@ describe('RecordBalanceSheet', () => {
   it('reports a plain failure when deleting the entry errors', async () => {
     toast.mockClear();
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json([
           {
             code: 'RUB',
@@ -238,7 +238,7 @@ describe('RecordBalanceSheet', () => {
   it('reports a conflict when deleting a non-latest entry', async () => {
     toast.mockClear();
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json([
           {
             code: 'RUB',
@@ -268,7 +268,7 @@ describe('RecordBalanceSheet', () => {
   it('says the date is too early when the API answers recorded_before_previous', async () => {
     toast.mockClear();
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json([
           {
             code: 'RUB',
@@ -299,7 +299,7 @@ describe('RecordBalanceSheet', () => {
   it('points at the transfer when the entry is not a manual one', async () => {
     toast.mockClear();
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json([
           {
             code: 'RUB',
@@ -331,7 +331,7 @@ describe('RecordBalanceSheet', () => {
     toast.mockClear();
     onlineManager.setOnline(false);
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json([
           {
             code: 'RUB',

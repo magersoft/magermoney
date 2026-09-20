@@ -43,7 +43,7 @@ function mountRatesPage(fetch: (path: string, init?: RequestInit) => Promise<Res
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   queryClient.setQueryData(['me'], profile);
-  queryClient.setQueryData(['currencies'], [currency('USD'), currency('EUR')]);
+  queryClient.setQueryData(['currencies', 'connected'], [currency('USD'), currency('EUR')]);
   queryClient.setQueryData(['rates', null], rates);
 
   return mount(RatesPage, {

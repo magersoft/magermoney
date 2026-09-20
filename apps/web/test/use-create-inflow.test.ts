@@ -64,7 +64,7 @@ describe('useCreateInflow', () => {
     let block = false;
     const blocked: [string, (r: Response) => void][] = [];
     const answer = (path: string) => {
-      if (path === '/currencies') return json([cur('USD')]);
+      if (path === '/me/currencies') return json([cur('USD')]);
       if (path === '/income-sources') return json([sourceDto]);
       if (path.startsWith('/inflows')) return json([]);
       return json([acc(ACCOUNT_ID, 'USD', { balance: '10' })]);
@@ -115,7 +115,7 @@ describe('useCreateInflow', () => {
       if (init?.method === 'POST') return post.promise;
       if (block) return block;
       if (path === '/income-sources') return json([sourceDto]);
-      if (path.startsWith('/inflows') || path === '/currencies') return json([]);
+      if (path.startsWith('/inflows') || path === '/me/currencies') return json([]);
       return json([acc(ACCOUNT_ID, 'EUR', { balance: '100' })]);
     });
     await flushPromises();
@@ -135,7 +135,7 @@ describe('useCreateInflow', () => {
     const p = mountIt(async (path, init) => {
       if (init?.method === 'POST') return json(inflowDto, 201);
       if (path === '/income-sources') return json([sourceDto]);
-      if (path.startsWith('/inflows') || path === '/currencies') return json([]);
+      if (path.startsWith('/inflows') || path === '/me/currencies') return json([]);
       return json([acc(ACCOUNT_ID, 'USD', { balance: '10' })]);
     });
     await flushPromises();

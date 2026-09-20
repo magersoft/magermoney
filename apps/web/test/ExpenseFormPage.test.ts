@@ -74,7 +74,7 @@ async function mountForm(
 }
 
 const base = (path: string) => {
-  if (path === '/currencies')
+  if (path === '/me/currencies')
     return json([
       {
         code: 'EUR',
@@ -107,7 +107,7 @@ describe('ExpenseFormPage', () => {
           reportingCurrencies: ['RUB', 'EUR'],
           onboardingCompletedAt: null,
         });
-      if (path === '/currencies')
+      if (path === '/me/currencies')
         return json(
           ['EUR', 'RUB'].map((code) => ({
             code,

@@ -1,7 +1,15 @@
-import { CurrencyRegistry, SystemClock, type Clock } from '@magermoney/domain';
+import {
+  CurrencyRegistry,
+  SAMPLE_CURRENCIES,
+  SystemClock,
+  type Clock,
+  type Currency,
+} from '@magermoney/domain';
+import type { CurrencyDto } from '@magermoney/contracts';
 import type { AppDeps } from '../../src/app.js';
 import { MemoryProfileRepository } from '../../src/modules/profiles/infrastructure/memory-profile-repository.js';
 import { MemoryRateRepository } from '../../src/modules/rates/infrastructure/memory-rate-repository.js';
+import { MemoryUserCurrencyRepository } from '../../src/modules/currencies/infrastructure/memory-user-currency-repository.js';
 import { memoryUnitOfWork } from '../../src/shared/db/unit-of-work.js';
 import { MemoryAccountRepository } from '../../src/modules/accounts/infrastructure/memory-account-repository.js';
 import { MemoryBalanceRepository } from '../../src/modules/accounts/infrastructure/memory-balance-repository.js';
@@ -11,6 +19,18 @@ import { MemoryInflowRepository } from '../../src/modules/inflows/infrastructure
 import { MemoryExpenseCategoryRepository } from '../../src/modules/expenses/infrastructure/memory-expense-category-repository.js';
 import { MemoryExpenseRepository } from '../../src/modules/expenses/infrastructure/memory-expense-repository.js';
 import { MemoryBudgetRepository } from '../../src/modules/budgets/infrastructure/memory-budget-repository.js';
+
+/** The sample set as the catalogue serves it, for the currency repositories. */
+const toDto = (c: Currency): CurrencyDto => ({
+  code: c.code,
+  kind: c.kind,
+  scale: c.scale,
+  symbol: c.symbol ?? null,
+  nameRu: null,
+  nameEn: null,
+  icon: null,
+  rateSource: c.kind === 'crypto' ? 'coingecko' : 'open-er-api',
+});
 
 export function memoryRepos() {
   const balances = new MemoryBalanceRepository();
@@ -43,6 +63,7 @@ export function testDeps(over: Partial<AppDeps> = {}): AppDeps {
     profiles: new MemoryProfileRepository([]),
     registry: CurrencyRegistry.sample(),
     rates: new MemoryRateRepository(),
+    userCurrencies: new MemoryUserCurrencyRepository(SAMPLE_CURRENCIES.map(toDto)),
     rateProviders: [],
     ...over,
     repos,

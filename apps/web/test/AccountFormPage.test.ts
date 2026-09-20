@@ -59,7 +59,7 @@ const json = (body: unknown) =>
 
 async function mountForm(editing?: typeof created, inShell = false) {
   const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-    if (path === '/currencies') return json(currencies);
+    if (path === '/me/currencies') return json(currencies);
     if (path === '/accounts' && init?.method === 'POST') return json(created);
     if (path === '/accounts' && editing) return json([editing]);
     return json([]);

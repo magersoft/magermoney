@@ -57,7 +57,7 @@ export function apiOf(routes: (path: string, init?: RequestInit) => Response | u
     const own = routes(path, init);
     if (own) return own;
     if (path === '/me') return json(profile);
-    if (path === '/currencies') return json([cur('USD'), cur('EUR'), cur('RUB')]);
+    if (path === '/me/currencies') return json([cur('USD'), cur('EUR'), cur('RUB')]);
     if (path.startsWith('/rates'))
       return json([
         { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-17', source: 'api' },

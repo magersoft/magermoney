@@ -8,6 +8,8 @@ import { logger } from './shared/logger.js';
 import { profileRoutes } from './modules/profiles/http/routes.js';
 import type { ProfileRepository } from './modules/profiles/application/profile-repository.js';
 import { ratesRoutes } from './modules/rates/http/routes.js';
+import { userCurrencyRoutes } from './modules/currencies/http/routes.js';
+import type { UserCurrencyRepository } from './modules/currencies/application/user-currency-repository.js';
 import { accountRoutes } from './modules/accounts/http/routes.js';
 import { transferRoutes } from './modules/transfers/http/routes.js';
 import { incomeSourceRoutes } from './modules/income-sources/http/routes.js';
@@ -55,6 +57,8 @@ export interface AppDeps {
   /** The currency catalogue. `ready` loads it when it is backed by the database. */
   registry: CurrencyLookup & { ready?(): Promise<void> };
   rates: RateRepository;
+  /** The signed-in person's connected currencies — a short list out of the catalogue. */
+  userCurrencies: UserCurrencyRepository;
   rateProviders: RateProvider[];
   repos: Repos;
   uow: UnitOfWork<Repos>;
@@ -123,6 +127,7 @@ export function createApp(deps: AppDeps) {
   );
 
   app.route('/me', profileRoutes(deps));
+  app.route('/me/currencies', userCurrencyRoutes(deps));
   app.route('/', ratesRoutes(deps));
   app.route('/', accountRoutes(deps));
   app.route('/', transferRoutes(deps));

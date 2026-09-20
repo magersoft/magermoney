@@ -80,7 +80,7 @@ function mountSheet(fetch: (path: string, init?: RequestInit) => Promise<Respons
 describe('TransferSheet', () => {
   it('shows the received field only when currencies differ and posts both amounts', async () => {
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path === '/me/currencies') return json([cur('USD'), cur('EUR')]);
       if (path.startsWith('/rates'))
         return json([
           { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api' },
@@ -142,7 +142,7 @@ describe('TransferSheet', () => {
 
   it('sends occurredAt only once the date field has been edited', async () => {
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path === '/me/currencies') return json([cur('USD'), cur('EUR')]);
       if (path.startsWith('/rates'))
         return json([
           { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api' },
@@ -191,7 +191,7 @@ describe('TransferSheet', () => {
     toast.mockClear();
     onlineManager.setOnline(false);
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path === '/me/currencies') return json([cur('USD'), cur('EUR')]);
       if (path.startsWith('/rates')) return json([]);
       if (path === '/me')
         return json({
@@ -239,7 +239,7 @@ describe('TransferSheet', () => {
   it('tells a new transfer its date is too early, not to edit it', async () => {
     toast.mockClear();
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
-      if (path === '/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path === '/me/currencies') return json([cur('USD'), cur('EUR')]);
       if (path.startsWith('/rates')) return json([]);
       if (init?.method === 'POST')
         return json({ code: 'transfer_not_latest', message: 'Newer balances exist' }, 409);

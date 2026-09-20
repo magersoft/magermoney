@@ -27,10 +27,18 @@ export class PgRateRepository implements RateRepository {
       select code, kind, scale, symbol, name_ru, name_en, icon, rate_source
       from currencies order by kind, code`;
   }
+  /*
+   * Only what somebody has actually connected. The catalogue has two hundred
+   * more currencies than anyone uses, and both providers are free tiers — asking
+   * for the whole of it every night spends that budget on codes no screen will
+   * ever show.
+   */
   async quotable(source: RateSource): Promise<QuotableCurrency[]> {
     return this.sql<QuotableCurrency[]>`
-      select code, coingecko_id as provider_id from currencies
-      where rate_source = ${source} order by code`;
+      select c.code, c.coingecko_id as provider_id from currencies c
+      where c.rate_source = ${source}
+        and exists (select 1 from user_currencies uc where uc.code = c.code)
+      order by c.code`;
   }
   async deleteManual(userId: string, base: string, date: string) {
     const res = await this

@@ -86,7 +86,7 @@ function mountPage(accounts: unknown[], inShell = false, refreshStatus = 200) {
   const fetch = vi.fn(async (path: string) => {
     paths.push(path);
     if (path === '/me') return json(profile);
-    if (path === '/currencies') return json(currencies);
+    if (path === '/me/currencies') return json(currencies);
     if (path === '/rates/refresh')
       return refreshStatus === 200
         ? json({ stored: 2, refreshed: true, refreshedAt: '2026-09-20T09:00:00.000Z' })

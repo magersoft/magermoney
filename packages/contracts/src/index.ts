@@ -1,5 +1,6 @@
 export * from './common.js';
 export * from './currency.js';
+export * from './user-currency.js';
 export * from './rate.js';
 export * from './profile.js';
 export * from './account.js';

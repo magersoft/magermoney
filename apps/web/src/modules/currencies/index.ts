@@ -4,4 +4,9 @@
  * neither has to import the other.
  */
 export { toCurrency, toRate } from './domain/mappers';
-export { useCurrencies, useCurrencyRegistry } from './application/use-currencies';
+export {
+  useConnectedCurrencies,
+  useCurrencies,
+  useCurrencyCatalogue,
+  useCurrencyRegistry,
+} from './application/use-currencies';

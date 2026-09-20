@@ -64,7 +64,7 @@ function mountIt(fetchImpl: (path: string, init?: RequestInit) => Promise<Respon
 describe('income queries', () => {
   it('serves sources as DTOs and as domain objects, and inflows for the asked window', async () => {
     const fetch = vi.fn(async (path: string) => {
-      if (path === '/currencies') return json([cur('USD')]);
+      if (path === '/me/currencies') return json([cur('USD')]);
       if (path.startsWith('/inflows')) return json([inflowDto]);
       return json([sourceDto]);
     });
@@ -89,7 +89,7 @@ describe('income queries', () => {
       isPrimary: false,
     };
     const p = mountIt(async (path, init) => {
-      if (path === '/currencies') return json([cur('USD')]);
+      if (path === '/me/currencies') return json([cur('USD')]);
       if (path.startsWith('/inflows')) return json([]);
       if (init?.method === 'POST') {
         stored = [...stored, second];
