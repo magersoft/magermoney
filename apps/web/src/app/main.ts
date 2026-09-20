@@ -10,6 +10,7 @@ import { startRouting } from '@/app/start-routing';
 import { registerAccountMutations } from '@/modules/accounts/offline';
 import { useSession } from '@/modules/auth';
 import { registerIncomeMutations } from '@/modules/income/offline';
+import { registerProfileMutations } from '@/modules/profile/offline';
 import { registerTransferMutations } from '@/modules/transfers/offline';
 import { createApiClient } from '@/shared/api/client';
 import { API_KEY, OWNER_KEY } from '@/shared/api/use-api';
@@ -37,6 +38,7 @@ app.provide(OWNER_KEY, ownerId);
 registerAccountMutations(queryClient, api, ownerId);
 registerTransferMutations(queryClient, api, ownerId);
 registerIncomeMutations(queryClient, api, ownerId);
+registerProfileMutations(queryClient, api, ownerId);
 app.use(VueQueryPlugin, { queryClient, clientPersister });
 
 /**

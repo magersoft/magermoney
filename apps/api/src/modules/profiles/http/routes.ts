@@ -54,10 +54,11 @@ export function profileRoutes(deps: AppDeps) {
       },
     }),
     async (c) => {
-      const res = await updateProfile(deps.profiles, deps.registry)(
-        c.var.userId,
-        c.req.valid('json'),
-      );
+      const res = await updateProfile(
+        deps.profiles,
+        deps.registry,
+        deps.userCurrencies,
+      )(c.var.userId, c.req.valid('json'));
       return res.match(
         (p) => c.json(p, 200),
         (e) => {

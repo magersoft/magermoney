@@ -48,6 +48,28 @@ describe('display currency', () => {
     d.set('KZT');
     expect(d.current.value).toBe('USD');
   });
+  it('moves off a currency that was taken out of the switch', async () => {
+    const profile = ref({ defaultCurrency: 'EUR', reportingCurrencies: ['EUR', 'USD', 'RUB'] });
+    const d = createDisplayCurrency(profile, { get: () => null, set: () => {} });
+    d.set('RUB');
+    expect(d.current.value).toBe('RUB');
+
+    // The ruble is unmarked on the currencies screen.
+    profile.value = { defaultCurrency: 'EUR', reportingCurrencies: ['EUR', 'USD'] };
+    await nextTick();
+
+    // Whatever it lands on, it is something the switch actually offers.
+    expect(d.options.value).toContain(d.current.value);
+    expect(d.current.value).toBe('EUR');
+  });
+
+  it('never leaves the switch empty: one currency is still a display currency', () => {
+    const profile = ref({ defaultCurrency: 'USD', reportingCurrencies: ['USD'] });
+    const d = createDisplayCurrency(profile, { get: () => 'EUR', set: () => {} });
+    expect(d.current.value).toBe('USD');
+    expect(d.options.value).toEqual(['USD']);
+  });
+
   it('restores a remembered choice when still listed, else falls back', () => {
     const profile = ref({ defaultCurrency: 'EUR', reportingCurrencies: ['EUR', 'USD'] });
     expect(createDisplayCurrency(profile, { get: () => 'USD', set: () => {} }).current.value).toBe(

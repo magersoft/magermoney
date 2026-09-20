@@ -24,8 +24,16 @@ export class MemoryUserCurrencyRepository implements UserCurrencyRepository {
     private readonly connected: Record<string, string[]> = {},
   ) {}
 
+  /**
+   * The codes as stored. A user the test never mentioned has the whole
+   * catalogue connected, which is what a test with nothing to say about
+   * connections wants; `{ [user]: [...] }` is how a test says otherwise.
+   */
+  codesOf(userId: string): string[] {
+    return [...(this.connected[userId] ?? this.catalogue.map((c) => c.code))];
+  }
   async listConnected(userId: string): Promise<CurrencyDto[]> {
-    const codes = new Set(this.connected[userId] ?? []);
+    const codes = new Set(this.codesOf(userId));
     return this.catalogue
       .filter((c) => codes.has(c.code))
       .sort((a, b) => a.code.localeCompare(b.code));

@@ -30,6 +30,10 @@ import type { BalanceRepository } from './modules/accounts/application/balance-r
 import type { TransferRepository } from './modules/transfers/application/transfer-repository.js';
 
 export interface Repos {
+  /* Both of these are here because disconnecting a currency has to drop it from
+     the person's reporting list in the same transaction. */
+  profiles: ProfileRepository;
+  userCurrencies: UserCurrencyRepository;
   accounts: AccountRepository;
   balances: BalanceRepository;
   transfers: TransferRepository;

@@ -84,7 +84,7 @@ export function userCurrencyRoutes(deps: AppDeps) {
     }),
     async (c) => {
       const { code } = c.req.valid('param');
-      const res = await disconnectCurrency(deps.userCurrencies)(c.var.userId, code);
+      const res = await disconnectCurrency(deps.uow)(c.var.userId, code);
       return res.match(
         () => c.body(null, 204),
         (e) => {

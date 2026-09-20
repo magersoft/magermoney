@@ -1,35 +1,40 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import type { ProfileDto, UpdateProfileInput } from '@magermoney/contracts';
-import { useApi } from '@/shared/api/use-api';
+import { useApi, useOwnerId } from '@/shared/api/use-api';
 import { profileApi } from '../infrastructure/profile-api';
+import {
+  PROFILE_KEY,
+  registerProfileMutations,
+  UPDATE_PROFILE_KEY,
+  type UpdateProfileVars,
+} from './mutation-defaults';
 
 /**
- * The profile, and the one way to change it. The change is shown before the
- * PATCH answers — on a phone that is the difference between a settings screen
- * and a settings screen that feels broken — and taken back if it fails.
+ * The profile, and the one way to change it.
+ *
+ * The change goes through the offline mutation queue rather than a plain
+ * `mutationFn`: reordering the display switch on a train has to survive the
+ * tunnel and the closed tab, not revert to whatever the server last said. The
+ * optimistic update and the rollback live with the registration, so a mutation
+ * restored from IndexedDB behaves exactly like a fresh one.
  */
 export function useProfile() {
   const api = profileApi(useApi());
   const qc = useQueryClient();
-  const query = useQuery({ queryKey: ['me'], queryFn: api.get });
-  const mutation = useMutation({
-    mutationFn: api.update,
-    onMutate: async (input: UpdateProfileInput) => {
-      await qc.cancelQueries({ queryKey: ['me'] });
-      const prev = qc.getQueryData<ProfileDto>(['me']);
-      if (prev) qc.setQueryData(['me'], { ...prev, ...input });
-      return { prev };
-    },
-    onError: (_e, _i, ctx) => {
-      if (ctx?.prev) qc.setQueryData(['me'], ctx.prev);
-    },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['me'] }),
+  const ownerId = useOwnerId();
+  registerProfileMutations(qc, useApi(), ownerId);
+
+  const query = useQuery({ queryKey: PROFILE_KEY, queryFn: api.get });
+  const mutation = useMutation<ProfileDto, Error, UpdateProfileVars>({
+    mutationKey: UPDATE_PROFILE_KEY,
   });
 
   return {
     profile: query.data,
     isLoading: query.isLoading,
     update: (input: UpdateProfileInput): Promise<void> =>
-      mutation.mutateAsync(input).then(() => undefined),
+      mutation.mutateAsync({ ownerId: ownerId(), input }).then(() => undefined),
+    /** True while the write is parked offline, waiting for a connection. */
+    isPaused: mutation.isPaused,
   };
 }

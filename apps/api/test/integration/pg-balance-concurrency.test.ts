@@ -35,6 +35,8 @@ const acc = (name: string) => ({
  * times out.
  */
 const gatedUpdate = (repos: Repos, gate: Promise<void>): Repos => ({
+  profiles: repos.profiles,
+  userCurrencies: repos.userCurrencies,
   accounts: repos.accounts,
   transfers: repos.transfers,
   incomeSources: repos.incomeSources,

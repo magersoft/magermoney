@@ -32,7 +32,12 @@ const toDto = (c: Currency): CurrencyDto => ({
   rateSource: c.kind === 'crypto' ? 'coingecko' : 'open-er-api',
 });
 
-export function memoryRepos() {
+export function memoryRepos(
+  profiles: MemoryProfileRepository = new MemoryProfileRepository([]),
+  userCurrencies: MemoryUserCurrencyRepository = new MemoryUserCurrencyRepository(
+    SAMPLE_CURRENCIES.map(toDto),
+  ),
+) {
   const balances = new MemoryBalanceRepository();
   const accounts = new MemoryAccountRepository(balances);
   const transfers = new MemoryTransferRepository(accounts);
@@ -41,6 +46,8 @@ export function memoryRepos() {
   const expenses = new MemoryExpenseRepository();
   const expenseCategories = new MemoryExpenseCategoryRepository(expenses);
   return {
+    profiles,
+    userCurrencies,
     accounts,
     balances,
     transfers,
@@ -55,15 +62,19 @@ export function memoryRepos() {
 export function testDeps(over: Partial<AppDeps> = {}): AppDeps {
   // The unit of work must hand out the repositories the test actually inspects,
   // so it is built from the overridden ones when there are any.
-  const repos = over.repos ?? memoryRepos();
+  const profiles = (over.profiles as MemoryProfileRepository) ?? new MemoryProfileRepository([]);
+  const userCurrencies =
+    (over.userCurrencies as MemoryUserCurrencyRepository) ??
+    new MemoryUserCurrencyRepository(SAMPLE_CURRENCIES.map(toDto));
+  const repos = over.repos ?? memoryRepos(profiles, userCurrencies);
   return {
     clock: new SystemClock() as Clock,
     jwtSecret: 'test-secret-test-secret-test-secret-1234',
     cronSecret: 'cron',
-    profiles: new MemoryProfileRepository([]),
+    profiles,
     registry: CurrencyRegistry.sample(),
     rates: new MemoryRateRepository(),
-    userCurrencies: new MemoryUserCurrencyRepository(SAMPLE_CURRENCIES.map(toDto)),
+    userCurrencies,
     rateProviders: [],
     ...over,
     repos,
