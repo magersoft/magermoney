@@ -1,9 +1,11 @@
 ---
 id: TASK-049
 title: 'Нижняя навигация: стеклянная полупрозрачная панель в духе iOS liquid glass'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-20 08:23'
+updated_date: '2026-09-20 19:46'
 labels: []
 dependencies: []
 ordinal: 47000
