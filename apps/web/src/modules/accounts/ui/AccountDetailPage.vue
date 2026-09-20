@@ -61,6 +61,7 @@ import {
 import { useCurrencies } from '@/modules/currencies';
 import { todayIso } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import {
   formatDate,
   formatDayAndMonth,
@@ -107,6 +108,22 @@ const { t, locale } = useI18n();
 const { toast } = useToast();
 const id = computed(() => String(route.params.id));
 const account = useAccount(id);
+
+usePageTitle(() => account.value?.name ?? null);
+/*
+ * Editing was the first line of the menu, which is a long way round for the
+ * one thing you open an account to change. It is the bar's action now; the
+ * menu keeps what is rarer or destructive.
+ */
+usePageAction(() =>
+  account.value
+    ? {
+        label: t('accounts.detail.edit'),
+        onSelect: () => void router.push(`/accounts/${account.value!.id}/edit`),
+        testid: 'account-edit',
+      }
+    : null,
+);
 const currencies = useCurrencies();
 const uiLocale = computed(() => locale.value as DateLocale);
 const amountLocale = computed(() => locale.value as AmountLocale);
@@ -250,7 +267,11 @@ async function del() {
   <section v-if="account" class="flex flex-col gap-6 pb-8">
     <header class="flex items-start gap-3 pt-1">
       <div class="min-w-0 flex-1">
-        <h1 class="truncate text-2xl font-semibold tracking-[-0.01em]" data-testid="account-name">
+        <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+        <h1
+          class="sr-only truncate text-2xl font-semibold tracking-[-0.01em] md:not-sr-only"
+          data-testid="account-name"
+        >
           {{ account.name }}
         </h1>
         <p class="text-muted-foreground text-sm">
@@ -302,9 +323,6 @@ async function del() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem @select="router.push(`/accounts/${account.id}/edit`)">
-              {{ t('accounts.detail.edit') }}
-            </DropdownMenuItem>
             <DropdownMenuItem @select="archive">
               {{
                 account.archivedAt ? t('accounts.detail.unarchive') : t('accounts.detail.archive')

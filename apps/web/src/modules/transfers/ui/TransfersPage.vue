@@ -7,6 +7,7 @@ import type { TransferDto } from '@magermoney/contracts';
 import { Skeleton } from '@magermoney/ui';
 import { useAccounts } from '@/modules/accounts';
 import { formatDateTime } from '@/shared/dates/format';
+import { usePageTitle } from '@/shared/layout/page-bar';
 import { useTransfers } from '../application/use-transfers';
 import TransferSheet from './TransferSheet.vue';
 
@@ -21,6 +22,8 @@ const nameOf = (id: string) => accounts.value.find((a) => a.id === id)?.name ?? 
 const currencyOf = (id: string) => accounts.value.find((a) => a.id === id)?.currency ?? '';
 const open = ref(false);
 const editing = ref<TransferDto | undefined>();
+
+usePageTitle(() => t('transfers.title'));
 function edit(tr: TransferDto) {
   editing.value = tr;
   open.value = true;
@@ -29,7 +32,8 @@ function edit(tr: TransferDto) {
 
 <template>
   <section class="pb-8">
-    <h1 class="text-2xl font-semibold tracking-[-0.01em]">
+    <!-- The bar carries this on a phone; a wide window's bar carries the links. -->
+    <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
       {{ t('transfers.title') }}
     </h1>
     <Skeleton v-if="isLoading" class="mt-4 h-12 w-full" />

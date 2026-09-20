@@ -2,8 +2,7 @@
 /**
  * The app shell: a top bar the whole app is hung from, and — on a phone — the
  * floating pill that replaces it as navigation. It renders chrome only: screens
- * fill the default slot, the currency switch and the desktop "+" fill the named
- * ones.
+ * fill the default slot, the desktop "+" fills the named one.
  *
  * Four sections: Home · Accounts · Plan · Settings; Goals joins in phase 4. The
  * list itself lives in `nav.ts`, because both navigations read it.
@@ -12,27 +11,21 @@
  * the top bar is a hairline-separated surface, labels sit at 11–13px, and the
  * accent marks exactly one thing: where you are.
  *
- * The bar's right-hand corner belongs to whichever screen is open. The shell
- * opens it here, once, above the `RouterView` — a screen claims it by calling
- * `usePageAction` and gives it back on the way out.
+ * The bar's title and its right-hand corner belong to whichever screen is
+ * open. The shell opens both here, once, above the `RouterView` — a screen
+ * claims them with `usePageTitle` / `usePageAction` and gives them back on the
+ * way out.
  */
 import { useI18n } from 'vue-i18n';
 import AppHeader from '@/shared/layout/AppHeader.vue';
 import BottomNav from '@/shared/layout/BottomNav.vue';
-import { providePageAction } from '@/shared/layout/page-action';
+import { providePageBar } from '@/shared/layout/page-bar';
 
-/*
- * The default is spelled out rather than left to `?? true` downstream: Vue
- * casts an absent `Boolean` prop to `false`, not to `undefined`, so a
- * defaulting expression further down never runs and the bar quietly drops the
- * currency switch on every screen.
- */
-const { showCurrency = true } = defineProps<{ showCurrency?: boolean }>();
 const emit = defineEmits<{ quick: [] }>();
 
 const { t } = useI18n();
 
-const action = providePageAction();
+const bar = providePageBar();
 </script>
 
 <template>
@@ -44,11 +37,7 @@ const action = providePageAction();
       {{ t('a11y.skipToContent') }}
     </a>
 
-    <AppHeader :action="action" :show-currency="showCurrency">
-      <template #currency>
-        <slot name="currency" />
-      </template>
-    </AppHeader>
+    <AppHeader :action="bar.action.value" :title="bar.title.value" />
 
     <!--
       The pill is 64px tall, the "+" rises 20px out of it and it floats 12px

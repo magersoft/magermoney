@@ -1,6 +1,7 @@
 import { mount, type ComponentMountingOptions } from '@vue/test-utils';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
-import type { Component } from 'vue';
+import { h, type Component } from 'vue';
+import AppShell from '../../src/shared/layout/AppShell.vue';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import ru from '../../src/locales/ru.json';
@@ -64,11 +65,18 @@ export function apiOf(routes: (path: string, init?: RequestInit) => Response | u
   };
 }
 
+/**
+ * `inShell` mounts the screen inside `AppShell`. A screen's top-bar title and
+ * action are claimed through the shell, so a bare mount has nowhere to put
+ * them — and asserting about them without the shell asserts about a
+ * configuration the app never renders.
+ */
 export async function mountAt<C extends Component>(
   component: C,
   at: string,
   fetch: Fetch,
   options: ComponentMountingOptions<C> = {},
+  inShell = false,
 ) {
   const blank = { template: '<i />' };
   const router = createRouter({
@@ -77,6 +85,7 @@ export async function mountAt<C extends Component>(
       { path: '/', component: blank },
       { path: '/accounts', component: blank },
       { path: '/accounts/:id', component: blank },
+      { path: '/accounts/:id/edit', component: blank },
       { path: '/plan', name: 'plan', component: blank },
       { path: '/plan/income/new', component: blank },
       { path: '/plan/income/:id', component: blank },
@@ -87,8 +96,9 @@ export async function mountAt<C extends Component>(
   });
   await router.push(at);
   await router.isReady();
-  const wrapper = mount(component, {
+  const wrapper = mount(inShell ? (AppShell as unknown as C) : component, {
     ...options,
+    ...(inShell ? { slots: { default: () => h(component as Component) } } : {}),
     global: {
       plugins: [
         [

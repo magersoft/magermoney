@@ -1,26 +1,22 @@
 <script setup lang="ts">
 /**
- * The top bar, in the reference's scheme: navigation on the left, the screen's
- * one action on the right, and nothing in between that the screen did not ask
- * for.
+ * The top bar: the way back on the left, the screen's name in the middle, the
+ * screen's one action on the right — and nothing the screen did not ask for.
  *
- * The left is a single place with two readings. On a screen you arrived at
- * from somewhere else it is the way back; on a tab's own screen there is no
- * back, so the wordmark takes the place instead of leaving a hole. A wide
- * window has room for the sections themselves, so the wordmark and the tab
- * links sit in the middle there — the phone reaches them through the pill at
- * the bottom.
+ * The middle holds two different things at two widths, because at those two
+ * widths it answers two different questions. On a phone it says which screen
+ * you are on, the way a pushed screen does on iOS; the wordmark is not worth a
+ * line there, and the tab links live in the pill at the bottom. A wide window
+ * has room for the sections themselves, so it gets the wordmark and the tab
+ * links and lets the screen's own heading name the screen.
  *
- * The right is the screen's, through `page-action.ts`. The bar renders what it
- * was handed and never invents an action of its own. It is a word in the
- * accent colour and nothing else: a bar holding one action does not need a
- * filled shape to say which one it is, and a disc with a glyph in it turns a
- * sentence into furniture.
+ * The action is a word in the accent colour and nothing else: a bar holding
+ * one action does not need a filled shape to say which one it is, and a disc
+ * with a glyph in it turns a sentence into furniture.
  *
- * A bar with nothing on it is not a bar. On the home screen there is no way
- * back, no action, and the currency switch belongs to the screen itself — so
- * on a phone the bar is not rendered at all rather than drawn empty. A wide
- * window still gets it, because there the tab links live in it.
+ * A bar with nothing on it is not a bar. Where there is no way back, no title
+ * and no action — the home screen — it is not rendered on a phone rather than
+ * drawn empty. A wide window still gets it, because the tab links live in it.
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -28,22 +24,17 @@ import { useRoute, useRouter } from 'vue-router';
 import { ChevronLeftIcon, Loader2Icon } from '@lucide/vue';
 import { Button } from '@magermoney/ui';
 import { backTarget, isCurrent, isRoot, NAV } from '@/shared/layout/nav';
-import type { PageAction } from '@/shared/layout/page-action';
+import type { PageAction } from '@/shared/layout/page-bar';
 
-const { action, showCurrency } = defineProps<{
-  action: PageAction | null;
-  /** Home carries its own switch; everywhere else the bar carries it. */
-  showCurrency: boolean;
-}>();
+const { action, title } = defineProps<{ action: PageAction | null; title: string | null }>();
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
 const canGoBack = computed(() => !isRoot(route.path));
-
-/** Nothing on the left but the wordmark, nothing on the right at all. */
-const bare = computed(() => !canGoBack.value && !action && !showCurrency);
+/** Nothing to hold at phone width, where the wordmark and the links are hidden. */
+const bare = computed(() => !canGoBack.value && !action && !title);
 
 /**
  * `router.back()` needs somewhere to go back to. A screen opened from a link,
@@ -63,7 +54,7 @@ function goBack(): void {
     :class="bare ? 'hidden md:block' : ''"
     style="padding-top: env(safe-area-inset-top)"
   >
-    <div class="mx-auto flex h-14 w-full max-w-3xl items-center gap-3 px-4 md:px-6">
+    <div class="relative mx-auto flex h-14 w-full max-w-3xl items-center gap-3 px-4 md:px-6">
       <Button
         v-if="canGoBack"
         variant="ghost"
@@ -78,16 +69,26 @@ function goBack(): void {
       </Button>
 
       <!--
-        The wordmark goes home, but it is not a tab: the Home tab is what says
-        where you are. It steps aside on a phone once there is a back button —
-        two things competing for the left corner is how a bar stops reading as
-        a direction.
+        Centred on the bar rather than between the buttons: a title that
+        centres itself in the leftover space shifts as soon as one side grows,
+        and a title that moves when you navigate reads as a different bar. It
+        is `absolute` so the two corners keep the width they had, and it stops
+        short of both of them — a long account name truncates instead of
+        sliding under the action.
       -->
+      <h2
+        v-if="title"
+        class="absolute inset-x-[4.5rem] truncate text-center text-[17px] font-semibold tracking-[-0.01em] md:hidden"
+        data-testid="page-title"
+      >
+        {{ title }}
+      </h2>
+
+      <!-- The wordmark goes home, but it is not a tab: the Home tab is what says where you are. -->
       <RouterLink v-slot="{ href, navigate }" to="/" custom>
         <a
           :href="href"
-          class="text-base font-semibold outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
-          :class="canGoBack ? 'hidden md:inline' : ''"
+          class="hidden text-base font-semibold outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring md:inline"
           @click="navigate"
         >
           {{ t('app.name') }}
@@ -118,33 +119,29 @@ function goBack(): void {
         </RouterLink>
       </nav>
 
-      <div class="ms-auto flex shrink-0 items-center gap-1">
-        <slot v-if="showCurrency" name="currency" />
-
-        <!--
-          A running action says so where it was pressed. `aria-busy` alone is a
-          promise to a screen reader that the eye never collects — the spinner
-          is the same statement, made visibly, and it takes the word's place so
-          the bar does not shuffle while the save is in flight.
-        -->
-        <Button
-          v-if="action"
-          variant="ghost"
-          size="sm"
-          type="button"
-          class="-me-2 min-h-11 rounded-full px-3 text-[15px] font-medium text-accent-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:text-muted-foreground disabled:opacity-100"
-          :aria-label="action.ariaLabel"
-          :disabled="action.disabled || action.pending"
-          :aria-busy="action.pending ? 'true' : undefined"
-          :data-testid="action.testid ?? 'page-action'"
-          @click="action.onSelect"
-        >
-          <Loader2Icon v-if="action.pending" :size="18" class="animate-spin" aria-hidden="true" />
-          <template v-else>
-            {{ action.label }}
-          </template>
-        </Button>
-      </div>
+      <!--
+        A running action says so where it was pressed. `aria-busy` alone is a
+        promise to a screen reader that the eye never collects — the spinner is
+        the same statement, made visibly, and it takes the word's place so the
+        bar does not shuffle while the save is in flight.
+      -->
+      <Button
+        v-if="action"
+        variant="ghost"
+        size="sm"
+        type="button"
+        class="-me-2 ms-auto min-h-11 shrink-0 rounded-full px-3 text-[15px] font-medium text-accent-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:text-muted-foreground disabled:opacity-100"
+        :aria-label="action.ariaLabel"
+        :disabled="action.disabled || action.pending"
+        :aria-busy="action.pending ? 'true' : undefined"
+        :data-testid="action.testid ?? 'page-action'"
+        @click="action.onSelect"
+      >
+        <Loader2Icon v-if="action.pending" :size="18" class="animate-spin" aria-hidden="true" />
+        <template v-else>
+          {{ action.label }}
+        </template>
+      </Button>
     </div>
   </header>
 </template>

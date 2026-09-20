@@ -30,7 +30,7 @@ import {
   type FilterChipItem,
 } from '@magermoney/ui';
 import { useDisplayCurrency } from '@/modules/rates';
-import { usePageAction } from '@/shared/layout/page-action';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useCapitalSummary } from '../application/use-capital-summary';
 import AccountRow from './AccountRow.vue';
 
@@ -93,6 +93,14 @@ const isEmpty = computed(
   () =>
     summary.value !== undefined && active.value.length === 0 && summary.value.archived.length === 0,
 );
+
+/*
+ * Alone among the tabs, this screen never says its own name: it leads with the
+ * total, the way the reference does, and «Счета» would fight that. So the bar
+ * says it. The Plan and the settings screen carry a heading of their own and
+ * leave the bar's middle alone rather than saying it twice.
+ */
+usePageTitle(() => t('accounts.title'));
 
 /*
  * The list's one action. The empty screen keeps its own button — there the

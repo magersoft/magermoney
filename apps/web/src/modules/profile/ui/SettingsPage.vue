@@ -20,6 +20,7 @@ import {
   useToast,
 } from '@magermoney/ui';
 import { useSession } from '@/modules/auth';
+import { CurrencySwitch } from '@/modules/rates';
 import { THEMES, useTheme, type Theme } from '@/shared/theme';
 import { ApiError } from '@/shared/api/client';
 import { LOCALES, type Locale } from '../domain/profile';
@@ -148,6 +149,28 @@ async function signOut(): Promise<void> {
               </SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <!--
+          The switch used to live in the top bar, on every screen. It belongs
+          to the two places that answer "in what currency am I reading this" —
+          Home, where the numbers are, and here, next to the list it picks
+          from. A control repeated on every screen is one nobody reads.
+        -->
+        <div class="flex flex-col gap-2 border-t border-border pt-6 md:pt-5">
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium">
+              {{ t('settings.display.label') }}
+            </span>
+            <span class="text-sm leading-relaxed text-muted-foreground">
+              {{ t('settings.display.hint') }}
+            </span>
+          </div>
+          <CurrencySwitch
+            :rates-link="false"
+            class="self-start"
+            data-testid="settings-display-currency"
+          />
         </div>
 
         <div class="border-t border-border pt-6 md:pt-5">

@@ -175,6 +175,37 @@ describe('AccountDetailPage', () => {
   });
 
   /*
+   * The account's name is the bar's title on a phone, and changing the account
+   * is the bar's action — it used to be the first line of the ⋯ menu, which is
+   * a long way round for the one thing you open an account to change.
+   */
+  it('names itself in the top bar and offers the edit there', async () => {
+    const account = acc(ACCOUNT_ID, 'USD');
+    const fetch = vi.fn(
+      apiOf((path) => {
+        if (path === '/accounts') return json([account]);
+        if (path.startsWith(`/accounts/${ACCOUNT_ID}/balances`)) return json([]);
+        return undefined;
+      }),
+    );
+    const { wrapper, router } = await mountAt(
+      AccountDetailPage,
+      `/accounts/${ACCOUNT_ID}`,
+      fetch,
+      {},
+      true,
+    );
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="page-title"]').text()).toBe(account.name);
+
+    await wrapper.get('[data-testid="account-edit"]').trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.path).toBe(`/accounts/${ACCOUNT_ID}/edit`);
+    wrapper.unmount();
+  });
+
+  /*
    * The star is the whole way an account gets onto Home, so it has to be both
    * the switch and the readout: one tap patches the account, and the button
    * says which way it now stands.

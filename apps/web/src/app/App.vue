@@ -12,7 +12,7 @@ import { useRoute } from 'vue-router';
 import { MotionConfig } from 'motion-v';
 import { Toaster } from '@magermoney/ui';
 import AppShell from '@/shared/layout/AppShell.vue';
-import { CurrencySwitch, useDisplayCurrency } from '@/modules/rates';
+import { useDisplayCurrency } from '@/modules/rates';
 import { useTheme } from '@/app/theme';
 import QuickActions from '@/app/QuickActions.vue';
 
@@ -36,11 +36,6 @@ useDisplayCurrency();
 
 const bare = computed(() => Boolean(route.meta.public));
 /**
- * Home carries the currency switch in its own header (the reference's slide 10),
- * so the top bar hands it over rather than showing a second one.
- */
-const ownsCurrency = computed(() => route.name === 'home');
-/**
  * The quick actions are mounted once, here, and opened from two places: the
  * "+" in the phone's navigation pill and the floating button on a wide window.
  * One instance means one set of sheets — and the half-typed inflow in them
@@ -57,10 +52,7 @@ const quickOpen = ref(false);
     >
       <RouterView />
     </main>
-    <AppShell v-else :show-currency="!ownsCurrency" @quick="quickOpen = true">
-      <template #currency>
-        <CurrencySwitch />
-      </template>
+    <AppShell v-else @quick="quickOpen = true">
       <template #fab>
         <QuickActions v-model:open="quickOpen" />
       </template>

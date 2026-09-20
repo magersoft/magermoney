@@ -13,7 +13,9 @@
  * `utilities` layer and would win against `base` on the same property.
  *
  * The arrows at the end open the rates screen — it lost its tab in phase 3, and
- * this is where a person wonders what rate they are looking at.
+ * this is where a person wonders what rate they are looking at. The settings
+ * screen switches them off: the rates row sits a few lines below the switch
+ * there, and two ways into the same screen within one glance is one too many.
  *
  * Two currencies is the common case and both codes fit next to the wordmark and
  * the theme button on a 375px phone. Three or four do not, so below `sm:` the
@@ -26,6 +28,9 @@ import { Motion } from 'motion-v';
 import { computed } from 'vue';
 import { useCurrencies } from '@/modules/currencies';
 import { useDisplayCurrency } from '../application/use-display-currency';
+
+/* The default sits at the declaration: an absent Boolean prop arrives as `false`. */
+const { ratesLink = true } = defineProps<{ ratesLink?: boolean }>();
 
 const { t } = useI18n();
 const currencies = useCurrencies();
@@ -69,6 +74,7 @@ const kindOf = computed(
       >
     </button>
     <RouterLink
+      v-if="ratesLink"
       to="/settings/rates"
       :aria-label="t('a11y.openRates')"
       :title="t('a11y.openRates')"

@@ -17,7 +17,7 @@ import { ACCOUNT_KINDS, CARD_TYPES } from '@magermoney/domain';
 import { Button, CountrySelect, MoneyInput, useToast } from '@magermoney/ui';
 import { useCurrencies } from '@/modules/currencies';
 import { errorKeyFor } from '@/shared/api/error-messages';
-import { usePageAction } from '@/shared/layout/page-action';
+import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useCountryOptions } from '@/shared/countries/options';
 import type { DateLocale } from '@/shared/dates/format';
 import { ACCOUNT_KIND_KEYS } from '../domain/labels';
@@ -139,6 +139,11 @@ const complete = computed(
 const submitLabel = computed(() =>
   editingId.value ? t('accounts.form.save') : t('accounts.form.create'),
 );
+const title = computed(() =>
+  editingId.value ? t('accounts.form.editTitle') : t('accounts.form.createTitle'),
+);
+
+usePageTitle(() => title.value);
 
 /*
  * The same action, in the bar and at the foot of the form. A form you have
@@ -184,8 +189,14 @@ async function submit() {
 
 <template>
   <form class="flex flex-col gap-6 pb-8" data-testid="account-form" @submit.prevent="submit">
-    <h1 class="text-2xl font-semibold tracking-[-0.01em]">
-      {{ editingId ? t('accounts.form.editTitle') : t('accounts.form.createTitle') }}
+    <!--
+      The bar says this on a phone, so the screen does not say it twice. A wide
+      window's bar carries the tab links instead, and the heading comes back —
+      it stays in the document either way, for whoever is listening rather than
+      looking.
+    -->
+    <h1 class="sr-only text-2xl font-semibold tracking-[-0.01em] md:not-sr-only">
+      {{ title }}
     </h1>
 
     <div class="flex flex-col gap-2">

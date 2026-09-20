@@ -20,7 +20,7 @@ import { TabBar, fadeUp } from '@magermoney/ui';
 import { BudgetsSegment } from '@/modules/budgets';
 import { ExpensesSegment } from '@/modules/expenses';
 import { IncomeSegment } from '@/modules/income';
-import { usePageAction } from '@/shared/layout/page-action';
+import { usePageAction } from '@/shared/layout/page-bar';
 
 const TABS = ['income', 'expenses', 'budgets'] as const;
 type Tab = (typeof TABS)[number];

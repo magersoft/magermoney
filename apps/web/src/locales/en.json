@@ -456,6 +456,10 @@
     "theme": {
       "label": "Theme"
     },
+    "display": {
+      "label": "Display currency",
+      "hint": "Amounts on Home and in the lists are shown in it."
+    },
     "currencies": {
       "title": "Reporting currencies",
       "hint": "Amounts on the home screen switch between these. One of them is the main one.",
