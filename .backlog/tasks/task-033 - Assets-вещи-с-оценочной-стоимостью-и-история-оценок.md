@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@magersoft'
 created_date: '2026-09-19 13:23'
-updated_date: '2026-09-21 13:37'
+updated_date: '2026-09-21 13:39'
 labels:
   - phase-4
   - api
@@ -49,3 +49,17 @@ Asset — то, чем владеют и что имеет оценочную с
 <!-- SECTION:NOTES:BEGIN -->
 Ветка phase-4 (общая на фазу). Готово: домен (assetValue, assetsTotal), contracts (Asset/Valuation DTO), миграция assets + asset_valuations, API-модуль assets с журналом оценок, RLS-тест. Осталось: веб (задачи 15, 16).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Активы и журнал оценок, на ветке phase-4.
+
+Домен: assetValue и assetsTotal, 100 % покрытие (Vitest + fast-check). Текущая стоимость — последняя строка журнала, отдельной колонки нет (ADR 0002): в pg это lateral join, в памяти — такой же поиск.
+
+API: модуль assets с CRUD и журналом оценок, одна оценка на актив в день (unique (asset_id, valued_on) → 409 valuation_exists), неположительная оценка → 400, удаление актива уносит журнал каскадом. Миграции assets и asset_valuations с RLS; ограничения доказаны в psql внутри откатанной транзакции.
+
+Веб: сегмент активов с суммой и пометкой «не входит в капитал», экран актива с журналом и изменением к цене покупки, шит переоценки, формы. Капитал на Главной включает активы с counts_in_total и называет те, которые сегодняшние курсы не могут оценить.
+
+Проверено: bun run test, lint, typecheck, build — зелёные; AssetsSegment.test.ts (5), assets.test.ts (7), capital-with-assets.test.ts (4), pg-phase4-rls.test.ts. AC #6 отмечен частично: изменение к цене покупки есть, курсорной пагинации журнала нет — у актива единицы оценок, а не лента; причина записана в docs/discovery/phase-4-execution-ledger.md.
+<!-- SECTION:FINAL_SUMMARY:END -->
