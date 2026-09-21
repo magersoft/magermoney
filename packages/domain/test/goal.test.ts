@@ -128,6 +128,14 @@ describe('goalForecast', () => {
     ).toEqual({ kind: 'none', reason: 'achieved' });
   });
 
+  it('says nothing when the date is further off than anyone plans', () => {
+    // A euro a month against ten thousand: positive, and about 833 years out.
+    expect(goalForecast(goal, progressOf(0), series(1, 2, 3), '2026-03-15')).toEqual({
+      kind: 'none',
+      reason: 'too_far',
+    });
+  });
+
   it('reads at most the last six months', () => {
     // Nine months of history; only the last six (5000 → 8000, 600 a month) count.
     const f = goalForecast(

@@ -1,0 +1,18 @@
+# Phase 4 execution ledger
+
+Source: SDD ledger for `docs/superpowers/plans/2026-09-21-phase-4-goals-assets.md` (spec `docs/superpowers/specs/2026-09-21-phase-4-goals-assets-design.md`). Rulings made during execution, in the order they were made, each with the cost accepted if the ruling turns out wrong; then every deferred minor, grouped by task; then plan errata found along the way. Mirrors `docs/discovery/phase-3-execution-ledger.md`.
+
+## Rulings
+
+- One branch, `phase-4`, for all sixteen tasks rather than one per backlog task. Tasks 4, 5 and 10 (contracts, migrations, pg integration) each serve TASK-031, TASK-032 and TASK-033 at once, so a branch per backlog task would mean cutting them into three and reordering the plan. Commits name the backlog task they belong to. Cost if wrong: the three tasks close on one merge instead of three.
+- `GoalForecast` gains a fourth reason, `too_far`, with a horizon of `FORECAST_HORIZON_YEARS = 50`. The spec fixes only "never in the past" and "no forecast on a non-positive rate"; a rate that is positive but tiny against a large remainder answers with a year nobody plans around, and past year 9999 `addDays` stops returning an `IsoDate` at all — which is how the case was found, by the plan's own property test. Owner chose the explicit reason over folding it into `not_advancing` or clamping the date. Cost if wrong: one value out of the contract enum and two i18n strings.
+
+## Deferred minors
+
+_(none yet)_
+
+## Plan errata
+
+- Task 1 and Task 3: the `Rate` literals in the test blocks omit `date` and `source`, both required by `packages/domain/src/rate.ts`. Written as the repo's own tests do, through a local `rate()` helper.
+- Task 1: the plan's three test cases never reach the zero-target guard in its own implementation block, so the plan as written leaves the domain package's 100 % branch gate red. One case added.
+- Task 2: the expected forecast date `2026-10-15` is four days off. The implementation in the very next block defines a month as 30 days, and seven of those from 15 March land on 11 October.

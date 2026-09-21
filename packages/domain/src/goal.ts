@@ -64,13 +64,21 @@ export interface MonthlyBalance {
 
 export type GoalForecast =
   | { kind: 'date'; on: IsoDate; monthlyRate: Money }
-  | { kind: 'none'; reason: 'not_enough_history' | 'not_advancing' | 'achieved' };
+  | { kind: 'none'; reason: 'not_enough_history' | 'not_advancing' | 'achieved' | 'too_far' };
 
 /** The window the rate is measured over, and the least history that may be measured. */
 export const FORECAST_WINDOW_MONTHS = 6;
 export const FORECAST_MIN_MONTHS = 2;
+/**
+ * How far ahead a forecast is still worth printing. A rate that positive but
+ * tiny against a large remainder answers with a year a person cannot plan
+ * around — and beyond year 9999 it is not even an `IsoDate` any more, which is
+ * how this case was found.
+ */
+export const FORECAST_HORIZON_YEARS = 50;
 
 const DAYS_IN_MONTH = 30;
+const HORIZON_DAYS = FORECAST_HORIZON_YEARS * 365;
 
 /**
  * When the Goal is reached if the last months repeat themselves. The rate is
@@ -79,8 +87,8 @@ const DAYS_IN_MONTH = 30;
  *
  * It answers with a reason rather than a date whenever the answer would be
  * invented — too little history to average, a balance going nowhere or
- * backwards, a Goal already reached. A screen can say any of those plainly; it
- * cannot say "infinity".
+ * backwards, a Goal already reached, or a date past the horizon anyone plans
+ * around. A screen can say any of those plainly; it cannot say "infinity".
  */
 export function goalForecast(
   goal: Goal,
@@ -100,6 +108,7 @@ export function goalForecast(
 
   const months = progress.remaining.amount.div(rate);
   const days = months.times(DAYS_IN_MONTH).ceil().toNumber();
+  if (days > HORIZON_DAYS) return { kind: 'none', reason: 'too_far' };
   return {
     kind: 'date',
     on: addDays(today, days),
