@@ -9,8 +9,13 @@ Source: SDD ledger for `docs/superpowers/plans/2026-09-21-phase-4-goals-assets.m
 
 - `achieved_at` is stamped from the linked Accounts that hold the Goal's **own** currency, and those alone (the plan's Task 7 note, adopted). No request path here has a rate table, and a stamp that depends on today's rate is a stamp a rate could take back. A Goal funded entirely in other currencies is stamped by the next same-currency write, or by its owner's own edit. Cost if wrong: a goal reached only across currencies shows unstamped until one of those two happens.
 
+- `GoalForecast` gained `too_far` _and_ a correctness fix behind it: decimal.js calls zero positive, so the plan's `!rate.isPositive()` guard let a flat balance through and divided the remainder by zero. `gt(0)` is the guard; the flat case now says "not advancing", which is what it is. Cost if wrong: none — the previous behaviour printed a year in the tens of thousands.
+- The goals and assets modules ship `offline.ts` with their query keys but no registered mutation. Nothing a goal does is written in a lift, and the write with the best claim — recording a valuation in front of the thing — is wired when TASK-036 gives edits and deletes a general home. Cost if wrong: a valuation typed offline is lost until then, the same as every other edit today.
+
 ## Deferred minors
 
+- The valuation journal has no cursor pagination (TASK-033 AC #6 asks for it). An asset carries a handful of opinions, not a ledger, and the endpoint serves them newest-first in one response; pagination is wiring with no load to justify it yet. Left unchecked on the task.
+- The five-tab pill was not proven at 320 px in a real browser, and the glass contrast proof was not re-run against the new geometry (TASK-031 AC #6). Both navigations are covered by tests at the DOM level, and the existing glass-panel suite passes unchanged, but neither is the visual check the plan asks for. Left unchecked.
 - Task 5 step 4: `supabase db reset` was not run. The local database holds an import — 48 accounts, 84 inflows, 33 expenses — and the owner chose to keep it. The three migrations were applied to the running database instead, and all four constraints from step 5 were proven inside a transaction that was rolled back (a zero target refused, deleting a Goal released its Account, deleting an Asset took its valuations, a second valuation on the same day refused). The "applies from empty" proof stays on the hand-off checklist.
 
 ## Plan errata
