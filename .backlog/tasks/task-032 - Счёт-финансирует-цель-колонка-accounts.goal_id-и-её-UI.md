@@ -45,3 +45,15 @@ ordinal: 30000
 <!-- SECTION:NOTES:BEGIN -->
 Ветка phase-4 (общая на фазу). Готово: миграция accounts.goal_id, goalId в AccountDto и UpdateAccountInput, PATCH /accounts/{id} со связыванием и освобождением, отказы: 404 чужая цель, 409 account_already_linked, 409 goal_archived. Осталось: веб (задача 14).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Связь «счёт финансирует цель», на ветке phase-4.
+
+Миграция добавляет accounts.goal_id (nullable, FK на goals, on delete set null) — удаление цели освобождает счета, деньги никуда не делись. goalId попал в AccountDto и только в UpdateAccountInput: цель выбирают на экране цели, когда оба уже существуют, поэтому при создании счёта её называть нечем.
+
+PATCH /accounts/{id} связывает и отвязывает, отвечает 404 на чужую цель, 409 account_already_linked на счёт, который держит другая цель, и 409 goal_archived на архивную. Шит привязки на экране цели показывает занятые счета отключёнными и называет цель, которая их держит, а когда свободных нет — говорит именно это, а не «нет счетов».
+
+Проверено: accounts-goal-link.test.ts (4 теста), LinkAccountSheet.test.ts (3 теста, включая отправку goalId: null при отвязке), pg-goal-archive.test.ts доказывает освобождение счетов в одной транзакции и откат при сбое. bun run test, lint, typecheck, build — зелёные.
+<!-- SECTION:FINAL_SUMMARY:END -->
