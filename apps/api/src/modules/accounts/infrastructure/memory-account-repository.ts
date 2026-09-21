@@ -44,7 +44,7 @@ export class MemoryAccountRepository implements AccountRepository {
     return Promise.all(rows.map((r) => this.withBalance(r)));
   }
   async create(userId: string, data: NewAccount, opening?: OpeningBalance) {
-    const row: Stored = { ...data, id: randomUUID(), userId, archivedAt: null };
+    const row: Stored = { ...data, id: randomUUID(), userId, archivedAt: null, goalId: null };
     this.rows.push(row);
     if (opening)
       await this.balances.insert(userId, {

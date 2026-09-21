@@ -41,6 +41,7 @@ const acc = (id: string, currency: string) => ({
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: '100',
   balanceRecordedAt: null,
 });

@@ -45,6 +45,7 @@ export const acc = (id: string, currency: string, over: object = {}) => ({
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: '100',
   balanceRecordedAt: '2026-09-01T00:00:00.000Z',
   ...over,

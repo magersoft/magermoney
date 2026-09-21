@@ -70,6 +70,7 @@ const account = {
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: '800',
   balanceRecordedAt: null,
 };

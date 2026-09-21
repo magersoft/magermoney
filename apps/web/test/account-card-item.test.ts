@@ -26,6 +26,7 @@ const dto = (over: Partial<AccountDto> = {}): AccountDto => ({
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: '1200.00',
   balanceRecordedAt: null,
   ...over,

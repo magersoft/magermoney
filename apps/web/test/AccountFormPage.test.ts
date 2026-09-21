@@ -50,6 +50,7 @@ const created = {
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: null,
   balanceRecordedAt: null,
 };

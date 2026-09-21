@@ -29,6 +29,8 @@ export const AccountDtoSchema = z
     archivedAt: z.iso.datetime().nullable(),
     balance: DecimalString.nullable(),
     balanceRecordedAt: z.iso.datetime().nullable(),
+    /** The Goal this Account funds, or null. An Account funds at most one. */
+    goalId: z.uuid().nullable(),
   })
   .openapi('Account');
 export type AccountDto = z.infer<typeof AccountDtoSchema>;
@@ -86,8 +88,17 @@ export const CreateAccountInputSchema = z
   .openapi('CreateAccountInput');
 export type CreateAccountInput = z.infer<typeof CreateAccountInputSchema>;
 
+/*
+ * `goalId` is on the update only, not on `accountFields`: an Account is linked
+ * to a Goal from the Goal's own screen, after both exist. Nothing creating an
+ * account has a goal to name yet.
+ */
 export const UpdateAccountInputSchema = z
-  .object(accountFields)
+  .object({
+    ...accountFields,
+    /** The Goal this Account funds, or null. An Account funds at most one. */
+    goalId: z.uuid().nullable(),
+  })
   .partial()
   .refine(cardFieldsOnlyOnCards, CARD_MESSAGE)
   .openapi('UpdateAccountInput');

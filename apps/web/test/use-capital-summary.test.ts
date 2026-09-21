@@ -27,6 +27,7 @@ const base: AccountDto = {
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: '100',
   balanceRecordedAt: null,
 };

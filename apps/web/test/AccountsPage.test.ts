@@ -68,6 +68,7 @@ const acc = (id: string, over: object) => ({
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: '100',
   balanceRecordedAt: null,
   ...over,

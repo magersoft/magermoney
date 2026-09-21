@@ -10,3 +10,5 @@ export * from './income-source.js';
 export * from './inflow.js';
 export * from './expense.js';
 export * from './budget.js';
+export * from './goal.js';
+export * from './asset.js';

@@ -15,4 +15,6 @@ _(none yet)_
 
 - Task 1 and Task 3: the `Rate` literals in the test blocks omit `date` and `source`, both required by `packages/domain/src/rate.ts`. Written as the repo's own tests do, through a local `rate()` helper.
 - Task 1: the plan's three test cases never reach the zero-target guard in its own implementation block, so the plan as written leaves the domain package's 100 % branch gate red. One case added.
+- Task 4: the file list names only `packages/contracts`, but `goalId` on `AccountDtoSchema` is a required field on a schema three packages already parse against. It broke the API's `toAccountDto` at typecheck and 46 web tests at runtime, none of them in the task's list. `AccountRow` gained `goalId` (excluded from `NewAccount`, added explicitly to `AccountPatch`), both account repositories carry it, and every web account fixture gained `goalId: null`.
+- Task 4: `goalId` belongs on `UpdateAccountInputSchema` only, not on the shared `accountFields` — that object also builds `CreateAccountInputSchema`, and nothing creating an Account has a Goal to name yet.
 - Task 2: the expected forecast date `2026-10-15` is four days off. The implementation in the very next block defines a month as 30 days, and seven of those from 15 March land on 11 October.

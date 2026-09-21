@@ -19,6 +19,7 @@ const dto = {
   note: null,
   sortOrder: 0,
   archivedAt: null,
+  goalId: null,
   balance: '10',
   balanceRecordedAt: '2026-09-11T00:00:00.000Z',
 };

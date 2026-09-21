@@ -20,16 +20,22 @@ export interface AccountRow {
   note: string | null;
   sortOrder: number;
   archivedAt: string | null; // ISO
+  /** The Goal this Account funds, or null. An Account funds at most one. */
+  goalId: string | null;
   /** Latest balance entry, joined. */
   balance: string | null;
   balanceRecordedAt: string | null;
 }
 
+/*
+ * `goalId` is not part of a new Account: an Account is linked to a Goal from
+ * the Goal's own screen, once both exist. It is patchable, and only patchable.
+ */
 export type NewAccount = Omit<
   AccountRow,
-  'id' | 'userId' | 'archivedAt' | 'balance' | 'balanceRecordedAt'
+  'id' | 'userId' | 'archivedAt' | 'goalId' | 'balance' | 'balanceRecordedAt'
 >;
-export type AccountPatch = Partial<NewAccount>;
+export type AccountPatch = Partial<NewAccount> & { goalId?: string | null };
 export interface OpeningBalance {
   amount: string;
   recordedAt: string;
