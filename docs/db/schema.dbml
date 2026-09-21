@@ -66,7 +66,7 @@ Table accounts [note: 'phase 2. Holds exactly one currency. Card-specific fields
   card_type card_type [note: 'card only']
   is_spending bool [not null, default: false, note: 'counts towards available-until-payday']
   is_pinned bool [not null, default: false, note: 'shown in the Home screen strip']
-  goal_id uuid [ref: > goals.id, note: 'phase 4: added by a later migration']
+  goal_id uuid [ref: > goals.id, note: 'phase 4. The goal this account funds, at most one. Deleting the goal sets it null — the money did not go anywhere.']
   card_last4 text
   card_network text [note: 'Visa, MasterCard, Mir']
   card_tier text [note: 'Classic, Gold, Platinum, Elite, Digital']
@@ -195,7 +195,7 @@ Table budgets [note: 'phase 3. Variable category with a monthly limit.'] {
 
 // ---------- phase 4: where it is going ----------
 
-Table goals [note: 'phase 4. Funded amount = sum of linked accounts (accounts.goal_id).'] {
+Table goals [note: 'phase 4. Funded amount = sum of linked accounts (accounts.goal_id), computed by the client at today rates (ADR 0003) — never stored. achieved_at is stamped once by the server and a falling rate never clears it; archived_at is the owner decision and releases the accounts. check: target_amount > 0'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
   name text [not null]
@@ -203,13 +203,12 @@ Table goals [note: 'phase 4. Funded amount = sum of linked accounts (accounts.go
   target_amount numeric [not null]
   currency text [not null, ref: > currencies.code]
   target_date date
-  monthly_share numeric [not null, default: 0, note: 'share of monthly savings, 0..1']
-  income_source_id uuid [ref: > income_sources.id, note: 'which income feeds it (informational)']
   achieved_at timestamptz
+  archived_at timestamptz
   sort_order int [not null, default: 0]
 }
 
-Table assets [note: 'phase 4. Owned things with an estimated value, e.g. the car. Never a Goal.'] {
+Table assets [note: 'phase 4. Owned things with an estimated value, e.g. the car. Never a Goal. Current value = latest asset_valuations row, never a column here (ADR 0002). check: purchase_price > 0'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
   name text [not null]
@@ -217,9 +216,10 @@ Table assets [note: 'phase 4. Owned things with an estimated value, e.g. the car
   counts_in_total bool [not null, default: false]
   acquired_on date
   purchase_price numeric
+  archived_at timestamptz
 }
 
-Table asset_valuations [note: 'phase 4. Valuation history.'] {
+Table asset_valuations [note: 'phase 4. Valuation history. One valuation per asset per day: unique (asset_id, valued_on). Deleting the asset takes them with it. check: value > 0'] {
   id uuid [pk]
   user_id uuid [not null, ref: > profiles.id]
   asset_id uuid [not null, ref: > assets.id]
