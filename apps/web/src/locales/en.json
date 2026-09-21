@@ -129,7 +129,7 @@
     "linked": "Linked",
     "linkHint": "An account funds at most one goal.",
     "takenBy": "Already funds \"{name}\"",
-    "noFreeAccounts": "No accounts free.",
+    "noFreeAccounts": "Every account already funds another goal. Free one up first.",
     "release": "Unlink",
     "releaseNamed": "Unlink the account {name}",
     "archive": "Archive this goal",
@@ -151,7 +151,8 @@
       "saved": "Goal updated",
       "created": "Goal created",
       "missing": "No such goal."
-    }
+    },
+    "noAccountsAtAll": "No accounts yet. Add one first."
   },
   "assets": {
     "title": "Assets",

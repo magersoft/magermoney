@@ -43,6 +43,9 @@ const rows = computed(() =>
     })),
 );
 
+/** How many could be linked right now: this goal's own, plus the untaken. */
+const freeCount = computed(() => rows.value.filter((r) => r.takenBy === null).length);
+
 async function toggle(accountId: string, here: boolean) {
   try {
     await update(accountId, { goalId: here ? null : props.goalId });
@@ -91,6 +94,18 @@ async function toggle(accountId: string, here: boolean) {
         v-if="rows.length === 0"
         class="text-muted-foreground p-3 text-sm"
         data-testid="link-no-accounts"
+      >
+        {{ t('goals.noAccountsAtAll') }}
+      </p>
+
+      <!--
+        Every account is taken. Saying "no accounts" here would be a lie about
+        the money; the reason is what the person needs to act on.
+      -->
+      <p
+        v-else-if="freeCount === 0"
+        class="text-muted-foreground p-3 text-sm"
+        data-testid="link-none-free"
       >
         {{ t('goals.noFreeAccounts') }}
       </p>
