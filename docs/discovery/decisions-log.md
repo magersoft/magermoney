@@ -115,3 +115,17 @@ Execution rulings that changed owner-visible behaviour (the full list, with the 
 - The expense form's category field is a text input backed by a `<datalist>`: a known name sends the category id, anything else creates the category by name.
 - Import: a forced inflows import is refused while any Inflow is still credited to an Account. Forcing the expenses kind deletes every expense, every budget, and then every category left without an expense — including categories created in the app, with their sort order.
 - Import: rows that cannot be read stop the run and are listed together — every mapping problem of all three sheets at once.
+
+## Phase 4 (2026-09-21)
+
+Brainstorm decisions (spec §1, `docs/superpowers/specs/2026-09-21-phase-4-goals-assets-design.md`):
+
+1. Phase 4 is Goals, `accounts.goal_id` and Assets. Snapshots stay in phase 5, as `schema.dbml` already had them; only TASK-029's own acceptance criterion said otherwise.
+2. A Goal answers "when will I reach it at the current rate?", so it carries a target amount and the screen carries a forecast.
+3. The rate is measured rather than declared: average monthly growth of the linked Accounts over the last 6 whole months of `balance_entries`. Fewer than 2 whole months of history, or a non-positive rate, means no forecast — and the screen says so instead of printing an infinity.
+4. Assets are the second segment of the fifth tab, the way Budgets are a segment of Plan. The tab is still called "Goals".
+5. An Asset joins the total capital through its own `counts_in_total` flag, decided when it is created. Home keeps one capital figure; there is no with/without switch.
+6. A Goal's life is active → achieved → archived. `achieved_at` is stamped once by the server and never cleared by a falling rate; only archiving is manual, and it releases the Goal's Accounts in the same transaction.
+7. An Account is linked from the Goal's screen, choosing among Accounts no Goal holds. The write is `PATCH /accounts/{id}` with `goalId`, so the `goals` module never writes another module's table.
+8. An Asset's current value is the last row of its valuation journal, never a column beside it (ADR 0002).
+9. `goals.monthly_share` and `goals.income_source_id` are dropped from the `schema.dbml` sketch: they encoded the share-based split that phase 3 decision #7 had already deferred.
