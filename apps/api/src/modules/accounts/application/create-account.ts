@@ -10,7 +10,7 @@ import { notInFuture, toAccountDto } from './dto.js';
 export interface AccountDeps {
   /** Balance writes and the account delete take the account lock inside one transaction, exactly like transfers. */
   uow: UnitOfWork<Repos>;
-  repos: Pick<Repos, 'accounts' | 'balances' | 'transfers'>;
+  repos: Pick<Repos, 'accounts' | 'balances' | 'transfers' | 'goals'>;
   registry: CurrencyLookup;
   clock: Clock;
 }

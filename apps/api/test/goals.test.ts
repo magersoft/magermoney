@@ -48,3 +48,51 @@ describe('goals', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('archiving a goal', () => {
+  const savings = {
+    name: 'Savings',
+    bank: 'N26',
+    country: 'DE',
+    currency: 'EUR',
+    kind: 'bank_account',
+  };
+
+  it('releases the accounts it held, in one transaction', async () => {
+    const app = mk();
+    const goal = await (await authed(app, 'POST', '/goals', car)).json();
+    const account = await (await authed(app, 'POST', '/accounts', savings)).json();
+    await authed(app, 'PATCH', `/accounts/${account.id}`, { goalId: goal.id });
+
+    const archived = await authed(app, 'PATCH', `/goals/${goal.id}`, {
+      archivedAt: '2026-09-21T10:00:00.000Z',
+    });
+    expect(archived.status).toBe(200);
+    expect((await archived.json()).archivedAt).toBe('2026-09-21T10:00:00.000Z');
+
+    // There is no GET /accounts/{id}; the list is what the app serves.
+    const after = await (await authed(app, 'GET', '/accounts')).json();
+    expect(after.find((a: { id: string }) => a.id === account.id).goalId).toBeNull();
+  });
+
+  it('stamps achievedAt once and does not clear it when the money leaves', async () => {
+    const app = mk();
+    const goal = await (
+      await authed(app, 'POST', '/goals', { name: 'Phone', targetAmount: '1000', currency: 'EUR' })
+    ).json();
+    const account = await (
+      await authed(app, 'POST', '/accounts', {
+        ...savings,
+        openingBalance: { amount: '1200' },
+      })
+    ).json();
+
+    await authed(app, 'PATCH', `/accounts/${account.id}`, { goalId: goal.id });
+    const reached = await (await authed(app, 'GET', `/goals/${goal.id}`)).json();
+    expect(reached.achievedAt).not.toBeNull();
+
+    await authed(app, 'PATCH', `/accounts/${account.id}`, { goalId: null });
+    const still = await (await authed(app, 'GET', `/goals/${goal.id}`)).json();
+    expect(still.achievedAt).toBe(reached.achievedAt);
+  });
+});

@@ -11,6 +11,7 @@ import { ERRORS, fail } from '../../accounts/http/routes.js';
 import {
   createGoal,
   deleteGoal,
+  getGoal,
   listGoals,
   updateGoal,
   type GoalDeps,
@@ -26,7 +27,12 @@ const body = <S extends z.ZodTypeAny>(schema: S) => ({
 
 export function goalRoutes(deps: AppDeps) {
   const r = new OpenAPIHono<AppEnv>();
-  const uc: GoalDeps = { repos: deps.repos, registry: deps.registry };
+  const uc: GoalDeps = {
+    repos: deps.repos,
+    registry: deps.registry,
+    clock: deps.clock,
+    uow: deps.uow,
+  };
   const guard = requireUser({ jwks: deps.jwks, secret: deps.jwtSecret });
   r.use('/goals', guard);
   r.use('/goals/*', guard);
@@ -39,6 +45,20 @@ export function goalRoutes(deps: AppDeps) {
       responses: { 200: json(z.array(GoalDtoSchema), 'Including archived goals'), ...ERRORS },
     }),
     async (c) => c.json(await listGoals(uc)(c.var.userId), 200),
+  );
+  r.openapi(
+    createRoute({
+      method: 'get',
+      path: '/goals/{id}',
+      security: [{ bearer: [] }],
+      request: { params: IdParamSchema },
+      responses: { 200: json(GoalDtoSchema, 'One goal'), ...ERRORS },
+    }),
+    async (c) =>
+      (await getGoal(uc)(c.var.userId, c.req.valid('param').id)).match(
+        (dto) => c.json(dto, 200),
+        (e) => fail(c, e),
+      ),
   );
   r.openapi(
     createRoute({

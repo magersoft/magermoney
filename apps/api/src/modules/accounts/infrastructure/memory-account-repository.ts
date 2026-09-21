@@ -63,6 +63,21 @@ export class MemoryAccountRepository implements AccountRepository {
     Object.assign(row, patch);
     return this.withBalance(row);
   }
+  async listByGoal(userId: string, goalId: string) {
+    const rows = this.mine(userId).filter((r) => r.goalId === goalId);
+    return Promise.all(rows.map((r) => this.withBalance(r)));
+  }
+  async setGoal(userId: string, accountId: string, goalId: string | null) {
+    const row = this.mine(userId).find((r) => r.id === accountId);
+    if (!row) return null;
+    row.goalId = goalId;
+    return this.withBalance(row);
+  }
+  async clearGoal(userId: string, goalId: string) {
+    const rows = this.mine(userId).filter((r) => r.goalId === goalId);
+    for (const r of rows) r.goalId = null;
+    return rows.length;
+  }
   async setArchived(userId: string, id: string, archivedAt: string | null) {
     const row = this.mine(userId).find((r) => r.id === id);
     if (!row) return null;

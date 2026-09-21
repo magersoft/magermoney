@@ -91,6 +91,23 @@ export class PgAccountRepository implements AccountRepository {
         .sql`update accounts set ${this.sql(data)} where user_id = ${userId} and id = ${id}`;
     return this.findById(userId, id);
   }
+  async listByGoal(userId: string, goalId: string) {
+    const rows = await this.sql<
+      Raw[]
+    >`${this.sql.unsafe(SELECT)} where a.user_id = ${userId} and a.goal_id = ${goalId} order by a.sort_order, a.name`;
+    return rows.map(fromRaw);
+  }
+  async setGoal(userId: string, accountId: string, goalId: string | null) {
+    await this
+      .sql`update accounts set goal_id = ${goalId} where user_id = ${userId} and id = ${accountId}`;
+    return this.findById(userId, accountId);
+  }
+  async clearGoal(userId: string, goalId: string) {
+    return (
+      await this
+        .sql`update accounts set goal_id = null where user_id = ${userId} and goal_id = ${goalId}`
+    ).count;
+  }
   async setArchived(userId: string, id: string, archivedAt: string | null) {
     await this
       .sql`update accounts set archived_at = ${archivedAt} where user_id = ${userId} and id = ${id}`;

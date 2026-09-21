@@ -54,6 +54,12 @@ export interface AccountRepository {
     userId: string,
     id: string,
   ): Promise<'deleted' | 'not_found' | 'has_transfers' | 'has_inflows'>;
+  /** The accounts funding one goal. */
+  listByGoal(userId: string, goalId: string): Promise<AccountRow[]>;
+  /** Sets or clears the goal on one account; returns the row, or null when it is not the user's. */
+  setGoal(userId: string, accountId: string, goalId: string | null): Promise<AccountRow | null>;
+  /** Clears the goal on every account that funds it; returns how many were released. */
+  clearGoal(userId: string, goalId: string): Promise<number>;
   /** Assigns sort_order 0..n-1 in the given order. False if any id is not the user's. */
   reorder(userId: string, ids: string[]): Promise<boolean>;
   countEntries(userId: string, id: string): Promise<number>;
