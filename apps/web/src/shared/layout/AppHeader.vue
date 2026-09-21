@@ -21,16 +21,11 @@
  * root puts the person there, because `shared/` may not reach into a module to
  * fetch them.
  *
- * A bar with nothing on it is not a bar: where there is no way back, no title,
- * no action and nobody in the corner, it is not rendered on a phone rather than
- * drawn empty. A wide window still gets it, because the tab links live in it.
- *
- * The lead counts towards that. It did not once, on the reasoning that a bar
- * holding nothing but a face is still a bar holding nothing — but that was
- * written while Settings was a tab in the phone's pill, so the face was a
- * shortcut and losing it cost nothing. It is now the only way to Settings on a
- * phone, and the home screen names nothing and asks for nothing, so hiding the
- * bar there hid the door.
+ * A bar with nothing on it is not a bar. Where there is no way back, no title
+ * and no action — the home screen — it is not rendered on a phone rather than
+ * drawn empty. The lead does not count towards that: a bar holding nothing but
+ * a face is still a bar holding nothing. A wide window still gets it, because
+ * the tab links live in it.
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -40,12 +35,7 @@ import { Button } from '@magermoney/ui';
 import { backTarget, isCurrent, isRoot, NAV } from '@/shared/layout/nav';
 import type { PageAction } from '@/shared/layout/page-bar';
 
-const { action, title, hasLead } = defineProps<{
-  action: PageAction | null;
-  title: string | null;
-  /** Whether the composition root put somebody in the left corner. */
-  hasLead: boolean;
-}>();
+const { action, title } = defineProps<{ action: PageAction | null; title: string | null }>();
 
 const { t } = useI18n();
 const route = useRoute();
@@ -53,7 +43,7 @@ const router = useRouter();
 
 const canGoBack = computed(() => !isRoot(route.path));
 /** Nothing to hold at phone width, where the wordmark and the links are hidden. */
-const bare = computed(() => !canGoBack.value && !action && !title && !hasLead);
+const bare = computed(() => !canGoBack.value && !action && !title);
 
 /**
  * `router.back()` needs somewhere to go back to. A screen opened from a link,

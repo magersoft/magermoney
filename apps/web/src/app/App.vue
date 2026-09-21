@@ -66,12 +66,9 @@ const quickOpen = ref(false);
       <RouterView />
     </main>
     <AppShell v-else @quick="quickOpen = true">
-      <!--
-        Passed only when there is a face to put there, so the bar can tell an
-        empty corner from a filled one: `v-if` on the template, not inside it.
-      -->
-      <template v-if="showAvatar" #lead>
+      <template #lead>
         <RouterLink
+          v-if="showAvatar"
           to="/settings"
           :aria-label="t('nav.settings')"
           data-testid="nav-avatar"
