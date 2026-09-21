@@ -1,7 +1,7 @@
 ---
 id: TASK-033
 title: 'Assets: вещи с оценочной стоимостью и история оценок'
-status: In Progress
+status: Done
 assignee:
   - '@magersoft'
 created_date: '2026-09-19 13:23'
