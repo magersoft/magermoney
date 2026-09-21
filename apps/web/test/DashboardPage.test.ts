@@ -221,6 +221,19 @@ describe('DashboardPage', () => {
     expect(w.find('[data-testid="currency-switch"]').exists()).toBe(true);
   });
 
+  /*
+   * Home is the one screen whose bar is not drawn on a phone — it names
+   * nothing and asks for nothing — so the face in the greeting row is the way
+   * to Settings here, the way the bar's own face is on every other screen.
+   */
+  it('makes the face in the greeting row the way to settings', async () => {
+    const w = mountPage({ sources: [sourceDto], inflows: [inflowDto], expenses: [] });
+    await flushPromises();
+    const avatar = w.get('[data-testid="home-avatar"]');
+    expect(avatar.attributes('href')).toBe('/settings');
+    expect(avatar.attributes('aria-label')).toBe('Настройки');
+  });
+
   it('sets the total with the rates it was summed at, and what is left until payday', async () => {
     const w = mountPage({
       sources: [sourceDto, unratedSourceDto],

@@ -5,10 +5,14 @@
  * thing this app is actually about — which currency the screen counts in.
  *
  * The avatar is the same disc the top bar carries on the other screens, at the
- * size the reference gives it here and raised off the canvas.
+ * size the reference gives it here and raised off the canvas — and it leads
+ * where that one leads. This screen's bar is not drawn on a phone, because it
+ * names nothing and asks for nothing, so without this the face in the bar has
+ * nowhere to appear and Settings has no door on the screen the app opens to.
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { RouterLink } from 'vue-router';
 import { useSession } from '@/modules/auth';
 import { greetingName, ProfileAvatar, useProfile } from '@/modules/profile';
 import { CurrencySwitch } from '@/modules/rates';
@@ -22,7 +26,14 @@ const name = computed(() => greetingName(profile.value, user.value?.email ?? nul
 
 <template>
   <header class="flex items-center gap-3" data-testid="home-header">
-    <ProfileAvatar data-testid="home-avatar" class="shadow-card size-11 text-base" />
+    <RouterLink
+      to="/settings"
+      :aria-label="t('nav.settings')"
+      data-testid="home-avatar"
+      class="shrink-0 rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
+    >
+      <ProfileAvatar class="shadow-card size-11 text-base" />
+    </RouterLink>
 
     <p class="min-w-0 flex-1 truncate text-sm font-medium" data-testid="home-greeting">
       {{ name ? t('dashboard.greeting.named', { name }) : t('dashboard.greeting.plain') }}
