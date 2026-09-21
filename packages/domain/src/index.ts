@@ -12,6 +12,7 @@ export * from './inflow.js';
 export * from './expense.js';
 export * from './budget.js';
 export * from './account.js';
+export * from './goal.js';
 export * from './transfer.js';
 export * from './read-models.js';
 export * from './plan-read-models.js';
