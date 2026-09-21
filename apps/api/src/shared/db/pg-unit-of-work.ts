@@ -9,6 +9,7 @@ import { PgInflowRepository } from '../../modules/inflows/infrastructure/pg-infl
 import { PgExpenseCategoryRepository } from '../../modules/expenses/infrastructure/pg-expense-category-repository.js';
 import { PgExpenseRepository } from '../../modules/expenses/infrastructure/pg-expense-repository.js';
 import { PgBudgetRepository } from '../../modules/budgets/infrastructure/pg-budget-repository.js';
+import { PgGoalRepository } from '../../modules/goals/infrastructure/pg-goal-repository.js';
 import type { Sql } from './client.js';
 import type { UnitOfWork } from './unit-of-work.js';
 
@@ -23,6 +24,7 @@ export const pgRepos = (sql: Sql): Repos => ({
   expenseCategories: new PgExpenseCategoryRepository(sql),
   expenses: new PgExpenseRepository(sql),
   budgets: new PgBudgetRepository(sql),
+  goals: new PgGoalRepository(sql),
 });
 
 /** One transaction per unit of work; the repositories inside see the same connection, so `for update` locks hold until commit. */

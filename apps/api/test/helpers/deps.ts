@@ -19,6 +19,7 @@ import { MemoryInflowRepository } from '../../src/modules/inflows/infrastructure
 import { MemoryExpenseCategoryRepository } from '../../src/modules/expenses/infrastructure/memory-expense-category-repository.js';
 import { MemoryExpenseRepository } from '../../src/modules/expenses/infrastructure/memory-expense-repository.js';
 import { MemoryBudgetRepository } from '../../src/modules/budgets/infrastructure/memory-budget-repository.js';
+import { MemoryGoalRepository } from '../../src/modules/goals/infrastructure/memory-goal-repository.js';
 
 /** The sample set as the catalogue serves it, for the currency repositories. */
 const toDto = (c: Currency): CurrencyDto => ({
@@ -56,6 +57,7 @@ export function memoryRepos(
     expenseCategories,
     expenses,
     budgets: new MemoryBudgetRepository(),
+    goals: new MemoryGoalRepository(),
   };
 }
 
