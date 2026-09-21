@@ -109,7 +109,8 @@ describe('goalForecast properties', () => {
           }));
           const p = goalProgress(goalOf(1_000_000), accountsOf([falling.at(-1)!]), table);
           const f = goalForecast(goalOf(1_000_000), p, history, '2026-09-21');
-          if (falling[0]! > falling.at(-1)!)
+          /* `>=`, not `>`: a flat series is the case zero-as-positive hid. */
+          if (falling[0]! >= falling.at(-1)!)
             expect(f).toEqual({ kind: 'none', reason: 'not_advancing' });
         },
       ),

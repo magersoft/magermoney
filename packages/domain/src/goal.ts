@@ -104,7 +104,11 @@ export function goalForecast(
   const last = window[window.length - 1]!.total.amount;
   const steps = window.length - 1;
   const rate = last.minus(first).div(steps);
-  if (!rate.isPositive()) return { kind: 'none', reason: 'not_advancing' };
+  /*
+   * `gt(0)`, not `isPositive()`: decimal.js calls zero positive, and a flat
+   * balance divided into the remainder is Infinity, not a date.
+   */
+  if (!rate.gt(0)) return { kind: 'none', reason: 'not_advancing' };
 
   const months = progress.remaining.amount.div(rate);
   const days = months.times(DAYS_IN_MONTH).ceil().toNumber();
