@@ -1,7 +1,7 @@
 ---
 id: TASK-032
 title: 'Счёт финансирует цель: колонка accounts.goal_id и её UI'
-status: In Progress
+status: Done
 assignee:
   - '@magersoft'
 created_date: '2026-09-19 13:23'
