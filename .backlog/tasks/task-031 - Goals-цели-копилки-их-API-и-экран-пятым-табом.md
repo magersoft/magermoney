@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@magersoft'
 created_date: '2026-09-19 13:23'
-updated_date: '2026-09-21 13:37'
+updated_date: '2026-09-21 13:39'
 labels:
   - phase-4
   - api
@@ -67,3 +67,17 @@ ordinal: 29000
 <!-- SECTION:NOTES:BEGIN -->
 Ветка phase-4. Готово: домен (goalProgress, goalForecast, 100 % покрытие), contracts (GoalDto/Input/Update + accounts.goalId), миграция goals + accounts.goal_id, API-модуль goals (CRUD, GET /goals/{id}), архивация в одной deps.uow с освобождением счетов, achieved_at один раз, pg-интеграционные тесты архивации и RLS. Осталось: веб (задачи 11, 12, 13).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Цели-копилки целиком, на ветке phase-4.
+
+Домен: goalProgress и goalForecast в packages/domain, 100 % покрытие (Vitest + fast-check, 116 тестов). У прогноза четыре причины отсутствия вместо трёх: добавлен too_far с горизонтом 50 лет — property-тест нашёл, что при крошечном темпе дата уходит за 9999 год и перестаёт быть IsoDate. Там же исправлена настоящая ошибка: decimal.js считает ноль положительным, из-за чего плоский баланс делился на ноль и давал Infinity; теперь gt(0), и ровный баланс честно говорит «не растёт».
+
+API: модуль goals (CRUD + GET /goals/{id}), архивация в одной deps.uow снимает goal_id со счетов, achieved_at ставится один раз и не снимается при падении курса — считается только по счетам в валюте самой цели, потому что в запросе нет таблицы курсов. Миграция goals с RLS (4 именованные политики) и check target_amount > 0.
+
+Веб: пятый таб «Цели» в обеих навигациях, экран savings на форме экрана План, модуль goals (data-слой, прогресс, прогноз по журналу balance_entries), карточка цели, экран цели со списком финансирующих счетов, форма цели.
+
+Проверено: bun run test (все пакеты), lint, typecheck, build — зелёные. pg-интеграционные тесты архивации и RLS прогнаны на локальной базе (14 файлов, 60 тестов). Ограничения ACs: #6 отмечен частично — обе навигации покрыты тестами (shell.test.ts, bottom-nav.test.ts, NavFiveTabs.test.ts), но проверка пилюли на 320 px в браузере и перепрогон доказательства контраста стекла под пять табов не сделаны; см. docs/discovery/phase-4-execution-ledger.md.
+<!-- SECTION:FINAL_SUMMARY:END -->
