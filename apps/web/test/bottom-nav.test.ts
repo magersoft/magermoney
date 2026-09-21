@@ -36,22 +36,16 @@ async function mountNav(at = '/') {
 }
 
 describe('BottomNav', () => {
-  it('puts the "+" between Accounts and Plan, and gives every tab an icon', async () => {
+  it('puts the "+" in the middle of four tabs, and gives every tab an icon', async () => {
     const nav = await mountNav();
     expect(
       nav
         .findAll('[data-testid^="tab-"], [data-testid="quick-add"]')
         .map((el) => el.attributes('data-testid')),
-    ).toEqual(['tab-home', 'tab-accounts', 'quick-add', 'tab-plan', 'tab-goals', 'tab-settings']);
-    expect(nav.findAll('a').map((a) => a.text())).toEqual([
-      'Home',
-      'Accounts',
-      'Plan',
-      'Goals',
-      'Settings',
-    ]);
+    ).toEqual(['tab-home', 'tab-accounts', 'quick-add', 'tab-plan', 'tab-goals']);
+    expect(nav.findAll('a').map((a) => a.text())).toEqual(['Home', 'Accounts', 'Plan', 'Goals']);
     // One icon per tab, plus the one on the "+".
-    expect(nav.findAll('svg')).toHaveLength(6);
+    expect(nav.findAll('svg')).toHaveLength(5);
   });
 
   it('lights the tab that owns the screen, nested routes included', async () => {
@@ -61,7 +55,13 @@ describe('BottomNav', () => {
     expect(await lit('/accounts/abc')).toEqual(['Accounts']);
     expect(await lit('/transfers')).toEqual(['Accounts']);
     expect(await lit('/plan/income/abc')).toEqual(['Plan']);
-    expect(await lit('/settings/rates')).toEqual(['Settings']);
+    /*
+     * Nothing is lit on a settings screen: the pill has no Settings tab, and
+     * the avatar in the top bar is what leads there on a phone. A pill that lit
+     * the nearest tab instead would claim you were somewhere you are not.
+     */
+    expect(await lit('/settings/rates')).toEqual([]);
+    expect(await lit('/settings')).toEqual([]);
   });
 
   it('asks for the quick actions rather than navigating when the "+" is pressed', async () => {

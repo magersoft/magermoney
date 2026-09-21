@@ -34,7 +34,7 @@
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { PlusIcon } from '@lucide/vue';
-import { isCurrent, NAV } from '@/shared/layout/nav';
+import { isCurrent, PILL_NAV } from '@/shared/layout/nav';
 
 const emit = defineEmits<{ quick: [] }>();
 
@@ -52,12 +52,15 @@ const route = useRoute();
       data-testid="nav-pill"
       class="glass-panel mx-auto flex h-16 max-w-sm items-center rounded-full px-2"
     >
-      <template v-for="(item, i) in NAV" :key="item.to">
+      <template v-for="(item, i) in PILL_NAV" :key="item.to">
         <!--
           The "+" sits in the middle of the row rather than on top of it: a tab
           under a 56px disc is a tab nobody can hit. It rises out of the pill by
           translation, not margin, so the four tabs keep the width they had and
           the press can scale the same disc without fighting the layout.
+
+          Index 2 of four puts two tabs on each side. `PILL_NAV` is what keeps
+          that true: a fifth tab here would push the disc off centre.
         -->
         <button
           v-if="i === 2"

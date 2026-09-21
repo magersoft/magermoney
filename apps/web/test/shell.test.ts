@@ -39,15 +39,20 @@ async function mountShell(at = '/') {
  * The labels of the links that claim to be the current page. Not deduplicated:
  * exactly one tab per navigation has to be lit, so the same label twice is the
  * assertion — once would mean the desktop bar and the phone pill disagree.
+ * Settings is the one section that is a tab in the header only (the avatar
+ * leads there on a phone), so there it is lit once by design.
  */
 const current = (shell: Awaited<ReturnType<typeof mountShell>>) =>
   shell.findAll('a[aria-current="page"]').map((a) => a.text());
 
 describe('AppShell', () => {
-  it('offers five tabs in both navigations, and rates is no longer one of them', async () => {
+  it('gives the header every section and the pill the four that are tabs', async () => {
     const shell = await mountShell();
     const labels = shell.findAll('nav a').map((a) => a.text());
-    // Two navs (desktop bar, phone pill), five links each.
+    /*
+     * The desktop bar carries all five; the phone pill carries four, so the "+"
+     * keeps two tabs on each side. Settings is reached by the avatar there.
+     */
     expect(labels).toEqual([
       'Home',
       'Accounts',
@@ -58,7 +63,6 @@ describe('AppShell', () => {
       'Accounts',
       'Plan',
       'Goals',
-      'Settings',
     ]);
   });
 
@@ -71,7 +75,8 @@ describe('AppShell', () => {
     expect(current(await mountShell('/accounts/abc'))).toEqual(['Accounts', 'Accounts']);
     expect(current(await mountShell('/transfers'))).toEqual(['Accounts', 'Accounts']);
     expect(current(await mountShell('/plan/income/abc'))).toEqual(['Plan', 'Plan']);
-    expect(current(await mountShell('/settings/rates'))).toEqual(['Settings', 'Settings']);
+    // Lit once: Settings is a tab in the header only.
+    expect(current(await mountShell('/settings/rates'))).toEqual(['Settings']);
   });
 
   it('makes the skip link target focusable, so the skip actually moves focus', async () => {

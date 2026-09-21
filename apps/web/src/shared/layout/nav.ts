@@ -1,8 +1,10 @@
 /**
  * The app's sections, in the one order they are ever shown in. Both navigations
  * read this list — the bar at the top of a wide window and the pill at the
- * bottom of a phone — so a section cannot exist in one and be missing from the
- * other, and a tab cannot be lit in one while dark in the other.
+ * bottom of a phone — so a tab cannot be lit in one while dark in the other,
+ * and every path belongs to exactly one section whichever navigation asks.
+ *
+ * One section is not a tab in the pill: see `inPill` and `PILL_NAV` below.
  *
  * Icons come from `@lucide/vue`, which is bundled: a phone with no network
  * still gets its navigation drawn.
@@ -22,18 +24,35 @@ export type NavItem = {
    * starts with "/".
    */
   readonly owns: readonly string[];
+  /**
+   * Whether this section is a tab in the phone's pill. Settings is not: on a
+   * phone the profile avatar in the top bar already leads there, so a tab would
+   * be a second door to the same room — and it is the door that costs the most,
+   * because it pushes the "+" off centre and squeezes four labels into the
+   * width of five. On a wide window there is no avatar and no pill, so it is an
+   * ordinary link in the header.
+   */
+  readonly inPill: boolean;
 };
 
 export const NAV: readonly NavItem[] = [
-  { key: 'home', to: '/', label: 'nav.home', icon: HouseIcon, owns: [] },
+  { key: 'home', to: '/', label: 'nav.home', icon: HouseIcon, owns: [], inPill: true },
   {
     key: 'accounts',
     to: '/accounts',
     label: 'nav.accounts',
     icon: WalletIcon,
     owns: ['/accounts', '/transfers'],
+    inPill: true,
   },
-  { key: 'plan', to: '/plan', label: 'nav.plan', icon: ChartPieIcon, owns: ['/plan'] },
+  {
+    key: 'plan',
+    to: '/plan',
+    label: 'nav.plan',
+    icon: ChartPieIcon,
+    owns: ['/plan'],
+    inPill: true,
+  },
   {
     key: 'goals',
     to: '/goals',
@@ -41,6 +60,7 @@ export const NAV: readonly NavItem[] = [
     icon: TargetIcon,
     /* Assets live on this tab's screen too, so an asset's page lights it. */
     owns: ['/goals', '/assets'],
+    inPill: true,
   },
   {
     key: 'settings',
@@ -48,8 +68,15 @@ export const NAV: readonly NavItem[] = [
     label: 'nav.settings',
     icon: SettingsIcon,
     owns: ['/settings'],
+    inPill: false,
   },
 ];
+
+/**
+ * The tabs the phone's pill draws. Four, so the "+" sits in the middle of them
+ * with two on each side — the shape the pill was designed around.
+ */
+export const PILL_NAV: readonly NavItem[] = NAV.filter((item) => item.inPill);
 
 export const isCurrent = (item: NavItem, path: string): boolean =>
   item.owns.length === 0
