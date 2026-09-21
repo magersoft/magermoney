@@ -44,3 +44,20 @@ ordinal: 29000
 - [ ] #8 Сбой загрузки целей показывает ошибку, а не пустой список
 - [ ] #9 Строки ru.json и en.json прогнаны через humanize-text; bun run test, lint, typecheck и build проходят
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+План исполнения — docs/superpowers/plans/2026-09-21-phase-4-goals-assets.md, задачи 1, 2, 4, 5, 6, 7, 10, 11, 12, 13.
+1. Задача 1 — домен: goalProgress + тесты и property-тесты
+2. Задача 2 — домен: goalForecast (окно 6 мес., минимум 2 мес. истории)
+3. Задача 4 — contracts: zod DTO Goal (совместно с TASK-032/033)
+4. Задача 5 — миграции goals и schema.dbml (совместно)
+5. Задача 6 — API: модуль goals, CRUD, achieved_at один раз
+6. Задача 7 — API: архивация отвязывает счета в одной deps.uow
+7. Задача 10 — pg-интеграционные тесты фазы 4 (совместно)
+8. Задача 11 — веб: пятый таб и модуль savings, маршруты
+9. Задача 12 — веб: data-слой goals и offline-вход
+10. Задача 13 — веб: сегмент Целей, экран цели, форма
+Ветка одна на всю фазу — phase-4 (решение владельца, 2026-09-21).
+<!-- SECTION:PLAN:END -->
