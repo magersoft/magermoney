@@ -20,6 +20,8 @@ import { MemoryExpenseCategoryRepository } from '../../src/modules/expenses/infr
 import { MemoryExpenseRepository } from '../../src/modules/expenses/infrastructure/memory-expense-repository.js';
 import { MemoryBudgetRepository } from '../../src/modules/budgets/infrastructure/memory-budget-repository.js';
 import { MemoryGoalRepository } from '../../src/modules/goals/infrastructure/memory-goal-repository.js';
+import { MemoryAssetRepository } from '../../src/modules/assets/infrastructure/memory-asset-repository.js';
+import { MemoryValuationRepository } from '../../src/modules/assets/infrastructure/memory-valuation-repository.js';
 
 /** The sample set as the catalogue serves it, for the currency repositories. */
 const toDto = (c: Currency): CurrencyDto => ({
@@ -46,6 +48,7 @@ export function memoryRepos(
   const inflows = new MemoryInflowRepository(incomeSources, accounts);
   const expenses = new MemoryExpenseRepository();
   const expenseCategories = new MemoryExpenseCategoryRepository(expenses);
+  const valuations = new MemoryValuationRepository();
   return {
     profiles,
     userCurrencies,
@@ -58,6 +61,8 @@ export function memoryRepos(
     expenses,
     budgets: new MemoryBudgetRepository(),
     goals: new MemoryGoalRepository(),
+    assets: new MemoryAssetRepository(valuations),
+    valuations,
   };
 }
 

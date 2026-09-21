@@ -46,6 +46,8 @@ const gatedUpdate = (repos: Repos, gate: Promise<void>): Repos => ({
   expenses: repos.expenses,
   budgets: repos.budgets,
   goals: repos.goals,
+  assets: repos.assets,
+  valuations: repos.valuations,
   balances: new Proxy(repos.balances, {
     get(target, prop) {
       const value = Reflect.get(target, prop, target) as unknown;
