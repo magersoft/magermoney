@@ -104,16 +104,16 @@
     "fundedOf": "{funded} of {target} {code} saved",
     "unconvertible": "No rate today for: {names}",
     "forecast": {
-      "on": "At this pace — {date}",
+      "on": "At this pace: {date}",
       "achieved": "Goal closed",
-      "pending": "Measuring the pace from the account journals",
-      "not_enough_history": "A pace shows up once there are two months of history",
+      "pending": "Working out the pace",
+      "not_enough_history": "Two months of history and a pace shows up here",
       "not_advancing": "The linked accounts are not growing, so there is no date",
-      "too_far": "At this pace the date lands beyond any planning horizon"
+      "too_far": "At this pace the goal is over 50 years off"
     },
     "empty": {
       "title": "No goals yet",
-      "body": "A goal is an amount you are heading for: a holiday, a buffer, a car. Link accounts to it and this screen works out when you get there."
+      "body": "A goal is an amount you are heading for: a holiday, a buffer, a car. Link accounts to it and you will see when you get there."
     },
     "error": {
       "title": "Goals didn't load",
@@ -190,7 +190,7 @@
       "nameRequired": "Give the asset a name",
       "currency": "Currency",
       "counts": "Count in the capital",
-      "countsHint": "The asset joins the total on the Home screen.",
+      "countsHint": "It will count towards your total on the Home screen.",
       "acquired": "When you got it",
       "price": "What it cost",
       "priceHint": "Optional.",
@@ -199,7 +199,9 @@
       "saved": "Asset updated",
       "created": "Asset created",
       "missing": "No such asset."
-    }
+    },
+    "gainedSince": "{amount} {code} above the {price} it cost",
+    "lostSince": "{amount} {code} below the {price} it cost"
   },
   "income": {
     "title": "Income",

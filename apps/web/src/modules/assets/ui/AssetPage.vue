@@ -52,6 +52,23 @@ usePageAction(() => ({
   testid: 'asset-revalue',
 }));
 
+/**
+ * The move against what it cost. Both amounts are in the asset's own currency,
+ * so no rate is involved and the figure is exact.
+ */
+const sincePurchase = computed(() => {
+  const a = asset.value;
+  if (!a?.value || !a.purchasePrice) return null;
+  const diff = a.value.subtract(a.purchasePrice);
+  if (diff.isErr()) return null;
+  const moved = diff.value;
+  return t(moved.isNegative() ? 'assets.lostSince' : 'assets.gainedSince', {
+    amount: moved.isNegative() ? moved.multiply(-1).round().toString() : moved.round().toString(),
+    code: a.value.currency.code,
+    price: a.purchasePrice.round().toString(),
+  });
+});
+
 async function dropValuation(valuationId: string) {
   try {
     await remove(valuationId);
@@ -85,6 +102,18 @@ async function dropValuation(valuationId: string) {
       <div class="bg-surface shadow-card rounded-xl">
         <AssetRow :asset="asset" />
       </div>
+
+      <!--
+        What it has done since it was bought. Only shown when both numbers
+        exist: a change against a price nobody recorded is not a change.
+      -->
+      <p
+        v-if="sincePurchase"
+        class="text-muted-foreground px-1 text-sm"
+        data-testid="asset-since-purchase"
+      >
+        {{ sincePurchase }}
+      </p>
 
       <div class="flex gap-3">
         <Button
