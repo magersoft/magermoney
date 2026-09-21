@@ -4,9 +4,12 @@ import {
   Decimal,
   Money,
   RateTable,
+  goalForecast,
   goalProgress,
+  FORECAST_MIN_MONTHS,
   type Account,
   type Goal,
+  type MonthlyBalance,
   type Rate,
 } from '../src/index.js';
 
@@ -83,5 +86,57 @@ describe('goalProgress', () => {
     const p = goalProgress(goal, [account({ balance: Money.of(new Decimal(12_000), EUR) })], table);
     expect(p.remaining.amount.toString()).toBe('0');
     expect(p.ratio).toBe(1);
+  });
+});
+
+const series = (...totals: number[]): MonthlyBalance[] =>
+  totals.map((n, i) => ({
+    month: { year: 2026, month: i + 1 },
+    total: Money.of(new Decimal(n), EUR),
+  }));
+
+describe('goalForecast', () => {
+  const progressOf = (funded: number) =>
+    goalProgress(goal, [account({ balance: Money.of(new Decimal(funded), EUR) })], table);
+
+  it('divides what is left by the average monthly growth', () => {
+    // 1000 → 3000 over two steps = 1000 a month; 7000 left = 7 months from
+    // today — and a month is 30 days here, so seven of them land on 11 October,
+    // four days short of the calendar's seventh 15th.
+    const f = goalForecast(goal, progressOf(3_000), series(1_000, 2_000, 3_000), '2026-03-15');
+    expect(f).toEqual({ kind: 'date', on: '2026-10-11', monthlyRate: expect.anything() });
+    if (f.kind === 'date') expect(f.monthlyRate.amount.toString()).toBe('1000');
+  });
+
+  it('says nothing when there is less than two months of history', () => {
+    expect(goalForecast(goal, progressOf(1_000), series(1_000), '2026-01-15')).toEqual({
+      kind: 'none',
+      reason: 'not_enough_history',
+    });
+    expect(FORECAST_MIN_MONTHS).toBe(2);
+  });
+
+  it('says nothing when the balance is not advancing', () => {
+    expect(
+      goalForecast(goal, progressOf(2_000), series(3_000, 2_500, 2_000), '2026-03-15'),
+    ).toEqual({ kind: 'none', reason: 'not_advancing' });
+  });
+
+  it('says nothing for a goal already reached', () => {
+    expect(
+      goalForecast(goal, progressOf(10_000), series(1_000, 5_000, 10_000), '2026-03-15'),
+    ).toEqual({ kind: 'none', reason: 'achieved' });
+  });
+
+  it('reads at most the last six months', () => {
+    // Nine months of history; only the last six (5000 → 8000, 600 a month) count.
+    const f = goalForecast(
+      goal,
+      progressOf(8_000),
+      series(100, 200, 300, 5_000, 5_600, 6_200, 6_800, 7_400, 8_000),
+      '2026-09-15',
+    );
+    if (f.kind !== 'date') throw new Error('expected a date');
+    expect(f.monthlyRate.amount.toString()).toBe('600');
   });
 });

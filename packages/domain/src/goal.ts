@@ -1,4 +1,5 @@
 import type { Account } from './account.js';
+import { addDays, type YearMonth } from './calendar.js';
 import { Money } from './money.js';
 import type { IsoDate } from './rate.js';
 import type { RateTable } from './rate-table.js';
@@ -53,4 +54,55 @@ export function goalProgress(
     ? 1
     : Math.min(1, funded.amount.div(goal.target.amount).toNumber());
   return { funded, remaining, ratio: Math.max(0, ratio), unconvertible };
+}
+
+/** One month's closing total across the linked Accounts, in the Goal's currency. */
+export interface MonthlyBalance {
+  month: YearMonth;
+  total: Money;
+}
+
+export type GoalForecast =
+  | { kind: 'date'; on: IsoDate; monthlyRate: Money }
+  | { kind: 'none'; reason: 'not_enough_history' | 'not_advancing' | 'achieved' };
+
+/** The window the rate is measured over, and the least history that may be measured. */
+export const FORECAST_WINDOW_MONTHS = 6;
+export const FORECAST_MIN_MONTHS = 2;
+
+const DAYS_IN_MONTH = 30;
+
+/**
+ * When the Goal is reached if the last months repeat themselves. The rate is
+ * measured, not declared: the average monthly growth of the linked Accounts
+ * across the last six closing totals.
+ *
+ * It answers with a reason rather than a date whenever the answer would be
+ * invented — too little history to average, a balance going nowhere or
+ * backwards, a Goal already reached. A screen can say any of those plainly; it
+ * cannot say "infinity".
+ */
+export function goalForecast(
+  goal: Goal,
+  progress: GoalProgress,
+  history: readonly MonthlyBalance[],
+  today: IsoDate,
+): GoalForecast {
+  if (progress.remaining.amount.isZero()) return { kind: 'none', reason: 'achieved' };
+  const window = history.slice(-FORECAST_WINDOW_MONTHS);
+  if (window.length < FORECAST_MIN_MONTHS) return { kind: 'none', reason: 'not_enough_history' };
+
+  const first = window[0]!.total.amount;
+  const last = window[window.length - 1]!.total.amount;
+  const steps = window.length - 1;
+  const rate = last.minus(first).div(steps);
+  if (!rate.isPositive()) return { kind: 'none', reason: 'not_advancing' };
+
+  const months = progress.remaining.amount.div(rate);
+  const days = months.times(DAYS_IN_MONTH).ceil().toNumber();
+  return {
+    kind: 'date',
+    on: addDays(today, days),
+    monthlyRate: Money.of(rate, goal.target.currency),
+  };
 }

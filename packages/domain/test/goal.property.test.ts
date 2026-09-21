@@ -5,6 +5,7 @@ import {
   Decimal,
   Money,
   RateTable,
+  goalForecast,
   goalProgress,
   type Account,
   type Goal,
@@ -71,6 +72,47 @@ describe('goalProgress properties', () => {
         const reached = p.funded.amount.gte(target);
         expect(p.remaining.amount.isZero()).toBe(reached);
       }),
+    );
+  });
+});
+
+describe('goalForecast properties', () => {
+  const rising = fc.array(fc.integer({ min: 1, max: 5_000 }), { minLength: 2, maxLength: 9 });
+
+  it('never forecasts a date in the past', () => {
+    fc.assert(
+      fc.property(rising, (steps) => {
+        let running = 0;
+        const history = steps.map((s, i) => {
+          running += s;
+          return {
+            month: { year: 2026, month: i + 1 },
+            total: Money.of(new Decimal(running), EUR),
+          };
+        });
+        const p = goalProgress(goalOf(1_000_000), accountsOf([running]), table);
+        const f = goalForecast(goalOf(1_000_000), p, history, '2026-09-21');
+        if (f.kind === 'date') expect(f.on >= '2026-09-21').toBe(true);
+      }),
+    );
+  });
+
+  it('never forecasts a date when the rate is not positive', () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.integer({ min: 0, max: 5_000 }), { minLength: 2, maxLength: 9 }),
+        (xs) => {
+          const falling = [...xs].sort((a, b) => b - a);
+          const history = falling.map((n, i) => ({
+            month: { year: 2026, month: i + 1 },
+            total: Money.of(new Decimal(n), EUR),
+          }));
+          const p = goalProgress(goalOf(1_000_000), accountsOf([falling.at(-1)!]), table);
+          const f = goalForecast(goalOf(1_000_000), p, history, '2026-09-21');
+          if (falling[0]! > falling.at(-1)!)
+            expect(f).toEqual({ kind: 'none', reason: 'not_advancing' });
+        },
+      ),
     );
   });
 });
