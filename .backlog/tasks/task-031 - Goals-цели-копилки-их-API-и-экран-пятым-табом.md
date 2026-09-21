@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@magersoft'
 created_date: '2026-09-19 13:23'
-updated_date: '2026-09-21 12:42'
+updated_date: '2026-09-21 13:14'
 labels:
   - phase-4
   - api
@@ -61,3 +61,9 @@ ordinal: 29000
 10. Задача 13 — веб: сегмент Целей, экран цели, форма
 Ветка одна на всю фазу — phase-4 (решение владельца, 2026-09-21).
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ветка phase-4. Готово: домен (goalProgress, goalForecast, 100 % покрытие), contracts (GoalDto/Input/Update + accounts.goalId), миграция goals + accounts.goal_id, API-модуль goals (CRUD, GET /goals/{id}), архивация в одной deps.uow с освобождением счетов, achieved_at один раз, pg-интеграционные тесты архивации и RLS. Осталось: веб (задачи 11, 12, 13).
+<!-- SECTION:NOTES:END -->
