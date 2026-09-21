@@ -1,10 +1,11 @@
 ---
 id: TASK-031
 title: 'Goals: цели-копилки, их API и экран пятым табом'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@magersoft'
 created_date: '2026-09-19 13:23'
-updated_date: '2026-09-21 12:00'
+updated_date: '2026-09-21 12:42'
 labels:
   - phase-4
   - api
