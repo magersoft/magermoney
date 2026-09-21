@@ -1,10 +1,11 @@
 ---
 id: TASK-033
 title: 'Assets: вещи с оценочной стоимостью и история оценок'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@magersoft'
 created_date: '2026-09-19 13:23'
-updated_date: '2026-09-21 12:00'
+updated_date: '2026-09-21 13:14'
 labels:
   - phase-4
   - api
@@ -42,3 +43,9 @@ Asset — то, чем владеют и что имеет оценочную с
 - [ ] #8 Сбой загрузки активов показывает ошибку, а не пустой список
 - [ ] #9 Строки ru.json и en.json прогнаны через humanize-text; bun run test, lint, typecheck и build проходят
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ветка phase-4 (общая на фазу). Готово: домен (assetValue, assetsTotal), contracts (Asset/Valuation DTO), миграция assets + asset_valuations, API-модуль assets с журналом оценок, RLS-тест. Осталось: веб (задачи 15, 16).
+<!-- SECTION:NOTES:END -->
