@@ -37,7 +37,7 @@ const bar = providePageBar();
       {{ t('a11y.skipToContent') }}
     </a>
 
-    <AppHeader :action="bar.action.value" :title="bar.title.value">
+    <AppHeader :action="bar.action.value" :title="bar.title.value" :has-lead="Boolean($slots.lead)">
       <template #lead>
         <slot name="lead" />
       </template>

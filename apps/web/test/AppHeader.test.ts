@@ -156,10 +156,18 @@ describe('the top bar', () => {
     expect(inner.shell.find('[data-testid="lead"]').exists()).toBe(false);
   });
 
-  /* A bar holding nothing but a face is still a bar holding nothing. */
-  it('stays undrawn on a phone even when a lead is offered', async () => {
+  /*
+   * This used to assert the opposite: a bar holding nothing but a face was
+   * held to be a bar holding nothing. That was true while Settings was a tab
+   * in the phone's pill and the face was only a shortcut. The pill now carries
+   * four tabs and Settings is not one of them, so the face is the only way
+   * there — and the home screen, which names nothing and asks for nothing, is
+   * exactly where hiding the bar hid the door.
+   */
+  it('is drawn on a phone when the lead is all it holds', async () => {
     const { shell } = await mountShell('/', { lead: () => h('i', { 'data-testid': 'lead' }) });
-    expect(shell.get('header').classes()).toContain('hidden');
+    expect(shell.get('header').classes()).not.toContain('hidden');
+    expect(shell.find('[data-testid="lead"]').exists()).toBe(true);
   });
 
   /*
