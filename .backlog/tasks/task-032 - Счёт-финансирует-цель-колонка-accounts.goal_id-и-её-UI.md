@@ -1,10 +1,11 @@
 ---
 id: TASK-032
 title: 'Счёт финансирует цель: колонка accounts.goal_id и её UI'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@magersoft'
 created_date: '2026-09-19 13:23'
-updated_date: '2026-09-21 12:00'
+updated_date: '2026-09-21 13:14'
 labels:
   - phase-4
   - api
@@ -38,3 +39,9 @@ ordinal: 30000
 - [ ] #5 Отвязка доступна со строки привязанного счёта на экране цели и шлёт goalId: null
 - [ ] #6 bun run test, lint, typecheck проходят
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ветка phase-4 (общая на фазу). Готово: миграция accounts.goal_id, goalId в AccountDto и UpdateAccountInput, PATCH /accounts/{id} со связыванием и освобождением, отказы: 404 чужая цель, 409 account_already_linked, 409 goal_archived. Осталось: веб (задача 14).
+<!-- SECTION:NOTES:END -->
