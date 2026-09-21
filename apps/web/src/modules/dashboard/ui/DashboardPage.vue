@@ -71,6 +71,7 @@ async function refreshHome() {
         <Motion v-bind="listStagger(0)">
           <TotalBalanceBlock
             :capital="model.capital"
+            :assets="model.assets"
             :rate-date="rateDate"
             :days="model.payday.days"
             :per-day="model.payday.perDay"

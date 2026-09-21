@@ -64,7 +64,8 @@
     "error": {
       "title": "Could not load the home screen",
       "retry": "Try again"
-    }
+    },
+    "assetsUnconvertible": "No rate today for these assets: {names}"
   },
   "plan": {
     "title": "Plan",

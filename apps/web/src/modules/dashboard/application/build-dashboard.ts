@@ -1,5 +1,6 @@
 import {
   addDays,
+  assetsTotal,
   daysToPayday,
   firstOfMonth,
   inflowsVsPlan,
@@ -9,6 +10,7 @@ import {
   parseIso,
   perDay,
   upcomingEvents,
+  type Asset,
   type Budget,
   type CurrencyRegistry,
   type Expense,
@@ -27,6 +29,8 @@ export const UPCOMING_DAYS = 30;
 
 export interface DashboardInput {
   capital: CapitalSummary | undefined;
+  /** Owned things. Only the ones marked for it join the capital. */
+  assets: readonly Asset[];
   sources: readonly IncomeSource[];
   expenses: readonly Expense[];
   budgets: readonly Budget[];
@@ -58,7 +62,14 @@ export interface MonthStat {
   delta: number | null;
 }
 export interface DashboardModel {
+  /**
+   * The accounts *and* the assets marked for the capital: what the person owns,
+   * which is the question the headline number answers. `unconvertible` stays
+   * the accounts' own — the assets report theirs beside it, because an Asset is
+   * not an Account and the screen names them differently.
+   */
   capital: CapitalSummary;
+  assets: { total: Money; unconvertible: Asset[] };
   payday: { date: IsoDate | null; days: number | null; perDay: Money | null };
   plan: MonthPlan;
   /**
@@ -92,7 +103,7 @@ function stat(amount: Money, previous: Money): MonthStat {
 
 /** Pure: the whole home screen. Undefined while capital, rates or the display currency are missing. */
 export function buildDashboard(input: DashboardInput): DashboardModel | undefined {
-  const { capital, sources, expenses, budgets, inflows, table, registry, today } = input;
+  const { capital, assets, sources, expenses, budgets, inflows, table, registry, today } = input;
   const display = registry.get(input.display);
   if (!capital || !table || display.isErr()) return undefined;
 
@@ -124,8 +135,15 @@ export function buildDashboard(input: DashboardInput): DashboardModel | undefine
     });
   };
   const thisMonth = received(today);
+  /* Accounts plus the owned things: one number for everything owned. */
+  const owned = assetsTotal(assets, table, display.value);
+  const withAssets: CapitalSummary = {
+    ...capital,
+    total: capital.total.add(owned.total)._unsafeUnwrap(),
+  };
   return {
-    capital,
+    capital: withAssets,
+    assets: owned,
     payday: {
       date: nextPayday(sources, today),
       days,

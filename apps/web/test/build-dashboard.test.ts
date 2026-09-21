@@ -79,6 +79,7 @@ const capital = {
 };
 const input = (over: object = {}) => ({
   capital,
+  assets: [],
   sources: [source()],
   expenses: [
     expense(),

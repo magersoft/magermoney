@@ -1,6 +1,7 @@
 import { computed, type ComputedRef } from 'vue';
 import { addDays, firstOfMonth, lastOfMonth } from '@magermoney/domain';
 import { useCapitalSummary } from '@/modules/accounts';
+import { useAssets } from '@/modules/assets';
 import { useBudgets } from '@/modules/budgets';
 import { useCurrencyRegistry } from '@/modules/currencies';
 import { useExpenses } from '@/modules/expenses';
@@ -21,6 +22,7 @@ export function useDashboard(): {
 } {
   const today = todayIso();
   const capital = useCapitalSummary();
+  const assets = useAssets();
   const sources = useIncomeSources();
   const expenses = useExpenses();
   const budgets = useBudgets();
@@ -37,6 +39,7 @@ export function useDashboard(): {
     model: computed(() =>
       buildDashboard({
         capital: capital.summary.value,
+        assets: assets.assets.value,
         sources: sources.sources.value,
         expenses: expenses.expenses.value,
         budgets: budgets.budgets.value,
@@ -50,6 +53,7 @@ export function useDashboard(): {
     isLoading: computed(
       () =>
         capital.isLoading.value ||
+        assets.isLoading.value ||
         sources.isLoading.value ||
         expenses.isLoading.value ||
         budgets.isLoading.value ||
@@ -58,6 +62,7 @@ export function useDashboard(): {
     isError: computed(
       () =>
         capital.isError.value ||
+        assets.isError.value ||
         sources.isError.value ||
         expenses.isError.value ||
         budgets.isError.value ||
@@ -65,6 +70,7 @@ export function useDashboard(): {
     ),
     refetch: () => {
       capital.refetch();
+      assets.refetch();
       sources.refetch();
       expenses.refetch();
       budgets.refetch();

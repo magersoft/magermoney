@@ -18,8 +18,10 @@ import type { Money } from '@magermoney/domain';
 import type { CapitalSummary } from '@/modules/accounts';
 import type { AmountLocale } from '@magermoney/ui';
 
-const { capital, days, perDay } = defineProps<{
+const { capital, assets, days, perDay } = defineProps<{
   capital: CapitalSummary;
+  /** The owned things that today's rates cannot price, reported by name. */
+  assets: { unconvertible: { name: string }[] };
   rateDate: string;
   days: number | null;
   perDay: Money | null;
@@ -30,6 +32,8 @@ const amountLocale = computed(() => locale.value as AmountLocale);
 const codes = computed(() =>
   [...new Set(capital.unconvertible.map((a) => a.balance.currency.code))].join(', '),
 );
+/* An asset has no balance to take a code from, so it is named instead. */
+const assetNames = computed(() => assets.unconvertible.map((a) => a.name).join(', '));
 </script>
 
 <template>
@@ -61,6 +65,14 @@ const codes = computed(() =>
       data-testid="dash-unconvertible"
     >
       {{ t('dashboard.unconvertible', { codes }) }}
+    </p>
+
+    <p
+      v-if="assets.unconvertible.length > 0"
+      class="mt-1 text-xs text-muted-foreground"
+      data-testid="dash-assets-unconvertible"
+    >
+      {{ t('dashboard.assetsUnconvertible', { names: assetNames }) }}
     </p>
 
     <!--
