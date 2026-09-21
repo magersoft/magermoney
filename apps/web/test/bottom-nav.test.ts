@@ -42,10 +42,16 @@ describe('BottomNav', () => {
       nav
         .findAll('[data-testid^="tab-"], [data-testid="quick-add"]')
         .map((el) => el.attributes('data-testid')),
-    ).toEqual(['tab-home', 'tab-accounts', 'quick-add', 'tab-plan', 'tab-settings']);
-    expect(nav.findAll('a').map((a) => a.text())).toEqual(['Home', 'Accounts', 'Plan', 'Settings']);
+    ).toEqual(['tab-home', 'tab-accounts', 'quick-add', 'tab-plan', 'tab-goals', 'tab-settings']);
+    expect(nav.findAll('a').map((a) => a.text())).toEqual([
+      'Home',
+      'Accounts',
+      'Plan',
+      'Goals',
+      'Settings',
+    ]);
     // One icon per tab, plus the one on the "+".
-    expect(nav.findAll('svg')).toHaveLength(5);
+    expect(nav.findAll('svg')).toHaveLength(6);
   });
 
   it('lights the tab that owns the screen, nested routes included', async () => {

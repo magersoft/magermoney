@@ -6,7 +6,8 @@
     "home": "Home",
     "accounts": "Accounts",
     "plan": "Plan",
-    "settings": "Settings"
+    "settings": "Settings",
+    "goals": "Goals"
   },
   "dashboard": {
     "title": "Home",
@@ -77,6 +78,126 @@
       "income": "Add income source",
       "expenses": "Add expense",
       "budgets": "Add budget"
+    }
+  },
+  "savings": {
+    "title": "Goals",
+    "sections": "Savings sections",
+    "tabs": {
+      "goals": "Goals",
+      "assets": "Assets"
+    },
+    "add": {
+      "goals": "New goal",
+      "assets": "New asset"
+    }
+  },
+  "goals": {
+    "title": "Goals",
+    "add": "New goal",
+    "achieved": "Reached",
+    "remainingLabel": "Still to save",
+    "reachedLabel": "Saved",
+    "progressLabel": "{name}: {percent}% saved",
+    "progressPending": "Working it out at today's rates",
+    "fundedOf": "{funded} of {target} {code} saved",
+    "unconvertible": "No rate today for: {names}",
+    "forecast": {
+      "on": "At this pace — {date}",
+      "achieved": "Goal closed",
+      "pending": "Measuring the pace from the account journals",
+      "not_enough_history": "A pace shows up once there are two months of history",
+      "not_advancing": "The linked accounts are not growing, so there is no date",
+      "too_far": "At this pace the date lands beyond any planning horizon"
+    },
+    "empty": {
+      "title": "No goals yet",
+      "body": "A goal is an amount you are heading for: a holiday, a buffer, a car. Link accounts to it and this screen works out when you get there."
+    },
+    "error": {
+      "title": "Goals didn't load",
+      "retry": "Try again"
+    },
+    "edit": "Edit",
+    "editNamed": "Edit the goal {name}",
+    "wantedBy": "Wanted by {date}",
+    "funding": "What funds it",
+    "noAccounts": "No accounts yet. Link the one you are saving on.",
+    "link": "Link an account",
+    "linkOne": "Link",
+    "linked": "Linked",
+    "linkHint": "An account funds at most one goal.",
+    "takenBy": "Already funds \"{name}\"",
+    "noFreeAccounts": "No accounts free.",
+    "release": "Unlink",
+    "releaseNamed": "Unlink the account {name}",
+    "archive": "Archive this goal",
+    "archived": "Goal archived",
+    "archiveHint": "The accounts stay where they are, free for another goal.",
+    "form": {
+      "newTitle": "New goal",
+      "editTitle": "Edit goal",
+      "name": "Name",
+      "namePlaceholder": "Holiday, buffer, car",
+      "nameRequired": "Give the goal a name",
+      "target": "How much you need",
+      "targetPositive": "The amount has to be above zero",
+      "currency": "Currency",
+      "by": "Wanted by",
+      "byHint": "Optional.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Goal updated",
+      "created": "Goal created",
+      "missing": "No such goal."
+    }
+  },
+  "assets": {
+    "title": "Assets",
+    "add": "New asset",
+    "total": "Assets in total",
+    "valuedOn": "Valued {date}",
+    "neverValued": "Not valued yet",
+    "notCounted": "outside the capital",
+    "rateDate": "At {date}'s rates",
+    "unconvertible": "No rate today for: {names}",
+    "empty": {
+      "title": "No assets yet",
+      "body": "An asset is a thing worth money: a car, a watch, a laptop. Write it down and re-value it now and then."
+    },
+    "error": {
+      "title": "Assets didn't load",
+      "retry": "Try again"
+    },
+    "edit": "Edit",
+    "revalue": "Re-value",
+    "revalueNamed": "Re-value {name}",
+    "revalueHint": "One valuation per day.",
+    "worth": "What it is worth",
+    "worthPositive": "The valuation has to be above zero",
+    "valuedOnLabel": "As of",
+    "valuationSaved": "Valuation recorded",
+    "journal": "Valuation history",
+    "journalEmpty": "No valuations yet.",
+    "remove": "Delete",
+    "removeValuation": "Delete the valuation from {date}",
+    "form": {
+      "newTitle": "New asset",
+      "editTitle": "Edit asset",
+      "name": "What it is",
+      "namePlaceholder": "Car, watch, laptop",
+      "nameRequired": "Give the asset a name",
+      "currency": "Currency",
+      "counts": "Count in the capital",
+      "countsHint": "The asset joins the total on the Home screen.",
+      "acquired": "When you got it",
+      "price": "What it cost",
+      "priceHint": "Optional.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Asset updated",
+      "created": "Asset created",
+      "missing": "No such asset."
     }
   },
   "income": {

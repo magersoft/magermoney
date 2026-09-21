@@ -8,7 +8,7 @@
  * still gets its navigation drawn.
  */
 import type { FunctionalComponent } from 'vue';
-import { ChartPieIcon, HouseIcon, SettingsIcon, WalletIcon } from '@lucide/vue';
+import { ChartPieIcon, HouseIcon, SettingsIcon, TargetIcon, WalletIcon } from '@lucide/vue';
 
 export type NavItem = {
   readonly key: string;
@@ -34,6 +34,14 @@ export const NAV: readonly NavItem[] = [
     owns: ['/accounts', '/transfers'],
   },
   { key: 'plan', to: '/plan', label: 'nav.plan', icon: ChartPieIcon, owns: ['/plan'] },
+  {
+    key: 'goals',
+    to: '/goals',
+    label: 'nav.goals',
+    icon: TargetIcon,
+    /* Assets live on this tab's screen too, so an asset's page lights it. */
+    owns: ['/goals', '/assets'],
+  },
   {
     key: 'settings',
     to: '/settings',

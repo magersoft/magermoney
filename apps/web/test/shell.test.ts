@@ -44,18 +44,20 @@ const current = (shell: Awaited<ReturnType<typeof mountShell>>) =>
   shell.findAll('a[aria-current="page"]').map((a) => a.text());
 
 describe('AppShell', () => {
-  it('offers four tabs in both navigations, and rates is no longer one of them', async () => {
+  it('offers five tabs in both navigations, and rates is no longer one of them', async () => {
     const shell = await mountShell();
     const labels = shell.findAll('nav a').map((a) => a.text());
-    // Two navs (desktop bar, phone pill), four links each.
+    // Two navs (desktop bar, phone pill), five links each.
     expect(labels).toEqual([
       'Home',
       'Accounts',
       'Plan',
+      'Goals',
       'Settings',
       'Home',
       'Accounts',
       'Plan',
+      'Goals',
       'Settings',
     ]);
   });

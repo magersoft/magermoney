@@ -81,6 +81,41 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/modules/budgets').then((m) => m.BudgetFormPage),
   },
   {
+    path: '/goals',
+    name: 'savings',
+    component: () => import('@/modules/savings').then((m) => m.SavingsPage),
+  },
+  {
+    path: '/goals/new',
+    name: 'goal-new',
+    component: () => import('@/modules/goals').then((m) => m.GoalFormPage),
+  },
+  {
+    path: '/goals/:id',
+    name: 'goal',
+    component: () => import('@/modules/goals').then((m) => m.GoalPage),
+  },
+  {
+    path: '/goals/:id/edit',
+    name: 'goal-edit',
+    component: () => import('@/modules/goals').then((m) => m.GoalFormPage),
+  },
+  {
+    path: '/assets/new',
+    name: 'asset-new',
+    component: () => import('@/modules/assets').then((m) => m.AssetFormPage),
+  },
+  {
+    path: '/assets/:id',
+    name: 'asset',
+    component: () => import('@/modules/assets').then((m) => m.AssetPage),
+  },
+  {
+    path: '/assets/:id/edit',
+    name: 'asset-edit',
+    component: () => import('@/modules/assets').then((m) => m.AssetFormPage),
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import('@/modules/profile').then((m) => m.SettingsPage),

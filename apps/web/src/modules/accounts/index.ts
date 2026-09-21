@@ -24,7 +24,7 @@ export {
   useEditBalance,
   useDeleteBalance,
 } from './application/use-record-balance';
-export { useAccountBalances } from './application/use-account-balances';
+export { useAccountBalances, useBalanceJournals } from './application/use-account-balances';
 export {
   useCapitalSummary,
   summarise,
