@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-20 17:17'
-updated_date: '2026-09-22 08:05'
+updated_date: '2026-09-22 08:06'
 labels: []
 dependencies:
   - TASK-050
@@ -43,3 +43,13 @@ ordinal: 51000
 - [ ] #6 Клавиатура и экранные читалки: у контрола есть подпись, он открывается и закрывается с клавиатуры, фокус возвращается на триггер
 - [ ] #7 Тесты покрывают выбор валюты в каждом из трёх окон и случай единственного значения; существующие тесты, которые ищут `select`, обновлены
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. QuickActionSheet (packages/ui): убрать нативный <select>, на его место — слот #currency внутри обёртки [data-slot="quick-action-currency"], выровненной по сумме. Пропсы currencies/currencyLabel и эмит update:code убрать; code остаётся (его читает QuickAmountGrid).
+2. ExpenseSheet и IncomeSourceSheet: в слот — AppCurrencySelect variant=compact, :model-value=form.currency, @update:model-value выставляет валюту и currencyPicked. Подпись — та же строка, что была у currency-label.
+3. TransferSheet: валюта следует за счётом, выбор из одного значения — в слоте статичная подпись с кодом (data-testid="transfer-currency"), без выпадающего списка.
+4. Тесты: packages/ui/test/quick-action.test.ts — заменить проверку <select> на проверку слота; ExpenseFormPage/IncomeSourceFormPage — читать [data-testid="currency-value"] вместо HTMLSelectElement, добавить выбор валюты через fixture pickCurrency; TransferSheet.test.ts — проверить подпись; новый тест на единственное значение.
+5. Прогнать lint, typecheck, test, build.
+<!-- SECTION:PLAN:END -->
