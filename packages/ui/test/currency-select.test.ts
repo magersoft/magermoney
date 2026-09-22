@@ -171,4 +171,48 @@ describe('CurrencySelect, compact variant', () => {
     expect(w.emitted('update:modelValue')?.at(-1)).toEqual(['EUR']);
     w.unmount();
   });
+
+  /*
+   * The compact trigger stands at the right of an amount, so a list started
+   * from its left edge is wider than what is left of the screen and gets shoved
+   * flat against it. Hung from the right, it lines up with the trigger and
+   * keeps the page's own gutter — and it never grows past the viewport.
+   */
+  it('hangs its list from the right edge it stands at, and never wider than the screen', async () => {
+    const w = mountIt({ variant: 'compact', modelValue: 'USD' });
+    await openAndType(w, '');
+    const list = document.querySelector('[data-slot="combobox-content"]')!;
+    expect(list.getAttribute('data-align')).toBe('end');
+    expect(list.className).toContain('max-w-[calc(100vw-2rem)]');
+    w.unmount();
+  });
+
+  /*
+   * Beside an amount there is no visible label and no form row to tab through,
+   * so the trigger is the whole control: it has to open from the keyboard,
+   * close on Escape, and hand the focus back — otherwise someone who opened it
+   * with the keyboard is dropped at the top of the sheet.
+   */
+  it('opens from the keyboard, closes on Escape and gives the focus back', async () => {
+    const w = mountIt({ variant: 'compact', modelValue: 'USD' });
+    const trigger = w.get('[data-testid="currency-trigger"]').element as HTMLElement;
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+
+    /*
+     * A real `<button>`, which is what makes Enter and Space open it — the
+     * browser turns those into a click, and no test environment does.
+     */
+    expect(trigger.tagName).toBe('BUTTON');
+    trigger.focus();
+    await w.get('[data-testid="currency-trigger"]').trigger('click');
+    await flushPromises();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(document.querySelector('[data-slot="combobox-content"]')).toBeTruthy();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await flushPromises();
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(trigger);
+    w.unmount();
+  });
 });

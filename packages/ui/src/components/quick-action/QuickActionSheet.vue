@@ -48,10 +48,13 @@ const props = withDefaults(
     /** The exact decimal string being typed. */
     amount: string;
     amountLabel: string;
-    /** The currency of that amount, and the ones it can be switched to. */
+    /**
+     * The currency of that amount — what the quick amounts are drawn in. How it
+     * is chosen is the screen's business: the `currency` slot holds whatever
+     * control belongs beside the number, from an app's currency picker to a
+     * plain caption where there is nothing to choose.
+     */
     code: string;
-    currencies: readonly string[];
-    currencyLabel: string;
     scale?: number;
     locale?: AmountLocale;
     /** Расход / Доход / Перевод. Left out, the segment is not shown. */
@@ -83,7 +86,6 @@ const props = withDefaults(
 const emit = defineEmits<{
   'update:open': [open: boolean];
   'update:amount': [amount: string];
-  'update:code': [code: string];
   'update:type': [type: string];
   confirm: [];
 }>();
@@ -94,9 +96,6 @@ const emit = defineEmits<{
  * on the panel people actually see, which is where `$attrs` goes instead.
  */
 defineOptions({ inheritAttrs: false });
-
-const pickCurrency = (event: Event) =>
-  emit('update:code', (event.target as HTMLSelectElement).value);
 </script>
 
 <template>
@@ -175,17 +174,17 @@ const pickCurrency = (event: Event) =>
                 @update:model-value="emit('update:amount', $event)"
               />
             </label>
-            <select
-              data-slot="quick-action-currency"
-              :aria-label="props.currencyLabel"
-              :value="props.code"
-              class="border-input bg-surface text-ink focus-visible:outline-ring h-11 shrink-0 rounded-lg border px-2 font-mono text-sm tracking-[0.08em] uppercase outline-offset-2 focus-visible:outline-2"
-              @change="pickCurrency"
-            >
-              <option v-for="currency in props.currencies" :key="currency" :value="currency">
-                {{ currency }}
-              </option>
-            </select>
+            <!--
+              The control itself belongs to the screen, not here: which
+              currencies are on offer, what they are called and in which
+              language is an app's knowledge, and where a transfer has only the
+              account's own currency there is nothing to open at all. The sheet
+              owns only the place it stands in — beside the number, subordinate
+              to it, never wider than it has to be.
+            -->
+            <div data-slot="quick-action-currency" class="flex shrink-0 items-end">
+              <slot name="currency" />
+            </div>
           </div>
 
           <QuickAmountGrid

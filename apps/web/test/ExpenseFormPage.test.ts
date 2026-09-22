@@ -7,6 +7,7 @@ import ru from '../src/locales/ru.json';
 import { API_KEY } from '../src/shared/api/use-api.js';
 import { resetDisplayCurrency } from '../src/modules/rates/application/use-display-currency.js';
 import ExpenseFormPage from '../src/modules/expenses/ui/ExpenseFormPage.vue';
+import { pickCurrency } from './fixtures/currency-picker.js';
 
 const { toast } = vi.hoisted(() => ({ toast: vi.fn() }));
 vi.mock('@magermoney/ui', async (importOriginal) => {
@@ -125,8 +126,17 @@ describe('ExpenseFormPage', () => {
     const { w } = await mountForm('/plan/expenses/new', fetch);
     /* The currency stands beside the amount now, which is the first field. */
     expect(
-      (sheet().get('[data-slot="quick-action-currency"]').element as HTMLSelectElement).value,
+      sheet().get('[data-testid="expense-currency"] [data-testid="currency-value"]').text(),
     ).toBe('RUB');
+
+    /*
+     * And it is the same picker as everywhere else: a list searched by name,
+     * not three letters in a native select.
+     */
+    await pickCurrency(sheet().get('[data-testid="expense-currency"]').element, 'EUR');
+    expect(
+      sheet().get('[data-testid="expense-currency"] [data-testid="currency-value"]').text(),
+    ).toBe('EUR');
     w.unmount();
   });
 

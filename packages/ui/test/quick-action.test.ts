@@ -95,8 +95,6 @@ describe('QuickActionSheet', () => {
     title: 'Новая операция',
     amount: '0',
     code: 'RUB',
-    currencies: ['RUB', 'USD', 'EUR'],
-    currencyLabel: 'Валюта',
     amountLabel: 'Сумма',
     types: [
       { value: 'expense', label: 'Расход' },
@@ -114,7 +112,10 @@ describe('QuickActionSheet', () => {
   const mountSheet = async (extra: Record<string, unknown> = {}) => {
     const w = mount(QuickActionSheet, {
       props: { ...props, ...extra },
-      slots: { fields: '<div data-test="fields">поля</div>' },
+      slots: {
+        fields: '<div data-test="fields">поля</div>',
+        currency: '<button data-test="currency" type="button">RUB</button>',
+      },
       attachTo: document.body,
     });
     /* The panel is teleported, so it lands a tick after the mount. */
@@ -138,17 +139,18 @@ describe('QuickActionSheet', () => {
     w.unmount();
   });
 
-  it('puts a currency beside the amount, because one currency is an assumption we cannot make', async () => {
+  /*
+   * A number without its currency is not an amount, so the place beside the
+   * amount is the sheet's. What stands in it is not: which currencies exist and
+   * what they are called is an app's knowledge, and a transfer has nothing to
+   * choose at all — so the sheet holds the slot and no list of its own.
+   */
+  it('keeps a place for the currency beside the amount and lets the screen fill it', async () => {
     const w = await mountSheet();
-    const currency = panel()!.querySelector<HTMLSelectElement>(
-      '[data-slot="quick-action-currency"]',
-    )!;
-    expect(currency.getAttribute('aria-label')).toBe('Валюта');
-    expect(currency.querySelectorAll('option')).toHaveLength(3);
-    currency.value = 'USD';
-    currency.dispatchEvent(new Event('change', { bubbles: true }));
-    await w.vm.$nextTick();
-    expect(w.emitted('update:code')).toEqual([['USD']]);
+    const slot = panel()!.querySelector('[data-slot="quick-action-currency"]')!;
+    expect(slot.querySelector('[data-test="currency"]')).toBeTruthy();
+    expect(slot.className).toContain('shrink-0');
+    expect(panel()!.querySelector('select')).toBeNull();
     w.unmount();
   });
 

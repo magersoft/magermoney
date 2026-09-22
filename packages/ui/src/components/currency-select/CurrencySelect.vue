@@ -212,7 +212,18 @@ function onOpen(value: boolean) {
       />
     </ComboboxAnchor>
 
-    <ComboboxList align="start" :class="props.variant === 'compact' ? 'w-72' : undefined">
+    <!--
+      The row fills the screen's width, so its list hangs from the left edge it
+      already has. The compact trigger does not: it stands at the right of an
+      amount, and a list started from its left is wider than what is left of the
+      screen — the browser then shoves it against the edge, with none of the
+      margin every other surface keeps. Hung from the right instead, it lines up
+      with the trigger and lands inside the page's own gutter.
+    -->
+    <ComboboxList
+      :align="props.variant === 'compact' ? 'end' : 'start'"
+      :class="props.variant === 'compact' ? 'w-72 max-w-[calc(100vw-2rem)]' : undefined"
+    >
       <!--
         `display-value` has to be pinned to the query. Left to itself the
         combobox writes the selected code into the search field when the list

@@ -4,6 +4,7 @@ import { resetDisplayCurrency } from '../src/modules/rates/application/use-displ
 import IncomeSourceFormPage from '../src/modules/income/ui/IncomeSourceFormPage.vue';
 import { sourceDto } from './fixtures/income.js';
 import { apiOf, json, mountAt } from './fixtures/income-mount.js';
+import { pickCurrency } from './fixtures/currency-picker.js';
 
 vi.mock('@magermoney/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@magermoney/ui')>();
@@ -39,8 +40,14 @@ describe('IncomeSourceFormPage', () => {
     );
     await flushPromises();
     expect(
-      (sheet().get('[data-slot="quick-action-currency"]').element as HTMLSelectElement).value,
+      sheet().get('[data-testid="source-currency"] [data-testid="currency-value"]').text(),
     ).toBe('RUB');
+
+    /* Searched by name, like every other currency field in the app. */
+    await pickCurrency(sheet().get('[data-testid="source-currency"]').element, 'USD');
+    expect(
+      sheet().get('[data-testid="source-currency"] [data-testid="currency-value"]').text(),
+    ).toBe('USD');
     wrapper.unmount();
   });
 

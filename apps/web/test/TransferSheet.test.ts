@@ -142,6 +142,39 @@ describe('TransferSheet', () => {
     w.unmount();
   });
 
+  /*
+   * A transfer leaves the account in the account's own currency, so there is
+   * nothing to choose. A picker holding one value reads as a choice not yet
+   * made; the currency is stated instead — and it is named, so it is not a
+   * three-letter code floating beside a number for a screen reader.
+   */
+  it('states the sending currency rather than offering a list of one', async () => {
+    const fetch = vi.fn(async (path: string) => {
+      if (path === '/me/currencies') return json([cur('USD'), cur('EUR')]);
+      if (path.startsWith('/rates')) return json([]);
+      if (path === '/me')
+        return json({
+          id: 'u',
+          displayName: null,
+          locale: 'ru',
+          defaultCurrency: 'USD',
+          reportingCurrencies: ['USD'],
+          onboardingCompletedAt: null,
+        });
+      return json([acc(USD_ID, 'USD'), acc(EUR_ID, 'EUR')]);
+    });
+    const w = mountSheet(fetch);
+    await flushPromises();
+    const body = new DOMWrapper(document.body);
+    const slot = body.get('[data-slot="quick-action-currency"]');
+    expect(slot.find('select').exists()).toBe(false);
+    expect(slot.find('[data-testid="currency-trigger"]').exists()).toBe(false);
+    const stated = body.get('[data-testid="transfer-currency"]');
+    expect(stated.text()).toContain('USD');
+    expect(stated.text()).toContain('Валюта счёта');
+    w.unmount();
+  });
+
   it('sends occurredAt only once the date field has been edited', async () => {
     const fetch = vi.fn(async (path: string, init?: RequestInit) => {
       if (path === '/me/currencies') return json([cur('USD'), cur('EUR')]);

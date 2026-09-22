@@ -222,8 +222,6 @@ async function del() {
     :amount="sent"
     :amount-label="t('transfers.sent')"
     :code="fromAcc?.currency ?? ''"
-    :currencies="fromAcc ? [fromAcc.currency] : []"
-    :currency-label="t('transfers.sentCurrency')"
     :scale="scaleOf(fromAcc?.currency)"
     :locale="amountLocale"
     :types="props.types"
@@ -238,6 +236,23 @@ async function del() {
     @update:type="emit('update:type', $event)"
     @confirm="submit"
   >
+    <!--
+      Nothing to choose here: a transfer leaves the account in the account's own
+      currency. A list of one reads as a choice that has not been made yet, so
+      the currency is simply stated — and until a source account is picked there
+      is nothing to state.
+    -->
+    <template #currency>
+      <p
+        v-if="fromAcc"
+        data-testid="transfer-currency"
+        class="text-muted-foreground flex min-h-11 items-center px-1 font-mono text-sm font-medium tracking-[0.06em] uppercase"
+      >
+        <span class="sr-only">{{ t('transfers.sentCurrency') }}: </span>
+        {{ fromAcc.currency }}
+      </p>
+    </template>
+
     <template #fields>
       <SelectRow
         v-model="from"

@@ -38,7 +38,7 @@ import {
   type AmountLocale,
   type SegmentedOption,
 } from '@magermoney/ui';
-import { useCurrencies } from '@/modules/currencies';
+import { AppCurrencySelect, useCurrencies } from '@/modules/currencies';
 import { todayIso, useDisplayCurrency } from '@/modules/rates';
 import { errorKeyFor } from '@/shared/api/error-messages';
 import type { DateLocale } from '@/shared/dates/format';
@@ -137,7 +137,6 @@ watch(
   { immediate: true },
 );
 
-const codes = computed(() => currencies.value.map((c) => c.code));
 const scale = computed(() => currencies.value.find((c) => c.code === form.currency)?.scale ?? 2);
 const busy = computed(() => creating.value || updating.value);
 const uiLocale = computed(() => locale.value as DateLocale);
@@ -241,8 +240,6 @@ async function del() {
     :amount="form.amount"
     :amount-label="t('expenses.form.amount')"
     :code="form.currency"
-    :currencies="codes"
-    :currency-label="t('expenses.form.currency')"
     :scale="scale"
     :locale="amountLocale"
     :types="props.types"
@@ -254,13 +251,22 @@ async function del() {
     data-testid="expense-form"
     @update:open="emit('update:open', $event)"
     @update:amount="form.amount = $event"
-    @update:code="
-      form.currency = $event;
-      currencyPicked = true;
-    "
     @update:type="emit('update:type', $event)"
     @confirm="submit"
   >
+    <template #currency>
+      <AppCurrencySelect
+        variant="compact"
+        :model-value="form.currency"
+        :label="t('expenses.form.currency')"
+        data-testid="expense-currency"
+        @update:model-value="
+          form.currency = $event;
+          currencyPicked = true;
+        "
+      />
+    </template>
+
     <template #fields>
       <p v-if="amountError" class="text-negative -mt-1 text-xs" data-testid="expense-amount-error">
         {{ amountError }}
