@@ -3,9 +3,11 @@ id: TASK-053
 title: >-
   Быстрые окна «Расход», «Доход» и «Перевод»: выбор валюты общим компонентом
   вместо нативного списка
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-20 17:17'
+updated_date: '2026-09-22 08:05'
 labels: []
 dependencies:
   - TASK-050
