@@ -53,3 +53,17 @@ ordinal: 51000
 4. Тесты: packages/ui/test/quick-action.test.ts — заменить проверку <select> на проверку слота; ExpenseFormPage/IncomeSourceFormPage — читать [data-testid="currency-value"] вместо HTMLSelectElement, добавить выбор валюты через fixture pickCurrency; TransferSheet.test.ts — проверить подпись; новый тест на единственное значение.
 5. Прогнать lint, typecheck, test, build.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Решение: нативный <select> убран из QuickActionSheet, на его месте — слот #currency. Дизайн-система не знает ни подключённых валют человека, ни их названий на его языке, поэтому контрол приносит экран: «Расход» и «Доход» кладут в слот AppCurrencySelect variant=compact (тот же компонент, что на остальных экранах), «Перевод» — статичную подпись с кодом счёта, потому что выбор там состоит из одного значения (AC #4). Пропсы currencies/currencyLabel и эмит update:code удалены; code остался — его читает QuickAmountGrid.
+
+Побочная находка при визуальной проверке: компактный список открывался с align=start, и браузер прижимал его вплотную к краю экрана без единого отступа. Исправлено на align=end + max-w-[calc(100vw-2rem)] — список теперь висит на правом крае триггера и не шире экрана. Это же чинит компактный выбор валюты в InflowSheet.
+
+Проверка: реальные 320 и 393 CSS-пикселя (iframe, а не resize окна — окно браузера не опускается ниже 500). На 320: scrollWidth 320 (горизонтального скролла нет), триггер 86×44 px, правый край 304 (отступ 16), поле суммы 194 px, список 274 px внутри вьюпорта. На 393 — то же без сжатия. Снят скриншот обоих состояний, светлая и тёмная тема.
+
+Тесты: quick-action (слот вместо select, select в панели отсутствует), currency-select (align=end + max-w; открытие/Escape/возврат фокуса на триггер), ExpenseFormPage и IncomeSourceFormPage (значение читается из currency-value, валюта выбирается через pickCurrency по названию), TransferSheet (подпись вместо списка из одного значения).
+
+Вне объёма: нативный <select> в AccountsPage — это фильтр по валюте со значением «все», а не выбор валюты суммы; у него есть собственный комментарий с обоснованием. Не трогал.
+<!-- SECTION:NOTES:END -->
