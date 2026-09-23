@@ -1,9 +1,11 @@
 ---
 id: TASK-051
 title: 'Профиль в настройках: аватар, имя и их редактирование'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-20 10:39'
+updated_date: '2026-09-23 08:36'
 labels: []
 dependencies: []
 ordinal: 49000
