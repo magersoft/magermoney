@@ -447,11 +447,42 @@
     "unconvertible": "No rate: {codes}. These accounts are left out of the total.",
     "count": "{n} account | {n} accounts",
     "filter": {
-      "label": "Currency",
-      "all": "All currencies",
-      "chip": "Currency: {code}",
-      "remove": "Remove filter: {code}",
-      "empty": "No accounts in {code}"
+      "label": "Active filters",
+      "open": "Filters",
+      "openActive": "Filters, {n} on | Filters, {n} on",
+      "title": "Filters",
+      "currency": "Currency",
+      "currencyAny": "Any currency",
+      "country": "Country",
+      "countryAny": "Any country",
+      "kind": "Account type",
+      "cardType": "Card type",
+      "cardTypes": {
+        "debit": "Debit",
+        "credit": "Credit"
+      },
+      "expiryLabel": "Card expiry",
+      "expiry": {
+        "any": "Any",
+        "soon": "Expiring soon",
+        "expired": "Expired"
+      },
+      "expiryOption": {
+        "any": "Any",
+        "soon": "Soon",
+        "expired": "Expired"
+      },
+      "amount": "Balance in {code}",
+      "min": "From",
+      "max": "To",
+      "minChip": "from {amount}",
+      "maxChip": "up to {amount}",
+      "apply": "Apply",
+      "reset": "Reset",
+      "remove": "Remove filter: {label}",
+      "clear": "Clear filters",
+      "empty": "No account matches these filters.",
+      "chosen": "{n} chosen"
     },
     "empty": {
       "title": "No accounts yet",

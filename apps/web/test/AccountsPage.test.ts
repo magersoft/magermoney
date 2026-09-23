@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
@@ -48,8 +48,21 @@ const currencies = [
     icon: null,
     rateSource: 'open-er-api',
   },
+  {
+    code: 'RUB',
+    kind: 'fiat',
+    scale: 2,
+    symbol: null,
+    nameRu: null,
+    nameEn: null,
+    icon: null,
+    rateSource: 'open-er-api',
+  },
 ];
-const rates = [{ base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api' }];
+const rates = [
+  { base: 'EUR', quote: 'USD', value: '1.16', date: '2026-09-11', source: 'api' },
+  { base: 'RUB', quote: 'USD', value: '0.0125', date: '2026-09-11', source: 'api' },
+];
 const acc = (id: string, over: object) => ({
   id,
   name: id,
@@ -82,6 +95,8 @@ const json = (body: unknown) =>
 const USD_ID = '11111111-1111-4111-8111-111111111111';
 const EUR_ID = '22222222-2222-4222-8222-222222222222';
 const ARCHIVED_ID = '33333333-3333-4333-8333-333333333333';
+const RUB_ID = '44444444-4444-4444-8444-444444444444';
+const CARD_ID = '55555555-5555-4555-8555-555555555555';
 
 function mountPage(accounts: unknown[], inShell = false, refreshStatus = 200) {
   resetDisplayCurrency();
@@ -109,6 +124,7 @@ function mountPage(accounts: unknown[], inShell = false, refreshStatus = 200) {
     ],
   });
   return mount(inShell ? AppShell : AccountsPage, {
+    attachTo: document.body,
     ...(inShell ? { slots: { default: () => h(AccountsPage) } } : {}),
     global: {
       plugins: [
@@ -126,6 +142,11 @@ function mountPage(accounts: unknown[], inShell = false, refreshStatus = 200) {
 }
 
 describe('AccountsPage', () => {
+  /* Sheets and lists render into portals, which jsdom keeps after an unmount. */
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
   /* The gesture has no keyboard, so the test drives what the gesture drives. */
   const pull = async (w: ReturnType<typeof mountPage>) => {
     const { PullToRefresh } = await import('@magermoney/ui');
@@ -183,20 +204,189 @@ describe('AccountsPage', () => {
     expect(w.findAll('[tabindex]')).toHaveLength(0);
   });
 
-  it('filters the stack by currency and drops the filter from its chip', async () => {
-    const w = mountPage([acc(USD_ID, {}), acc(EUR_ID, { currency: 'EUR' })]);
+  /* The sheet renders into a portal, so it is looked for in the document. */
+  const inSheet = <E extends Element = HTMLElement>(selector: string) =>
+    document.querySelector<E>(`[data-testid="accounts-filter-sheet"] ${selector}`);
+  async function openFilters(w: ReturnType<typeof mountPage>) {
+    await w.get('[data-testid="accounts-filter-open"]').trigger('click');
+    await flushPromises();
+  }
+  async function pickMany(picker: string, codes: string[]) {
+    inSheet(`[data-testid="${picker}"] [data-testid$="-trigger"]`)!.click();
+    await flushPromises();
+    for (const code of codes) {
+      document.querySelector<HTMLElement>(`[data-testid$="-option-${code}"]`)!.click();
+      await flushPromises();
+    }
+    /* Escape closes the list first; a second one would close the sheet. */
+    document
+      .querySelector('[role="listbox"]')!
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await flushPromises();
+  }
+  async function apply() {
+    inSheet('[data-testid="filter-apply"]')!.click();
+    await flushPromises();
+  }
+  const cardHrefs = (w: ReturnType<typeof mountPage>) =>
+    w.findAll('[data-slot="account-card"]').map((c) => c.attributes('href'));
+
+  const THREE = () => [
+    acc(USD_ID, {}),
+    acc(EUR_ID, { currency: 'EUR', country: 'DE' }),
+    acc(RUB_ID, { currency: 'RUB', country: 'DE', kind: 'bank_account' }),
+  ];
+
+  it('offers one filter button where the currency list stood', async () => {
+    const w = mountPage(THREE());
     await flushPromises();
 
-    const select = w.get('[data-testid="accounts-currency-filter"]');
-    await select.setValue('EUR');
+    expect(w.find('select').exists()).toBe(false);
+    const button = w.get('[data-testid="accounts-filter-open"]');
+    expect(button.text()).toBe(ru.accounts.filter.open);
+    expect(w.find('[data-testid="accounts-filter-count"]').exists()).toBe(false);
 
-    expect(w.findAll('[data-slot="account-card"]')).toHaveLength(1);
-    expect(w.get('[data-slot="account-card"]').attributes('href')).toBe(`/accounts/${EUR_ID}`);
+    await openFilters(w);
+    expect(inSheet('h2, [id]')).not.toBeNull();
+    expect(document.body.textContent).toContain(ru.accounts.filter.title);
+  });
 
-    await w.get('[data-slot="filter-chip-remove"]').trigger('click');
+  it('narrows the stack, the count and the total to several currencies at once', async () => {
+    const w = mountPage(THREE());
+    await flushPromises();
+    await openFilters(w);
 
-    expect(w.findAll('[data-slot="account-card"]')).toHaveLength(2);
+    await pickMany('filter-currency', ['EUR', 'RUB']);
+    expect(
+      [
+        ...document.querySelectorAll('[data-testid="filter-currency"] [data-slot="filter-chip"]'),
+      ].map((c) => c.textContent?.trim()),
+    ).toHaveLength(2);
+    await apply();
+
+    expect(cardHrefs(w)).toEqual([`/accounts/${EUR_ID}`, `/accounts/${RUB_ID}`]);
+    expect(w.get('[data-testid="accounts-count"]').text()).toContain('2');
+    // EUR 100 at 1.16 and RUB 100 at 0.0125: 116 + 1.25.
+    expect(w.get('[data-testid="capital-total"]').text()).toContain('117');
+    expect(w.get('[data-testid="accounts-filter-count"]').text()).toBe('2');
+    expect(w.get('[data-testid="accounts-filter-open"]').attributes('aria-label')).toBe(
+      'Фильтры, включено 2',
+    );
+  });
+
+  it('drops one chosen value from its chip and leaves the rest', async () => {
+    const w = mountPage(THREE());
+    await flushPromises();
+    await openFilters(w);
+    await pickMany('filter-currency', ['EUR', 'RUB']);
+    await apply();
+
+    const chips = w.findAll('[data-slot="filter-chip"]');
+    expect(chips.map((c) => c.text())).toEqual(['EUR', 'RUB']);
+    await chips[0]!.get('[data-slot="filter-chip-remove"]').trigger('click');
+
+    expect(cardHrefs(w)).toEqual([`/accounts/${RUB_ID}`]);
+    expect(w.get('[data-testid="accounts-filter-count"]').text()).toBe('1');
+  });
+
+  it('combines groups: a country and a kind must both hold', async () => {
+    const w = mountPage([
+      ...THREE(),
+      acc(CARD_ID, { kind: 'card', cardType: 'debit', country: 'DE', cardExpires: '2030-01-01' }),
+    ]);
+    await flushPromises();
+    await openFilters(w);
+
+    await pickMany('filter-country', ['DE']);
+    inSheet('[data-testid="filter-kind-card"]')!.click();
+    await flushPromises();
+    await apply();
+
+    expect(cardHrefs(w)).toEqual([`/accounts/${CARD_ID}`]);
+  });
+
+  it('does not touch the screen until the filter is applied', async () => {
+    const w = mountPage(THREE());
+    await flushPromises();
+    await openFilters(w);
+
+    inSheet('[data-testid="filter-kind-bank_account"]')!.click();
+    await flushPromises();
+    expect(cardHrefs(w)).toHaveLength(3);
+
+    await apply();
+    expect(cardHrefs(w)).toEqual([`/accounts/${RUB_ID}`]);
+  });
+
+  it('resets every filter from the sheet', async () => {
+    const w = mountPage(THREE());
+    await flushPromises();
+    await openFilters(w);
+    await pickMany('filter-currency', ['EUR']);
+    await apply();
+    expect(cardHrefs(w)).toHaveLength(1);
+
+    await openFilters(w);
+    inSheet('[data-testid="filter-reset"]')!.click();
+    await flushPromises();
+
+    expect(cardHrefs(w)).toHaveLength(3);
     expect(w.find('[data-slot="filter-chip"]').exists()).toBe(false);
+    expect(w.find('[data-testid="accounts-filter-count"]').exists()).toBe(false);
+  });
+
+  it('says when nothing is left, and brings everything back in one tap', async () => {
+    const w = mountPage(THREE());
+    await flushPromises();
+    await openFilters(w);
+
+    const min = inSheet<HTMLInputElement>('[data-testid="filter-min"]')!;
+    min.value = '1000000';
+    min.dispatchEvent(new Event('input'));
+    await apply();
+
+    expect(w.find('[data-slot="account-card"]').exists()).toBe(false);
+    expect(w.get('[data-testid="accounts-filter-empty"]').text()).toContain(
+      ru.accounts.filter.empty,
+    );
+    await w.get('[data-testid="accounts-filter-empty-reset"]').trigger('click');
+    expect(cardHrefs(w)).toHaveLength(3);
+  });
+
+  it('closes on Escape and puts focus back on the filter button', async () => {
+    const w = mountPage(THREE());
+    await flushPromises();
+    const button = w.get('[data-testid="accounts-filter-open"]');
+    (button.element as HTMLElement).focus();
+    await openFilters(w);
+    expect(button.attributes('aria-expanded')).toBe('true');
+
+    document.activeElement!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
+    await flushPromises();
+
+    expect(inSheet('*')).toBeNull();
+    expect(document.activeElement).toBe(button.element);
+  });
+
+  it('asks about cards only once an account is a card that says', async () => {
+    const w = mountPage(THREE());
+    await flushPromises();
+    await openFilters(w);
+    expect(inSheet('[data-testid="filter-card-type"]')).toBeNull();
+    expect(inSheet('[data-testid="filter-expiry"]')).toBeNull();
+    w.unmount();
+    document.body.innerHTML = '';
+
+    const withCard = mountPage([
+      ...THREE(),
+      acc(CARD_ID, { kind: 'card', cardType: 'credit', cardExpires: '2030-01-01' }),
+    ]);
+    await flushPromises();
+    await openFilters(withCard);
+    expect(inSheet('[data-testid="filter-card-type"]')).not.toBeNull();
+    expect(inSheet('[data-testid="filter-expiry"]')).not.toBeNull();
   });
 
   it('waits with a stack-shaped skeleton instead of claiming the filter found nothing', async () => {

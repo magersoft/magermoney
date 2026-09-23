@@ -7,16 +7,17 @@
  * Two things the reference never had to answer. Its total counts one currency
  * and ours is summed from a dozen, so the footnote — which rate, which date —
  * is part of the figure rather than a caption (docs/design/direction.md). And
- * its «All cards» filters payment cards; here the only filter worth having is
- * the currency an account is held in, which is also what the stack is coloured
- * by.
+ * its «All cards» filters payment cards; here a wallet is narrowed by currency,
+ * country, kind, card and balance, which is too much for one control beside
+ * the total — so the control is one button, and the questions live in a sheet.
  *
- * The filter is stated twice on purpose: the select is how it is set, the chip
- * is how it is read and dropped. What a screen of numbers is filtered by is
- * half of what the numbers mean, and a `<select>` collapsed to a code is easy
- * to walk past.
+ * The filter is stated twice on purpose: the sheet is how it is set, the chips
+ * are how it is read and dropped one at a time. What a screen of numbers is
+ * filtered by is half of what the numbers mean, and the total, the count and
+ * the stack all answer to it together.
  */
-import { computed, markRaw, ref } from 'vue';
+import { computed, markRaw, ref, useTemplateRef } from 'vue';
+import { SlidersHorizontalIcon } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRouter } from 'vue-router';
 import {
@@ -31,11 +32,17 @@ import {
   type AmountLocale,
   type FilterChipItem,
 } from '@magermoney/ui';
+import { useCurrencies } from '@/modules/currencies';
 import { useDisplayCurrency, useRefreshRates } from '@/modules/rates';
+import { formatMoney } from '@/shared/money/format';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useScreenRefresh } from '@/shared/query/use-screen-refresh';
 import { useCapitalSummary } from '../application/use-capital-summary';
 import { useAccountCards } from '../application/use-account-cards';
+import { useFilteredAccounts } from '../application/use-filtered-accounts';
+import { EMPTY_FILTER, activeFilterCount, type AccountFilter } from '../domain/account-filter';
+import { ACCOUNT_KIND_KEYS } from '../domain/labels';
+import AccountsFilterSheet from './AccountsFilterSheet.vue';
 import AccountRow from './AccountRow.vue';
 
 const { t, locale } = useI18n();
@@ -47,22 +54,23 @@ const amountLocale = computed(() => locale.value as AmountLocale);
 const link = markRaw(RouterLink);
 
 const showArchived = ref(false);
-/** The code the stack is filtered to, or `''` for all of them. */
-const currency = ref('');
+const filter = ref<AccountFilter>(EMPTY_FILTER);
+const filterOpen = ref(false);
+/* Where focus goes back to when the sheet closes, whichever way it was closed. */
+const filterButton = useTemplateRef<{ $el: HTMLElement }>('filterButton');
+const filterCount = computed(() => activeFilterCount(filter.value));
 
-/*
- * The groups are flattened rather than kept: on this screen the bank an account
- * belongs to is a detail of the account, and the stack reads as one wallet. The
- * order the summary grouped them in survives, so the cards sit the same way
- * they do in the strip on the home screen.
- */
 const active = computed(() => (summary.value?.groups ?? []).flatMap((g) => g.accounts));
-const codes = computed(() => [...new Set(active.value.map((a) => a.balance.currency.code))].sort());
-const shown = computed(() =>
-  currency.value
-    ? active.value.filter((a) => a.balance.currency.code === currency.value)
-    : active.value,
+const { shown, choices, total, unconvertible } = useFilteredAccounts(summary, filter);
+const currencies = useCurrencies();
+const displayScale = computed(
+  () => currencies.value.find((c) => c.code === baseCode.value)?.scale ?? 2,
 );
+
+function applyFilter(next: AccountFilter) {
+  filter.value = next;
+  filterOpen.value = false;
+}
 
 /*
  * The summary decides the order, the cards decide what is on them — the colour
@@ -76,20 +84,51 @@ const cards = computed<AccountCardItem[]>(() =>
     return card ? [card] : [];
   }),
 );
-const chips = computed<FilterChipItem[]>(() =>
-  currency.value
-    ? [
-        {
-          id: currency.value,
-          label: t('accounts.filter.chip', { code: currency.value }),
-          removeLabel: t('accounts.filter.remove', { code: currency.value }),
-        },
-      ]
-    : [],
-);
+/*
+ * One chip per value, so each can be dropped on its own. The id says which
+ * group the value came from, because «RU» is both a country and, in some
+ * wallets, nothing else.
+ */
+const chips = computed<FilterChipItem[]>(() => {
+  const f = filter.value;
+  const money = (amount: string) => formatMoney(amount, baseCode.value, amountLocale.value);
+  const labelled = [
+    ...f.currencies.map((code) => ({ id: `currencies:${code}`, label: code })),
+    ...f.countries.map((code) => ({ id: `countries:${code}`, label: t(`country.${code}`) })),
+    ...f.kinds.map((kind) => ({ id: `kinds:${kind}`, label: t(ACCOUNT_KIND_KEYS[kind]) })),
+    ...f.cardTypes.map((type) => ({
+      id: `cardTypes:${type}`,
+      label: t(`accounts.filter.cardTypes.${type}`),
+    })),
+    ...(f.expiry === 'any'
+      ? []
+      : [{ id: 'expiry', label: t(`accounts.filter.expiry.${f.expiry}`) }]),
+    ...(f.min
+      ? [{ id: 'min', label: t('accounts.filter.minChip', { amount: money(f.min) }) }]
+      : []),
+    ...(f.max
+      ? [{ id: 'max', label: t('accounts.filter.maxChip', { amount: money(f.max) }) }]
+      : []),
+  ];
+  return labelled.map((c) => ({
+    ...c,
+    removeLabel: t('accounts.filter.remove', { label: c.label }),
+  }));
+});
+
+function dropChip(id: string) {
+  const [group, value] = id.split(':') as [string, string | undefined];
+  const f = filter.value;
+  if (group === 'expiry') filter.value = { ...f, expiry: 'any' };
+  else if (group === 'min' || group === 'max') filter.value = { ...f, [group]: '' };
+  else {
+    const key = group as 'currencies' | 'countries' | 'kinds' | 'cardTypes';
+    filter.value = { ...f, [key]: (f[key] as readonly string[]).filter((v) => v !== value) };
+  }
+}
 
 const unconvertibleCodes = computed(() =>
-  [...new Set(summary.value?.unconvertible.map((a) => a.balance.currency.code))].join(', '),
+  [...new Set(unconvertible.value.map((a) => a.balance.currency.code))].join(', '),
 );
 const isEmpty = computed(
   () =>
@@ -145,40 +184,53 @@ async function refreshAccounts() {
           </h2>
 
           <!--
-          A native select: the filter is a list of codes, and nothing about it
-          is worth the keyboard and screen-reader work of rebuilding a listbox.
+          One quiet button where the select stood: it opens every question at
+          once, and says how many are answered, so a narrowed total is never
+          mistaken for all of it.
         -->
-          <select
-            v-if="codes.length > 1"
-            v-model="currency"
-            data-testid="accounts-currency-filter"
-            :aria-label="t('accounts.filter.label')"
-            class="h-11 shrink-0 rounded-full border border-input bg-surface px-3 font-mono text-xs uppercase tracking-[0.08em] text-ink outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
+          <Button
+            v-if="active.length > 1"
+            ref="filterButton"
+            variant="outline"
+            size="sm"
+            data-testid="accounts-filter-open"
+            aria-haspopup="dialog"
+            :aria-expanded="filterOpen"
+            :aria-label="
+              filterCount > 0
+                ? t('accounts.filter.openActive', { n: filterCount }, filterCount)
+                : undefined
+            "
+            class="min-h-11 shrink-0 gap-2 rounded-full px-4"
+            @click="filterOpen = true"
           >
-            <option value="">
-              {{ t('accounts.filter.all') }}
-            </option>
-            <option v-for="code in codes" :key="code" :value="code">
-              {{ code }}
-            </option>
-          </select>
+            <SlidersHorizontalIcon aria-hidden="true" class="size-4" />
+            {{ t('accounts.filter.open') }}
+            <span
+              v-if="filterCount > 0"
+              data-testid="accounts-filter-count"
+              aria-hidden="true"
+              class="bg-primary text-primary-foreground grid min-w-5 place-items-center rounded-full px-1.5 font-mono text-xs leading-5 tabular-nums"
+              >{{ filterCount }}</span
+            >
+          </Button>
         </div>
 
-        <Skeleton v-if="!summary" class="mt-1 h-10 w-48" />
+        <Skeleton v-if="!summary || !total" class="mt-1 h-10 w-48" />
         <AmountLockup
           v-else
           data-testid="capital-total"
           class="text-[40px] leading-[46px] tracking-[-0.01em]"
-          :amount="summary.total.toString()"
-          :code="summary.total.currency.code"
-          :scale="summary.total.currency.scale"
+          :amount="total.toString()"
+          :code="total.currency.code"
+          :scale="total.currency.scale"
           :locale="amountLocale"
         />
         <p class="text-xs text-muted-foreground" data-testid="accounts-rate-note">
           {{ t('accounts.rateDate', { date: rateDate }) }}
         </p>
         <p
-          v-if="summary && summary.unconvertible.length > 0"
+          v-if="summary && unconvertible.length > 0"
           class="text-xs text-muted-foreground"
           data-testid="accounts-unconvertible"
         >
@@ -201,7 +253,9 @@ async function refreshAccounts() {
       <FilterChipRow
         :chips="chips"
         :aria-label="t('accounts.filter.label')"
-        @remove="currency = ''"
+        :clear-label="chips.length > 1 && cards.length > 0 ? t('accounts.filter.clear') : undefined"
+        @remove="dropChip"
+        @clear="filter = EMPTY_FILTER"
       />
 
       <!--
@@ -227,13 +281,27 @@ async function refreshAccounts() {
         </Button>
       </div>
 
-      <p
-        v-else-if="currency && cards.length === 0"
-        class="text-sm text-muted-foreground"
+      <!--
+        Nothing left is a state of the filter, not of the wallet: it says so,
+        and the way back is one tap rather than a chip at a time.
+      -->
+      <div
+        v-else-if="filterCount > 0 && cards.length === 0"
+        class="flex flex-col items-start gap-3"
         data-testid="accounts-filter-empty"
       >
-        {{ t('accounts.filter.empty', { code: currency }) }}
-      </p>
+        <p class="text-sm text-muted-foreground">
+          {{ t('accounts.filter.empty') }}
+        </p>
+        <Button
+          variant="outline"
+          class="min-h-11 rounded-xl px-4"
+          data-testid="accounts-filter-empty-reset"
+          @click="filter = EMPTY_FILTER"
+        >
+          {{ t('accounts.filter.clear') }}
+        </Button>
+      </div>
 
       <AccountCardStack
         v-else
@@ -265,5 +333,15 @@ async function refreshAccounts() {
         </ul>
       </div>
     </section>
+
+    <AccountsFilterSheet
+      v-model:open="filterOpen"
+      :filter="filter"
+      :choices="choices"
+      :display-code="baseCode"
+      :display-scale="displayScale"
+      @apply="applyFilter"
+      @closed="filterButton?.$el.focus()"
+    />
   </PullToRefresh>
 </template>
