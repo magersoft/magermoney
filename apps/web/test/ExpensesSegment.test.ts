@@ -15,6 +15,8 @@ const profile = {
   defaultCurrency: 'USD',
   reportingCurrencies: ['USD', 'EUR'],
   onboardingCompletedAt: null,
+  avatarEmoji: null,
+  avatarColor: null,
 };
 const currencies = [
   {

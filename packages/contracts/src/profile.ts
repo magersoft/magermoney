@@ -1,5 +1,14 @@
 import { z } from '@hono/zod-openapi';
+import { AVATAR_COLORS, isAvatarEmoji } from '@magermoney/domain';
 import { CurrencyCodeSchema } from './common.js';
+
+/** One emoji, drawn on the disc in place of the initial. */
+export const AvatarEmojiSchema = z
+  .string()
+  .refine(isAvatarEmoji, { message: 'must be a single emoji' })
+  .openapi({ example: '🦊' });
+/** A card-palette colour for the disc, by name. */
+export const AvatarColorSchema = z.enum(AVATAR_COLORS);
 
 /**
  * How many currencies the display switch can offer.
@@ -18,6 +27,10 @@ export const ProfileDtoSchema = z
     defaultCurrency: CurrencyCodeSchema,
     reportingCurrencies: z.array(CurrencyCodeSchema).min(1).max(MAX_REPORTING_CURRENCIES),
     onboardingCompletedAt: z.iso.datetime().nullable(),
+    /** Null: the disc shows the initial of the name. */
+    avatarEmoji: AvatarEmojiSchema.nullable(),
+    /** Null: the disc keeps the surface colour. */
+    avatarColor: AvatarColorSchema.nullable(),
   })
   .openapi('Profile');
 export type ProfileDto = z.infer<typeof ProfileDtoSchema>;
@@ -31,6 +44,9 @@ export const UpdateProfileInputSchema = z
       .min(1)
       .max(MAX_REPORTING_CURRENCIES)
       .optional(),
+    /** Absent leaves the stored value alone; null clears it. */
+    avatarEmoji: AvatarEmojiSchema.nullable().optional(),
+    avatarColor: AvatarColorSchema.nullable().optional(),
   })
   .refine(
     (v) =>

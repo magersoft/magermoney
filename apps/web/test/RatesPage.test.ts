@@ -21,6 +21,8 @@ const profile: ProfileDto = {
   defaultCurrency: 'USD',
   reportingCurrencies: ['USD', 'EUR'],
   onboardingCompletedAt: null,
+  avatarEmoji: null,
+  avatarColor: null,
 };
 
 const currency = (code: string): CurrencyDto => ({

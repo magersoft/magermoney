@@ -107,6 +107,8 @@ describe('ExpenseFormPage', () => {
           defaultCurrency: 'RUB',
           reportingCurrencies: ['RUB', 'EUR'],
           onboardingCompletedAt: null,
+          avatarEmoji: null,
+          avatarColor: null,
         });
       if (path === '/me/currencies')
         return json(

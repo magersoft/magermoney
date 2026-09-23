@@ -5,7 +5,7 @@ import type {
   ProfileRepository,
 } from '../application/profile-repository.js';
 const cols =
-  'id, display_name, locale, default_currency, reporting_currencies, onboarding_completed_at';
+  'id, display_name, locale, default_currency, reporting_currencies, onboarding_completed_at, avatar_emoji, avatar_color';
 export class PgProfileRepository implements ProfileRepository {
   constructor(private readonly sql: Sql) {}
   async findById(id: string): Promise<Profile | null> {
@@ -23,6 +23,8 @@ export class PgProfileRepository implements ProfileRepository {
       data.reporting_currencies = patch.reportingCurrencies;
     if (patch.onboardingCompletedAt !== undefined)
       data.onboarding_completed_at = patch.onboardingCompletedAt;
+    if (patch.avatarEmoji !== undefined) data.avatar_emoji = patch.avatarEmoji;
+    if (patch.avatarColor !== undefined) data.avatar_color = patch.avatarColor;
     if (Object.keys(data).length === 0) return this.findById(id);
     const [row] = await this.sql<
       Profile[]

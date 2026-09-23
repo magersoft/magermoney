@@ -26,6 +26,8 @@ export const profile = {
   defaultCurrency: 'USD',
   reportingCurrencies: ['USD', 'EUR'],
   onboardingCompletedAt: null,
+  avatarEmoji: null,
+  avatarColor: null,
 };
 export const acc = (id: string, currency: string, over: object = {}) => ({
   id,

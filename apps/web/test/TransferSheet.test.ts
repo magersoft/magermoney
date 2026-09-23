@@ -95,6 +95,8 @@ describe('TransferSheet', () => {
           defaultCurrency: 'USD',
           reportingCurrencies: ['USD'],
           onboardingCompletedAt: null,
+          avatarEmoji: null,
+          avatarColor: null,
         });
       if (init?.method === 'POST')
         return json(
@@ -160,6 +162,8 @@ describe('TransferSheet', () => {
           defaultCurrency: 'USD',
           reportingCurrencies: ['USD'],
           onboardingCompletedAt: null,
+          avatarEmoji: null,
+          avatarColor: null,
         });
       return json([acc(USD_ID, 'USD'), acc(EUR_ID, 'EUR')]);
     });
@@ -190,6 +194,8 @@ describe('TransferSheet', () => {
           defaultCurrency: 'USD',
           reportingCurrencies: ['USD'],
           onboardingCompletedAt: null,
+          avatarEmoji: null,
+          avatarColor: null,
         });
       if (init?.method === 'POST')
         return json(
@@ -236,6 +242,8 @@ describe('TransferSheet', () => {
           defaultCurrency: 'USD',
           reportingCurrencies: ['USD'],
           onboardingCompletedAt: null,
+          avatarEmoji: null,
+          avatarColor: null,
         });
       if (init?.method === 'POST') throw new TypeError('Failed to fetch');
       return json([acc(USD_ID, 'USD'), acc(USD2_ID, 'USD'), acc(EUR_ID, 'EUR')]);

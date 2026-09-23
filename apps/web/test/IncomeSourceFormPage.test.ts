@@ -34,6 +34,8 @@ describe('IncomeSourceFormPage', () => {
               defaultCurrency: 'RUB',
               reportingCurrencies: ['RUB', 'USD'],
               onboardingCompletedAt: null,
+              avatarEmoji: null,
+              avatarColor: null,
             })
           : undefined,
       ),

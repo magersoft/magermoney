@@ -1,3 +1,5 @@
+import type { AvatarColor } from '@magermoney/domain';
+
 export interface Profile {
   id: string;
   displayName: string | null;
@@ -5,6 +7,8 @@ export interface Profile {
   defaultCurrency: string;
   reportingCurrencies: string[];
   onboardingCompletedAt: string | null;
+  avatarEmoji: string | null;
+  avatarColor: AvatarColor | null;
 }
 export type ProfilePatch = Partial<Omit<Profile, 'id'>>;
 export interface ProfileRepository {

@@ -62,6 +62,8 @@ const uowFor = (repo: MemoryUserCurrencyRepository, reporting?: string[]) => {
       defaultCurrency: (reporting ?? connected)[0] ?? 'USD',
       reportingCurrencies: reporting ?? connected,
       onboardingCompletedAt: null,
+      avatarEmoji: null,
+      avatarColor: null,
     },
   ]);
   return { uow: memoryUnitOfWork(memoryRepos(profiles, repo)), profiles };

@@ -21,6 +21,8 @@ function setup(over: Partial<Parameters<typeof testDeps>[0]> = {}) {
       defaultCurrency: 'EUR',
       reportingCurrencies: ['EUR', 'USD', 'RUB'],
       onboardingCompletedAt: null,
+      avatarEmoji: null,
+      avatarColor: null,
     },
   ]);
   return { app: createApp(testDeps({ profiles, jwtSecret: secret, ...over })), profiles };
@@ -111,5 +113,62 @@ describe('/me', () => {
     });
     expect(res.status).toBe(400);
     expect((await res.json()).code).toBe('VALIDATION');
+  });
+
+  describe('the avatar', () => {
+    const patch = async (app: ReturnType<typeof setup>['app'], body: unknown) =>
+      app.request('/me', { method: 'PATCH', headers: await auth(), body: JSON.stringify(body) });
+
+    it('comes back empty until one is chosen', async () => {
+      const { app } = setup();
+      const res = await app.request('/me', { headers: await auth() });
+      expect(await res.json()).toMatchObject({ avatarEmoji: null, avatarColor: null });
+    });
+
+    it('is set by PATCH, and a later change to something else leaves it alone', async () => {
+      const { app } = setup();
+      const set = await patch(app, { avatarEmoji: '🦊', avatarColor: 'teal' });
+      expect(set.status).toBe(200);
+      expect(await set.json()).toMatchObject({ avatarEmoji: '🦊', avatarColor: 'teal' });
+
+      const renamed = await patch(app, { displayName: 'Vlad' });
+      expect(await renamed.json()).toMatchObject({
+        displayName: 'Vlad',
+        avatarEmoji: '🦊',
+        avatarColor: 'teal',
+      });
+    });
+
+    it('goes back to the initial when the emoji is cleared with null', async () => {
+      const { app } = setup();
+      await patch(app, { avatarEmoji: '🦊', avatarColor: 'teal' });
+      const res = await patch(app, { avatarEmoji: null });
+      expect(await res.json()).toMatchObject({ avatarEmoji: null, avatarColor: 'teal' });
+    });
+
+    it.each([
+      ['a colour outside the palette', { avatarColor: 'magenta' }],
+      ['two emoji', { avatarEmoji: '🦊🐻' }],
+    ])('refuses %s with 400 and keeps what was there', async (_label, body) => {
+      const { app, profiles } = setup();
+      await patch(app, { avatarEmoji: '🦊', avatarColor: 'teal' });
+      const res = await patch(app, body);
+      expect(res.status).toBe(400);
+      expect(await profiles.findById(uid)).toMatchObject({
+        avatarEmoji: '🦊',
+        avatarColor: 'teal',
+      });
+    });
+
+    it("changes only the caller's own profile", async () => {
+      const other = '22222222-2222-2222-2222-222222222222';
+      const { profiles } = setup();
+      const mine = await profiles.findById(uid);
+      const seeded = new MemoryProfileRepository([mine!, { ...mine!, id: other }]);
+      const scoped = createApp(testDeps({ profiles: seeded, jwtSecret: secret }));
+      await patch(scoped, { avatarEmoji: '🦊' });
+      expect((await seeded.findById(other))?.avatarEmoji).toBeNull();
+      expect((await seeded.findById(uid))?.avatarEmoji).toBe('🦊');
+    });
   });
 });

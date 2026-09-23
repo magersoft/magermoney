@@ -9,6 +9,8 @@ const profile = {
   defaultCurrency: 'EUR',
   reportingCurrencies: ['EUR', 'USD'],
   onboardingCompletedAt: null,
+  avatarEmoji: null,
+  avatarColor: null,
 };
 describe('profileApi', () => {
   it('gets and validates the profile', async () => {

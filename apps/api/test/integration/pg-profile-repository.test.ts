@@ -28,6 +28,14 @@ describe('PgProfileRepository', () => {
       reportingCurrencies: ['USD'],
       defaultCurrency: 'USD',
     });
+    expect(updated).toMatchObject({ avatarEmoji: null, avatarColor: null });
+    const painted = await repo.update(id, { avatarEmoji: '🐻‍❄️', avatarColor: 'violet' });
+    expect(painted).toMatchObject({ avatarEmoji: '🐻‍❄️', avatarColor: 'violet', locale: 'en' });
+    expect(await repo.update(id, { avatarEmoji: null })).toMatchObject({
+      avatarEmoji: null,
+      avatarColor: 'violet',
+    });
+    await expect(repo.update(id, { avatarColor: 'magenta' as never })).rejects.toThrow();
     expect(await repo.findById('00000000-0000-0000-0000-000000000000')).toBeNull();
   });
 });

@@ -34,6 +34,8 @@ const profile = (reporting: string[], main = reporting[0]!): ProfileDto => ({
   defaultCurrency: main,
   reportingCurrencies: reporting,
   onboardingCompletedAt: null,
+  avatarEmoji: null,
+  avatarColor: null,
 });
 const CATALOGUE = [...CONNECTED, cur('COP'), cur('KPW', { rateSource: null })];
 
