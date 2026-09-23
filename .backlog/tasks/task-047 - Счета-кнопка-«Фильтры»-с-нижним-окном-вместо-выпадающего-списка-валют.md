@@ -1,10 +1,11 @@
 ---
 id: TASK-047
 title: 'Счета: кнопка «Фильтры» с нижним окном вместо выпадающего списка валют'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-20 07:35'
-updated_date: '2026-09-20 17:15'
+updated_date: '2026-09-23 07:36'
 labels: []
 dependencies:
   - TASK-050
@@ -33,6 +34,18 @@ ordinal: 45000
 - [ ] #7 Поля «тип карты» и «срок действия» скрыты или неактивны, пока данных для них нет в счетах, и это указано в задаче-зависимости
 - [ ] #8 Тесты покрывают применение, сброс и мультивыбор
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Решения (согласованы с владельцем 23.09): мультивыбор — режим multiple в CurrencySelect и CountrySelect; свайп вниз — общий жест для всех нижних окон приложения (SheetContent side=bottom и QuickActionSheet).
+1. packages/ui: чистая функция swipeOutcome + композабл useSwipeDismiss; подключить в SheetContent (side=bottom) и QuickActionSheet, с ручкой-полоской; уважать prefers-reduced-motion и прокрутку содержимого.
+2. packages/ui: режим multiple в CurrencySelect и CountrySelect — model string[], список не закрывается, выбранное отмечено, чипы под полем снимаются по одному; тесты.
+3. apps/web accounts/domain: чистый фильтр счетов (валюты, страны, виды, тип карты, срок действия, сумма от/до в валюте отображения) + число активных фильтров + доступные варианты; тесты.
+4. AccountsFilterSheet: черновик, Применить/Сбросить; поля типа карты и срока скрыты, если в счетах нет таких данных.
+5. AccountsPage: кнопка «Фильтры» с числом, чипы применённых фильтров, итог и счётчик по отфильтрованным счетам, пустой результат с быстрым сбросом.
+6. Тексты ru/en, тесты страницы (применение, сброс, мультивыбор), lint/typecheck/test/build, impeccable-аудит, проверка в браузере в светлой и тёмной теме.
+<!-- SECTION:PLAN:END -->
 
 ## Comments
 
