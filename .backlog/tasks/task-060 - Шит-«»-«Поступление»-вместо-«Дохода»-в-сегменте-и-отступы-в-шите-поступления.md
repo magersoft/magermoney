@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-23 18:28'
-updated_date: '2026-09-23 18:33'
+updated_date: '2026-09-23 18:36'
 labels:
   - web
   - ui
@@ -52,3 +52,9 @@ ordinal: 58000
 6. Тесты: InflowSheet.test на слоты quick-action-*, quick-actions.test на новый сегмент и кнопку; e2e smoke — селекторы поступления.
 7. typecheck, lint, test, build; проверка на 390px в браузере.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Реализовано в e1474c9. InflowSheet теперь на QuickActionSheet: отступы даёт сам шит, поля строками SelectRow/InputRow, валюта источника рядом с суммой (у нового источника — выбор валюты там же). Сегмент «+»: transfer/expense/inflow; «Новый источник дохода» — второстепенная кнопка, ведёт на /plan/income/new. Экспорт IncomeSourceSheet из barrel убран, больше не нужен снаружи. Проверки: typecheck, lint, 413/413 тестов web, build — чанк income не в входном. Визуальная проверка на 390px не сделана: dev-сервер требует входа. TASK-038 про QuickActions устарела по сути (там больше нет ленивого InflowSheet), но та же вставка RouteError внизу страницы возможна у сегмента inflow в OperationSheet.
+<!-- SECTION:NOTES:END -->
