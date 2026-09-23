@@ -34,6 +34,12 @@ export function registerProfileMutations(
 ): void {
   const api = profileApi(client);
   queryClient.setMutationDefaults(UPDATE_PROFILE_KEY, {
+    /*
+     * One write at a time. Picking an avatar with the arrow keys saves on every
+     * step, and two PATCHes in flight can reach the server in either order —
+     * the profile would keep whichever landed last, not the one picked last.
+     */
+    scope: { id: 'profile' },
     mutationFn: ({ ownerId, input }: UpdateProfileVars): Promise<ProfileDto> => {
       assertOwner(ownerId, signedInId());
       return api.update(input);

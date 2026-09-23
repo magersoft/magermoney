@@ -13,6 +13,8 @@ const profile: ProfileDto = {
   defaultCurrency: 'EUR',
   reportingCurrencies: ['EUR', 'USD'],
   onboardingCompletedAt: null,
+  avatarEmoji: null,
+  avatarColor: null,
 };
 
 const json = (body: unknown, status = 200) =>
@@ -76,5 +78,31 @@ describe('useProfile', () => {
     await flushPromises();
 
     expect(api().profile.value?.defaultCurrency).toBe('EUR');
+  });
+
+  /*
+   * Leafing through the avatar grid with the arrow keys saves on every step.
+   * Two PATCHes in flight at once can land in either order, and the server
+   * would keep whichever came last rather than the one picked last.
+   */
+  it('sends one write at a time, in the order they were made', async () => {
+    const first = deferred<Response>();
+    const bodies: string[] = [];
+    const fetchImpl = vi.fn(async (_path: string, init?: RequestInit) => {
+      if (init?.method !== 'PATCH') return json(profile);
+      bodies.push(String(init.body));
+      return bodies.length === 1 ? first.promise : json({ ...profile, avatarEmoji: '🐻' });
+    });
+    const { api } = mountProfile(fetchImpl);
+    await flushPromises();
+
+    const a = api().update({ avatarEmoji: '🦊' });
+    const b = api().update({ avatarEmoji: '🐻' });
+    await flushPromises();
+    expect(bodies).toHaveLength(1);
+
+    first.resolve(json({ ...profile, avatarEmoji: '🦊' }));
+    await Promise.all([a, b]);
+    expect(bodies.map((body) => JSON.parse(body).avatarEmoji)).toEqual(['🦊', '🐻']);
   });
 });

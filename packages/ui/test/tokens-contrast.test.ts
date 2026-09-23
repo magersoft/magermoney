@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   contrastOn,
   fillForHue,
+  luminance as fillLuminance,
   ACCOUNT_COLORWAYS,
   ACCOUNT_COLORWAY_FILLS,
   type CardFill,
@@ -211,6 +212,16 @@ describe('the card palette', () => {
 
   it.each(ACCOUNT_COLORWAYS)('carries its ink at AA through the sheen: %s', (name) => {
     expect(worstThroughGloss(ACCOUNT_COLORWAY_FILLS[name])).toBeGreaterThanOrEqual(4.5);
+  });
+
+  /*
+   * The profile disc is painted in the same colours but carries no sheen, so
+   * its initial is read against the bare fill — a different surface from the
+   * card's, and one the check above never measures.
+   */
+  it.each(ACCOUNT_COLORWAYS)('carries its ink at AA bare, as a profile disc: %s', (name) => {
+    const fill = ACCOUNT_COLORWAY_FILLS[name];
+    expect(contrastOn(fill.ink, fillLuminance(fill))).toBeGreaterThanOrEqual(4.5);
   });
 
   it('carries ink at AA on every hue a currency can land on', () => {

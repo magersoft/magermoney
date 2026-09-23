@@ -4,8 +4,12 @@
  * left, control on the right, no cards inside cards. Every change is saved the
  * moment it is made — there is no Save button, because there is nothing here
  * worth a second step — and shown immediately, with a toast if the PATCH fails.
+ *
+ * The person comes first and apart from the parameters: their disc, their name
+ * and the address they signed in with, above the rows that tune the app. The
+ * disc is the way into choosing it — it wears a pencil so that it says so.
  */
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import {
@@ -26,6 +30,8 @@ import { THEMES, useTheme, type Theme } from '@/shared/theme';
 import { ApiError } from '@/shared/api/client';
 import { LOCALES, type Locale } from '../domain/profile';
 import { useProfile } from '../application/use-profile';
+import AvatarSheet from './AvatarSheet.vue';
+import ProfileAvatar from './ProfileAvatar.vue';
 
 const { t, locale } = useI18n();
 const { toast } = useToast();
@@ -36,6 +42,9 @@ const { profile, isLoading, update } = useProfile();
 
 const displayName = ref('');
 const saving = ref(false);
+const avatarOpen = ref(false);
+/* Only shown: the address belongs to the Supabase session and is not changed here. */
+const email = computed(() => session.user.value?.email ?? '');
 
 watch(
   profile,
@@ -92,24 +101,70 @@ async function signOut(): Promise<void> {
     </template>
 
     <template v-else>
-      <div class="mt-8 flex flex-col gap-6 border-t border-border pt-6 md:gap-5">
-        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <label for="display-name" class="text-sm font-medium">
-            {{ t('settings.displayName.label') }}
-          </label>
-          <Input
-            id="display-name"
-            v-model="displayName"
-            type="text"
-            autocomplete="name"
-            maxlength="80"
-            class="h-11 md:w-64"
-            :placeholder="t('settings.displayName.placeholder')"
-            @change="saveName"
-            @blur="saveName"
-          />
-        </div>
+      <section
+        aria-labelledby="profile-heading"
+        class="mt-8 flex flex-col gap-3"
+        data-testid="settings-profile"
+      >
+        <h2 id="profile-heading" class="text-xs font-medium text-muted-foreground">
+          {{ t('settings.profile.title') }}
+        </h2>
+        <div class="flex items-center gap-4">
+          <button
+            type="button"
+            class="relative shrink-0 rounded-full outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+            :aria-label="t('settings.profile.editAvatar')"
+            data-testid="settings-avatar"
+            @click="avatarOpen = true"
+          >
+            <ProfileAvatar class="shadow-card size-20 text-3xl" />
+            <span
+              aria-hidden="true"
+              class="absolute -end-0.5 -bottom-0.5 grid size-7 place-items-center rounded-full border border-border bg-surface-raised text-ink shadow-card"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="size-3.5"
+              >
+                <path d="M4 20h4L19 9a2.83 2.83 0 0 0-4-4L4 16v4Z" />
+              </svg>
+            </span>
+          </button>
 
+          <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <label for="display-name" class="sr-only">
+              {{ t('settings.displayName.label') }}
+            </label>
+            <Input
+              id="display-name"
+              v-model="displayName"
+              type="text"
+              autocomplete="name"
+              maxlength="80"
+              class="h-11 text-base font-medium"
+              :placeholder="t('settings.displayName.placeholder')"
+              @change="saveName"
+              @blur="saveName"
+            />
+            <p
+              v-if="email"
+              class="truncate px-3 text-sm text-muted-foreground"
+              data-testid="settings-email"
+            >
+              {{ email }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <AvatarSheet v-model:open="avatarOpen" @change="save" />
+
+      <div class="mt-8 flex flex-col gap-6 md:gap-5">
         <div
           class="flex flex-col gap-2 border-t border-border pt-6 md:flex-row md:items-center md:justify-between md:pt-5"
         >

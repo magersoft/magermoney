@@ -615,6 +615,27 @@
   },
   "settings": {
     "title": "Настройки",
+    "profile": {
+      "title": "Профиль",
+      "editAvatar": "Изменить аватар",
+      "avatar": {
+        "title": "Аватар",
+        "emoji": "Эмодзи",
+        "initial": "Первая буква имени",
+        "color": "Цвет",
+        "colors": {
+          "none": "Без цвета",
+          "red": "Красный",
+          "orange": "Оранжевый",
+          "amber": "Янтарный",
+          "green": "Зелёный",
+          "teal": "Бирюзовый",
+          "blue": "Синий",
+          "violet": "Фиолетовый",
+          "pink": "Розовый"
+        }
+      }
+    },
     "displayName": {
       "label": "Как вас зовут",
       "placeholder": "Имя"

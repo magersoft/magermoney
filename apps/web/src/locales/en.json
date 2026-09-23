@@ -615,6 +615,27 @@
   },
   "settings": {
     "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "editAvatar": "Change avatar",
+      "avatar": {
+        "title": "Avatar",
+        "emoji": "Emoji",
+        "initial": "First letter of your name",
+        "color": "Colour",
+        "colors": {
+          "none": "No colour",
+          "red": "Red",
+          "orange": "Orange",
+          "amber": "Amber",
+          "green": "Green",
+          "teal": "Teal",
+          "blue": "Blue",
+          "violet": "Violet",
+          "pink": "Pink"
+        }
+      }
+    },
     "displayName": {
       "label": "Your name",
       "placeholder": "Name"
