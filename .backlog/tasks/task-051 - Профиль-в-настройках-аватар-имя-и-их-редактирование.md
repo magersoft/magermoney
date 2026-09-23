@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-20 10:39'
-updated_date: '2026-09-23 08:36'
+updated_date: '2026-09-23 08:37'
 labels: []
 dependencies: []
 ordinal: 49000
@@ -34,3 +34,21 @@ ordinal: 49000
 - [ ] #9 Строки локализации добавлены в en.json и ru.json
 - [ ] #10 Тесты покрывают: контракты (частичное обновление и отклонение недопустимого значения), PATCH /me, доменный выбор между эмодзи, инициалом и силуэтом, и отрисовку секции профиля на SettingsPage
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Решения по открытым вопросам:
+- Цвета диска: те же 8 имён, что у карточек счетов (ACCOUNT_COLORWAYS из packages/domain). У каждой заливки в ACCOUNT_COLORWAY_FILLS уже есть подобранные чернила, и контраст доказан в tokens-contrast.test.ts; заливки одинаковы в светлой и тёмной теме, так что одно доказательство покрывает обе. Отдельный список означал бы второе доказательство контраста. null = прежний диск bg-surface/text-ink.
+- Эмодзи: в UI готовая сетка (радиогруппа), в контракте — любой один графемный кластер эмодзи (Intl.Segmenter + \p{Extended_Pictographic}/Regional_Indicator), не длиннее 16 кодпоинтов; в БД check char_length 1..16. Сетку можно менять без миграции. null = инициал.
+
+Шаги:
+1. Миграция: profiles.avatar_emoji text check (1..16), avatar_color text check (in colorway names), обе nullable.
+2. packages/domain: AVATAR_COLORS (= ACCOUNT_COLORWAYS) + isAvatarEmoji (тест, 100% покрытие).
+3. contracts: avatarEmoji/avatarColor в ProfileDtoSchema (nullable) и UpdateProfileInputSchema (nullable().optional()); тесты частичного обновления и отказа.
+4. API: Profile/ProfilePatch, pg/memory репозитории, тест PATCH /me (установка, сброс null, отсутствие поля не затирает, 400 на неверном цвете/эмодзи).
+5. web domain: avatarFace(profile, email) → emoji | initial | silhouette; тест.
+6. ProfileAvatar читает avatarFace и цвет (cardFill чернила).
+7. SettingsPage: первая секция «Профиль» — крупный аватар, имя (сохранение на change/blur, как было), e-mail из сессии; кнопка «Изменить аватар» открывает Sheet с радиогруппами эмодзи и цвета (roving tabindex, aria-checked), каждый выбор сохраняется сразу через тот же оптимистичный PATCH — шапка и приветствие обновляются из общего кэша ['me']. Строка имени убрана из параметров.
+8. i18n en/ru, тесты SettingsPage, lint/typecheck/test.
+<!-- SECTION:PLAN:END -->
