@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-23 18:28'
-updated_date: '2026-09-23 18:31'
+updated_date: '2026-09-23 18:33'
 labels:
   - web
   - ui
@@ -40,3 +40,15 @@ ordinal: 58000
 - [ ] #5 Тесты QuickActions/OperationSheet обновлены: сегмент открывает поступление, создание источника дохода по-прежнему достижимо
 - [ ] #6 Ленивая загрузка чанка income сохранена: он не попадает в входной чанк
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. InflowSheet переносится на QuickActionSheet (как расход, доход и перевод): сумма крупным полем сверху, валюта источника рядом, поля строками InputRow/SelectRow. Отступы даёт сам QuickActionSheet (p-4), это и чинит прижатые к краям поля.
+2. InflowSheet принимает types/type и слот #secondary, как соседние шиты.
+3. OperationSheet: сегмент transfer/expense/inflow, лениво грузит InflowSheet вместо IncomeSourceSheet.
+4. QuickActions: убрать ленивый InflowSheet и кнопку quick-inflow; во второстепенных действиях кнопка «Новый источник дохода» ведёт на /plan/income/new (маршрут уже есть и открывает тот же шит источника).
+5. Локали ru/en: quick.types.inflow, quick.incomeSource, inflows.close.
+6. Тесты: InflowSheet.test на слоты quick-action-*, quick-actions.test на новый сегмент и кнопку; e2e smoke — селекторы поступления.
+7. typecheck, lint, test, build; проверка на 390px в браузере.
+<!-- SECTION:PLAN:END -->
