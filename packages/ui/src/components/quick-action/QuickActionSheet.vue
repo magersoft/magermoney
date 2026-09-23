@@ -38,6 +38,7 @@ import type { SegmentedOption } from '../segmented-control/types';
 import type { AmountLocale } from '../amount-lockup/format-amount';
 import { fade, sheetUp } from '../../motion/presets';
 import QuickAmountGrid from './QuickAmountGrid.vue';
+import { useSwipeDismiss } from '../swipe-dismiss/use-swipe-dismiss';
 
 const props = withDefaults(
   defineProps<{
@@ -96,6 +97,9 @@ const emit = defineEmits<{
  * on the panel people actually see, which is where `$attrs` goes instead.
  */
 defineOptions({ inheritAttrs: false });
+
+/* Dragged down, it closes — the same gesture every bottom sheet in the app answers to. */
+const swipe = useSwipeDismiss(() => emit('update:open', false));
 </script>
 
 <template>
@@ -139,7 +143,13 @@ defineOptions({ inheritAttrs: false });
               props.class,
             )
           "
+          v-on="swipe"
         >
+          <div
+            data-slot="sheet-grip"
+            aria-hidden="true"
+            class="bg-muted-foreground/30 mx-auto -mt-2 -mb-2 h-1 w-10 shrink-0 rounded-full"
+          />
           <header class="flex items-start justify-between gap-3">
             <DialogTitle class="text-base font-medium">
               {{ props.title }}

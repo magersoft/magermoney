@@ -4,8 +4,15 @@ import type { DialogContentEmits, DialogContentProps } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
 import { XIcon } from '@lucide/vue';
 import { reactiveOmit } from '@vueuse/core';
-import { DialogClose, DialogContent, DialogPortal, useForwardPropsEmits } from 'reka-ui';
+import {
+  DialogClose,
+  DialogContent,
+  DialogPortal,
+  injectDialogRootContext,
+  useForwardPropsEmits,
+} from 'reka-ui';
 import { cn } from '../../../lib/utils';
+import { useSwipeDismiss } from '../../swipe-dismiss/use-swipe-dismiss';
 import { Button } from '../button';
 import SheetOverlay from './SheetOverlay.vue';
 
@@ -28,6 +35,16 @@ const emits = defineEmits<DialogContentEmits>();
 const delegatedProps = reactiveOmit(props, 'class', 'side', 'showCloseButton');
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
+
+/*
+ * A sheet that rises from the bottom edge goes back the way it came: dragged
+ * down, it closes. Every bottom sheet in the app is this one, so the gesture
+ * lives here rather than on each screen.
+ */
+const dialog = injectDialogRootContext();
+const swipe = useSwipeDismiss(() => dialog.onOpenChange(false), {
+  disabled: () => props.side !== 'bottom',
+});
 </script>
 
 <template>
@@ -43,7 +60,15 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
         )
       "
       v-bind="{ ...$attrs, ...forwarded }"
+      v-on="swipe"
     >
+      <!-- The grip says the sheet can be dragged; the gesture works from anywhere on it. -->
+      <div
+        v-if="side === 'bottom'"
+        data-slot="sheet-grip"
+        aria-hidden="true"
+        class="bg-muted-foreground/30 mx-auto -mb-2 mt-2 h-1 w-10 shrink-0 rounded-full"
+      />
       <slot />
 
       <DialogClose v-if="showCloseButton" data-slot="sheet-close" as-child>
