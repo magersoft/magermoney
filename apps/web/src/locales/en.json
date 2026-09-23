@@ -790,6 +790,7 @@
   "inflows": {
     "title": "Inflow",
     "editTitle": "Edit inflow",
+    "close": "Close",
     "source": "From",
     "newSource": "New source…",
     "newName": "Source name",
@@ -817,12 +818,12 @@
     "types": {
       "transfer": "Transfer",
       "expense": "Expense",
-      "income": "Income"
+      "inflow": "Inflow"
     },
     "record": "Update balance",
     "transfer": "Transfer",
     "pickAccount": "Which account?",
-    "inflow": "Inflow"
+    "incomeSource": "New income source"
   },
   "errors": {
     "recordedInFuture": "That date is in the future. Pick today or earlier.",
