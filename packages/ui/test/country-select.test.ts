@@ -110,3 +110,50 @@ describe('CountrySelect', () => {
     w.unmount();
   });
 });
+
+describe('CountrySelect, several at once', () => {
+  const several = (modelValue: string[] = []) =>
+    mount(CountrySelect, {
+      props: {
+        options: OPTIONS,
+        modelValue,
+        multiple: true,
+        removeLabel: (name: string) => `Убрать: ${name}`,
+        ...WORDS,
+      },
+      attachTo: document.body,
+    });
+
+  it('adds a country, keeps the list open and ticks what is in', async () => {
+    document.body.innerHTML = '';
+    const w = several(['DE']);
+    await w.get('[data-testid="country-trigger"]').trigger('click');
+    await flushPromises();
+
+    const de = document.querySelector<HTMLElement>('[data-testid="country-option-DE"]')!;
+    expect(de.querySelector('[data-slot="country-check"]')).not.toBeNull();
+    document.querySelector<HTMLElement>('[data-testid="country-option-PT"]')!.click();
+    await flushPromises();
+
+    expect(w.emitted('update:modelValue')?.at(-1)).toEqual([['DE', 'PT']]);
+    expect(document.querySelector('[role="listbox"]')).not.toBeNull();
+    w.unmount();
+  });
+
+  it('states the choice as chips that each drop one, with no clear-all in the row', async () => {
+    const w = several(['DE', 'RU']);
+
+    expect(w.findAll('[data-slot="filter-chip"]').map((c) => c.text())).toEqual([
+      'Германия',
+      'Россия',
+    ]);
+    expect(w.find('[data-testid="country-clear"]').exists()).toBe(false);
+    expect(w.get('[data-testid="country-value"]').text()).toBe('Выберите страну');
+
+    const remove = w.findAll('[data-slot="filter-chip-remove"]');
+    expect(remove[0]!.attributes('aria-label')).toBe('Убрать: Германия');
+    await remove[0]!.trigger('click');
+    expect(w.emitted('update:modelValue')?.at(-1)).toEqual([['RU']]);
+    w.unmount();
+  });
+});

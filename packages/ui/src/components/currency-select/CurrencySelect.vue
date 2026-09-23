@@ -19,10 +19,15 @@
  *
  * Every word is a prop. The list is the same everywhere; what it is called is
  * not, and translations live in the app rather than in the design system.
+ *
+ * `multiple` is for a filter rather than a form: the model is a list, a tap
+ * adds or takes back without closing the list, a tick marks what is in, and
+ * the choice is stated under the row as chips that each drop one. Only the row
+ * does it — the compact trigger stands beside one amount, in one currency.
  */
 import { computed, ref, useId } from 'vue';
 import type { HTMLAttributes } from 'vue';
-import { ChevronRightIcon, ChevronsUpDownIcon } from '@lucide/vue';
+import { CheckIcon, ChevronRightIcon, ChevronsUpDownIcon } from '@lucide/vue';
 import { cn } from '../../lib/utils';
 import {
   Combobox,
@@ -35,6 +40,7 @@ import {
   ComboboxViewport,
 } from '../ui/combobox';
 import CurrencyIcon from '../currency-icon/CurrencyIcon.vue';
+import FilterChipRow from '../chip/FilterChipRow.vue';
 import { groupCurrencies, type CurrencyOption } from './filter';
 
 const props = withDefaults(
@@ -79,10 +85,16 @@ const props = withDefaults(
     /** A quiet line under the value: why the field is locked, what it affects. */
     hint?: string;
     disabled?: boolean;
+    /** Several codes at once; the model is then a list. Row variant only. */
+    multiple?: boolean;
+    /** The accessible name of a chip's remove control, from the currency's name. */
+    removeLabel?: (name: string) => string;
     class?: HTMLAttributes['class'];
   }>(),
   {
     variant: 'row',
+    multiple: false,
+    removeLabel: (name: string) => name,
     placeholder: undefined,
     searchPlaceholder: undefined,
     emptyLabel: undefined,
@@ -99,8 +111,11 @@ const props = withDefaults(
   },
 );
 
-/** The currency code, upper case. Never null: an amount is always in something. */
-const model = defineModel<string>({ required: true });
+/**
+ * The currency code, upper case. Never null: an amount is always in something.
+ * With `multiple`, the codes chosen, in the order they were picked.
+ */
+const model = defineModel<string | string[]>({ required: true });
 
 const open = ref(false);
 const query = ref('');
@@ -108,7 +123,23 @@ const uid = useId();
 const errorId = `${uid}-error`;
 const headingId = `${uid}-group`;
 
-const selected = computed(() => props.options.find((o) => o.code === model.value));
+const chosen = computed(() => (Array.isArray(model.value) ? model.value : [model.value]));
+/* In the trigger: the one currency. A list is stated by its chips instead. */
+const selected = computed(() =>
+  props.multiple ? undefined : props.options.find((o) => o.code === model.value),
+);
+const chips = computed(() =>
+  props.multiple
+    ? chosen.value.map((code) => {
+        const name = props.options.find((o) => o.code === code)?.name ?? code;
+        return { id: code, label: name, removeLabel: props.removeLabel(name) };
+      })
+    : [],
+);
+const isChosen = (code: string) => props.multiple && chosen.value.includes(code);
+function drop(code: string) {
+  model.value = chosen.value.filter((c) => c !== code);
+}
 
 const groups = computed(() => groupCurrencies(props.options, query.value, props.frequent));
 
@@ -133,6 +164,7 @@ function onOpen(value: boolean) {
 <template>
   <Combobox
     v-model="model"
+    :multiple="props.multiple"
     :open="open"
     :disabled="props.disabled"
     :ignore-filter="true"
@@ -212,6 +244,14 @@ function onOpen(value: boolean) {
       />
     </ComboboxAnchor>
 
+    <FilterChipRow
+      v-if="props.multiple"
+      :chips="chips"
+      :aria-label="props.label"
+      class="mt-3"
+      @remove="drop"
+    />
+
     <!--
       The row fills the screen's width, so its list hangs from the left edge it
       already has. The compact trigger does not: it stands at the right of an
@@ -269,6 +309,12 @@ function onOpen(value: boolean) {
           >
             <CurrencyIcon :code="currency.code" :kind="currency.kind" :size="20" />
             <span class="min-w-0 flex-1 truncate">{{ currency.name }}</span>
+            <CheckIcon
+              v-if="isChosen(currency.code)"
+              data-slot="currency-check"
+              aria-hidden="true"
+              class="text-primary size-4 shrink-0"
+            />
             <span
               v-if="unavailable.has(currency.code) && props.disabledLabel"
               class="text-muted-foreground shrink-0 text-xs"

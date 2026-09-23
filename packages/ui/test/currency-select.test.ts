@@ -216,3 +216,56 @@ describe('CurrencySelect, compact variant', () => {
     w.unmount();
   });
 });
+
+describe('CurrencySelect, several at once', () => {
+  const several = (modelValue: string[] = []) =>
+    mountIt({
+      multiple: true,
+      modelValue,
+      removeLabel: (name: string) => `Убрать: ${name}`,
+      'onUpdate:modelValue': () => {},
+    });
+  const chips = (w: ReturnType<typeof mountIt>) =>
+    w.findAll('[data-slot="filter-chip"]').map((c) => c.text());
+
+  it('adds to the choice instead of replacing it, and keeps the list open', async () => {
+    const w = several(['EUR']);
+    await openAndType(w);
+
+    document.querySelector<HTMLElement>('[data-testid="currency-option-USD"]')!.click();
+    await flushPromises();
+
+    expect(w.emitted('update:modelValue')?.at(-1)).toEqual([['EUR', 'USD']]);
+    expect(document.querySelector('[role="listbox"]')).not.toBeNull();
+  });
+
+  it('marks what is chosen in the list, and takes it back on a second tap', async () => {
+    const w = several(['EUR', 'USD']);
+    await openAndType(w);
+
+    const eur = document.querySelector<HTMLElement>('[data-testid="currency-option-EUR"]')!;
+    expect(eur.getAttribute('aria-selected')).toBe('true');
+    expect(eur.querySelector('[data-slot="currency-check"]')).not.toBeNull();
+
+    eur.click();
+    await flushPromises();
+    expect(w.emitted('update:modelValue')?.at(-1)).toEqual([['USD']]);
+  });
+
+  it('shows each choice as a chip that drops just that one', async () => {
+    const w = several(['EUR', 'BTC']);
+
+    expect(chips(w)).toEqual(['Евро', 'Биткоин']);
+    const remove = w.findAll('[data-slot="filter-chip-remove"]');
+    expect(remove[1]!.attributes('aria-label')).toBe('Убрать: Биткоин');
+
+    await remove[1]!.trigger('click');
+    expect(w.emitted('update:modelValue')?.at(-1)).toEqual([['EUR']]);
+  });
+
+  it('reads as an invitation while nothing is chosen, with no chips', () => {
+    const w = several([]);
+    expect(w.get('[data-testid="currency-value"]').text()).toBe('Выберите валюту');
+    expect(chips(w)).toEqual([]);
+  });
+});

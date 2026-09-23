@@ -99,9 +99,10 @@ usePageAction(() => ({
  * binding it two-way is safe.
  */
 const pending = ref('');
-async function onPick(code: string) {
+/* The picker is single here, so its value is always one code. */
+async function onPick(code: string | string[]) {
   pending.value = '';
-  if (!code) return;
+  if (typeof code !== 'string' || !code) return;
   try {
     await connect(code);
   } catch {

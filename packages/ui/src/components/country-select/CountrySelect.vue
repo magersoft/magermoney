@@ -10,10 +10,15 @@
  *
  * The words are all props. The list is the same everywhere; what it is called
  * is not, and translations live in the app rather than in the design system.
+ *
+ * `multiple` is for a filter rather than a form, as in `CurrencySelect`: the
+ * model is a list, a tap adds or takes back without closing the list, a tick
+ * marks what is in, and the chips under the row each drop one — which is also
+ * why the row loses its clear button there.
  */
 import { computed, ref, useId } from 'vue';
 import type { HTMLAttributes } from 'vue';
-import { ChevronRightIcon, XIcon } from '@lucide/vue';
+import { CheckIcon, ChevronRightIcon, XIcon } from '@lucide/vue';
 import { cn } from '../../lib/utils';
 import {
   Combobox,
@@ -25,6 +30,7 @@ import {
   ComboboxTrigger,
   ComboboxViewport,
 } from '../ui/combobox';
+import FilterChipRow from '../chip/FilterChipRow.vue';
 import CountryFlag from './CountryFlag.vue';
 import { filterCountries, type CountryOption } from './filter';
 
@@ -47,9 +53,15 @@ const props = withDefaults(
     /** Without it the field cannot be emptied once it holds a country. */
     clearable?: boolean;
     disabled?: boolean;
+    /** Several countries at once; the model is then a list. */
+    multiple?: boolean;
+    /** The accessible name of a chip's remove control, from the country's name. */
+    removeLabel?: (name: string) => string;
     class?: HTMLAttributes['class'];
   }>(),
   {
+    multiple: false,
+    removeLabel: (name: string) => name,
     placeholder: undefined,
     searchPlaceholder: undefined,
     emptyLabel: undefined,
@@ -61,16 +73,37 @@ const props = withDefaults(
   },
 );
 
-/** The alpha-2 code, upper case, or `null` for no country. */
-const model = defineModel<string | null>({ default: null });
+/**
+ * The alpha-2 code, upper case, or `null` for no country. With `multiple`, the
+ * codes chosen, in the order they were picked.
+ */
+const model = defineModel<string | string[] | null>({ default: null });
 
 const open = ref(false);
 const query = ref('');
 const errorId = `${useId()}-error`;
 
-const selected = computed(() =>
-  model.value ? props.options.find((o) => o.code === model.value) : undefined,
+const chosen = computed(() =>
+  Array.isArray(model.value) ? model.value : model.value ? [model.value] : [],
 );
+/* In the row: the one country. A list is stated by its chips instead. */
+const selected = computed(() =>
+  !props.multiple && typeof model.value === 'string'
+    ? props.options.find((o) => o.code === model.value)
+    : undefined,
+);
+const chips = computed(() =>
+  props.multiple
+    ? chosen.value.map((code) => {
+        const name = props.options.find((o) => o.code === code)?.name ?? code;
+        return { id: code, label: name, removeLabel: props.removeLabel(name) };
+      })
+    : [],
+);
+const isChosen = (code: string) => props.multiple && chosen.value.includes(code);
+function drop(code: string) {
+  model.value = chosen.value.filter((c) => c !== code);
+}
 const shown = computed(() => filterCountries(props.options, query.value));
 
 /*
@@ -90,6 +123,7 @@ function clear() {
 <template>
   <Combobox
     v-model="model"
+    :multiple="props.multiple"
     :open="open"
     :disabled="props.disabled"
     :ignore-filter="true"
@@ -150,6 +184,14 @@ function clear() {
       />
     </ComboboxAnchor>
 
+    <FilterChipRow
+      v-if="props.multiple"
+      :chips="chips"
+      :aria-label="props.label"
+      class="mt-3"
+      @remove="drop"
+    />
+
     <ComboboxList align="start">
       <!--
         `display-value` has to be pinned to the query. Left to itself the
@@ -174,6 +216,12 @@ function clear() {
         >
           <CountryFlag :code="country.code" :size="20" />
           <span class="min-w-0 flex-1 truncate">{{ country.name }}</span>
+          <CheckIcon
+            v-if="isChosen(country.code)"
+            data-slot="country-check"
+            aria-hidden="true"
+            class="text-primary size-4 shrink-0"
+          />
           <span class="text-muted-foreground font-mono text-xs tracking-[0.08em]">{{
             country.code
           }}</span>
