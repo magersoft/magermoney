@@ -93,7 +93,7 @@ async function signOut(): Promise<void> {
     </h1>
 
     <template v-if="isLoading && !profile">
-      <div class="mt-8 flex flex-col gap-4">
+      <div class="flex flex-col gap-4 md:mt-8">
         <Skeleton class="h-11 w-full" />
         <Skeleton class="h-11 w-full" />
         <Skeleton class="h-32 w-full" />
@@ -103,7 +103,7 @@ async function signOut(): Promise<void> {
     <template v-else>
       <section
         aria-labelledby="profile-heading"
-        class="mt-8 flex flex-col gap-3"
+        class="flex flex-col gap-3 md:mt-8"
         data-testid="settings-profile"
       >
         <h2 id="profile-heading" class="text-xs font-medium text-muted-foreground">
