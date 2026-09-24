@@ -1,9 +1,11 @@
 ---
 id: TASK-061
 title: 'Шит «+»: убрать «Новый источник дохода» и «Обновить остаток» из блока «Ещё»'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-23 18:39'
+updated_date: '2026-09-24 09:58'
 labels:
   - frontend
   - ux
@@ -25,3 +27,19 @@ ordinal: 59000
 - [ ] #4 Выбранное размещение согласовано с владельцем до реализации (/frontend-design)
 - [ ] #5 Тесты QuickActions и e2e обновлены; ключи i18n `quick.record`, `quick.incomeSource` удалены или перенесены
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Placement agreed with the owner 2026-09-24: balance is updated only from the account screen (AccountDetailPage already has it); a new income source lives in Plan → Income and the inflow form's source picker (both exist).
+2. Remove the #secondary content and the account-picker sheet from QuickActions; drop the dead #secondary pass-through in OperationSheet and the three operation sheets.
+3. Drop i18n keys quick.record, quick.incomeSource, quick.pickAccount (ru/en).
+4. Update quick-actions tests (red first: assert no secondary block in any segment) and e2e.
+5. lint/typecheck/test.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Owner chose 'account screen only' for record-balance quick access (no extra entry point).
+<!-- SECTION:NOTES:END -->
