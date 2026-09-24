@@ -1,10 +1,11 @@
 ---
 id: TASK-058
 title: 'Цели и активы: кнопка «Удалить» с подтверждением, в базе — архив'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-22 06:46'
-updated_date: '2026-09-22 06:51'
+updated_date: '2026-09-24 09:08'
 labels:
   - web
   - ux
