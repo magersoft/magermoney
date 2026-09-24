@@ -58,6 +58,8 @@ const props = withDefaults(
     code: string;
     scale?: number;
     locale?: AmountLocale;
+    /** A balance below zero is real on a credit card; an amount spent never is. */
+    allowNegative?: boolean;
     /** Расход / Доход / Перевод. Left out, the segment is not shown. */
     types?: readonly SegmentedOption[];
     type?: string;
@@ -74,6 +76,7 @@ const props = withDefaults(
     description: undefined,
     scale: 2,
     locale: 'en',
+    allowNegative: false,
     types: () => [],
     type: '',
     typeLabel: undefined,
@@ -180,6 +183,7 @@ const swipe = useSwipeDismiss(() => emit('update:open', false));
                 :model-value="props.amount"
                 :scale="props.scale"
                 :locale="props.locale"
+                :allow-negative="props.allowNegative"
                 class="h-14 rounded-none border-0 bg-transparent px-0 text-3xl focus-visible:ring-0"
                 @update:model-value="emit('update:amount', $event)"
               />
