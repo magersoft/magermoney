@@ -120,8 +120,9 @@ test('sign in, see home, switch currency', async ({ page }) => {
 
     // Record a balance on Beta from its detail page.
     await page.getByTestId('account-record').click();
-    await page.getByTestId('balance-amount').fill('10');
-    await page.getByTestId('balance-save').click();
+    const balance = page.getByTestId('balance-form');
+    await balance.locator('[data-slot="quick-action-amount"] input').fill('10');
+    await balance.locator('[data-slot="quick-action-confirm"]').click();
     await expect(page.getByTestId('account-balance')).toContainText('10');
 
     // Transfer 40 from Alfa to Beta; the total stays 110, Beta shows 50.

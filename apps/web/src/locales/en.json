@@ -618,7 +618,12 @@
       "note": "Note",
       "save": "Record",
       "delete": "Delete entry",
-      "failed": "That did not record. Try again."
+      "failed": "That did not record. Try again.",
+      "before": "Was",
+      "unchanged": "No change",
+      "close": "Close",
+      "currency": "Account currency",
+      "notePlaceholder": "For example, from the bank statement"
     }
   },
   "settings": {
