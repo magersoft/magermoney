@@ -1,9 +1,11 @@
 ---
 id: TASK-059
 title: 'Цели и активы: иконка и цвет, чтобы список читался с одного взгляда'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-22 06:46'
+updated_date: '2026-09-24 09:14'
 labels:
   - web
   - design
