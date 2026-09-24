@@ -1,11 +1,11 @@
 ---
 id: TASK-058
 title: 'Цели и активы: кнопка «Удалить» с подтверждением, в базе — архив'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-22 06:46'
-updated_date: '2026-09-24 09:10'
+updated_date: '2026-09-24 09:25'
 labels:
   - web
   - ux
@@ -25,15 +25,15 @@ ordinal: 56000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 На экране цели и на экране актива есть кнопка «Удалить», заметная как кнопка, а не как подпись
-- [ ] #2 Нажатие спрашивает подтверждение и называет последствия: у цели — сколько счетов отвяжется, у актива — что история оценок перестанет быть видна
-- [ ] #3 Подтверждение шлёт PATCH с archivedAt, а не DELETE; запись остаётся в базе
-- [ ] #4 Удалённые цель и актив исчезают отовсюду: из списков «Накоплений», из суммы капитала, из выбора счёта под цель
-- [ ] #5 Удаление цели отвязывает её счета, и они остаются на месте со своими балансами
-- [ ] #6 После удаления человек возвращается на «Накопления», список обновляется; отказ сервера показывается тостом и ничего не исчезает
-- [ ] #7 Прежняя формулировка «Убрать цель в архив» уходит из интерфейса и из локалей ru и en
-- [ ] #8 В вебе не остаётся неиспользуемых экспортов удаления
-- [ ] #9 Тесты покрывают подтверждение, отмену подтверждения, исчезновение из списка и отказ сервера
+- [x] #1 На экране цели и на экране актива есть кнопка «Удалить», заметная как кнопка, а не как подпись
+- [x] #2 Нажатие спрашивает подтверждение и называет последствия: у цели — сколько счетов отвяжется, у актива — что история оценок перестанет быть видна
+- [x] #3 Подтверждение шлёт PATCH с archivedAt, а не DELETE; запись остаётся в базе
+- [x] #4 Удалённые цель и актив исчезают отовсюду: из списков «Накоплений», из суммы капитала, из выбора счёта под цель
+- [x] #5 Удаление цели отвязывает её счета, и они остаются на месте со своими балансами
+- [x] #6 После удаления человек возвращается на «Накопления», список обновляется; отказ сервера показывается тостом и ничего не исчезает
+- [x] #7 Прежняя формулировка «Убрать цель в архив» уходит из интерфейса и из локалей ru и en
+- [x] #8 В вебе не остаётся неиспользуемых экспортов удаления
+- [x] #9 Тесты покрывают подтверждение, отмену подтверждения, исчезновение из списка и отказ сервера
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -46,3 +46,15 @@ ordinal: 56000
 5. Test fixture i18n gets ruPlural so plural copy is asserted as the app renders it.
 6. Lint, typecheck, full web tests; impeccable pass on the two screens.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Decision: the API DELETE /goals/{id} and /assets/{id} stay for a future real purge; the web's useDeleteGoal/useDeleteAsset and the client remove() methods had no caller and were removed. AC5 (accounts released, balances kept) is the server's existing single-transaction release, covered by apps/api/test/goals.test.ts ('releases the accounts it held') and test/integration/pg-goal-archive.test.ts. The test i18n fixture now uses ruPlural so plural copy is asserted as rendered. Not done: a live browser check (local app needs sign-in); verified through DOM tests instead.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Goal and asset screens end with a destructive 'Удалить цель' / 'Удалить актив' button. An AlertDialog asks first and names the consequence (the goal: how many accounts come free, pluralised; the asset: its valuation history goes out of sight). Confirming sends PATCH {archivedAt}, never DELETE, then returns to /goals (the assets tab for an asset). A refusal toasts and stays. Old 'Убрать цель в архив' copy removed from ru/en. Verified: test/GoalPage.test.ts and AssetPage.test.ts (button, confirm text, cancel sends nothing, PATCH not DELETE, redirect, server refusal); GoalsSegment/AssetsSegment tests (archived rows gone, asset out of the total); full lint/typecheck/tests green. Commit 0978443 on task-058.
+<!-- SECTION:FINAL_SUMMARY:END -->
