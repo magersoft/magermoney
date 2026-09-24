@@ -32,24 +32,15 @@ export function useUpdateGoal() {
   };
 }
 
-/** Archiving is an update, not a delete: the goal stays, and it releases its accounts. */
+/**
+ * What the screen calls deleting. The goal stays in the database with a stamp,
+ * because its history hangs off it and a real delete has no undo; it releases
+ * its accounts in the same write. Nothing shows an archived goal again.
+ */
 export function useArchiveGoal() {
   const { update, isPending } = useUpdateGoal();
   return {
     archive: (id: string) => update(id, { archivedAt: new Date().toISOString() }),
     isPending,
   };
-}
-
-export function useDeleteGoal() {
-  const api = goalsApi(useApi());
-  const qc = useQueryClient();
-  const m = useMutation({
-    mutationFn: api.remove,
-    onSettled: async () => {
-      await qc.invalidateQueries({ queryKey: GOALS_KEY });
-      await qc.invalidateQueries({ queryKey: ACCOUNTS_KEY });
-    },
-  });
-  return { remove: (id: string) => m.mutateAsync(id), isPending: m.isPending };
 }

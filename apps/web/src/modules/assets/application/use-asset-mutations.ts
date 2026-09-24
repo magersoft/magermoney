@@ -32,14 +32,17 @@ export function useUpdateAsset() {
   };
 }
 
-export function useDeleteAsset() {
-  const api = assetsApi(useApi());
-  const qc = useQueryClient();
-  const m = useMutation({
-    mutationFn: api.remove,
-    onSettled: () => qc.invalidateQueries({ queryKey: ASSETS_KEY }),
-  });
-  return { remove: (id: string) => m.mutateAsync(id), isPending: m.isPending };
+/**
+ * What the screen calls deleting. The asset stays in the database with a stamp,
+ * because its valuations hang off it and a real delete has no undo; every list
+ * and total leaves it out from then on.
+ */
+export function useArchiveAsset() {
+  const { update, isPending } = useUpdateAsset();
+  return {
+    archive: (id: string) => update(id, { archivedAt: new Date().toISOString() }),
+    isPending,
+  };
 }
 
 /**

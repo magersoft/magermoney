@@ -6,6 +6,7 @@ import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import ru from '../../src/locales/ru.json';
 import { API_KEY } from '../../src/shared/api/use-api.js';
+import { ruPlural } from '../../src/app/i18n.js';
 
 export const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -121,7 +122,12 @@ export async function mountAt<C extends Component>(
             }),
           },
         ],
-        createI18n({ legacy: false, locale: 'ru', messages: { ru } }),
+        createI18n({
+          legacy: false,
+          locale: 'ru',
+          pluralRules: { ru: ruPlural },
+          messages: { ru },
+        }),
         router,
       ],
       provide: { [API_KEY as unknown as string]: { fetch } },

@@ -9,8 +9,16 @@
  */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   AmountLockup,
   Button,
   RouteError,
@@ -23,12 +31,13 @@ import { errorKeyFor } from '@/shared/api/error-messages';
 import { formatDay, type DateLocale } from '@/shared/dates/format';
 import { usePageAction, usePageTitle } from '@/shared/layout/page-bar';
 import { useAssets } from '../application/use-assets';
-import { useDeleteValuation } from '../application/use-asset-mutations';
+import { useArchiveAsset, useDeleteValuation } from '../application/use-asset-mutations';
 import { useValuations } from '../application/use-valuations';
 import AssetRow from './AssetRow.vue';
 import ValuationSheet from './ValuationSheet.vue';
 
 const route = useRoute();
+const router = useRouter();
 const { t, locale } = useI18n();
 const { toast } = useToast();
 const amountLocale = computed(() => locale.value as AmountLocale);
@@ -39,8 +48,10 @@ const { assets, isLoading, isError, refetch } = useAssets();
 const asset = computed(() => assets.value.find((a) => a.id === id.value));
 const journal = useValuations(id);
 const { remove } = useDeleteValuation(id.value);
+const { archive, isPending: deleting } = useArchiveAsset();
 
 const valuing = ref(false);
+const confirmDelete = ref(false);
 const missing = computed(() => !isLoading.value && !isError.value && !asset.value);
 
 usePageTitle(() => asset.value?.name ?? t('assets.title'));
@@ -68,6 +79,21 @@ const sincePurchase = computed(() => {
     price: a.purchasePrice.round().toString(),
   });
 });
+
+/**
+ * Deleting is archiving underneath: the asset and its journal keep their rows,
+ * and every list and total leaves them out from then on.
+ */
+async function deleteAsset() {
+  if (!asset.value) return;
+  try {
+    await archive(asset.value.id);
+    toast.success(t('assets.deleted'));
+    await router.replace({ name: 'savings', query: { tab: 'assets' } });
+  } catch (e) {
+    toast.error(t(errorKeyFor(e, 'assets.error.title')));
+  }
+}
 
 async function dropValuation(valuationId: string) {
   try {
@@ -176,6 +202,40 @@ async function dropValuation(valuationId: string) {
           </li>
         </RowGroup>
       </section>
+
+      <div class="pt-2">
+        <Button
+          variant="destructive"
+          class="min-h-11 rounded-xl px-4"
+          :disabled="deleting"
+          data-testid="asset-delete"
+          @click="confirmDelete = true"
+        >
+          {{ t('assets.delete') }}
+        </Button>
+      </div>
+
+      <AlertDialog v-model:open="confirmDelete">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{{ t('assets.deleteTitle', { name: asset.name }) }}</AlertDialogTitle>
+            <AlertDialogDescription>{{ t('assets.deleteBody') }}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="asset-delete-cancel">
+              {{ t('assets.cancel') }}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              :disabled="deleting"
+              data-testid="asset-delete-confirm"
+              @click="deleteAsset"
+            >
+              {{ t('assets.delete') }}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ValuationSheet v-model:open="valuing" :asset-id="asset.id" />
     </template>

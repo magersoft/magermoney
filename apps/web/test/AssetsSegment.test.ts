@@ -88,6 +88,20 @@ describe('AssetsSegment', () => {
     wrapper.unmount();
   });
 
+  it('leaves a deleted asset out of the list and out of the total', async () => {
+    const { wrapper } = await mountWith([
+      assetDto(),
+      assetDto({ id: ID_B, name: 'Часы', value: '9000', archivedAt: '2026-09-24T10:00:00.000Z' }),
+    ]);
+    await flushPromises();
+    await flushPromises();
+
+    expect(wrapper.find(`[data-testid="asset-row-${ID_B}"]`).exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('Часы');
+    expect(wrapper.get('[data-testid="assets-total"]').text()).not.toContain('39');
+    wrapper.unmount();
+  });
+
   it('invites the first asset when there are none', async () => {
     const { wrapper } = await mountWith([]);
     await flushPromises();

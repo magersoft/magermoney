@@ -27,8 +27,6 @@ export const assetsApi = (client: ApiClient) => ({
       await client.fetch(`/assets/${id}`, { method: 'PATCH', body: JSON.stringify(input) }),
       AssetDtoSchema,
     ),
-  remove: async (id: string): Promise<void> =>
-    parse(await client.fetch(`/assets/${id}`, { method: 'DELETE' }), noContent),
 
   valuations: async (assetId: string): Promise<ValuationDto[]> =>
     parse(await client.fetch(`/assets/${assetId}/valuations`, { method: 'GET' }), valuations),

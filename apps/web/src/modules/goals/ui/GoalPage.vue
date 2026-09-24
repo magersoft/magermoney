@@ -13,6 +13,14 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   AmountLockup,
   Button,
   RouteError,
@@ -44,10 +52,11 @@ const goal = computed(() => goals.value.find((g) => g.id === id.value));
 const { progress } = useGoalProgress(goal);
 const accounts = useAccounts();
 const { update } = useUpdateAccount();
-const { archive, isPending: archiving } = useArchiveGoal();
+const { archive, isPending: deleting } = useArchiveGoal();
 
 const linked = computed(() => accounts.accounts.value.filter((a) => a.goalId === id.value));
 const picking = ref(false);
+const confirmDelete = ref(false);
 const missing = computed(() => !isLoading.value && !isError.value && !goal.value);
 
 usePageTitle(() => goal.value?.name ?? t('goals.title'));
@@ -67,11 +76,22 @@ async function release(accountId: string) {
   }
 }
 
-async function archiveGoal() {
+/**
+ * Deleting is archiving underneath: the goal keeps its row, lets go of its
+ * accounts in the same write, and no screen shows it again. The person is told
+ * only what they will notice — how many accounts come free.
+ */
+const deleteBody = computed(() =>
+  linked.value.length === 0
+    ? t('goals.deleteNoAccounts')
+    : t('goals.deleteAccounts', { n: linked.value.length }, linked.value.length),
+);
+
+async function deleteGoal() {
   if (!goal.value) return;
   try {
     await archive(goal.value.id);
-    toast.success(t('goals.archived'));
+    toast.success(t('goals.deleted'));
     await router.replace({ name: 'savings' });
   } catch (e) {
     toast.error(t(errorKeyFor(e, 'goals.error.title')));
@@ -167,18 +187,37 @@ async function archiveGoal() {
 
       <div class="pt-2">
         <Button
-          variant="ghost"
-          class="text-muted-foreground min-h-11 rounded-xl px-4"
-          :disabled="archiving"
-          data-testid="goal-archive"
-          @click="archiveGoal"
+          variant="destructive"
+          class="min-h-11 rounded-xl px-4"
+          :disabled="deleting"
+          data-testid="goal-delete"
+          @click="confirmDelete = true"
         >
-          {{ t('goals.archive') }}
+          {{ t('goals.delete') }}
         </Button>
-        <p class="text-muted-foreground mt-1 px-4 text-xs">
-          {{ t('goals.archiveHint') }}
-        </p>
       </div>
+
+      <AlertDialog v-model:open="confirmDelete">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{{ t('goals.deleteTitle', { name: goal.name }) }}</AlertDialogTitle>
+            <AlertDialogDescription>{{ deleteBody }}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="goal-delete-cancel">
+              {{ t('goals.cancel') }}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              :disabled="deleting"
+              data-testid="goal-delete-confirm"
+              @click="deleteGoal"
+            >
+              {{ t('goals.delete') }}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <LinkAccountSheet v-model:open="picking" :goal-id="goal.id" />
     </template>

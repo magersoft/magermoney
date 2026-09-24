@@ -7,7 +7,6 @@ import {
 import { listOf, parse, type ApiClient } from '@/shared/api/client';
 
 const list = listOf(GoalDtoSchema);
-const noContent = { safeParse: () => ({ success: true as const, data: undefined }) };
 
 export const goalsApi = (client: ApiClient) => ({
   list: async (): Promise<GoalDto[]> =>
@@ -22,6 +21,4 @@ export const goalsApi = (client: ApiClient) => ({
       await client.fetch(`/goals/${id}`, { method: 'PATCH', body: JSON.stringify(input) }),
       GoalDtoSchema,
     ),
-  remove: async (id: string): Promise<void> =>
-    parse(await client.fetch(`/goals/${id}`, { method: 'DELETE' }), noContent),
 });

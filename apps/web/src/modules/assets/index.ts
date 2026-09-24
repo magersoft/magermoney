@@ -7,7 +7,6 @@ export { useValuations } from './application/use-valuations';
 export {
   useAddValuation,
   useCreateAsset,
-  useDeleteAsset,
   useDeleteValuation,
   useUpdateAsset,
   useUpdateValuation,

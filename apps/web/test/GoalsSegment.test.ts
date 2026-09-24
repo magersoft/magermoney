@@ -114,4 +114,17 @@ describe('GoalsSegment', () => {
     );
     wrapper.unmount();
   });
+
+  it('leaves a deleted goal out of the list', async () => {
+    const { wrapper } = await mountWith(
+      [goalDto({ archivedAt: '2026-09-24T10:00:00.000Z' })],
+      [acc(ACC_A, 'USD')],
+    );
+    await flushPromises();
+    await flushPromises();
+
+    expect(wrapper.find(`[data-testid="goal-card-${GOAL_ID}"]`).exists()).toBe(false);
+    expect(wrapper.find('[data-testid="goals-empty"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
 });

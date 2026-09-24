@@ -132,9 +132,6 @@
     "noFreeAccounts": "Every account already funds another goal. Free one up first.",
     "release": "Unlink",
     "releaseNamed": "Unlink the account {name}",
-    "archive": "Archive this goal",
-    "archived": "Goal archived",
-    "archiveHint": "The accounts stay where they are, free for another goal.",
     "form": {
       "newTitle": "New goal",
       "editTitle": "Edit goal",
@@ -152,7 +149,13 @@
       "created": "Goal created",
       "missing": "No such goal."
     },
-    "noAccountsAtAll": "No accounts yet. Add one first."
+    "noAccountsAtAll": "No accounts yet. Add one first.",
+    "delete": "Delete goal",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteNoAccounts": "No accounts fund this goal. You can't bring it back later.",
+    "deleteAccounts": "{n} account will be unlinked. It stays where it is, with the same balance. You can't bring the goal back later. | {n} accounts will be unlinked. They stay where they are, with the same balances. You can't bring the goal back later.",
+    "deleted": "Goal deleted",
+    "cancel": "Cancel"
   },
   "assets": {
     "title": "Assets",
@@ -202,7 +205,12 @@
       "missing": "No such asset."
     },
     "gainedSince": "{amount} {code} above the {price} it cost",
-    "lostSince": "{amount} {code} below the {price} it cost"
+    "lostSince": "{amount} {code} below the {price} it cost",
+    "delete": "Delete asset",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteBody": "It leaves the list and your capital, and you won't see its valuation history again. You can't bring it back later.",
+    "deleted": "Asset deleted",
+    "cancel": "Cancel"
   },
   "income": {
     "title": "Income",
