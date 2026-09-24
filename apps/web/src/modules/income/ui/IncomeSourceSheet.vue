@@ -295,8 +295,5 @@ async function submit() {
         {{ t('income.form.payDaysHint') }}
       </p>
     </fieldset>
-    <template #secondary>
-      <slot name="secondary" />
-    </template>
   </QuickActionSheet>
 </template>

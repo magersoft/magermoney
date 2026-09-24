@@ -56,11 +56,7 @@ function pick(value: string) {
     :types="types"
     :type="type"
     @update:type="pick"
-  >
-    <template #secondary>
-      <slot name="secondary" />
-    </template>
-  </TransferSheet>
+  />
 
   <ExpenseSheet
     v-else-if="type === 'expense'"
@@ -70,11 +66,7 @@ function pick(value: string) {
     @update:open="open = $event"
     @update:type="pick"
     @done="open = false"
-  >
-    <template #secondary>
-      <slot name="secondary" />
-    </template>
-  </ExpenseSheet>
+  />
 
   <InflowSheet
     v-else
@@ -83,9 +75,5 @@ function pick(value: string) {
     :type="type"
     @update:open="open = $event"
     @update:type="pick"
-  >
-    <template #secondary>
-      <slot name="secondary" />
-    </template>
-  </InflowSheet>
+  />
 </template>

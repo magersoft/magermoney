@@ -372,9 +372,6 @@ async function del() {
         {{ t('expenses.form.delete') }}
       </Button>
     </div>
-    <template #secondary>
-      <slot name="secondary" />
-    </template>
   </QuickActionSheet>
 
   <AlertDialog v-model:open="confirmDelete">
