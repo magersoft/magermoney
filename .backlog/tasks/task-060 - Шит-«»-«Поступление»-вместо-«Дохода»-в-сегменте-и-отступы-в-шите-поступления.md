@@ -3,11 +3,11 @@ id: TASK-060
 title: >-
   Шит «+»: «Поступление» вместо «Дохода» в сегменте, и отступы в шите
   поступления
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-23 18:28'
-updated_date: '2026-09-23 18:36'
+updated_date: '2026-09-24 09:50'
 labels:
   - web
   - ui
@@ -33,12 +33,12 @@ ordinal: 58000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Поля шита «Поступление» стоят с тем же горизонтальным отступом, что и заголовок и кнопка «Записать», при ширине телефона (проверено на 390px)
-- [ ] #2 В сегменте шита «+» есть «Поступление», и оно открывает форму поступления без лишнего нажатия
-- [ ] #3 «Доход» (создание источника дохода) убран из сегмента и доступен как второстепенное действие шита или с экрана План → Доходы
-- [ ] #4 Отдельная кнопка «Поступление» в #secondary убрана, чтобы одно действие не было в двух местах
-- [ ] #5 Тесты QuickActions/OperationSheet обновлены: сегмент открывает поступление, создание источника дохода по-прежнему достижимо
-- [ ] #6 Ленивая загрузка чанка income сохранена: он не попадает в входной чанк
+- [x] #1 Поля шита «Поступление» стоят с тем же горизонтальным отступом, что и заголовок и кнопка «Записать», при ширине телефона (проверено на 390px)
+- [x] #2 В сегменте шита «+» есть «Поступление», и оно открывает форму поступления без лишнего нажатия
+- [x] #3 «Доход» (создание источника дохода) убран из сегмента и доступен как второстепенное действие шита или с экрана План → Доходы
+- [x] #4 Отдельная кнопка «Поступление» в #secondary убрана, чтобы одно действие не было в двух местах
+- [x] #5 Тесты QuickActions/OperationSheet обновлены: сегмент открывает поступление, создание источника дохода по-прежнему достижимо
+- [x] #6 Ленивая загрузка чанка income сохранена: он не попадает в входной чанк
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -57,4 +57,12 @@ ordinal: 58000
 
 <!-- SECTION:NOTES:BEGIN -->
 Реализовано в e1474c9. InflowSheet теперь на QuickActionSheet: отступы даёт сам шит, поля строками SelectRow/InputRow, валюта источника рядом с суммой (у нового источника — выбор валюты там же). Сегмент «+»: transfer/expense/inflow; «Новый источник дохода» — второстепенная кнопка, ведёт на /plan/income/new. Экспорт IncomeSourceSheet из barrel убран, больше не нужен снаружи. Проверки: typecheck, lint, 413/413 тестов web, build — чанк income не в входном. Визуальная проверка на 390px не сделана: dev-сервер требует входа. TASK-038 про QuickActions устарела по сути (там больше нет ленивого InflowSheet), но та же вставка RouteError внизу страницы возможна у сегмента inflow в OperationSheet.
+
+Finalization 2026-09-24, after merging task-060 into main (3d98321): quick-actions.test.ts and InflowSheet.test.ts green (21/21 with IncomeSourcePage), full monorepo lint/typecheck/test/build green on the merged main. AC6: the built entry chunk references InflowSheet only through a dynamic import(), the form code is in its own chunk. AC1 is proven structurally, not visually: InflowSheet.test asserts the fields render in QuickActionSheet's slots, whose container carries the same padding as the title and the button. No 390px browser check was done (the dev app needs sign-in).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+The '+' sheet segment is now Перевод / Расход / Поступление: the inflow form opens directly from the segment, and creating an income source moved to a secondary button that goes to /plan/income/new. The separate 'Поступление' secondary button is gone. InflowSheet now uses QuickActionSheet, which fixes the fields sitting flush against the sheet edges. The income chunk stays lazy. Verified by quick-actions and InflowSheet tests and a full lint/typecheck/test/build on main; not checked visually at 390px. Commit e1474c9, merged in 3d98321.
+<!-- SECTION:FINAL_SUMMARY:END -->
