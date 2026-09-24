@@ -1,9 +1,11 @@
 ---
 id: TASK-062
 title: 'Экран «Обновить остаток»: полный передизайн'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-09-23 18:39'
+updated_date: '2026-09-24 10:01'
 labels:
   - frontend
   - design
