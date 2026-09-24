@@ -7,13 +7,14 @@ import type {
 } from '../application/goal-repository.js';
 
 /** `target_date` is a `date`: read it as text so no timezone can shift the day. */
-const COLS = `id, user_id, name, icon, target_amount::text as target_amount, currency,
+const COLS = `id, user_id, name, icon, color, target_amount::text as target_amount, currency,
   to_char(target_date, 'YYYY-MM-DD') as target_date, achieved_at, archived_at, sort_order`;
 
 const toColumns = (p: GoalPatch): Record<string, unknown> => {
   const d: Record<string, unknown> = {};
   if (p.name !== undefined) d.name = p.name;
   if (p.icon !== undefined) d.icon = p.icon;
+  if (p.color !== undefined) d.color = p.color;
   if (p.targetAmount !== undefined) d.target_amount = p.targetAmount;
   if (p.currency !== undefined) d.currency = p.currency;
   if (p.targetDate !== undefined) d.target_date = p.targetDate;

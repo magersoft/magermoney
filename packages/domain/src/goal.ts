@@ -1,13 +1,16 @@
 import type { Account } from './account.js';
 import { addDays, type YearMonth } from './calendar.js';
 import { Money } from './money.js';
+import type { MarkColor } from './mark.js';
 import type { IsoDate } from './rate.js';
 import type { RateTable } from './rate-table.js';
 
 export interface Goal {
   id: string;
   name: string;
+  /** One emoji, or null to show the first letter of the name. */
   icon: string | null;
+  color: MarkColor | null;
   /** The amount to reach, in the goal's own currency. */
   target: Money;
   targetDate: IsoDate | null;

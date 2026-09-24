@@ -1,4 +1,5 @@
 import type { Currency } from './currency.js';
+import type { MarkColor } from './mark.js';
 import { Money } from './money.js';
 import type { IsoDate } from './rate.js';
 import type { RateTable } from './rate-table.js';
@@ -18,6 +19,9 @@ export interface Valuation {
 export interface Asset {
   id: string;
   name: string;
+  /** One emoji, or null to show the first letter of the name. */
+  icon: string | null;
+  color: MarkColor | null;
   /** The latest valuation, or null while the Asset has never been valued. */
   value: Money | null;
   valuedOn: IsoDate | null;

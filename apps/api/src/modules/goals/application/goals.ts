@@ -44,6 +44,7 @@ export const createGoal =
     const data: NewGoal = {
       name: input.name.trim(),
       icon: input.icon ?? null,
+      color: input.color ?? null,
       targetAmount: input.targetAmount,
       currency: input.currency,
       targetDate: input.targetDate ?? null,
@@ -60,6 +61,7 @@ const toPatch = (input: UpdateGoalInput): GoalPatch => {
   const patch: GoalPatch = {};
   if (input.name !== undefined) patch.name = input.name.trim();
   if (input.icon !== undefined) patch.icon = input.icon;
+  if (input.color !== undefined) patch.color = input.color;
   if (input.targetAmount !== undefined) patch.targetAmount = input.targetAmount;
   if (input.currency !== undefined) patch.currency = input.currency;
   if (input.targetDate !== undefined) patch.targetDate = input.targetDate;

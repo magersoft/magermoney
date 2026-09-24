@@ -1,8 +1,12 @@
+import type { MarkColor } from '@magermoney/domain';
+
 export interface GoalRow {
   id: string;
   userId: string;
   name: string;
   icon: string | null;
+  /** A card-palette colour name; the check constraint holds the list. */
+  color: MarkColor | null;
   targetAmount: string;
   currency: string;
   targetDate: string | null; // YYYY-MM-DD

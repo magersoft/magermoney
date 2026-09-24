@@ -44,6 +44,7 @@ const goal: Goal = {
   id: 'g',
   name: 'Car',
   icon: null,
+  color: null,
   target: Money.of(new Decimal(10_000), EUR),
   targetDate: null,
   achievedAt: null,

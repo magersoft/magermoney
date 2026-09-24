@@ -13,6 +13,7 @@ export * from './expense.js';
 export * from './budget.js';
 export * from './account.js';
 export * from './avatar.js';
+export * from './mark.js';
 export * from './goal.js';
 export * from './asset.js';
 export * from './transfer.js';

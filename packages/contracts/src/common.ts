@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { MARK_COLORS, isMarkEmoji } from '@magermoney/domain';
 export const DecimalString = z
   .string()
   .regex(/^-?\d+(\.\d+)?$/)
@@ -28,3 +29,11 @@ export const PositiveDecimalString = DecimalString.refine((v) => /^(?!-)(?=.*[1-
 export const FractionString = DecimalString.refine((v) => /^0(\.\d+)?$/.test(v), {
   message: 'must be at least 0 and less than 1',
 }).openapi({ example: '0.15' });
+
+/** One emoji marking a goal or an asset, drawn on its disc in place of the initial. */
+export const MarkEmojiSchema = z
+  .string()
+  .refine(isMarkEmoji, { message: 'must be a single emoji' })
+  .openapi({ example: '🚗' });
+/** A card-palette colour for a goal's or an asset's disc, by name. */
+export const MarkColorSchema = z.enum(MARK_COLORS);

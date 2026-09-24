@@ -12,7 +12,7 @@ import type {
  * can shift the day.
  */
 const SELECT = `
-  select a.id, a.user_id, a.name, a.currency, a.counts_in_total,
+  select a.id, a.user_id, a.name, a.icon, a.color, a.currency, a.counts_in_total,
          to_char(a.acquired_on, 'YYYY-MM-DD') as acquired_on,
          a.purchase_price::text as purchase_price, a.archived_at,
          latest.value, latest.valued_on
@@ -28,6 +28,8 @@ const SELECT = `
 const toColumns = (p: AssetPatch): Record<string, unknown> => {
   const d: Record<string, unknown> = {};
   if (p.name !== undefined) d.name = p.name;
+  if (p.icon !== undefined) d.icon = p.icon;
+  if (p.color !== undefined) d.color = p.color;
   if (p.currency !== undefined) d.currency = p.currency;
   if (p.countsInTotal !== undefined) d.counts_in_total = p.countsInTotal;
   if (p.acquiredOn !== undefined) d.acquired_on = p.acquiredOn;

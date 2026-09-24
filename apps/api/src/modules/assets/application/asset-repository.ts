@@ -1,7 +1,12 @@
+import type { MarkColor } from '@magermoney/domain';
+
 export interface AssetRow {
   id: string;
   userId: string;
   name: string;
+  icon: string | null;
+  /** A card-palette colour name; the check constraint holds the list. */
+  color: MarkColor | null;
   currency: string;
   countsInTotal: boolean;
   acquiredOn: string | null; // YYYY-MM-DD

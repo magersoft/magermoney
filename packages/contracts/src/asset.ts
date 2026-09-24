@@ -3,6 +3,8 @@ import {
   CurrencyCodeSchema,
   DecimalString,
   IsoDateSchema,
+  MarkColorSchema,
+  MarkEmojiSchema,
   PositiveDecimalString,
 } from './common.js';
 
@@ -10,6 +12,9 @@ export const AssetDtoSchema = z
   .object({
     id: z.uuid(),
     name: z.string(),
+    /** Both default to none, so a response from an API that predates them still parses. */
+    icon: z.string().nullable().default(null),
+    color: MarkColorSchema.nullable().default(null),
     currency: CurrencyCodeSchema,
     countsInTotal: z.boolean(),
     acquiredOn: IsoDateSchema.nullable(),
@@ -24,6 +29,8 @@ export type AssetDto = z.infer<typeof AssetDtoSchema>;
 
 const assetFields = {
   name: z.string().trim().min(1).max(60),
+  icon: MarkEmojiSchema.nullable().optional(),
+  color: MarkColorSchema.nullable().optional(),
   currency: CurrencyCodeSchema,
   countsInTotal: z.boolean().default(false),
   acquiredOn: IsoDateSchema.nullable().optional(),

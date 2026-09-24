@@ -95,4 +95,35 @@ describe('archiving a goal', () => {
     const still = await (await authed(app, 'GET', `/goals/${goal.id}`)).json();
     expect(still.achievedAt).toBe(reached.achievedAt);
   });
+
+  describe('the mark', () => {
+    it('starts unmarked, so a goal made before the choice existed reads the same', async () => {
+      const created = await (await authed(mk(), 'POST', '/goals', car)).json();
+      expect(created).toMatchObject({ icon: null, color: null });
+    });
+
+    it('keeps an emoji and a colour given on create, and changes or clears them on edit', async () => {
+      const app = mk();
+      const created = await (
+        await authed(app, 'POST', '/goals', { ...car, icon: '🚗', color: 'teal' })
+      ).json();
+      expect(created).toMatchObject({ icon: '🚗', color: 'teal' });
+
+      const recoloured = await (
+        await authed(app, 'PATCH', `/goals/${created.id}`, { color: 'pink' })
+      ).json();
+      expect(recoloured).toMatchObject({ icon: '🚗', color: 'pink' });
+
+      const cleared = await (
+        await authed(app, 'PATCH', `/goals/${created.id}`, { icon: null, color: null })
+      ).json();
+      expect(cleared).toMatchObject({ icon: null, color: null });
+    });
+
+    it('refuses a word for an icon and a colour outside the palette', async () => {
+      const app = mk();
+      expect((await authed(app, 'POST', '/goals', { ...car, icon: 'car' })).status).toBe(400);
+      expect((await authed(app, 'POST', '/goals', { ...car, color: '#f00' })).status).toBe(400);
+    });
+  });
 });

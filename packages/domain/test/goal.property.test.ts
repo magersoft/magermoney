@@ -35,6 +35,7 @@ const goalOf = (target: number): Goal => ({
   id: 'g',
   name: 'G',
   icon: null,
+  color: null,
   target: Money.of(new Decimal(target), EUR),
   targetDate: null,
   achievedAt: null,

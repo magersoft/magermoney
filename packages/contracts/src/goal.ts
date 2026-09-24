@@ -3,6 +3,8 @@ import {
   CurrencyCodeSchema,
   DecimalString,
   IsoDateSchema,
+  MarkColorSchema,
+  MarkEmojiSchema,
   PositiveDecimalString,
 } from './common.js';
 
@@ -10,7 +12,10 @@ export const GoalDtoSchema = z
   .object({
     id: z.uuid(),
     name: z.string(),
+    /** Read as any string: a goal written before the emoji rule may hold something else. */
     icon: z.string().nullable(),
+    /** Defaults to none, so a response from an API that predates it still parses. */
+    color: MarkColorSchema.nullable().default(null),
     targetAmount: DecimalString,
     currency: CurrencyCodeSchema,
     targetDate: IsoDateSchema.nullable(),
@@ -24,7 +29,8 @@ export type GoalDto = z.infer<typeof GoalDtoSchema>;
 
 const goalFields = {
   name: z.string().trim().min(1).max(60),
-  icon: z.string().trim().max(80).nullable().optional(),
+  icon: MarkEmojiSchema.nullable().optional(),
+  color: MarkColorSchema.nullable().optional(),
   targetAmount: PositiveDecimalString,
   currency: CurrencyCodeSchema,
   targetDate: IsoDateSchema.nullable().optional(),

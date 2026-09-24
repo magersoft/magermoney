@@ -12,6 +12,7 @@ async function seedLinkedGoal(tag: string) {
   const goal = await repos.goals.insert(uid, {
     name: 'Car',
     icon: null,
+    color: null,
     targetAmount: '10000',
     currency: 'USD',
     targetDate: null,

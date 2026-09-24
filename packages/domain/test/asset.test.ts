@@ -33,6 +33,8 @@ const valuation = (value: number, valuedOn: string): Valuation => ({
 const asset = (over: Partial<Asset> = {}): Asset => ({
   id: 'x',
   name: 'Car',
+  icon: null,
+  color: null,
   value: Money.of(new Decimal(30_000), EUR),
   valuedOn: '2026-09-01',
   countsInTotal: true,

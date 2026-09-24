@@ -24,6 +24,8 @@ export const createAsset =
     if (!deps.registry.has(input.currency)) return err(new UnknownCurrencyError(input.currency));
     const data: NewAsset = {
       name: input.name.trim(),
+      icon: input.icon ?? null,
+      color: input.color ?? null,
       currency: input.currency,
       countsInTotal: input.countsInTotal,
       acquiredOn: input.acquiredOn ?? null,
@@ -45,6 +47,8 @@ export const updateAsset =
       return err(new UnknownCurrencyError(input.currency));
     const patch: AssetPatch = {};
     if (input.name !== undefined) patch.name = input.name.trim();
+    if (input.icon !== undefined) patch.icon = input.icon;
+    if (input.color !== undefined) patch.color = input.color;
     if (input.currency !== undefined) patch.currency = input.currency;
     if (input.countsInTotal !== undefined) patch.countsInTotal = input.countsInTotal;
     if (input.acquiredOn !== undefined) patch.acquiredOn = input.acquiredOn;

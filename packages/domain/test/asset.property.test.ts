@@ -22,6 +22,8 @@ const build = (xs: { n: number; counts: boolean }[]): Asset[] =>
   xs.map((x, i) => ({
     id: `a${i}`,
     name: 'A',
+    icon: null,
+    color: null,
     value: Money.of(new Decimal(x.n), EUR),
     valuedOn: '2026-01-01',
     countsInTotal: x.counts,
