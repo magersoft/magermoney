@@ -1,11 +1,11 @@
 ---
 id: TASK-061
 title: 'Шит «+»: убрать «Новый источник дохода» и «Обновить остаток» из блока «Ещё»'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-23 18:39'
-updated_date: '2026-09-24 09:58'
+updated_date: '2026-09-24 10:01'
 labels:
   - frontend
   - ux
@@ -21,11 +21,11 @@ ordinal: 59000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 В шите «+» ни в одном сегменте нет блока «Ещё» с кнопками «Новый источник дохода» и «Обновить остаток»
-- [ ] #2 Создать источник дохода можно из раздела Plan → Доходы (и, если нужно, из выбора источника в форме поступления) без шита «+»
-- [ ] #3 Обновить остаток можно из экрана счёта; если нужен быстрый доступ без захода в счёт — выбрано и описано одно место для него
-- [ ] #4 Выбранное размещение согласовано с владельцем до реализации (/frontend-design)
-- [ ] #5 Тесты QuickActions и e2e обновлены; ключи i18n `quick.record`, `quick.incomeSource` удалены или перенесены
+- [x] #1 В шите «+» ни в одном сегменте нет блока «Ещё» с кнопками «Новый источник дохода» и «Обновить остаток»
+- [x] #2 Создать источник дохода можно из раздела Plan → Доходы (и, если нужно, из выбора источника в форме поступления) без шита «+»
+- [x] #3 Обновить остаток можно из экрана счёта; если нужен быстрый доступ без захода в счёт — выбрано и описано одно место для него
+- [x] #4 Выбранное размещение согласовано с владельцем до реализации (/frontend-design)
+- [x] #5 Тесты QuickActions и e2e обновлены; ключи i18n `quick.record`, `quick.incomeSource` удалены или перенесены
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -42,4 +42,12 @@ ordinal: 59000
 
 <!-- SECTION:NOTES:BEGIN -->
 Owner chose 'account screen only' for record-balance quick access (no extra entry point).
+
+Verification: quick-actions.test.ts 'offers nothing below the form in any segment' (red → green); IncomeSegment/IncomeSourceFormPage/PlanPage tests cover /plan/income/new; InflowSheet 'creates a source on the fly' covers the picker; e2e smoke records a balance from the account detail page (unchanged, did not use the removed buttons). Web suite 432/432, lint and typecheck clean.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Removed the income-source and record-balance buttons and the account picker from the '+' sheet (QuickActions), the dead #secondary pass-through from OperationSheet and the four operation sheets, and the quick.record / quick.incomeSource / quick.pickAccount strings. Placement agreed with the owner: balance updated only from the account screen; a new source from Plan → Income or the inflow form's picker. Verified with vitest (web 432/432), lint, typecheck.
+<!-- SECTION:FINAL_SUMMARY:END -->
