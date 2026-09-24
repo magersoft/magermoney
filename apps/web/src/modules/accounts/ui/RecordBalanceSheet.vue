@@ -188,28 +188,31 @@ async function del() {
     <template #fields>
       <!--
         Before and after, on one line: the old balance quiet on the left, the
-        change it makes on the right in the colour of its direction. Announced
-        politely, so a screen reader hears the change once typing settles.
+        change it makes on the right in the colour of its direction. Only the
+        change is a live region: the old balance does not move, and repeating
+        it on every keystroke would bury the one thing that does.
       -->
       <p
         v-if="before !== null"
-        class="text-muted-foreground -mt-2 mb-1 flex min-h-6 items-baseline justify-between gap-3 px-1 text-sm"
-        aria-live="polite"
+        class="text-muted-foreground -mt-2 mb-1 flex min-h-6 items-baseline justify-between gap-3 pr-1 text-sm"
       >
         <span data-testid="balance-before"
           >{{ t('accounts.balance.before') }}
           <span class="text-ink font-mono tabular-nums">{{ money(before) }}</span></span
         >
-        <span
-          v-if="change"
-          data-testid="balance-change"
-          class="font-mono font-medium tabular-nums"
-          :class="{
-            'text-positive': change.tone === 'up',
-            'text-negative': change.tone === 'down',
-          }"
-          >{{ change.text }}</span
-        >
+        <span aria-live="polite">
+          <span
+            v-if="change"
+            data-testid="balance-change"
+            class="font-medium"
+            :class="{
+              'font-mono tabular-nums': change.tone !== 'none',
+              'text-positive': change.tone === 'up',
+              'text-negative': change.tone === 'down',
+            }"
+            >{{ change.text }}</span
+          >
+        </span>
       </p>
 
       <InputRow
