@@ -20,9 +20,8 @@ export { useCreateInflow } from './application/use-inflow-mutations';
 
 export { payDaysLabel } from './domain/labels';
 export { default as IncomeSegment } from './ui/IncomeSegment.vue';
-/** The form itself, as the sheet the "+" raises; the route below is the same sheet. */
-export { default as IncomeSourceSheet } from './ui/IncomeSourceSheet.vue';
 export { default as InflowRow } from './ui/InflowRow.vue';
+/** Money that arrived, as the sheet the "+" raises and the source's screen reuses. */
 export { default as InflowSheet } from './ui/InflowSheet.vue';
 /** Routed screens, async: the Plan screen imports this barrel statically for `IncomeSegment`. */
 export const IncomeSourcePage = routeComponent(() => import('./ui/IncomeSourcePage.vue'));

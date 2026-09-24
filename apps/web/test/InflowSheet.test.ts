@@ -15,6 +15,10 @@ const USD_ACC = '33333333-3333-4333-8333-333333333333';
 const EUR_ACC = '44444444-4444-4444-8444-444444444444';
 const GBP_ACC = '55555555-5555-4555-8555-555555555555';
 const body = () => new DOMWrapper(document.body);
+/** The sheet draws its fields as rows: the testid is on the row, the control is inside it. */
+const row = (id: string, control = 'select') => body().get(`[data-testid="${id}"] ${control}`);
+const amount = () => body().get('[data-slot="quick-action-amount"] input');
+const confirm = () => body().get('[data-slot="quick-action-confirm"]');
 const patchBody = (calls: [string, RequestInit | undefined][]) =>
   JSON.parse(
     calls.find(([p, i]) => p === `/inflows/${inflowDto.id}` && i?.method === 'PATCH')?.[1]
@@ -51,26 +55,50 @@ function api(
 }
 
 describe('InflowSheet', () => {
+  /**
+   * The "+" writes an inflow as one of its kinds of operation, so the form is
+   * the same quick-action sheet as its neighbours: the amount first, the
+   * segment under it, the rows inside the sheet's own padding.
+   */
+  it('is a quick-action sheet with the kind of operation as its segment', async () => {
+    const calls: [string, RequestInit | undefined][] = [];
+    const types = [
+      { value: 'expense', label: 'Расход' },
+      { value: 'inflow', label: 'Поступление' },
+    ];
+    const { wrapper } = await mountAt(InflowSheet, '/', api(calls), {
+      props: { open: true, sourceId: SOURCE_ID, types, type: 'inflow' },
+      slots: { secondary: '<button data-testid="extra">x</button>' },
+    });
+    await flushPromises();
+    const sheet = body().get('[data-slot="quick-action-sheet"]');
+    expect(sheet.attributes('data-testid')).toBe('inflow-form');
+    expect(sheet.find('[data-testid="inflow-account"]').exists()).toBe(true);
+    expect(body().get('[data-testid="inflow-currency"]').text()).toContain('USD');
+    expect(sheet.find('[data-testid="extra"]').exists()).toBe(true);
+    await body().get('[data-testid="segment-expense"]').trigger('click');
+    expect(wrapper.emitted('update:type')?.at(-1)).toEqual(['expense']);
+    wrapper.unmount();
+  });
+
   it("defaults to the source's account, asks for the credited amount only across currencies, and posts both", async () => {
     const calls: [string, RequestInit | undefined][] = [];
     const { wrapper } = await mountAt(InflowSheet, '/', api(calls), {
       props: { open: true, sourceId: SOURCE_ID },
     });
     await flushPromises();
-    expect((body().get('[data-testid="inflow-account"]').element as HTMLSelectElement).value).toBe(
-      USD_ACC,
-    );
+    expect((row('inflow-account').element as HTMLSelectElement).value).toBe(USD_ACC);
     expect(body().find('[data-testid="inflow-credited"]').exists()).toBe(false);
 
-    await body().get('[data-testid="inflow-account"]').setValue(EUR_ACC);
-    await body().get('[data-testid="inflow-amount"]').setValue('116');
+    await row('inflow-account').setValue(EUR_ACC);
+    await amount().setValue('116');
     expect(body().find('[data-testid="inflow-credited"]').exists()).toBe(true);
     // 116 USD at 1 EUR = 1.16 USD
     expect(body().get('[data-testid="inflow-hint"]').text()).toContain('100');
     await body().get('[data-testid="inflow-credited"]').setValue('98');
     expect(body().get('[data-testid="inflow-rate"]').text()).toContain('0.8448275862');
 
-    await body().get('form').trigger('submit');
+    await confirm().trigger('click');
     await flushPromises();
     const [posted] = postBodies(calls, '/inflows');
     expect(posted).toMatchObject({
@@ -91,11 +119,10 @@ describe('InflowSheet', () => {
       props: { open: true, sourceId: SOURCE_ID },
     });
     await flushPromises();
-    await body().get('[data-testid="inflow-amount"]').setValue('500');
-    const date = body().get('[data-testid="inflow-date"]');
+    await amount().setValue('500');
+    const date = row('inflow-date', 'input');
     await date.setValue('2026-09-01');
-    await date.trigger('change');
-    await body().get('form').trigger('submit');
+    await confirm().trigger('click');
     await flushPromises();
     const [posted] = postBodies(calls, '/inflows');
     expect(posted).toEqual({
@@ -111,11 +138,11 @@ describe('InflowSheet', () => {
     const calls: [string, RequestInit | undefined][] = [];
     const { wrapper } = await mountAt(InflowSheet, '/', api(calls), { props: { open: true } });
     await flushPromises();
-    await body().get('[data-testid="inflow-source"]').setValue('__new__');
-    await body().get('[data-testid="inflow-new-name"]').setValue('Gift');
+    await row('inflow-source').setValue('__new__');
+    await row('inflow-new-name', 'input').setValue('Gift');
     await pickCurrency(body().get('[data-testid="inflow-new-currency"]').element, 'EUR');
-    await body().get('[data-testid="inflow-amount"]').setValue('50');
-    await body().get('form').trigger('submit');
+    await amount().setValue('50');
+    await confirm().trigger('click');
     await flushPromises();
     expect(postBodies(calls, '/income-sources')[0]).toMatchObject({
       name: 'Gift',
@@ -148,12 +175,10 @@ describe('InflowSheet', () => {
       props: { open: true, inflow: credited },
     });
     await flushPromises();
-    expect((body().get('[data-testid="inflow-amount"]').element as HTMLInputElement).value).toBe(
-      '500',
-    );
-    expect(body().get('[data-testid="inflow-source"]').attributes('disabled')).toBeDefined();
-    await body().get('[data-testid="inflow-amount"]').setValue('600');
-    await body().get('form').trigger('submit');
+    expect((amount().element as HTMLInputElement).value).toBe('500');
+    expect(row('inflow-source').attributes('disabled')).toBeDefined();
+    await amount().setValue('600');
+    await confirm().trigger('click');
     await flushPromises();
     expect(calls.some(([p, i]) => p === `/inflows/${inflowDto.id}` && i?.method === 'PATCH')).toBe(
       true,
@@ -169,20 +194,20 @@ describe('InflowSheet', () => {
       props: { open: true, sourceId: SOURCE_ID },
     });
     await flushPromises();
-    await body().get('[data-testid="inflow-amount"]').setValue('116');
-    await body().get('[data-testid="inflow-account"]').setValue(EUR_ACC);
+    await amount().setValue('116');
+    await row('inflow-account').setValue(EUR_ACC);
     await body().get('[data-testid="inflow-credited"]').setValue('98');
     expect((body().get('[data-testid="inflow-credited"]').element as HTMLInputElement).value).toBe(
       '98',
     );
 
-    await body().get('[data-testid="inflow-account"]').setValue(GBP_ACC);
+    await row('inflow-account').setValue(GBP_ACC);
     await flushPromises();
     // 98 was typed in euros; nothing of it may travel as pounds.
     expect((body().get('[data-testid="inflow-credited"]').element as HTMLInputElement).value).toBe(
       '',
     );
-    expect(body().get('[data-testid="inflow-save"]').attributes('disabled')).toBeDefined();
+    expect(confirm().attributes('disabled')).toBeDefined();
     wrapper.unmount();
   });
 
@@ -192,8 +217,8 @@ describe('InflowSheet', () => {
       props: { open: true, sourceId: SOURCE_ID },
     });
     await flushPromises();
-    await body().get('[data-testid="inflow-amount"]').setValue('0.00');
-    expect(body().get('[data-testid="inflow-save"]').attributes('disabled')).toBeDefined();
+    await amount().setValue('0.00');
+    expect(confirm().attributes('disabled')).toBeDefined();
     wrapper.unmount();
   });
 
@@ -208,9 +233,9 @@ describe('InflowSheet', () => {
     expect((body().get('[data-testid="inflow-credited"]').element as HTMLInputElement).value).toBe(
       '98',
     );
-    await body().get('[data-testid="inflow-amount"]').setValue('600');
+    await amount().setValue('600');
     await body().get('[data-testid="inflow-credited"]').setValue('510');
-    await body().get('form').trigger('submit');
+    await confirm().trigger('click');
     await flushPromises();
     // The API recomputes the account's entry from both, and refuses one without the other.
     expect(patchBody(calls)).toMatchObject({
@@ -228,8 +253,8 @@ describe('InflowSheet', () => {
       props: { open: true, inflow: credited },
     });
     await flushPromises();
-    await body().get('[data-testid="inflow-account"]').setValue('');
-    await body().get('form').trigger('submit');
+    await row('inflow-account').setValue('');
+    await confirm().trigger('click');
     await flushPromises();
     const patched = patchBody(calls);
     expect(patched).toMatchObject({ accountId: null });

@@ -145,10 +145,10 @@ test('sign in, see home, switch currency', async ({ page }) => {
 
     await page.goto('/');
     await page.getByTestId('dash-record-inflow').click();
-    await selectByText(page.getByTestId('inflow-source'), 'Job');
-    await page.getByTestId('inflow-amount').fill('1000');
-    await selectByText(page.getByTestId('inflow-account'), 'Beta');
-    await page.getByTestId('inflow-save').click();
+    await selectByText(page.getByTestId('inflow-source').locator('select'), 'Job');
+    await page.locator('[data-slot="quick-action-amount"] input').fill('1000');
+    await selectByText(page.getByTestId('inflow-account').locator('select'), 'Beta');
+    await page.locator('[data-slot="quick-action-confirm"]').click();
 
     // The dashboard shows it against the plan, and total capital grew by the credit: 110 -> 1110.
     await expect(page.locator('[data-testid^="dash-inflow-row-"]').first()).toContainText('1');

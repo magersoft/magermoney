@@ -4,6 +4,10 @@
  * and when its currency differs the person types what actually reached it — the
  * app never converts a balance by itself (ADR 0002). The day's rate is a hint,
  * the realised rate is derived once both numbers are in.
+ *
+ * It is written far more often than a source is set up, so it is one of the
+ * kinds of operation the "+" offers, on the same quick-action sheet as its
+ * neighbours: the amount first, the source's currency beside it, the rest rows.
  */
 import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -13,13 +17,13 @@ import { Decimal, Money, deriveInflowCredit, type Currency } from '@magermoney/d
 import {
   Button,
   fade,
-  Input,
+  InputRow,
   MoneyInput,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
+  QuickActionSheet,
+  SelectRow,
   useToast,
+  type AmountLocale,
+  type SegmentedOption,
 } from '@magermoney/ui';
 import { useAccounts } from '@/modules/accounts';
 import { AppCurrencySelect, useCurrencies, useCurrencyRegistry } from '@/modules/currencies';
@@ -34,13 +38,23 @@ import {
   useUpdateInflow,
 } from '../application/use-inflow-mutations';
 
-const props = defineProps<{ open: boolean; sourceId?: string; inflow?: InflowDto }>();
-const emit = defineEmits<{ 'update:open': [open: boolean] }>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    sourceId?: string;
+    inflow?: InflowDto;
+    types?: readonly SegmentedOption[];
+    type?: string;
+  }>(),
+  { sourceId: undefined, inflow: undefined, types: () => [], type: '' },
+);
+const emit = defineEmits<{ 'update:open': [open: boolean]; 'update:type': [type: string] }>();
 
 const NEW_SOURCE = '__new__';
 const NO_ACCOUNT = '';
 const { t, locale } = useI18n();
 const uiLocale = computed(() => locale.value as DateLocale);
+const amountLocale = computed(() => locale.value as AmountLocale);
 const { toast } = useToast();
 const { dtos: sources } = useIncomeSources();
 const { accounts } = useAccounts();
@@ -76,12 +90,28 @@ const activeAccounts = computed(() =>
   accounts.value.filter((a) => a.archivedAt === null || a.id === props.inflow?.accountId),
 );
 const chosenSource = computed(() => sources.value.find((s) => s.id === source.value));
+const sourceOptions = computed(() => [
+  ...currentSources.value.map((s) => ({ value: s.id, label: `${s.name} · ${s.currency}` })),
+  ...(props.inflow ? [] : [{ value: NEW_SOURCE, label: t('inflows.newSource') }]),
+]);
+const accountOptions = computed(() => [
+  { value: NO_ACCOUNT, label: t('inflows.noAccount') },
+  ...activeAccounts.value.map((a) => ({
+    value: a.id,
+    label: `${a.name} · ${a.balance ?? '0'} ${a.currency}`,
+  })),
+]);
 
 /**
  * True for the tick in which `reset()` fills the fields, so the guard below
  * does not mistake a prefill for the person changing their mind.
  */
 let priming = false;
+
+function pickDate(value: string) {
+  receivedOn.value = value;
+  dateTouched.value = true;
+}
 
 function reset() {
   priming = true;
@@ -241,96 +271,83 @@ async function del() {
 </script>
 
 <template>
-  <Sheet :open="open" @update:open="emit('update:open', $event)">
-    <SheetContent
-      side="bottom"
-      class="max-h-[92dvh] overflow-y-auto rounded-t-2xl pb-[max(1rem,env(safe-area-inset-bottom))]"
-    >
-      <SheetHeader>
-        <SheetTitle>{{ inflow ? t('inflows.editTitle') : t('inflows.title') }}</SheetTitle>
-      </SheetHeader>
-      <form class="mt-4 space-y-4" @submit.prevent="submit">
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{ t('inflows.source') }}</span>
-          <select
-            v-model="source"
-            data-testid="inflow-source"
-            :disabled="Boolean(inflow)"
-            class="mt-1 flex min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
-          >
-            <option v-for="s in currentSources" :key="s.id" :value="s.id">
-              {{ s.name }} · {{ s.currency }}
-            </option>
-            <option v-if="!inflow" :value="NEW_SOURCE">{{ t('inflows.newSource') }}</option>
-          </select>
-        </label>
+  <QuickActionSheet
+    :open="props.open"
+    :title="inflow ? t('inflows.editTitle') : t('inflows.title')"
+    :amount="amount"
+    :amount-label="t('inflows.amount')"
+    :code="currencyCode"
+    :scale="scaleOf(currencyCode)"
+    :locale="amountLocale"
+    :types="props.types"
+    :type="props.type"
+    :type-label="t('quick.type')"
+    :confirm-label="inflow ? t('inflows.update') : t('inflows.save')"
+    :close-label="t('inflows.close')"
+    :confirm-disabled="!canSubmit || busy"
+    data-testid="inflow-form"
+    @update:open="emit('update:open', $event)"
+    @update:amount="amount = $event"
+    @update:type="emit('update:type', $event)"
+    @confirm="submit"
+  >
+    <template #currency>
+      <!-- A new source is typed here, so its currency is chosen here; an existing one already has it. -->
+      <AppCurrencySelect
+        v-if="isNew"
+        v-model="newCurrency"
+        variant="compact"
+        :label="t('inflows.newCurrency')"
+        :frequent="reportingCurrencies"
+        data-testid="inflow-new-currency"
+      />
+      <p
+        v-else
+        data-testid="inflow-currency"
+        class="text-muted-foreground flex min-h-11 items-center px-1 font-mono text-sm font-medium tracking-[0.06em] uppercase"
+      >
+        {{ currencyCode }}
+      </p>
+    </template>
 
-        <div v-if="isNew" class="grid grid-cols-[1fr_7rem] gap-3">
-          <label class="block">
-            <span class="text-xs font-medium text-muted-foreground">{{
-              t('inflows.newName')
-            }}</span>
-            <Input v-model="newName" maxlength="80" data-testid="inflow-new-name" class="mt-1" />
-          </label>
-          <label class="block">
-            <span class="text-xs font-medium text-muted-foreground">{{
-              t('inflows.newCurrency')
-            }}</span>
-            <!-- Compact: the column is 7rem wide, and the name beside it is the
-                 field that matters here. -->
-            <AppCurrencySelect
-              v-model="newCurrency"
-              variant="compact"
-              :label="t('inflows.newCurrency')"
-              :frequent="reportingCurrencies"
-              data-testid="inflow-new-currency"
-              class="mt-1"
-            />
-          </label>
-        </div>
+    <template #fields>
+      <SelectRow
+        v-model="source"
+        :label="t('inflows.source')"
+        :options="sourceOptions"
+        :disabled="Boolean(inflow)"
+        data-testid="inflow-source"
+      />
 
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground"
-            >{{ t('inflows.amount') }} · {{ currencyCode }}</span
-          >
-          <MoneyInput
-            v-model="amount"
-            data-testid="inflow-amount"
-            :scale="scaleOf(currencyCode)"
-            :locale="uiLocale"
-            class="mt-1"
-            autofocus
-          />
-        </label>
+      <InputRow
+        v-if="isNew"
+        v-model="newName"
+        :label="t('inflows.newName')"
+        maxlength="80"
+        data-testid="inflow-new-name"
+      />
 
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{ t('inflows.date') }}</span>
-          <Input
-            v-model="receivedOn"
-            type="date"
-            :max="today"
-            class="mt-1"
-            data-testid="inflow-date"
-            @change="dateTouched = true"
-          />
-        </label>
+      <InputRow
+        :model-value="receivedOn"
+        :label="t('inflows.date')"
+        type="date"
+        :max="today"
+        data-testid="inflow-date"
+        @update:model-value="pickDate"
+      />
 
-        <label class="block">
-          <span class="text-xs font-medium text-muted-foreground">{{ t('inflows.account') }}</span>
-          <select
-            v-model="accountId"
-            data-testid="inflow-account"
-            class="mt-1 flex min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm pointer-coarse:min-h-11"
-          >
-            <option :value="NO_ACCOUNT">{{ t('inflows.noAccount') }}</option>
-            <option v-for="a in activeAccounts" :key="a.id" :value="a.id">
-              {{ a.name }} · {{ a.balance ?? '0' }} {{ a.currency }}
-            </option>
-          </select>
-        </label>
+      <SelectRow
+        v-model="accountId"
+        :label="t('inflows.account')"
+        :options="accountOptions"
+        data-testid="inflow-account"
+      />
 
-        <Motion v-if="cross" tag="label" class="block" v-bind="fade">
-          <span class="text-xs font-medium text-muted-foreground"
+      <Motion v-if="cross" class="flex flex-col gap-1" v-bind="fade">
+        <label
+          class="bg-surface-sunken flex min-h-14 flex-col justify-center gap-0.5 rounded-lg px-3 py-2"
+        >
+          <span class="text-muted-foreground text-xs"
             >{{ t('inflows.credited') }} · {{ account?.currency }}</span
           >
           <MoneyInput
@@ -338,84 +355,66 @@ async function del() {
             data-testid="inflow-credited"
             :scale="scaleOf(account?.currency)"
             :locale="uiLocale"
-            class="mt-1"
+            class="h-auto border-0 bg-transparent p-0 text-sm font-medium focus-visible:ring-0"
           />
-          <span
-            v-if="hint"
-            data-testid="inflow-hint"
-            class="mt-1 block text-xs text-muted-foreground"
-          >
-            {{ t('inflows.hint', { amount: `${hint} ${account?.currency}` }) }}
-          </span>
-          <span
-            v-if="realised"
-            data-testid="inflow-rate"
-            class="mt-1 block text-xs text-muted-foreground"
-          >
-            {{ t('inflows.rate', { from: currencyCode, to: account?.currency, rate: realised }) }}
-          </span>
-        </Motion>
+        </label>
+        <span v-if="hint" data-testid="inflow-hint" class="text-muted-foreground px-3 text-xs">
+          {{ t('inflows.hint', { amount: `${hint} ${account?.currency}` }) }}
+        </span>
+        <span v-if="realised" data-testid="inflow-rate" class="text-muted-foreground px-3 text-xs">
+          {{ t('inflows.rate', { from: currencyCode, to: account?.currency, rate: realised }) }}
+        </span>
+      </Motion>
+    </template>
 
-        <div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            class="min-h-9 pointer-coarse:min-h-11"
-            :aria-expanded="more"
-            aria-controls="inflow-more-fields"
-            data-testid="inflow-more"
-            @click="more = !more"
-          >
-            {{ t('inflows.more') }}
-          </Button>
-          <!-- `v-show`, not `v-if`: the button's `aria-controls` has to point at an element that exists. -->
-          <div v-show="more" id="inflow-more-fields" class="mt-2 space-y-4">
-            <label class="block">
-              <span class="text-xs font-medium text-muted-foreground">{{
-                t('inflows.usdRate')
-              }}</span>
-              <MoneyInput
-                v-model="usdRate"
-                data-testid="inflow-usd-rate"
-                :scale="10"
-                :locale="uiLocale"
-                class="mt-1 h-11 text-base"
-              />
-              <span class="mt-1 block text-xs text-muted-foreground">{{
-                t('inflows.usdRateHint', { code: currencyCode })
-              }}</span>
-            </label>
-            <label class="block">
-              <span class="text-xs font-medium text-muted-foreground">{{ t('inflows.note') }}</span>
-              <Input v-model="note" maxlength="1000" class="mt-1" />
-            </label>
-          </div>
-        </div>
+    <div class="flex flex-col gap-2">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        class="min-h-11 self-start"
+        :aria-expanded="more"
+        aria-controls="inflow-more-fields"
+        data-testid="inflow-more"
+        @click="more = !more"
+      >
+        {{ t('inflows.more') }}
+      </Button>
+      <!-- `v-show`, not `v-if`: the button's `aria-controls` has to point at an element that exists. -->
+      <div v-show="more" id="inflow-more-fields" class="flex flex-col gap-2">
+        <label
+          class="bg-surface-sunken flex min-h-14 flex-col justify-center gap-0.5 rounded-lg px-3 py-2"
+        >
+          <span class="text-muted-foreground text-xs">{{ t('inflows.usdRate') }}</span>
+          <MoneyInput
+            v-model="usdRate"
+            data-testid="inflow-usd-rate"
+            :scale="10"
+            :locale="uiLocale"
+            class="h-auto border-0 bg-transparent p-0 text-sm font-medium focus-visible:ring-0"
+          />
+        </label>
+        <p class="text-muted-foreground px-3 text-xs">
+          {{ t('inflows.usdRateHint', { code: currencyCode }) }}
+        </p>
+        <InputRow v-model="note" :label="t('inflows.note')" maxlength="1000" />
+      </div>
+    </div>
 
-        <div class="flex gap-2">
-          <Button
-            type="submit"
-            size="lg"
-            class="min-h-9 flex-1 pointer-coarse:min-h-11"
-            :disabled="!canSubmit || busy"
-            data-testid="inflow-save"
-          >
-            {{ inflow ? t('inflows.update') : t('inflows.save') }}
-          </Button>
-          <Button
-            v-if="inflow"
-            type="button"
-            size="lg"
-            variant="destructive"
-            class="min-h-9 pointer-coarse:min-h-11"
-            data-testid="inflow-delete"
-            @click="del"
-          >
-            {{ t('inflows.delete') }}
-          </Button>
-        </div>
-      </form>
-    </SheetContent>
-  </Sheet>
+    <div v-if="inflow" class="border-border/60 grid gap-2 border-t pt-3">
+      <Button
+        type="button"
+        variant="ghost"
+        class="text-destructive min-h-11"
+        data-testid="inflow-delete"
+        @click="del"
+      >
+        {{ t('inflows.delete') }}
+      </Button>
+    </div>
+
+    <template #secondary>
+      <slot name="secondary" />
+    </template>
+  </QuickActionSheet>
 </template>

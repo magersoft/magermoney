@@ -55,7 +55,9 @@ describe('IncomeSourcePage', () => {
 
     await record.trigger('click');
     await flushPromises();
-    expect(document.querySelector('[data-testid="inflow-amount"]')).not.toBeNull();
+    expect(
+      document.querySelector('[data-testid="inflow-form"] [data-slot="quick-action-amount"] input'),
+    ).not.toBeNull();
 
     /* The three that stayed are still where they were. */
     expect(wrapper.find('[data-testid="source-edit"]').exists()).toBe(true);
