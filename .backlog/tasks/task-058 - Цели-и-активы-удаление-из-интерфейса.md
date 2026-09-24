@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-09-22 06:46'
-updated_date: '2026-09-24 09:08'
+updated_date: '2026-09-24 09:10'
 labels:
   - web
   - ux
@@ -35,3 +35,14 @@ ordinal: 56000
 - [ ] #8 В вебе не остаётся неиспользуемых экспортов удаления
 - [ ] #9 Тесты покрывают подтверждение, отмену подтверждения, исчезновение из списка и отказ сервера
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Tests first (GoalPage.test.ts, AssetPage.test.ts): button is a real destructive button; click opens AlertDialog naming consequences (goal: N linked accounts released; asset: valuation history hidden); cancel sends nothing; confirm sends PATCH {archivedAt}, never DELETE, returns to /goals (assets tab for an asset); server refusal shows a toast and stays; archived goal/asset gone from list.
+2. Web: useArchiveGoal -> useRemoveGoal? No: keep archive as the write, name the UI op 'delete'. Add useArchiveAsset beside useUpdateAsset. Remove useDeleteGoal/useDeleteAsset and goalsApi.remove/assetsApi.remove from the web (API DELETE routes stay as a future true purge, unused by the client).
+3. GoalPage: replace ghost 'Убрать цель в архив' with outline destructive 'Удалить цель' + AlertDialog. AssetPage: same, 'Удалить актив'.
+4. Locales ru/en: drop goals.archive/archived/archiveHint; add delete/deleteTitle/deleteBody (plural by linked accounts)/cancel/deleted for goals and assets. Humanize copy.
+5. Test fixture i18n gets ruPlural so plural copy is asserted as the app renders it.
+6. Lint, typecheck, full web tests; impeccable pass on the two screens.
+<!-- SECTION:PLAN:END -->
