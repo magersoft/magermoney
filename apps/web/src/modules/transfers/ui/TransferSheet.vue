@@ -329,8 +329,5 @@ async function del() {
     >
       {{ t('transfers.delete') }}
     </Button>
-    <template #secondary>
-      <slot name="secondary" />
-    </template>
   </QuickActionSheet>
 </template>

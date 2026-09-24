@@ -53,24 +53,12 @@ describe('QuickActions', () => {
   });
 
   /**
-   * An income source is set up once and rarely touched again, so it sits below
-   * the form, where the inflow used to be. What an account holds now stays
-   * there too, once there is an account to hold it.
+   * The sheet writes one operation. A new income source and a balance typed in
+   * by hand have their own homes — Plan → Income and the account's screen — so
+   * nothing below the form competes with the button it exists for.
    */
-  it('keeps a new income source beside the form, and the balance only once there is an account', async () => {
+  it('offers nothing below the form in any segment', async () => {
     const { wrapper } = await mountAt(
-      QuickActions,
-      '/',
-      apiOf(() => undefined),
-      { props: { open: true } },
-    );
-    await flushPromises();
-    expect(body().find('[data-testid="quick-inflow"]').exists()).toBe(false);
-    expect(body().find('[data-testid="quick-income-source"]').exists()).toBe(true);
-    expect(body().find('[data-testid="quick-record"]').exists()).toBe(false);
-    wrapper.unmount();
-
-    const withAccount = await mountAt(
       QuickActions,
       '/',
       apiOf((p) =>
@@ -79,22 +67,13 @@ describe('QuickActions', () => {
       { props: { open: true } },
     );
     await flushPromises();
-    expect(body().find('[data-testid="quick-record"]').exists()).toBe(true);
-    withAccount.wrapper.unmount();
-  });
-
-  it('takes a new income source to its own form, and closes the sheet on the way', async () => {
-    const { wrapper, router } = await mountAt(
-      QuickActions,
-      '/',
-      apiOf(() => undefined),
-      { props: { open: true } },
-    );
-    await flushPromises();
-    await body().get('[data-testid="quick-income-source"]').trigger('click');
-    await flushPromises();
-    expect(router.currentRoute.value.path).toBe('/plan/income/new');
-    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    for (const kind of ['transfer', 'expense']) {
+      await body().get(`[data-testid="segment-${kind}"]`).trigger('click');
+      await flushPromises();
+      expect(body().find('[data-slot="quick-action-secondary"]').exists()).toBe(false);
+      expect(body().find('[data-testid="quick-income-source"]').exists()).toBe(false);
+      expect(body().find('[data-testid="quick-record"]').exists()).toBe(false);
+    }
     wrapper.unmount();
   });
 

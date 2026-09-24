@@ -828,10 +828,7 @@
       "expense": "Expense",
       "inflow": "Inflow"
     },
-    "record": "Update balance",
-    "transfer": "Transfer",
-    "pickAccount": "Which account?",
-    "incomeSource": "New income source"
+    "transfer": "Transfer"
   },
   "errors": {
     "recordedInFuture": "That date is in the future. Pick today or earlier.",

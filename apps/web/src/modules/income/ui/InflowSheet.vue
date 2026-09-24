@@ -412,9 +412,5 @@ async function del() {
         {{ t('inflows.delete') }}
       </Button>
     </div>
-
-    <template #secondary>
-      <slot name="secondary" />
-    </template>
   </QuickActionSheet>
 </template>

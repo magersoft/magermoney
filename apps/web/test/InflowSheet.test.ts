@@ -68,14 +68,12 @@ describe('InflowSheet', () => {
     ];
     const { wrapper } = await mountAt(InflowSheet, '/', api(calls), {
       props: { open: true, sourceId: SOURCE_ID, types, type: 'inflow' },
-      slots: { secondary: '<button data-testid="extra">x</button>' },
     });
     await flushPromises();
     const sheet = body().get('[data-slot="quick-action-sheet"]');
     expect(sheet.attributes('data-testid')).toBe('inflow-form');
     expect(sheet.find('[data-testid="inflow-account"]').exists()).toBe(true);
     expect(body().get('[data-testid="inflow-currency"]').text()).toContain('USD');
-    expect(sheet.find('[data-testid="extra"]').exists()).toBe(true);
     await body().get('[data-testid="segment-expense"]').trigger('click');
     expect(wrapper.emitted('update:type')?.at(-1)).toEqual(['expense']);
     wrapper.unmount();
