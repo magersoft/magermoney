@@ -109,6 +109,14 @@ export type { CardBrand } from './components/account-card/card-brand';
 export type { AccountCardItem } from './components/account-card/types';
 
 /*
+ * The mark of a goal or an asset: an emoji or an initial on a card-palette
+ * colour, and the two radio groups that choose it.
+ */
+export { default as MarkDisc } from './components/mark/MarkDisc.vue';
+export { default as MarkPicker } from './components/mark/MarkPicker.vue';
+export type { MarkPickerLabels } from './components/mark/MarkPicker.vue';
+
+/*
  * The chips. The filter row states what a screen of numbers is filtered by and
  * lets a filter be dropped where it is read; the category chip is the palette
  * a budget or an expense picks from.

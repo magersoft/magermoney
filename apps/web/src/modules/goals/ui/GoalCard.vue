@@ -15,7 +15,7 @@
  */
 import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { AmountLockup, ProgressRule, type AmountLocale } from '@magermoney/ui';
+import { AmountLockup, MarkDisc, ProgressRule, type AmountLocale } from '@magermoney/ui';
 import type { AccountDto } from '@magermoney/contracts';
 import type { Goal, GoalProgress } from '@magermoney/domain';
 import { formatDay, type DateLocale } from '@/shared/dates/format';
@@ -57,10 +57,13 @@ const forecastLine = computed(() => {
     class="bg-surface shadow-card flex flex-col gap-3 rounded-xl p-4"
     :data-testid="`goal-card-${goal.id}`"
   >
-    <header class="flex items-baseline justify-between gap-3">
-      <h3 class="min-w-0 truncate text-base font-semibold">
-        <span v-if="goal.icon" aria-hidden="true">{{ goal.icon }} </span>{{ goal.name }}
-      </h3>
+    <header class="flex items-center justify-between gap-3">
+      <div class="flex min-w-0 items-center gap-3">
+        <MarkDisc :emoji="goal.icon" :color="goal.color" :name="goal.name" class="size-9" />
+        <h3 class="min-w-0 truncate text-base font-semibold">
+          {{ goal.name }}
+        </h3>
+      </div>
       <span
         v-if="achieved"
         class="text-xs font-medium text-muted-foreground"

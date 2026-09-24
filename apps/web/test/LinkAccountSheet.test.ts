@@ -12,6 +12,7 @@ const goalDto = (id: string, name: string, over: object = {}) => ({
   id,
   name,
   icon: null,
+  color: null,
   targetAmount: '10000',
   currency: 'USD',
   targetDate: null,

@@ -10,7 +10,7 @@
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { AmountLockup, type AmountLocale } from '@magermoney/ui';
+import { AmountLockup, MarkDisc, type AmountLocale } from '@magermoney/ui';
 import type { Asset } from '@magermoney/domain';
 import { formatDay, type DateLocale } from '@/shared/dates/format';
 
@@ -31,12 +31,20 @@ const valuedLabel = computed(() =>
     class="flex min-h-11 items-center justify-between gap-3 px-4 py-3"
     :data-testid="`asset-row-${asset.id}`"
   >
-    <div class="flex min-w-0 flex-col gap-0.5">
-      <span class="truncate text-sm font-medium">{{ asset.name }}</span>
-      <span class="text-muted-foreground text-xs">
-        {{ valuedLabel }}
-        <template v-if="!asset.countsInTotal"> · {{ t('assets.notCounted') }}</template>
-      </span>
+    <div class="flex min-w-0 items-center gap-3">
+      <MarkDisc
+        :emoji="asset.icon"
+        :color="asset.color"
+        :name="asset.name"
+        class="size-9 text-sm"
+      />
+      <div class="flex min-w-0 flex-col gap-0.5">
+        <span class="truncate text-sm font-medium">{{ asset.name }}</span>
+        <span class="text-muted-foreground text-xs">
+          {{ valuedLabel }}
+          <template v-if="!asset.countsInTotal"> · {{ t('assets.notCounted') }}</template>
+        </span>
+      </div>
     </div>
     <AmountLockup
       v-if="asset.value"

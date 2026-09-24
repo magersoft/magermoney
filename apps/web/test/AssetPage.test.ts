@@ -14,6 +14,8 @@ const ID = '44444444-4444-4444-8444-444444444444';
 const assetDto = (over: object = {}) => ({
   id: ID,
   name: 'BMW 530e',
+  icon: null,
+  color: null,
   currency: 'USD',
   countsInTotal: true,
   acquiredOn: null,

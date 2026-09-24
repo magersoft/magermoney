@@ -15,6 +15,8 @@ export function toAsset(dto: AssetDto, registry: CurrencyRegistry): Asset {
   return {
     id: dto.id,
     name: dto.name,
+    icon: dto.icon,
+    color: dto.color,
     value: dto.value === null ? null : Money.of(dto.value, currency),
     valuedOn: dto.valuedOn,
     countsInTotal: dto.countsInTotal,

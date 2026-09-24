@@ -35,6 +35,8 @@ const source: IncomeSource = {
 const asset = (over: Partial<Asset> = {}): Asset => ({
   id: 'a1',
   name: 'BMW 530e',
+  icon: null,
+  color: null,
   value: Money.of('30000', EUR),
   valuedOn: '2026-09-01',
   countsInTotal: true,

@@ -1,5 +1,11 @@
 import type { GoalDto } from '@magermoney/contracts';
-import { Money, type Currency, type CurrencyRegistry, type Goal } from '@magermoney/domain';
+import {
+  Money,
+  isMarkEmoji,
+  type Currency,
+  type CurrencyRegistry,
+  type Goal,
+} from '@magermoney/domain';
 
 const fallback = (code: string): Currency => ({ code, kind: 'fiat', scale: 2 });
 
@@ -9,7 +15,9 @@ export function toGoal(dto: GoalDto, registry: CurrencyRegistry): Goal {
   return {
     id: dto.id,
     name: dto.name,
-    icon: dto.icon,
+    /* A goal written before the emoji rule may hold a word; the disc shows the initial instead. */
+    icon: dto.icon !== null && isMarkEmoji(dto.icon) ? dto.icon : null,
+    color: dto.color,
     target: Money.of(dto.targetAmount, currency),
     targetDate: dto.targetDate,
     achievedAt: dto.achievedAt,

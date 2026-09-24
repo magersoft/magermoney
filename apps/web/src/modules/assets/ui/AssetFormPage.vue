@@ -21,7 +21,9 @@ import {
 } from '@magermoney/ui';
 import { AppCurrencySelect } from '@/modules/currencies';
 import { useDisplayCurrency } from '@/modules/rates';
+import type { MarkColor } from '@magermoney/domain';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import MarkField from '@/shared/marks/MarkField.vue';
 import { usePageTitle } from '@/shared/layout/page-bar';
 import { useCreateAsset, useUpdateAsset } from '../application/use-asset-mutations';
 import { useAssets } from '../application/use-assets';
@@ -42,6 +44,8 @@ const missing = computed(() => editingId.value !== null && !isLoading.value && !
 
 const form = reactive({
   name: '',
+  icon: null as string | null,
+  color: null as MarkColor | null,
   currency: current.value,
   countsInTotal: false,
   acquiredOn: '',
@@ -54,6 +58,8 @@ watch(
   (a) => {
     if (!a) return;
     form.name = a.name;
+    form.icon = a.icon;
+    form.color = a.color;
     form.currency = a.currency;
     form.countsInTotal = a.countsInTotal;
     form.acquiredOn = a.acquiredOn ?? '';
@@ -73,6 +79,8 @@ async function submit() {
   const price = form.purchasePrice.replace(',', '.');
   const input = {
     name: form.name.trim(),
+    icon: form.icon,
+    color: form.color,
     currency: form.currency,
     countsInTotal: form.countsInTotal,
     acquiredOn: form.acquiredOn === '' ? null : form.acquiredOn,
@@ -105,19 +113,25 @@ async function submit() {
     </p>
 
     <form v-else class="flex flex-col gap-4" data-testid="asset-form" @submit.prevent="submit">
-      <label class="flex flex-col gap-1.5">
-        <span class="text-sm font-medium">{{ t('assets.form.name') }}</span>
-        <Input
-          v-model="form.name"
-          data-testid="asset-name"
-          :aria-invalid="nameInvalid"
-          :placeholder="t('assets.form.namePlaceholder')"
-          class="min-h-11"
-        />
-        <span v-if="nameInvalid" class="text-destructive text-xs">
-          {{ t('assets.form.nameRequired') }}
-        </span>
-      </label>
+      <!-- The disc beside the name it is drawn from; see GoalFormPage for why it is not inside the label. -->
+      <div class="flex items-start gap-3">
+        <div class="pt-6.5">
+          <MarkField v-model:emoji="form.icon" v-model:color="form.color" :name="form.name" />
+        </div>
+        <label class="flex min-w-0 flex-1 flex-col gap-1.5">
+          <span class="text-sm font-medium">{{ t('assets.form.name') }}</span>
+          <Input
+            v-model="form.name"
+            data-testid="asset-name"
+            :aria-invalid="nameInvalid"
+            :placeholder="t('assets.form.namePlaceholder')"
+            class="min-h-11"
+          />
+          <span v-if="nameInvalid" class="text-destructive text-xs">
+            {{ t('assets.form.nameRequired') }}
+          </span>
+        </label>
+      </div>
 
       <label class="flex flex-col gap-1.5">
         <span class="text-sm font-medium">{{ t('assets.form.currency') }}</span>

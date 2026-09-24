@@ -12,6 +12,7 @@ const goalDto = (over: object = {}) => ({
   id: GOAL_ID,
   name: 'Машина',
   icon: null,
+  color: null,
   targetAmount: '10000',
   currency: 'USD',
   targetDate: null,
@@ -125,6 +126,24 @@ describe('GoalsSegment', () => {
 
     expect(wrapper.find(`[data-testid="goal-card-${GOAL_ID}"]`).exists()).toBe(false);
     expect(wrapper.find('[data-testid="goals-empty"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('marks a goal with its emoji and colour, and an unmarked one with its first letter', async () => {
+    const OTHER = '44444444-4444-4444-8444-444444444444';
+    const { wrapper } = await mountWith(
+      [goalDto({ icon: '🚗', color: 'teal' }), goalDto({ id: OTHER, name: 'отпуск' })],
+      [],
+    );
+    await flushPromises();
+    await flushPromises();
+
+    const marked = wrapper.get(`[data-testid="goal-card-${GOAL_ID}"] [data-slot="mark-disc"]`);
+    expect(marked.text()).toBe('🚗');
+    expect(marked.attributes('data-color')).toBe('teal');
+    const plain = wrapper.get(`[data-testid="goal-card-${OTHER}"] [data-slot="mark-disc"]`);
+    expect(plain.text()).toBe('О');
+    expect(plain.attributes('data-color')).toBeUndefined();
     wrapper.unmount();
   });
 });

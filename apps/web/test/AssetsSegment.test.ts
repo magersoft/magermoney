@@ -9,6 +9,8 @@ const ID_B = '55555555-5555-4555-8555-555555555555';
 const assetDto = (over: object = {}) => ({
   id: ID_A,
   name: 'BMW 530e',
+  icon: null,
+  color: null,
   currency: 'USD',
   countsInTotal: true,
   acquiredOn: null,
@@ -108,6 +110,22 @@ describe('AssetsSegment', () => {
     await flushPromises();
 
     expect(wrapper.get('[data-testid="assets-empty"]').text()).toContain('Пока ни одного актива');
+    wrapper.unmount();
+  });
+
+  it('marks an asset with its emoji and colour, and an unmarked one with its first letter', async () => {
+    const { wrapper } = await mountWith([
+      assetDto({ icon: '🚗', color: 'blue' }),
+      assetDto({ id: ID_B, name: 'часы' }),
+    ]);
+    await flushPromises();
+    await flushPromises();
+
+    const marked = wrapper.get(`[data-testid="asset-row-${ID_A}"] [data-slot="mark-disc"]`);
+    expect(marked.text()).toBe('🚗');
+    expect(marked.attributes('data-color')).toBe('blue');
+    const plain = wrapper.get(`[data-testid="asset-row-${ID_B}"] [data-slot="mark-disc"]`);
+    expect(plain.text()).toBe('Ч');
     wrapper.unmount();
   });
 });

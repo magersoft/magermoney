@@ -1128,5 +1128,24 @@
     "ZA": "South Africa",
     "ZM": "Zambia",
     "ZW": "Zimbabwe"
+  },
+  "marks": {
+    "open": "Choose an icon and colour",
+    "title": "Icon and colour",
+    "emoji": "Icon",
+    "initial": "First letter of the name",
+    "color": "Colour",
+    "none": "No colour",
+    "done": "Done",
+    "colors": {
+      "red": "Red",
+      "orange": "Orange",
+      "amber": "Amber",
+      "green": "Green",
+      "teal": "Teal",
+      "blue": "Blue",
+      "violet": "Violet",
+      "pink": "Pink"
+    }
   }
 }

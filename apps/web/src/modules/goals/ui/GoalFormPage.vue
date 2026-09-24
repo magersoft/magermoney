@@ -13,7 +13,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { Button, Input, MoneyInput, Skeleton, useToast, type AmountLocale } from '@magermoney/ui';
 import { AppCurrencySelect } from '@/modules/currencies';
 import { useDisplayCurrency } from '@/modules/rates';
+import { isMarkEmoji, type MarkColor } from '@magermoney/domain';
 import { errorKeyFor } from '@/shared/api/error-messages';
+import MarkField from '@/shared/marks/MarkField.vue';
 import { usePageTitle } from '@/shared/layout/page-bar';
 import { useCreateGoal, useUpdateGoal } from '../application/use-goal-mutations';
 import { useGoals } from '../application/use-goals';
@@ -32,7 +34,14 @@ const editingId = computed(() => (route.params.id ? String(route.params.id) : nu
 const existing = computed(() => dtos.value.find((g) => g.id === editingId.value));
 const missing = computed(() => editingId.value !== null && !isLoading.value && !existing.value);
 
-const form = reactive({ name: '', targetAmount: '', currency: current.value, targetDate: '' });
+const form = reactive({
+  name: '',
+  icon: null as string | null,
+  color: null as MarkColor | null,
+  targetAmount: '',
+  currency: current.value,
+  targetDate: '',
+});
 const submitted = ref(false);
 
 watch(
@@ -40,6 +49,9 @@ watch(
   (g) => {
     if (!g) return;
     form.name = g.name;
+    /* An icon from before the emoji rule would be refused on save; it reads as none. */
+    form.icon = g.icon !== null && isMarkEmoji(g.icon) ? g.icon : null;
+    form.color = g.color;
     form.targetAmount = g.targetAmount;
     form.currency = g.currency;
     form.targetDate = g.targetDate ?? '';
@@ -63,6 +75,8 @@ async function submit() {
   if (!canSubmit.value || isPending.value) return;
   const input = {
     name: form.name.trim(),
+    icon: form.icon,
+    color: form.color,
     targetAmount: form.targetAmount.replace(',', '.'),
     currency: form.currency,
     targetDate: form.targetDate === '' ? null : form.targetDate,
@@ -94,19 +108,29 @@ async function submit() {
     </p>
 
     <form v-else class="flex flex-col gap-4" data-testid="goal-form" @submit.prevent="submit">
-      <label class="flex flex-col gap-1.5">
-        <span class="text-sm font-medium">{{ t('goals.form.name') }}</span>
-        <Input
-          v-model="form.name"
-          data-testid="goal-name"
-          :aria-invalid="nameInvalid"
-          :placeholder="t('goals.form.namePlaceholder')"
-          class="min-h-11"
-        />
-        <span v-if="nameInvalid" class="text-destructive text-xs">{{
-          t('goals.form.nameRequired')
-        }}</span>
-      </label>
+      <!--
+        The disc sits beside the name it is drawn from: its initial is the
+        name's first letter until an emoji replaces it. A sibling of the label,
+        not inside it — a button within a label would hand its taps to the input.
+      -->
+      <div class="flex items-start gap-3">
+        <div class="pt-6.5">
+          <MarkField v-model:emoji="form.icon" v-model:color="form.color" :name="form.name" />
+        </div>
+        <label class="flex min-w-0 flex-1 flex-col gap-1.5">
+          <span class="text-sm font-medium">{{ t('goals.form.name') }}</span>
+          <Input
+            v-model="form.name"
+            data-testid="goal-name"
+            :aria-invalid="nameInvalid"
+            :placeholder="t('goals.form.namePlaceholder')"
+            class="min-h-11"
+          />
+          <span v-if="nameInvalid" class="text-destructive text-xs">{{
+            t('goals.form.nameRequired')
+          }}</span>
+        </label>
+      </div>
 
       <label class="flex flex-col gap-1.5">
         <span class="text-sm font-medium">{{ t('goals.form.target') }}</span>

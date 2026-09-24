@@ -17,6 +17,7 @@ const goalDto = (over: object = {}) => ({
   id: GOAL_ID,
   name: 'Машина',
   icon: null,
+  color: null,
   targetAmount: '10000',
   currency: 'USD',
   targetDate: null,
